@@ -1,10 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // --- MAGNETIC BUTTONS (Hover Effect) ---
-    // Fix: bind events to the stable wrapper (.magnetic-wrap), and move only the inner (.magnetic-target).
-    // Reason: if you bind hover events to the element you're translating, the hover boundary moves and can
-    // rapidly trigger enter/leave, causing the cursor to flicker between arrow/pointer.
+
+    /* --- Magnetic Logic (Buttons/Links) --- */
     const magneticWraps = document.querySelectorAll('.magnetic-wrap');
+
     magneticWraps.forEach((wrap) => {
         const target = wrap.querySelector('.magnetic-target');
         if (!target) return;
@@ -13,15 +11,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const rect = wrap.getBoundingClientRect();
             const x = e.clientX - rect.left - rect.width / 2;
             const y = e.clientY - rect.top - rect.height / 2;
-            target.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+            target.style.transform = `translate3d(${(x * 0.2).toFixed(3)}px, ${(y * 0.2).toFixed(3)}px, 0)`;
         });
 
         wrap.addEventListener('mouseleave', () => {
-            target.style.transform = `translate(0px, 0px)`;
+            target.style.transform = 'translate3d(0px, 0px, 0px)';
         });
     });
 
-    // --- MOBILE NAV TOGGLE ---
+    /* --- Mobile Menu --- */
     const mobileToggle = document.querySelector('.mobile-menu-toggle');
     const navLinks = document.querySelector('.nav-links');
 
@@ -37,76 +35,84 @@ document.addEventListener('DOMContentLoaded', () => {
             navLinks.classList.toggle('open');
         });
 
-        // Close when clicking a link
         navLinks.querySelectorAll('a').forEach(a => {
             a.addEventListener('click', closeMenu);
         });
 
-        // Close when clicking outside
         document.addEventListener('click', (e) => {
             const clickedInsideNav = navLinks.contains(e.target) || mobileToggle.contains(e.target);
             if (!clickedInsideNav) closeMenu();
         });
 
-        // Close on resize back to desktop
         window.addEventListener('resize', () => {
             if (window.innerWidth > 768) closeMenu();
         });
     }
 
-    // --- 3D TILT CARDS ---
-    const cards = document.querySelectorAll('.tilt-card');
-    cards.forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            const rotateX = ((y - centerY) / centerY) * -5;
-            const rotateY = ((x - centerX) / centerX) * 5;
+    /* --- Advanced Project Card Animation (Physics) --- */
+    const projectCards = document.querySelectorAll('.project-card');
 
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-            card.style.setProperty('--mouse-x', `${x}px`);
-            card.style.setProperty('--mouse-y', `${y}px`);
-        });
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)`;
-        });
-    });
+    if (projectCards.length > 0) {
+        projectCards.forEach(card => {
+            let current = { x: 0, y: 0, rx: 0, ry: 0, s: 1.0 };
+            let target = { x: 0, y: 0, rx: 0, ry: 0, s: 1.0 };
+            let mouse = { x: 0, y: 0 }; 
+            let isHovering = false;
 
-    // --- HERO 3D PARALLAX (HOME ONLY) ---
-    const heroSection = document.querySelector('.hero-section');
-    const heroContent = document.getElementById('hero-tilt-layer');
-    
-    if (heroSection && heroContent) {
-        const isTouch = window.matchMedia("(hover: none)").matches;
-        if (!isTouch && window.innerWidth > 768) {
-            let currentX = 0, currentY = 0;
-            let targetX = 0, targetY = 0;
-            const smoothness = 0.08; 
-            const range = 4; 
-
-            heroSection.addEventListener('mousemove', (e) => {
-                const x = (e.clientX / window.innerWidth) * 2 - 1;
-                const y = (e.clientY / window.innerHeight) * 2 - 1;
-                targetX = y * -range; 
-                targetY = x * range;
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                mouse.x = x;
+                mouse.y = y;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                // Physics constants for premium feel
+                target.x = (x - centerX) * 0.05; // Subtle pan
+                target.y = (y - centerY) * 0.05; 
+                
+                // Tilt calculation
+                target.rx = ((y - centerY) / centerY) * -6; // Max 6deg tilt X
+                target.ry = ((x - centerX) / centerX) * 6;  // Max 6deg tilt Y
+                
+                target.s = 1.02; // Subtle scale up
+                isHovering = true;
             });
 
-            heroSection.addEventListener('mouseleave', () => { targetX = 0; targetY = 0; });
+            card.addEventListener('mouseleave', () => {
+                target = { x: 0, y: 0, rx: 0, ry: 0, s: 1.0 };
+                isHovering = false;
+            });
 
-            const animateHero = () => {
-                currentX += (targetX - currentX) * smoothness;
-                currentY += (targetY - currentY) * smoothness;
-                heroContent.style.transform = `rotateX(${currentX.toFixed(3)}deg) rotateY(${currentY.toFixed(3)}deg)`;
-                requestAnimationFrame(animateHero);
+            const animateCard = () => {
+                // Heavier damping (0.08) for "premium" weighted feel
+                const ease = 0.08; 
+
+                current.x += (target.x - current.x) * ease;
+                current.y += (target.y - current.y) * ease;
+                current.rx += (target.rx - current.rx) * ease;
+                current.ry += (target.ry - current.ry) * ease;
+                current.s += (target.s - current.s) * ease;
+
+                // Apply transform: Scale -> Translate -> Rotate
+                card.style.transform = `perspective(1000px) scale(${current.s.toFixed(4)}) translate3d(${current.x.toFixed(3)}px, ${current.y.toFixed(3)}px, 0) rotateX(${current.rx.toFixed(3)}deg) rotateY(${current.ry.toFixed(3)}deg)`;
+                
+                // Update glow position instantly
+                if (isHovering) {
+                    card.style.setProperty('--mouse-x', `${mouse.x}px`);
+                    card.style.setProperty('--mouse-y', `${mouse.y}px`);
+                }
+
+                requestAnimationFrame(animateCard);
             };
-            animateHero();
-        }
+            animateCard();
+        });
     }
 
-    // --- EMAIL COPY LOGIC ---
+    /* --- Utils (Email Copy & Fade Up) --- */
     window.copyEmail = function() {
         const email = document.getElementById('email-text').innerText;
         navigator.clipboard.writeText(email).then(() => {
@@ -116,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- SCROLL REVEAL ---
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -128,7 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
-    // --- INTRO CLEANUP ---
     setTimeout(() => {
         document.body.classList.remove('loading');
         document.querySelectorAll('.hero-section .fade-up').forEach(el => el.classList.add('in-view'));
