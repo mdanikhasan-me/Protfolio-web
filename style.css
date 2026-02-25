@@ -49,6 +49,7 @@ body.loading { overflow: hidden; }
     display: flex; flex-direction: column;
     pointer-events: none;
     overflow: hidden;
+    transition: background-color 0.5s ease, backdrop-filter 0.5s ease;
 }
 
 .intro-block {
@@ -385,8 +386,17 @@ section { padding: 80px 0; position: relative; }
         mix-blend-mode: normal;
     }
 
+    body.mobile-intro-active .intro-overlay {
+        background-color: rgba(8, 9, 10, 0.85);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        pointer-events: auto;
+    }
+
     .intro-logo {
-        font-size: 13vw;
+        font-size: 10vw;
+        animation-duration: 1.5s;
+        z-index: 20000;
     }
 
     .mobile-menu-toggle { display: flex; }
@@ -413,17 +423,17 @@ section { padding: 80px 0; position: relative; }
     .hero-greeting, .hero-title, .hero-subtitle, .hero-actions { transform: none !important; }
     .email-display { flex-direction: column; gap: 10px; padding: 15px 20px; }
     #email-text { font-size: 1rem; }
-}
 
-#who-btn.btn {
-    background: transparent; border: 1px solid var(--border-strong); color: var(--text-main);
-    transform: translateZ(0); overflow: hidden;
+    #who-btn.btn {
+        background: transparent; border: 1px solid var(--border-strong); color: var(--text-main);
+        transform: translateZ(0); overflow: hidden;
+    }
+    #who-btn.btn .magnetic-target {
+        position: relative; z-index: 2; pointer-events: none;
+        transition: transform 0.5s var(--ease-out-expo);
+    }
+    #who-btn.btn:hover .magnetic-target { transition: none; }
+    #who-btn.btn::before { content: none; }
+    #who-btn.btn::after { content: none; }
+    #who-btn.btn:hover { color: var(--text-main); border-color: var(--text-main); }
 }
-#who-btn.btn .magnetic-target {
-    position: relative; z-index: 2; pointer-events: none;
-    transition: transform 0.5s var(--ease-out-expo);
-}
-#who-btn.btn:hover .magnetic-target { transition: none; }
-#who-btn.btn::before { content: none; }
-#who-btn.btn::after { content: none; }
-#who-btn.btn:hover { color: var(--text-main); border-color: var(--text-main); }
