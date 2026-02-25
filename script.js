@@ -47,49 +47,78 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('resize', () => {
             if (window.innerWidth > 768) closeMenu();
         });
+
+        // Close menu on scroll smoothly (Mobile fix preserved)
+        window.addEventListener('scroll', () => {
+            if (navLinks.classList.contains('open')) {
+                closeMenu();
+            }
+        }, { passive: true });
     }
 
-    /* --- Advanced Project Card Animation (Physics) --- */
+    /* --- Optimized Project Card Animation (Instant + Smooth) --- */
     const projectCards = document.querySelectorAll('.project-card');
 
     if (projectCards.length > 0) {
         projectCards.forEach(card => {
+            let bounds;
             let current = { x: 0, y: 0, rx: 0, ry: 0, s: 1.0 };
             let target = { x: 0, y: 0, rx: 0, ry: 0, s: 1.0 };
-            let mouse = { x: 0, y: 0 }; 
             let isHovering = false;
+            let rafId = null;
 
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                mouse.x = x;
-                mouse.y = y;
-                
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                // Physics constants for premium feel
-                target.x = (x - centerX) * 0.05; // Subtle pan
-                target.y = (y - centerY) * 0.05; 
-                
-                // Tilt calculation
-                target.rx = ((y - centerY) / centerY) * -6; // Max 6deg tilt X
-                target.ry = ((x - centerX) / centerX) * 6;  // Max 6deg tilt Y
-                
-                target.s = 1.02; // Subtle scale up
+            // Updates bounds to prevent coordinate drift during scroll
+            const updateBounds = () => {
+                bounds = card.getBoundingClientRect();
+            };
+
+            const onEnter = () => {
                 isHovering = true;
-            });
+                updateBounds();
+                target.s = 1.02; 
+                
+                // Add listeners only while interacting to keep performance high
+                window.addEventListener('scroll', updateBounds, { passive: true });
+                window.addEventListener('resize', updateBounds, { passive: true });
+                
+                if (!rafId) rafId = requestAnimationFrame(animate);
+            };
 
-            card.addEventListener('mouseleave', () => {
-                target = { x: 0, y: 0, rx: 0, ry: 0, s: 1.0 };
+            const onLeave = () => {
                 isHovering = false;
-            });
+                target = { x: 0, y: 0, rx: 0, ry: 0, s: 1.0 };
+                
+                // Cleanup listeners
+                window.removeEventListener('scroll', updateBounds);
+                window.removeEventListener('resize', updateBounds);
+            };
 
-            const animateCard = () => {
-                // Heavier damping (0.08) for "premium" weighted feel
-                const ease = 0.08; 
+            const onMove = (e) => {
+                if (!bounds) return;
+                
+                const x = e.clientX - bounds.left;
+                const y = e.clientY - bounds.top;
+
+                // Immediate glow update (no latency)
+                card.style.setProperty('--mouse-x', x + 'px');
+                card.style.setProperty('--mouse-y', y + 'px');
+
+                // Physics Targets
+                const cx = bounds.width / 2;
+                const cy = bounds.height / 2;
+                const dx = x - cx;
+                const dy = y - cy;
+
+                // Tilt ~6deg max
+                target.rx = -(dy / cy) * 6;
+                target.ry = (dx / cx) * 6;
+                target.x = dx * 0.05;
+                target.y = dy * 0.05;
+            };
+
+            const animate = () => {
+                // Adaptive easing: fast follow (0.25) vs smooth settle (0.1)
+                const ease = isHovering ? 0.25 : 0.1;
 
                 current.x += (target.x - current.x) * ease;
                 current.y += (target.y - current.y) * ease;
@@ -97,22 +126,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 current.ry += (target.ry - current.ry) * ease;
                 current.s += (target.s - current.s) * ease;
 
-                // Apply transform: Scale -> Translate -> Rotate
-                card.style.transform = `perspective(1000px) scale(${current.s.toFixed(4)}) translate3d(${current.x.toFixed(3)}px, ${current.y.toFixed(3)}px, 0) rotateX(${current.rx.toFixed(3)}deg) rotateY(${current.ry.toFixed(3)}deg)`;
-                
-                // Update glow position instantly
-                if (isHovering) {
-                    card.style.setProperty('--mouse-x', `${mouse.x}px`);
-                    card.style.setProperty('--mouse-y', `${mouse.y}px`);
+                // Lightweight rounding instead of toFixed to reduce GC
+                const tX = Math.round(current.x * 100) / 100;
+                const tY = Math.round(current.y * 100) / 100;
+                const rX = Math.round(current.rx * 1000) / 1000;
+                const rY = Math.round(current.ry * 1000) / 1000;
+                const sc = Math.round(current.s * 1000) / 1000;
+
+                card.style.transform = `perspective(1000px) scale(${sc}) translate3d(${tX}px, ${tY}px, 0) rotateX(${rX}deg) rotateY(${rY}deg)`;
+
+                // Robust settle check for all properties
+                const isResting = !isHovering && 
+                                  Math.abs(target.x - current.x) < 0.01 &&
+                                  Math.abs(target.y - current.y) < 0.01 &&
+                                  Math.abs(target.rx - current.rx) < 0.01 &&
+                                  Math.abs(target.ry - current.ry) < 0.01 &&
+                                  Math.abs(target.s - current.s) < 0.001;
+
+                if (isResting) {
+                    rafId = null;
+                    card.style.transform = 'perspective(1000px) scale(1) translate3d(0, 0, 0) rotateX(0) rotateY(0)';
+                    return; 
                 }
 
-                requestAnimationFrame(animateCard);
+                rafId = requestAnimationFrame(animate);
             };
-            animateCard();
+
+            card.addEventListener('pointerenter', onEnter);
+            card.addEventListener('pointermove', onMove);
+            card.addEventListener('pointerleave', onLeave);
         });
     }
 
-    /* --- Utils (Email Copy & Fade Up) --- */
     window.copyEmail = function() {
         const email = document.getElementById('email-text').innerText;
         navigator.clipboard.writeText(email).then(() => {
