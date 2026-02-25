@@ -1,5 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    const existingFavicon = document.querySelector('link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]');
+    if (!existingFavicon) {
+        fetch('/partials/favicon.html', { cache: "no-cache" })
+            .then(response => response.text())
+            .then(html => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                Array.from(tempDiv.children).forEach(child => {
+                    document.head.appendChild(child);
+                });
+            })
+            .catch(err => console.error('Favicon injection failed:', err));
+    }
+
     const magneticWraps = document.querySelectorAll('.magnetic-wrap');
 
     magneticWraps.forEach((wrap) => {
