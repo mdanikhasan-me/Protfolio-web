@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* --- Magnetic Logic (Buttons/Links) --- */
     const magneticWraps = document.querySelectorAll('.magnetic-wrap');
 
     magneticWraps.forEach((wrap) => {
@@ -19,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    /* --- Mobile Menu --- */
     const mobileToggle = document.querySelector('.mobile-menu-toggle');
     const navLinks = document.querySelector('.nav-links');
 
@@ -48,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.innerWidth > 768) closeMenu();
         });
 
-        // Close menu on scroll smoothly (Mobile fix preserved)
         window.addEventListener('scroll', () => {
             if (navLinks.classList.contains('open')) {
                 closeMenu();
@@ -56,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { passive: true });
     }
 
-    /* --- Optimized Project Card Animation (Instant + Smooth) --- */
     const projectCards = document.querySelectorAll('.project-card');
 
     if (projectCards.length > 0) {
@@ -67,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
             let isHovering = false;
             let rafId = null;
 
-            // Updates bounds to prevent coordinate drift during scroll
             const updateBounds = () => {
                 bounds = card.getBoundingClientRect();
             };
@@ -77,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateBounds();
                 target.s = 1.02; 
                 
-                // Add listeners only while interacting to keep performance high
                 window.addEventListener('scroll', updateBounds, { passive: true });
                 window.addEventListener('resize', updateBounds, { passive: true });
                 
@@ -88,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 isHovering = false;
                 target = { x: 0, y: 0, rx: 0, ry: 0, s: 1.0 };
                 
-                // Cleanup listeners
                 window.removeEventListener('scroll', updateBounds);
                 window.removeEventListener('resize', updateBounds);
             };
@@ -99,17 +92,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const x = e.clientX - bounds.left;
                 const y = e.clientY - bounds.top;
 
-                // Immediate glow update (no latency)
                 card.style.setProperty('--mouse-x', x + 'px');
                 card.style.setProperty('--mouse-y', y + 'px');
 
-                // Physics Targets
                 const cx = bounds.width / 2;
                 const cy = bounds.height / 2;
                 const dx = x - cx;
                 const dy = y - cy;
 
-                // Tilt ~6deg max
                 target.rx = -(dy / cy) * 6;
                 target.ry = (dx / cx) * 6;
                 target.x = dx * 0.05;
@@ -117,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const animate = () => {
-                // Adaptive easing: fast follow (0.25) vs smooth settle (0.1)
                 const ease = isHovering ? 0.25 : 0.1;
 
                 current.x += (target.x - current.x) * ease;
@@ -126,7 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 current.ry += (target.ry - current.ry) * ease;
                 current.s += (target.s - current.s) * ease;
 
-                // Lightweight rounding instead of toFixed to reduce GC
                 const tX = Math.round(current.x * 100) / 100;
                 const tY = Math.round(current.y * 100) / 100;
                 const rX = Math.round(current.rx * 1000) / 1000;
@@ -135,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 card.style.transform = `perspective(1000px) scale(${sc}) translate3d(${tX}px, ${tY}px, 0) rotateX(${rX}deg) rotateY(${rY}deg)`;
 
-                // Robust settle check for all properties
                 const isResting = !isHovering && 
                                   Math.abs(target.x - current.x) < 0.01 &&
                                   Math.abs(target.y - current.y) < 0.01 &&
@@ -178,8 +165,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
-    setTimeout(() => {
-        document.body.classList.remove('loading');
-        document.querySelectorAll('.hero-section .fade-up').forEach(el => el.classList.add('in-view'));
-    }, 2200);
+    const introOverlay = document.querySelector('.intro-overlay');
+
+    if (introOverlay) {
+        document.body.classList.add('mobile-intro-active');
+
+        setTimeout(() => {
+            document.body.classList.remove('loading');
+            document.body.classList.remove('mobile-intro-active');
+            
+            document.querySelectorAll('.hero-section .fade-up').forEach(el => el.classList.add('in-view'));
+
+            setTimeout(() => {
+                introOverlay.style.display = 'none';
+            }, 500);
+        }, 2200);
+    } else {
+        requestAnimationFrame(() => {
+            document.body.classList.remove('loading');
+        });
+    }
 });
