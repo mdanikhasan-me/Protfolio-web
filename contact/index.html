@@ -1,106 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact | MD Anik Hasan</title>
-    <link rel="stylesheet" href="/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact | MD Anik Hasan</title>
+  <link rel="stylesheet" href="/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <script defer src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
 </head>
 
 <body class="loading contact-page">
 
-    <nav class="navbar glass-panel">
-        <div class="logo-container magnetic-wrap">
-            <a href="/" class="logo magnetic-target">
-                SAWLPER<span class="dot">.</span>
-            </a>
-        </div>
+    <div class="page-fx" aria-hidden="true"><canvas id="fx-contact"></canvas></div>
+<nav class="navbar" id="navbar">
+    <div class="navbar-inner glass-panel">
+      <div class="logo-container magnetic-wrap">
+        <a href="/" class="logo magnetic-target">SAWLPER<span class="dot">.</span></a>
+      </div>
 
-        <ul class="nav-links">
-            <li class="magnetic-wrap">
-                <a href="/" class="nav-link magnetic-target">Home</a>
-            </li>
+      <ul class="nav-links">
+        <li class="magnetic-wrap"><a href="/" class="nav-link magnetic-target">Home</a></li>
+        <li class="magnetic-wrap"><a href="/projects/" class="nav-link magnetic-target">Projects</a></li>
+        <li class="magnetic-wrap"><a href="/contact/" class="nav-link magnetic-target active">Contact</a></li>
+      </ul>
 
-            <li class="magnetic-wrap">
-                <a href="/projects/" class="nav-link magnetic-target">Projects</a>
-            </li>
+      <div class="mobile-menu-toggle"><span></span><span></span></div>
+    </div>
+  </nav>
 
-            <li class="magnetic-wrap">
-                <a href="/contact/" class="nav-link magnetic-target active">Contact</a>
-            </li>
-        </ul>
+  <main class="page-wrapper">
+    <section class="contact-section">
+      <div class="container">
+        <div class="contact-shell fade-up">
+          <div class="contact-left">
+            <span class="eyebrow">Contact</span>
+            <h2 class="section-title">Let’s work with your vision.</h2>
+            <p class="section-lead">
+              If you have an idea, a direction, or even a rough sketch—send it. We’ll shape it into something real.
+            </p>
 
-        <div class="mobile-menu-toggle">
-            <span></span>
-            <span></span>
-        </div>
-    </nav>
+            <div class="contact-email-card tilt-card">
+              <div class="email-top">
+                <span class="email-label">Email</span>
+                <span class="email-hint" id="copy-feedback"></span>
+              </div>
 
-    <main class="page-wrapper">
-        <section class="contact-section">
-            <div class="container">
-                <div class="contact-wrapper glass-panel fade-up">
+              <div class="email-row">
+                <span id="email-text">anikhasan2@icloud.com</span>
 
-                    <div class="contact-header">
-                        <span class="eyebrow">Get in Touch</span>
-                        <h2 class="section-title">Let's make something with pixel.</h2>
-                        <p>Available for freelance and collaboration.</p>
-                    </div>
-
-                    <div class="social-grid">
-                        <a href="https://github.com/mdanikhasan-dev" target="_blank" class="social-card magnetic-wrap">
-                            <div class="magnetic-target">
-                                <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor">
-                                    <path d="M12 0C5.37 0 0 5.37 0 12a12 12 0 008.21 11.39c.6.11.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61a3.17 3.17 0 00-1.33-1.75c-1.09-.74.08-.73.08-.73a2.51 2.51 0 011.83 1.23 2.54 2.54 0 003.47.99 2.54 2.54 0 01.76-1.6c-2.66-.3-5.47-1.33-5.47-5.92a4.64 4.64 0 011.23-3.22 4.31 4.31 0 01.12-3.18s1.01-.32 3.3 1.23a11.4 11.4 0 016 0c2.28-1.55 3.29-1.23 3.29-1.23a4.31 4.31 0 01.12 3.18 4.63 4.63 0 011.23 3.22c0 4.6-2.81 5.61-5.49 5.91a2.85 2.85 0 01.81 2.21v3.28c0 .32.21.7.83.58A12 12 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                                </svg>
-                                <span>GitHub</span>
-                            </div>
-                        </a>
-
-                        <a href="https://www.linkedin.com/in/mdanikhasan-dev/" target="_blank" class="social-card magnetic-wrap">
-                            <div class="magnetic-target">
-                                <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor">
-                                    <path d="M4.98 3.5C4.98 5 3.87 6.1 2.5 6.1S0 5 0 3.5 1.12.9 2.5.9s2.48 1.1 2.48 2.6zM.2 8.4h4.6V24H.2V8.4zM8.4 8.4h4.4v2.1h.1c.6-1.1 2.2-2.2 4.5-2.2 4.8 0 5.7 3.2 5.7 7.4V24h-4.6v-7.3c0-1.7 0-4-2.5-4s-2.9 1.9-2.9 3.9V24H8.4V8.4z"/>
-                                </svg>
-                                <span>LinkedIn</span>
-                            </div>
-                        </a>
-
-                        <a href="https://x.com/mdanikhasan_dev" target="_blank" class="social-card magnetic-wrap">
-                            <div class="magnetic-target">
-                                <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor">
-                                    <path d="M18.9 2H22l-7.6 8.7L23 22h-6.8l-5.3-6.9L4.7 22H1.6l8.1-9.3L1 2h6.9l4.8 6.3L18.9 2z"/>
-                                </svg>
-                                <span>X / Twitter</span>
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="email-section">
-                        <span class="email-label">Contact me via email</span>
-
-                        <div class="email-display">
-                            <span id="email-text">anikhasan2@icloud.com</span>
-
-                            <button class="copy-btn magnetic-wrap"
-                                    onclick="copyEmail()"
-                                    aria-label="Copy Email">
-                                <span class="magnetic-target">
-                                    Copy
-                                </span>
-                            </button>
-                        </div>
-
-                        <span class="copy-feedback" id="copy-feedback">
-                            Copied to clipboard
-                        </span>
-                    </div>
-
-                </div>
+                <button class="copy-btn2 magnetic-wrap" onclick="copyEmail()" aria-label="Copy Email">
+                  <span class="magnetic-target">
+                    <span class="copy-icon" aria-hidden="true"></span>
+                    Copy
+                  </span>
+                </button>
+              </div>
             </div>
-        </section>
-    </main>
-    <script src="/script.js"></script>
+
+            <div class="contact-note">
+              <span class="note-chip">Fast reply</span>
+              <span class="note-text">I usually respond within 24–48 hours.</span>
+            </div>
+          </div>
+
+          <div class="contact-right">
+            <div class="contact-grid-bg" aria-hidden="true"></div>
+
+                        <div class="social-grid2">
+              <a href="https://github.com/mdanikhasan-dev" target="_blank" class="social-card2 magnetic-wrap tilt-card">
+                <div class="magnetic-target social-row">
+                  <span class="social-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 .5C5.58.5.5 5.79.5 12.32c0 5.22 3.29 9.64 7.86 11.2.58.11.8-.26.8-.58v-2.2c-3.2.71-3.87-1.41-3.87-1.41-.52-1.38-1.28-1.74-1.28-1.74-1.04-.73.08-.72.08-.72 1.15.08 1.76 1.22 1.76 1.22 1.02 1.78 2.67 1.27 3.32.97.1-.76.4-1.27.73-1.56-2.55-.3-5.23-1.3-5.23-5.79 0-1.28.45-2.32 1.18-3.14-.12-.3-.51-1.52.11-3.17 0 0 .97-.31 3.18 1.2a10.7 10.7 0 0 1 2.9-.4c.99 0 1.99.14 2.9.4 2.2-1.51 3.17-1.2 3.17-1.2.62 1.65.23 2.87.11 3.17.74.82 1.18 1.86 1.18 3.14 0 4.5-2.69 5.49-5.25 5.78.41.36.78 1.08.78 2.18v3.24c0 .32.21.69.8.58 4.58-1.56 7.86-5.98 7.86-11.2C23.5 5.79 18.42.5 12 .5z"/></svg></span>
+                  <div class="social-meta">
+                    <span class="social-k">GitHub</span>
+                    <span class="social-v">mdanikhasan-dev</span>
+                  </div>
+                </div>
+                <div class="card-glow"></div>
+              </a>
+
+              <a href="https://www.linkedin.com/in/mdanikhasan-dev/" target="_blank" class="social-card2 magnetic-wrap tilt-card">
+                <div class="magnetic-target social-row">
+                  <span class="social-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M4.98 3.5a2.5 2.5 0 1 1-.01 5.01 2.5 2.5 0 0 1 .01-5.01zM3.5 9h2.96v11.5H3.5V9zM9.2 9h2.84v1.57h.04c.4-.75 1.38-1.54 2.84-1.54 3.04 0 3.6 2.05 3.6 4.72v6.75h-2.96v-5.98c0-1.43-.03-3.27-1.98-3.27-1.98 0-2.28 1.58-2.28 3.16v6.09H9.2V9z"/></svg></span>
+                  <div class="social-meta">
+                    <span class="social-k">LinkedIn</span>
+                    <span class="social-v">mdanikhasan-dev</span>
+                  </div>
+                </div>
+                <div class="card-glow"></div>
+              </a>
+
+              <a href="https://x.com/mdanikhasan_dev" target="_blank" class="social-card2 magnetic-wrap tilt-card">
+                <div class="magnetic-target social-row">
+                  <span class="social-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M18.2 2H21l-6.2 7.1L22 22h-6.2l-4.1-6.3L6.2 22H3.4l6.7-7.7L2 2h6.3l3.7 5.8L18.2 2zm-1.1 18h1.7L7 3.9H5.2L17.1 20z"/></svg></span>
+                  <div class="social-meta">
+                    <span class="social-k">X</span>
+                    <span class="social-v">@mdanikhasan_dev</span>
+                  </div>
+                </div>
+                <div class="card-glow"></div>
+              </a>
+
+              <a href="/projects/" class="social-card2 magnetic-wrap tilt-card">
+                <div class="magnetic-target social-row">
+                  <span class="social-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M4 7.5A3.5 3.5 0 0 1 7.5 4h9A3.5 3.5 0 0 1 20 7.5v9A3.5 3.5 0 0 1 16.5 20h-9A3.5 3.5 0 0 1 4 16.5v-9zm3.5-1.5A1.5 1.5 0 0 0 6 7.5v9A1.5 1.5 0 0 0 7.5 18h9a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 16.5 6h-9z"/><path d="M10 14.5 15.2 9.3v3.2h2V6.5h-6v2h3.2L9 13.7l1 0.8z"/></svg></span>
+                  <div class="social-meta">
+                    <span class="social-k">Projects</span>
+                    <span class="social-v">See what I’m building →</span>
+                  </div>
+                </div>
+                <div class="card-glow"></div>
+              </a>
+            </div>
+
+            <div class="contact-bottom fade-up delay-1">
+              <div class="bottom-chip">Collaboration</div>
+              <p>
+                Clean communication. Clear plan. Then I build and polish until it feels right.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script defer src="/script.js"></script>
 </body>
 </html>
