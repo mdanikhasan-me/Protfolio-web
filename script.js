@@ -1,7 +1,72 @@
+(() => {
+  const ensure = (selector, create) => {
+    if (document.head.querySelector(selector)) return;
+    document.head.appendChild(create());
+  };
+
+  ensure('link[rel="icon"][type="image/png"][href="/assets/icons/favicon.png"]', () => {
+    const l = document.createElement('link');
+    l.rel = 'icon';
+    l.type = 'image/png';
+    l.sizes = '32x32';
+    l.href = '/assets/icons/favicon.png';
+    return l;
+  });
+
+  ensure('link[rel="apple-touch-icon"][href="/assets/icons/favicon.png"]', () => {
+    const l = document.createElement('link');
+    l.rel = 'apple-touch-icon';
+    l.href = '/assets/icons/favicon.png';
+    return l;
+  });
+
+  ensure('meta[name="theme-color"][content="#0D0F13"]', () => {
+    const m = document.createElement('meta');
+    m.name = 'theme-color';
+    m.content = '#0D0F13';
+    return m;
+  });
+})();
+
+
 document.addEventListener('DOMContentLoaded', () => {
   const navbar = document.getElementById('navbar');
   const mobileToggle = document.querySelector('.mobile-menu-toggle');
   const navLinks = document.querySelector('.nav-links');
+  const path = (location.pathname || '/').toLowerCase();
+
+  const syncNav = () => {
+    if (!navLinks) return;
+
+    const isAbout = document.body.classList.contains('about-page') || path.startsWith('/about');
+    const existingAbout = navLinks.querySelector('a[href="/about/"]');
+
+    if (isAbout && !existingAbout) {
+      const li = document.createElement('li');
+      li.className = 'magnetic-wrap';
+      const a = document.createElement('a');
+      a.className = 'nav-link magnetic-target';
+      a.href = '/about/';
+      a.textContent = 'About';
+      li.appendChild(a);
+      navLinks.appendChild(li);
+    }
+
+    if (!isAbout && existingAbout) {
+      existingAbout.closest('li')?.remove();
+    }
+
+    navLinks.querySelectorAll('a.nav-link').forEach(a => a.classList.remove('active'));
+    const active = (() => {
+      if (path.startsWith('/projects')) return navLinks.querySelector('a[href="/projects/"]');
+      if (path.startsWith('/contact')) return navLinks.querySelector('a[href="/contact/"]');
+      if (path.startsWith('/about')) return navLinks.querySelector('a[href="/about/"]');
+      return navLinks.querySelector('a[href="/"]');
+    })();
+    if (active) active.classList.add('active');
+  };
+
+  syncNav();
 
   let lastY = window.scrollY || 0;
   let ticking = false;
@@ -11,6 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!mobileToggle || !navLinks) return;
     mobileToggle.classList.remove('active');
     navLinks.classList.remove('open');
+    if (mobileToggle.hasAttribute('aria-expanded')) mobileToggle.setAttribute('aria-expanded', 'false');
+    if (mobileToggle.hasAttribute('aria-label')) mobileToggle.setAttribute('aria-label', 'Open menu');
   };
 
   const setScrolled = (y) => {
@@ -76,8 +143,17 @@ document.addEventListener('DOMContentLoaded', () => {
   if (mobileToggle && navLinks) {
     const toggleMenu = (e) => {
       e.stopPropagation();
-      mobileToggle.classList.toggle('active');
-      navLinks.classList.toggle('open');
+      const willOpen = !navLinks.classList.contains('open');
+      mobileToggle.classList.toggle('active', willOpen);
+      navLinks.classList.toggle('open', willOpen);
+
+      // Optional a11y attributes (won't affect visuals if they aren't present)
+      if (mobileToggle.hasAttribute('aria-expanded')) {
+        mobileToggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      }
+      if (mobileToggle.hasAttribute('aria-label')) {
+        mobileToggle.setAttribute('aria-label', willOpen ? 'Close menu' : 'Open menu');
+      }
     };
 
     mobileToggle.addEventListener('click', toggleMenu);
@@ -90,6 +166,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (e) => {
       const clickedInside = navLinks.contains(e.target) || mobileToggle.contains(e.target);
       if (!clickedInside) closeMenu();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMenu();
     });
 
     window.addEventListener('resize', () => {
