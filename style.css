@@ -254,10 +254,10 @@ section { padding: 92px 0; position: relative; }
 .card-content{ transform: translateZ(30px); transform-style: preserve-3d; transition: transform 0.4s var(--ease-out-expo); }
 .project-card:hover, .home-card:hover{
   border-color: rgba(46,107,79,.26);
-  box-shadow:
-    0 30px 60px -12px rgba(0,0,0,0.88),
-    0 0 0 1px rgba(46,107,79,.08),
-    0 18px 70px rgba(46,107,79,.10);
+ box-shadow:
+  0 24px 48px -14px rgba(0,0,0,0.55),
+  0 0 0 1px rgba(46,107,79,.06),
+  0 14px 52px rgba(46,107,79,.07);
 }
 .project-card:hover .card-content, .home-card:hover .card-content{ transform: translateZ(40px); }
 .card-eyebrow{ color: var(--text-dim); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em; display:block; margin-bottom: 14px; font-weight: 900; }
