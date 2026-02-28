@@ -1,69 +1,150 @@
-<!DOCTYPE html> <html lang="en">
-<head>
-<meta name="twitter:image" content="https://mdanikhasan.com/assets/icons/favicon.png">
-<meta name="twitter:description" content="About MD Anik Hasan (Anik Hasan) — CSE student and Unreal Engine developer. Skills, interests, and background.">
-<meta name="twitter:title" content="About — MD Anik Hasan">
-<meta name="twitter:card" content="summary_large_image">
-<meta property="og:image" content="https://mdanikhasan.com/assets/icons/favicon.png">
-<meta property="og:url" content="https://mdanikhasan.com/about/">
-<meta property="og:description" content="About MD Anik Hasan (Anik Hasan) — CSE student and Unreal Engine developer. Skills, interests, and background.">
-<meta property="og:title" content="About — MD Anik Hasan">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="MD Anik Hasan">
-<link rel="apple-touch-icon" href="/assets/icons/favicon.png">
-<link rel="icon" href="/assets/icons/favicon.png" type="image/png">
-<link rel="canonical" href="https://mdanikhasan.com/about/">
-<meta name="theme-color" content="#0b0f14">
-<meta name="robots" content="index,follow">
-<meta name="description" content="About MD Anik Hasan (Anik Hasan) — CSE student and Unreal Engine developer. Skills, interests, and background.">
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>About — MD Anik Hasan</title>
-<link href="/style.css" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;600&amp;display=swap" rel="stylesheet"/>
-<script defer="" src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-<script defer="" src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"MD Anik Hasan","alternateName":["Anik Hasan","MD Anik","MDAnikHasan"],"url":"https://mdanikhasan.com","image":"https://mdanikhasan.com/assets/icons/favicon.png","jobTitle":"Unreal Engine Developer","description":"Unreal Engine developer and 3D artist from Bangladesh. Portfolio of MD Anik Hasan.","sameAs":["https://github.com/mdanikhasan-dev/Protfolio-web"]}</script>
-</head>
-<body class="loading about-page">
-<div aria-hidden="true" class="page-fx"><canvas id="fx-about"></canvas></div>
-<nav class="navbar" id="navbar">
-<div class="navbar-inner glass-panel">
-<div class="logo-container magnetic-wrap">
-<a class="logo magnetic-target" href="/">MDANIKHASAN.COM<span class="dot"></span></a>
-</div>
-<ul class="nav-links"> <li class="magnetic-wrap"><a href="/" class="nav-link magnetic-target ">Home</a></li> <li class="magnetic-wrap"><a href="/projects/" class="nav-link magnetic-target ">Projects</a></li> <li class="magnetic-wrap"><a href="/about/" class="nav-link magnetic-target active">About</a></li> <li class="magnetic-wrap"><a href="/contact/" class="nav-link magnetic-target ">Contact</a></li> </ul>
-<div aria-label="Open menu" class="mobile-menu-toggle" role="button" tabindex="0">
-<span></span><span></span>
-</div>
-</div>
-</nav>
-<main class="page-wrapper">
-<section class="about-section">
-<div class="container">
-<div class="section-header fade-up">
-<span class="eyebrow">The Architect</span>
-<h2 class="section-title">Behind the Code</h2>
-</div>
-<div class="about-grid">
-<div class="about-text about-text-plain fade-up delay-1">
-<p> I am MD Anik Hasan an obsessive <strong>Performance Engineer</strong> and <strong>Game Developer</strong>. Currently studying at <strong>United International University (UIU)</strong>. </p>
-<p>I'm interested in Machine Learning, Deep Learning, and AI Models.</p>
-<p>My workflow is <strong>Unreal Engine</strong> with C++ or UE5 Blueprints.</p>
-<div class="stats-row">
-<div class="stat-item">
-<span class="stat-num">5+</span>
-<span class="stat-label">Months Exp.</span>
-</div>
-<div class="stat-item">
-<span class="stat-num">7+</span>
-<span class="stat-label">Projects</span>
-</div>
-</div>
-</div>
-<div class="about-visual fade-up delay-2">
-<div class="code-block-visual tilt-card code-tilt">
-<pre><code><span class="tok-key">class</span> <span class="tok-class">Developer</span><span class="tok-punct">:</span>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Social / Open Graph -->
+    <meta name="twitter:image" content="https://mdanikhasan.com/assets/icons/favicon.png" />
+    <meta
+      name="twitter:description"
+      content="About MD Anik Hasan (Anik Hasan) — CSE student and Unreal Engine developer. Skills, interests, and background."
+    />
+    <meta name="twitter:title" content="About — MD Anik Hasan" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta property="og:image" content="https://mdanikhasan.com/assets/icons/favicon.png" />
+    <meta property="og:url" content="https://mdanikhasan.com/about/" />
+    <meta
+      property="og:description"
+      content="About MD Anik Hasan (Anik Hasan) — CSE student and Unreal Engine developer. Skills, interests, and background."
+    />
+    <meta property="og:title" content="About — MD Anik Hasan" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MD Anik Hasan" />
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" href="/assets/icons/favicon.png" />
+    <link rel="icon" href="/assets/icons/favicon.png" type="image/png" />
+
+    <!-- Canonical / SEO -->
+    <link rel="canonical" href="https://mdanikhasan.com/about/" />
+    <meta name="theme-color" content="#0b0f14" />
+    <meta name="robots" content="index,follow" />
+    <meta
+      name="description"
+      content="About MD Anik Hasan (Anik Hasan) — CSE student and Unreal Engine developer. Skills, interests, and background."
+    />
+
+    <!-- Basics -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>About — MD Anik Hasan</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Libraries -->
+    <script defer src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"
+    ></script>
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "MD Anik Hasan",
+        "alternateName": ["Anik Hasan", "MD Anik", "MDAnikHasan"],
+        "url": "https://mdanikhasan.com",
+        "image": "https://mdanikhasan.com/assets/icons/favicon.png",
+        "jobTitle": "Unreal Engine Developer",
+        "description": "Unreal Engine developer and 3D artist from Bangladesh. Portfolio of MD Anik Hasan.",
+        "sameAs": ["https://github.com/mdanikhasan-dev/Protfolio-web"]
+      }
+    </script>
+  </head>
+
+  <body class="loading about-page">
+    <!-- Page FX -->
+    <div class="page-fx" aria-hidden="true">
+      <canvas id="fx-about"></canvas>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+      <div class="navbar-inner glass-panel">
+        <div class="logo-container magnetic-wrap">
+          <a class="logo magnetic-target" href="/">
+            MDANIKHASAN.COM<span class="dot"></span>
+          </a>
+        </div>
+
+        <ul class="nav-links">
+          <li class="magnetic-wrap">
+            <a href="/" class="nav-link magnetic-target">Home</a>
+          </li>
+          <li class="magnetic-wrap">
+            <a href="/projects/" class="nav-link magnetic-target">Projects</a>
+          </li>
+          <li class="magnetic-wrap">
+            <a href="/about/" class="nav-link magnetic-target active">About</a>
+          </li>
+          <li class="magnetic-wrap">
+            <a href="/contact/" class="nav-link magnetic-target">Contact</a>
+          </li>
+        </ul>
+
+        <div class="mobile-menu-toggle" aria-label="Open menu" role="button" tabindex="0">
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main -->
+    <main class="page-wrapper">
+      <section class="about-section">
+        <div class="container">
+          <div class="section-header fade-up">
+            <span class="eyebrow">The Architect</span>
+            <h2 class="section-title">Behind the Code</h2>
+          </div>
+
+          <div class="about-grid">
+            <!-- Text -->
+            <div class="about-text about-text-plain fade-up delay-1">
+              <p>
+                I am MD Anik Hasan an obsessive <strong>Performance Engineer</strong> and
+                <strong>Game Developer</strong>. Currently studying at
+                <strong>United International University (UIU)</strong>.
+              </p>
+
+              <p>I'm interested in Machine Learning, Deep Learning, and AI Models.</p>
+
+              <p>My workflow is <strong>Unreal Engine</strong> with C++ or UE5 Blueprints.</p>
+
+              <div class="stats-row">
+                <div class="stat-item">
+                  <span class="stat-num">5+</span>
+                  <span class="stat-label">Months Exp.</span>
+                </div>
+
+                <div class="stat-item">
+                  <span class="stat-num">7+</span>
+                  <span class="stat-label">Projects</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Visual -->
+            <div class="about-visual fade-up delay-2">
+              <div class="code-block-visual tilt-card code-tilt">
+                <pre><code><span class="tok-key">class</span> <span class="tok-class">Developer</span><span class="tok-punct">:</span>
 <span class="tok-key">def</span> <span class="tok-fn">__init__</span>(<span class="tok-self">self</span>)<span class="tok-punct">:</span>
 <span class="tok-self">self</span><span class="tok-punct">.</span><span class="tok-prop">name</span> <span class="tok-op">=</span> <span class="tok-str">"MD Anik Hasan"</span>
 <span class="tok-self">self</span><span class="tok-punct">.</span><span class="tok-prop">stack</span> <span class="tok-op">=</span> [<span class="tok-str">"UE5"</span>, <span class="tok-str">"C++"</span>, <span class="tok-str">"Python"</span>] <span class="tok-self">self</span><span class="tok-punct">.</span><span class="tok-prop">brand</span> <span class="tok-op">=</span> <span class="tok-str">"MDANIKHASAN.COM"</span>
@@ -71,12 +152,14 @@
 <span class="tok-self">self</span><span class="tok-punct">.</span><span class="tok-prop">focus</span> <span class="tok-op">=</span> <span class="tok-str">"Unreal Engine Games"</span>
 <span class="tok-key">def</span> <span class="tok-fn">build</span>(<span class="tok-self">self</span>)<span class="tok-punct">:</span>
 <span class="tok-key">return</span> <span class="tok-str">"Immersive interactive experiences"</span></code></pre>
-</div>
-</div>
-</div>
-</div>
-</section>
-</main>
-<script defer="" src="/script.js"></script>
-</body>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Site JS -->
+    <script defer src="/script.js"></script>
+  </body>
 </html>
