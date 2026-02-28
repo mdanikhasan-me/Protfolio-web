@@ -1,96 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Projects | MD Anik Hasan</title>
-  <link rel="stylesheet" href="/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  <script defer src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
-</head>
+  <head>
+    <!-- Social / Open Graph -->
+    <meta name="twitter:image" content="https://mdanikhasan.com/assets/icons/favicon.png" />
+    <meta
+      name="twitter:description"
+      content="Projects by MD Anik Hasan: portfolio builds, tools, and experiments. Source code links and project details."
+    />
+    <meta name="twitter:title" content="Projects — MD Anik Hasan" />
+    <meta name="twitter:card" content="summary_large_image" />
 
-<body class="loading projects-page">
-    <div class="page-fx" aria-hidden="true"><canvas id="fx-projects"></canvas></div>
-<nav class="navbar" id="navbar">
-  <div class="navbar-inner glass-panel">
-    <div class="logo-container magnetic-wrap">
-      <a href="/" class="logo magnetic-target">SAWLPER<span class="dot"></span></a>
+    <meta property="og:image" content="https://mdanikhasan.com/assets/icons/favicon.png" />
+    <meta property="og:url" content="https://mdanikhasan.com/projects/" />
+    <meta
+      property="og:description"
+      content="Projects by MD Anik Hasan: portfolio builds, tools, and experiments. Source code links and project details."
+    />
+    <meta property="og:title" content="Projects — MD Anik Hasan" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MD Anik Hasan" />
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" href="/assets/icons/favicon.png" />
+    <link rel="icon" href="/assets/icons/favicon.png" type="image/png" />
+
+    <!-- Canonical / SEO -->
+    <link rel="canonical" href="https://mdanikhasan.com/projects/" />
+    <meta name="robots" content="index,follow" />
+    <meta
+      name="description"
+      content="Projects by MD Anik Hasan: portfolio builds, tools, and experiments. Source code links and project details."
+    />
+
+    <!-- Basics -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0f14" />
+
+    <title>Projects — MD Anik Hasan</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Libraries -->
+    <script defer src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+  </head>
+
+  <body class="loading projects-page">
+    <!-- Page FX -->
+    <div class="page-fx" aria-hidden="true">
+      <canvas id="fx-projects"></canvas>
     </div>
 
-    <ul class="nav-links">
-      <li class="magnetic-wrap"><a href="/" class="nav-link magnetic-target">Home</a></li>
-      <li class="magnetic-wrap"><a href="/projects/" class="nav-link magnetic-target active">Projects</a></li>
-      <li class="magnetic-wrap"><a href="/contact/" class="nav-link magnetic-target">Contact</a></li>
-    </ul>
-
-    <div class="mobile-menu-toggle" aria-label="Open menu" role="button" tabindex="0">
-      <span></span><span></span>
-    </div>
-  </div>
-</nav>
-
-  <main class="page-wrapper">
-    <section class="projects-section">
-      <div class="container">
-        <div class="section-header fade-up">
-          <span class="eyebrow">Works</span>
-          <h2 class="section-title">Selected Projects</h2>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+      <div class="navbar-inner glass-panel">
+        <div class="logo-container magnetic-wrap">
+          <a href="/" class="logo magnetic-target">
+            MDANIKHASAN.COM<span class="dot"></span>
+          </a>
         </div>
 
-        <div class="projects-grid">
+        <ul class="nav-links">
+          <li class="magnetic-wrap">
+            <a href="/" class="nav-link magnetic-target">Home</a>
+          </li>
+          <li class="magnetic-wrap">
+            <a href="/projects/" class="nav-link magnetic-target active">Projects</a>
+          </li>
+          <li class="magnetic-wrap">
+            <a href="/about/" class="nav-link magnetic-target">About</a>
+          </li>
+          <li class="magnetic-wrap">
+            <a href="/contact/" class="nav-link magnetic-target">Contact</a>
+          </li>
+        </ul>
 
-          <article class="project-card tilt-card fade-up delay-1">
-            <div class="card-content">
-              <span class="card-eyebrow">Discord Automation</span>
-              <h3 class="card-title">UIUBot</h3>
-              <p class="card-desc">
-                A Discord bot engineered for UIU students, featuring automated scheduling,
-                resource management, and community moderation tools.
-              </p>
-
-              <div class="tech-stack">
-                <span class="tech-tag">Python</span>
-                <span class="tech-tag">Discord.py</span>
-                <span class="tech-tag">AsyncIO</span>
-              </div>
-
-              <br />
-
-              <a href="https://github.com/Sawlper/UIU-BOT-Discord" target="_blank"
-                 class="btn btn-secondary magnetic-wrap" style="padding: 12px 24px; font-size: 0.8rem;">
-                <span class="magnetic-target">View GitHub</span>
-              </a>
-            </div>
-            <div class="card-glow"></div>
-          </article>
-
-          <article class="project-card tilt-card fade-up delay-2">
-            <div class="card-content">
-              <span class="card-eyebrow">Frontend Architecture</span>
-              <h3 class="card-title">Portfolio</h3>
-              <p class="card-desc">The high-performance architecture behind this website.</p>
-
-              <div class="tech-stack">
-                <span class="tech-tag">HTML5</span>
-                <span class="tech-tag">CSS3 3D</span>
-                <span class="tech-tag">Vanilla JS</span>
-              </div>
-            </div>
-            <div class="card-glow"></div>
-          </article>
-
+        <div class="mobile-menu-toggle" aria-label="Open menu" role="button" tabindex="0">
+          <span></span>
+          <span></span>
         </div>
       </div>
-    </section>
-  </main>
+    </nav>
 
-  <footer class="main-footer">
-    <div class="container">
-      <p>&copy; 2026 MD Anik Hasan. All rights reserved.</p>
-    </div>
-  </footer>
+    <!-- Main -->
+    <main class="page-wrapper">
+      <section class="projects-section">
+        <div class="container">
+          <div class="section-header fade-up">
+            <span class="eyebrow">Works</span>
+            <h2 class="section-title">Selected Projects</h2>
+          </div>
 
-  <script defer src="/script.js"></script>
-</body>
+          <div class="projects-grid">
+            <!-- Project 1 -->
+            <article class="project-card tilt-card fade-up delay-1">
+              <div class="card-content">
+                <span class="card-eyebrow">Discord Automation</span>
+                <h3 class="card-title">UIUBot</h3>
+
+                <p class="card-desc">
+                  A Discord bot engineered for UIU students, featuring automated scheduling, resource
+                  management, and community moderation tools.
+                </p>
+
+                <div class="tech-stack">
+                  <span class="tech-tag">Python</span>
+                  <span class="tech-tag">Discord.py</span>
+                  <span class="tech-tag">AsyncIO</span>
+                </div>
+
+                <br />
+
+                <a
+                  href="https://github.com//UIU-BOT-Discord"
+                  target="_blank"
+                  class="btn btn-secondary magnetic-wrap"
+                  style="padding: 12px 24px; font-size: 0.8rem"
+                >
+                  <span class="magnetic-target">Source Code</span>
+                </a>
+              </div>
+
+              <div class="card-glow"></div>
+            </article>
+
+            <!-- Project 2 -->
+            <article class="project-card tilt-card fade-up delay-2">
+              <div class="card-content">
+                <span class="card-eyebrow">Frontend Architecture</span>
+                <h3 class="card-title">Portfolio</h3>
+
+                <p class="card-desc">The high-performance architecture behind this website.</p>
+
+                <div class="tech-stack">
+                  <span class="tech-tag">HTML5</span>
+                  <span class="tech-tag">CSS3 3D</span>
+                  <span class="tech-tag">Vanilla JS</span>
+                </div>
+
+                <br />
+
+                <a
+                  href="https://github.com/mdanikhasan-dev/Protfolio-web"
+                  target="_blank"
+                  class="btn btn-secondary magnetic-wrap"
+                  style="padding: 12px 24px; font-size: 0.8rem"
+                >
+                  <span class="magnetic-target">Source Code</span>
+                </a>
+              </div>
+
+              <div class="card-glow"></div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+      <div class="container">
+        <p>&copy; 2026 MD Anik Hasan. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <!-- Site JS -->
+    <script defer src="/script.js"></script>
+  </body>
 </html>

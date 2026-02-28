@@ -1,4 +1,5 @@
 (() => {
+  document.documentElement.classList.add('js');
   const ensure = (selector, create) => {
     if (document.head.querySelector(selector)) return;
     document.head.appendChild(create());
@@ -27,7 +28,6 @@
     return m;
   });
 })();
-
 
 document.addEventListener('DOMContentLoaded', () => {
   const navbar = document.getElementById('navbar');
@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastY = window.scrollY || 0;
   let ticking = false;
   let hidden = false;
+  let downAccum = 0;
 
   const closeMenu = () => {
     if (!mobileToggle || !navLinks) return;
@@ -97,13 +98,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const y = window.scrollY || 0;
     const delta = y - lastY;
     setScrolled(y);
-
-    if (y <= 8) {
+    if (y <= 12) {
+      downAccum = 0;
       setHidden(false);
-    } else if (delta > 1 && y > 24) {
-      setHidden(true);
-    } else if (delta < -1) {
-      setHidden(false);
+    } else if (delta > 0) {
+      downAccum += delta;
+      if (downAccum > 42 && y > 120) setHidden(true);
+    } else if (delta < 0) {
+      downAccum = 0;
+      if (delta < -6) setHidden(false);
     }
 
     lastY = y;
@@ -139,15 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(rafLenis);
   }
 
-
   if (mobileToggle && navLinks) {
     const toggleMenu = (e) => {
       e.stopPropagation();
       const willOpen = !navLinks.classList.contains('open');
       mobileToggle.classList.toggle('active', willOpen);
       navLinks.classList.toggle('open', willOpen);
-
-      // Optional a11y attributes (won't affect visuals if they aren't present)
       if (mobileToggle.hasAttribute('aria-expanded')) {
         mobileToggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
       }
@@ -511,7 +511,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (document.body.classList.contains('projects-page')) initThreePageFx('fx-projects', 'projects');
   if (document.body.classList.contains('contact-page')) initThreePageFx('fx-contact', 'contact');
 
-
 window.copyEmail = function () {
     const el = document.getElementById('email-text');
     if (!el) return;
@@ -547,44 +546,8 @@ window.copyEmail = function () {
   }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
 
   document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-
-  const introOverlay = document.querySelector('.intro-overlay');
-  if (introOverlay) {
-    setTimeout(() => {
-      document.body.classList.remove('loading');
-      document.querySelectorAll('.hero-section .fade-up').forEach(el => el.classList.add('in-view'));
-      setTimeout(() => { introOverlay.style.display = 'none'; }, 220);
-    }, 1200);
-  } else {
-    requestAnimationFrame(() => document.body.classList.remove('loading'));
-  }
-
-    const isHome = document.body.classList.contains('home-page');
-
-  
-if (isHome) {
-  const overlay = document.querySelector('.intro-overlay');
-  setTimeout(() => {
-    document.body.classList.remove('loading');
-    document.querySelectorAll('.hero-section .fade-up').forEach(el => el.classList.add('in-view'));
-    if (overlay) setTimeout(() => overlay.classList.add('hidden'), 220);
-  }, 1200);
-
-  const state = {
-    w: 0,
-    h: 0,
-    dpr: 1,
-    mx: 0.5,
-    my: 0.35,
-    mxT: 0.5,
-    myT: 0.35,
-    scroll: 0,
-    scrollT: 0,
-    reduceMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
-    running: true
-  };
-
-  const clamp01 = (v) => Math.max(0, Math.min(1, v));
+  const wantsUnifiedBg = true;
+if (wantsUnifiedBg) {
 
   function injectHomeBg() {
     if (document.getElementById('home-bg')) return;
@@ -592,347 +555,230 @@ if (isHome) {
     const wrap = document.createElement('div');
     wrap.id = 'home-bg';
 
-    const grid = document.createElement('div');
-    grid.className = 'bg-grid';
-
-    const spot = document.createElement('div');
-    spot.className = 'bg-spotlight';
-
-    const vignette = document.createElement('div');
-    vignette.className = 'bg-vignette';
-
-    const noise = document.createElement('canvas');
-    noise.className = 'bg-canvas bg-noise';
-    noise.id = 'bg-noise';
-
     const canvas = document.createElement('canvas');
     canvas.className = 'bg-canvas';
     canvas.id = 'bg-three';
 
+    const vignette = document.createElement('div');
+    vignette.className = 'bg-vignette';
+
     wrap.appendChild(canvas);
-    wrap.appendChild(noise);
-    wrap.appendChild(grid);
-    wrap.appendChild(spot);
+    const mountains = document.createElement('div');
+    mountains.className = 'mountains';
+    mountains.innerHTML = `
+      <div class="mountain-layer layer-back"></div>
+      <div class="mountain-layer layer-mid"></div>
+      <div class="mountain-layer layer-front"></div>
+      <div class="mountain-glow" aria-hidden="true"></div>
+    `;
+    wrap.appendChild(mountains);
+
     wrap.appendChild(vignette);
 
     document.body.insertBefore(wrap, document.body.firstChild);
   }
-
   injectHomeBg();
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const lowPower =
+    (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+    (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  const bgWrap = document.getElementById('home-bg');
-  const threeCanvas = document.getElementById('bg-three');
-  const noiseCanvas = document.getElementById('bg-noise');
-  const bgGrid = bgWrap ? bgWrap.querySelector('.bg-grid') : null;
+  const dprCap = lowPower ? 1 : 1.0;
+let bgRoot = document.getElementById('home-bg');
+if (!bgRoot) {
+  bgRoot = document.createElement('div');
+  bgRoot.id = 'home-bg';
+  bgRoot.innerHTML = '<canvas id="bg-three"></canvas><div class="bg-vignette" aria-hidden="true"></div>';
+  document.body.prepend(bgRoot);
+}
+const canvas = document.getElementById('bg-three');
 
-  const sections = Array.from(document.querySelectorAll('main section'));
-  const getScrollProgress = () => {
-    if (!sections.length) {
-      const doc = document.documentElement;
-      const max = Math.max(1, (doc.scrollHeight || 1) - window.innerHeight);
-      return clamp01((window.scrollY || 0) / max);
-    }
-    const mid = (window.scrollY || 0) + window.innerHeight * 0.55;
-    let idx = 0;
-    for (let i = 0; i < sections.length; i++) {
-      const r = sections[i].getBoundingClientRect();
-      const top = r.top + (window.scrollY || 0);
-      const bot = top + r.height;
-      if (mid >= top && mid <= bot) { idx = i; break; }
-      if (mid > bot) idx = i;
-    }
-    const sec = sections[idx];
-    const r = sec.getBoundingClientRect();
-    const top = r.top + (window.scrollY || 0);
-    const span = Math.max(1, r.height);
-    const local = clamp01((mid - top) / span);
-    const denom = Math.max(1, sections.length - 1);
-    return clamp01((idx + local) / denom);
+  const state = {
+    w: 0, h: 0, dpr: 1,
+    mx: 0.5, my: 0.35, mxT: 0.5, myT: 0.35,
+    scroll: 0, scrollT: 0,
+    t: 0,
+    running: true
   };
 
-  function onPointerMove(e) {
-    state.mxT = clamp01(e.clientX / Math.max(1, window.innerWidth));
-    state.myT = clamp01(e.clientY / Math.max(1, window.innerHeight));
-  }
+  const clamp01 = (v) => Math.max(0, Math.min(1, v));
 
-  window.addEventListener('pointermove', onPointerMove, { passive: true });
-  window.addEventListener('touchmove', (e) => {
-    if (!e.touches || !e.touches[0]) return;
-    onPointerMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
-  }, { passive: true });
+  const onPointer = (e) => {
+    const x = (e.clientX || (state.w * 0.5)) / Math.max(1, state.w);
+    const y = (e.clientY || (state.h * 0.35)) / Math.max(1, state.h);
+    state.mxT = clamp01(x);
+    state.myT = clamp01(y);
+    const bg = document.getElementById('home-bg');
+    if (bg) {
+      bg.style.setProperty('--bgx', `${state.mxT * 100}%`);
+      bg.style.setProperty('--bgy', `${state.myT * 100}%`);
+      bg.style.setProperty('--mx', `${state.mxT}`);
+      bg.style.setProperty('--my', `${state.myT}`);
+    }
+  };
 
-  function resize() {
+  window.addEventListener('pointermove', onPointer, { passive: true });
+  window.addEventListener('pointerdown', onPointer, { passive: true });
+
+  const updateScroll = () => {
+    const doc = document.documentElement;
+    const max = Math.max(1, (doc.scrollHeight || 1) - window.innerHeight);
+    state.scrollT = clamp01((window.scrollY || 0) / max);
+    const bg = document.getElementById('home-bg');
+    if (bg) bg.style.setProperty('--scr', `${state.scrollT}`);
+  };
+  window.addEventListener('scroll', updateScroll, { passive: true });
+  updateScroll();
+
+  const vignette = document.querySelector('#home-bg .bg-vignette');
+
+  const ensureSize = (renderer, camera, uRes) => {
     state.w = Math.max(1, window.innerWidth);
     state.h = Math.max(1, window.innerHeight);
-    state.dpr = Math.min(2, window.devicePixelRatio || 1);
+    state.dpr = Math.min(dprCap, window.devicePixelRatio || 1);
+    renderer.setPixelRatio(state.dpr);
+    renderer.setSize(state.w, state.h, false);
+    if (camera) camera.updateProjectionMatrix();
+    if (uRes) uRes.value.set(state.w, state.h, state.dpr);
+    if (vignette) vignette.style.opacity = lowPower ? '0.65' : '0.75';
+  };
 
-    if (noiseCanvas) {
-      noiseCanvas.width = Math.floor(state.w * state.dpr);
-      noiseCanvas.height = Math.floor(state.h * state.dpr);
-    }
-    threeBg && threeBg.resize(state.w, state.h, state.dpr);
-  }
-
-  window.addEventListener('resize', resize, { passive: true });
-
-  let noiseCtx = null;
-  let noiseImg = null;
-  let noiseTick = 0;
-
-  function initNoise() {
-    if (!noiseCanvas) return;
-    noiseCtx = noiseCanvas.getContext('2d', { alpha: true });
-    noiseImg = noiseCtx.createImageData(noiseCanvas.width, noiseCanvas.height);
-  }
-
-  function drawNoise() {
-    if (!noiseCtx || !noiseImg) return;
-    noiseTick++;
-    if (noiseTick % 2 !== 0) return;
-
-    const d = noiseImg.data;
-    const w = noiseCanvas.width;
-    const h = noiseCanvas.height;
-    const stride = 4;
-    for (let y = 0; y < h; y += 2) {
-      for (let x = 0; x < w; x += 2) {
-        const o = (y * w + x) * stride;
-        const v = (Math.random() * 255) | 0;
-        d[o] = v;
-        d[o + 1] = v;
-        d[o + 2] = v;
-        d[o + 3] = 20;
-      }
-    }
-    noiseCtx.putImageData(noiseImg, 0, 0);
-  }
-
-  function hexToInt(h) {
-    return parseInt((h || '#ffffff').replace('#', ''), 16);
-  }
-
-  function initThreeBackground(canvas) {
-    if (!canvas || !window.THREE) return null;
-
-    const THREE = window.THREE;
-    const css = getComputedStyle(document.documentElement);
-
-    const cNavy = hexToInt(css.getPropertyValue('--accent').trim() || '#2b4c7e');
-    const cForest = hexToInt(css.getPropertyValue('--accent2').trim() || '#2e6b4f');
-    const cSteel = hexToInt(css.getPropertyValue('--accent3').trim() || '#7c96b6');
-
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      alpha: true,
-      antialias: true,
-      powerPreference: 'high-performance'
-    });
-    renderer.setClearColor(0x000000, 0);
-
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x070b10, 0.055);
-
-    const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 120);
-    camera.position.set(0, 0.4, 16);
-
-    const group = new THREE.Group();
-    scene.add(group);
-
-    const ambient = new THREE.AmbientLight(cSteel, 0.35);
-    scene.add(ambient);
-
-    const key = new THREE.DirectionalLight(cNavy, 0.55);
-    key.position.set(6, 10, 8);
-    scene.add(key);
-
-    const pointerLight = new THREE.PointLight(cForest, 0.9, 45, 1.9);
-    pointerLight.position.set(0, 0, 8);
-    scene.add(pointerLight);
-
-    const rim = new THREE.DirectionalLight(cForest, 0.28);
-    rim.position.set(-8, -6, 10);
-    scene.add(rim);
-
-    const createSwirl = (count, radius, height, color, size, opacity) => {
-      const g = new THREE.BufferGeometry();
-      const pos = new Float32Array(count * 3);
-      const a = new Float32Array(count);
-      for (let i = 0; i < count; i++) {
-        const t = Math.random() * Math.PI * 2;
-        const r = radius * (0.15 + Math.random() * 0.85);
-        const y = (Math.random() - 0.5) * height;
-        const ix = i * 3;
-        pos[ix] = Math.cos(t) * r;
-        pos[ix + 1] = y;
-        pos[ix + 2] = Math.sin(t) * r;
-        a[i] = Math.random();
-      }
-      g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-      g.setAttribute('a', new THREE.BufferAttribute(a, 1));
-
-      const m = new THREE.PointsMaterial({
-        color,
-        size,
-        transparent: true,
-        opacity,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-        sizeAttenuation: true
-      });
-      return new THREE.Points(g, m);
-    };
-
-    const far = createSwirl(2600, 18, 18, cSteel, 0.028, 0.26);
-    far.position.z = -10;
-    group.add(far);
-
-    const mid = createSwirl(1700, 12, 14, cNavy, 0.030, 0.28);
-    mid.position.z = -2;
-    group.add(mid);
-
-    const ring = createSwirl(1200, 7.5, 8, cForest, 0.034, 0.30);
-    ring.position.z = 4;
-    group.add(ring);
-
-    const grid = new THREE.GridHelper(56, 56, cSteel, cSteel);
-    grid.material.transparent = true;
-    grid.material.opacity = 0.05;
-    grid.material.depthWrite = false;
-    grid.rotation.x = Math.PI / 2;
-    grid.position.z = -14;
-    group.add(grid);
-
-    const coreGeo = new THREE.IcosahedronGeometry(1.6, 2);
-    const coreMat = new THREE.MeshStandardMaterial({
-      color: cNavy,
-      roughness: 0.62,
-      metalness: 0.18,
-      emissive: cForest,
-      emissiveIntensity: 0.08
-    });
-    const core = new THREE.Mesh(coreGeo, coreMat);
-    core.position.set(0, 0.1, 6.5);
-    group.add(core);
-
-    const wire = new THREE.LineSegments(
-      new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(1.9, 1)),
-      new THREE.LineBasicMaterial({ color: cSteel, transparent: true, opacity: 0.20 })
-    );
-    wire.position.copy(core.position);
-    group.add(wire);
-
-    const knot = new THREE.Mesh(
-      new THREE.TorusKnotGeometry(2.6, 0.16, 180, 10),
-      new THREE.MeshStandardMaterial({
-        color: cSteel,
-        roughness: 0.75,
-        metalness: 0.12,
-        emissive: cNavy,
-        emissiveIntensity: 0.04,
-        transparent: true,
-        opacity: 0.55
-      })
-    );
-    knot.position.set(0, 0.0, 5.8);
-    knot.rotation.x = Math.PI * 0.2;
-    group.add(knot);
-
-    let lastT = 0;
-
-    function resizeTo(w, h, dpr) {
-      renderer.setPixelRatio(dpr);
-      renderer.setSize(w, h, false);
-      camera.aspect = w / Math.max(1, h);
-      camera.updateProjectionMatrix();
-    }
-
-    function render(now) {
-      const t = now * 0.001;
-      const dt = Math.min(0.033, Math.max(0.0, t - lastT));
-      lastT = t;
-
-      const s = state.scroll;
-      const mx = (state.mx - 0.5) * 2.0;
-      const my = (state.my - 0.5) * 2.0;
-
-      pointerLight.position.x += (mx * 7.5 - pointerLight.position.x) * 0.08;
-      pointerLight.position.y += (-my * 4.2 - pointerLight.position.y) * 0.08;
-
-      const tz = 16 - s * 6.5;
-      const ty = 0.4 + s * 2.3;
-      const tx = mx * 0.9;
-
-      camera.position.z += (tz - camera.position.z) * 0.06;
-      camera.position.y += (ty - camera.position.y) * 0.06;
-      camera.position.x += (tx - camera.position.x) * 0.05;
-
-      const lookZ = 6.5 - s * 1.8;
-      camera.lookAt(new THREE.Vector3(mx * 0.8, -my * 0.45 + s * 0.4, lookZ));
-
-      group.rotation.y = t * 0.10 + s * 1.55;
-      group.rotation.x = (-my * 0.22) + s * 0.12;
-
-      far.rotation.y += dt * 0.018;
-      mid.rotation.y += dt * 0.028;
-      ring.rotation.y += dt * 0.042;
-
-      core.rotation.y += dt * (0.55 + Math.abs(mx) * 0.15);
-      core.rotation.x += dt * (0.28 + Math.abs(my) * 0.12);
-      wire.rotation.copy(core.rotation);
-      wire.position.copy(core.position);
-
-      knot.rotation.y += dt * 0.18;
-      knot.rotation.z += dt * 0.12;
-
-      const pulse = 0.06 + 0.04 * Math.sin(t * 0.9);
-      coreMat.emissiveIntensity = 0.06 + pulse + (0.06 * (1.0 - Math.min(1.0, Math.abs(mx) + Math.abs(my))));
-
-      renderer.render(scene, camera);
-    }
-
-    return { resize: resizeTo, render };
-  }
-
-  const threeBg = initThreeBackground(threeCanvas);
-
-  resize();
-  initNoise();
-
-  function onVisibility() {
+  document.addEventListener('visibilitychange', () => {
     state.running = !document.hidden;
-  }
+  }, { passive: true });
 
-  document.addEventListener('visibilitychange', onVisibility);
+  if (!window.THREE || !canvas) return;
 
-  function frame(now) {
-    state.scrollT = getScrollProgress();
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    alpha: true,
+    antialias: !lowPower,
+    powerPreference: lowPower ? 'low-power' : 'high-performance'
+  });
+  renderer.setClearColor(0x000000, 0);
 
-    state.mx += (state.mxT - state.mx) * 0.12;
-    state.my += (state.myT - state.my) * 0.12;
-    state.scroll += (state.scrollT - state.scroll) * 0.09;
+  const scene = new THREE.Scene();
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-    const bgx = (state.mx * 100).toFixed(2) + '%';
-    const bgy = (state.my * 100).toFixed(2) + '%';
-    document.documentElement.style.setProperty('--bgx', bgx);
-    document.documentElement.style.setProperty('--bgy', bgy);
+  const getCss = (name, fallback) => (getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback);
 
-    if (bgGrid) {
-      const tx = ((state.mx - 0.5) * -24).toFixed(2);
-      const ty = ((state.my - 0.5) * -18 + state.scroll * -60).toFixed(2);
-      bgGrid.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+  const uniforms = {
+    uTime: { value: 0 },
+    uMouse: { value: new THREE.Vector2(0.5, 0.35) },
+    uScroll: { value: 0 },
+    uRes: { value: new THREE.Vector3(1, 1, 1) },
+    uAccentA: { value: new THREE.Color(getCss('--accent', '#2B4C7E')) },
+    uAccentB: { value: new THREE.Color(getCss('--accent2', '#2E6B4F')) },
+    uAccentC: { value: new THREE.Color(getCss('--accent3', '#7C96B6')) }
+  };
+
+  const vert = `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = vec4(position.xy, 0.0, 1.0);
+    }
+  `;
+
+  const frag = `
+    #extension GL_OES_standard_derivatives : enable
+    precision mediump float;
+    varying vec2 vUv;
+    uniform float uTime;
+    uniform vec2 uMouse;
+    uniform float uScroll;
+    uniform vec3 uRes;
+    uniform vec3 uAccentA;
+    uniform vec3 uAccentB;
+    uniform vec3 uAccentC;
+    float paper(vec2 p){
+      p.y += uScroll * 0.25;
+      p += (uMouse - vec2(0.5)) * vec2(-0.15, 0.10);
+
+      float a = sin(p.x * 3.2 + uTime * 0.06);
+      float b = sin(p.y * 4.6 - uTime * 0.05);
+      float c = sin((p.x + p.y) * 2.4);
+      float d = sin(p.x * 9.5) * sin(p.y * 7.8);
+
+      float h = (a*b + 0.35*c + 0.25*d);
+      h = 0.5 + 0.5*h;            // 0..1
+      h = smoothstep(0.10, 0.95, h);
+      return h;
     }
 
-    if (!state.reduceMotion) drawNoise();
+    void main(){
+      vec2 uv = vUv;
+      vec2 p  = uv * vec2(2.2, 1.8);
 
-    if (state.running && threeBg) {
-      threeBg.render(now);
+      float h = paper(p);
+      vec2 g = vec2(dFdx(h), dFdy(h));
+      vec3 n = normalize(vec3(g * 1.2, 0.35));
+
+      vec2 lm = (uMouse - vec2(0.5)) * vec2(1.0, -1.0);
+      vec3 l = normalize(vec3(lm * 0.65, 0.95));
+      float diff = clamp(dot(n, l), 0.0, 1.0);
+      float sky = smoothstep(0.15, 1.0, uv.y);
+      vec3 base = mix(vec3(0.035,0.040,0.048), vec3(0.075,0.080,0.092), sky);
+      vec3 mist = mix(uAccentA*0.10, uAccentC*0.12, sky);
+      base += mist * 0.55;
+      base += (diff - 0.5) * 0.10;
+      base += (h - 0.5) * 0.05;
+      vec2 pp = uv - vec2(0.5 + lm.x*0.12, 0.55 + lm.y*0.08);
+      float glow = exp(-dot(pp,pp)*8.5);
+      base += (uAccentB*0.18 + vec3(1.0)*0.06) * glow * 0.55;
+      float gn = fract(sin(dot(uv*uRes.xy, vec2(12.9898,78.233))) * 43758.5453);
+      base += (gn - 0.5) * 0.010;
+
+      gl_FragColor = vec4(base, 1.0);
     }
+  `;
 
-    requestAnimationFrame(frame);
+  const geo = new THREE.PlaneGeometry(2, 2);
+  const mat = new THREE.ShaderMaterial({
+    uniforms,
+    vertexShader: vert,
+    fragmentShader: frag,
+    depthTest: false,
+    depthWrite: false
+  });
+
+  scene.add(new THREE.Mesh(geo, mat));
+
+  ensureSize(renderer, camera, uniforms.uRes);
+  window.addEventListener('resize', () => ensureSize(renderer, camera, uniforms.uRes), { passive: true });
+
+  let last = performance.now();
+  function tick(now){
+    requestAnimationFrame(tick);
+    if (!state.running) return;
+
+    const dt = Math.min(0.033, (now - last) / 1000);
+    last = now;
+
+    state.mx += (state.mxT - state.mx) * (lowPower ? 0.10 : 0.14);
+    state.my += (state.myT - state.my) * (lowPower ? 0.10 : 0.14);
+    state.scroll += (state.scrollT - state.scroll) * (lowPower ? 0.10 : 0.12);
+
+    uniforms.uMouse.value.set(state.mx, state.my);
+    uniforms.uScroll.value = state.scroll;
+
+    if (!reduceMotion) state.t += dt;
+    uniforms.uTime.value = state.t;
+
+    renderer.render(scene, camera);
   }
-
-  requestAnimationFrame(frame);
+  requestAnimationFrame(tick);
 }
 
-
 });
+  (function disableCopy(){
+    const block = (e) => {
+      e.preventDefault();
+      return false;
+    };
+    document.addEventListener('copy', block);
+    document.addEventListener('cut', block);
+    document.addEventListener('contextmenu', block);
+    document.addEventListener('selectstart', block);
+    })();
