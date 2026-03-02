@@ -1,109 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Social / Open Graph -->
-    <meta name="twitter:image" content="https://mdanikhasan.com/assets/icons/favicon.png" />
-    <meta
-      name="twitter:description"
-      content="Projects by MD Anik Hasan: portfolio builds, tools, and experiments. Source code links and project details."
-    />
-    <meta name="twitter:title" content="Projects — MD Anik Hasan" />
-    <meta name="twitter:card" content="summary_large_image" />
-
-    <meta property="og:image" content="https://mdanikhasan.com/assets/icons/favicon.png" />
-    <meta property="og:url" content="https://mdanikhasan.com/projects/" />
-    <meta
-      property="og:description"
-      content="Projects by MD Anik Hasan: portfolio builds, tools, and experiments. Source code links and project details."
-    />
-    <meta property="og:title" content="Projects — MD Anik Hasan" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="MD Anik Hasan" />
-
-    <!-- Icons -->
-    <link rel="apple-touch-icon" href="/assets/icons/favicon.png" />
-    <link rel="icon" href="/assets/icons/favicon.png" type="image/png" />
-
-    <!-- SEO -->
-    <link rel="canonical" href="https://mdanikhasan.com/projects/" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07080A" />
     <meta name="robots" content="index,follow" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <link rel="canonical" href="https://mdanikhasan.com/projects/" />
+
+    <title>Projects — MD Anik Hasan</title>
     <meta
       name="description"
       content="Projects by MD Anik Hasan: portfolio builds, tools, and experiments. Source code links and project details."
     />
 
-    <!-- Basics -->
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0b0f14" />
+    <meta property="og:title" content="Projects — MD Anik Hasan" />
+    <meta
+      property="og:description"
+      content="Projects by MD Anik Hasan: portfolio builds, tools, and experiments. Source code links and project details."
+    />
+    <meta property="og:url" content="https://mdanikhasan.com/projects/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MD Anik Hasan" />
+    <meta property="og:image" content="https://mdanikhasan.com/assets/og/preview.png" />
 
-    <title>Projects — MD Anik Hasan</title>
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Projects — MD Anik Hasan" />
+    <meta
+      name="twitter:description"
+      content="Projects by MD Anik Hasan: portfolio builds, tools, and experiments. Source code links and project details."
+    />
+    <meta name="twitter:image" content="https://mdanikhasan.com/assets/og/preview.png" />
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="/style.css" />
-    <link
+    <link rel="icon" href="/assets/icons/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/assets/icons/favicon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;600&display=swap"
       rel="stylesheet"
     />
 
-    <!-- Libraries -->
-    <script defer src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+    <link rel="stylesheet" href="/style.css" />
+<!-- SEO: site + breadcrumbs -->
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "MD Anik Hasan",
+  "url": "https://mdanikhasan.com/"
+}
+    </script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://mdanikhasan.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Projects",
+      "item": "https://mdanikhasan.com/projects/"
+    }
+  ]
+}
+    </script>
+
+    <!-- SEO: projects structured data -->
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Projects — MD Anik Hasan",
+  "url": "https://mdanikhasan.com/projects/",
+  "hasPart": [
+    {
+      "@type": "CreativeWork",
+      "name": "UIUBot",
+      "url": "https://github.com/mdanikhasan-dev/UIU-BOT-Discord",
+      "description": "Discord bot project showcased in the portfolio."
+    },
+    {
+      "@type": "CreativeWork",
+      "name": "Portfolio",
+      "url": "https://github.com/mdanikhasan-dev/Protfolio-web",
+      "description": "Source code for the mdanikhasan.com portfolio website."
+    }
+  ]
+}
+    </script>
+
   </head>
 
-  <body class="loading projects-page">
-    <!-- Page FX -->
-    <div class="page-fx" aria-hidden="true">
-      <canvas id="fx-projects"></canvas>
-    </div>
+  <body class="projects-page">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="page-fx" aria-hidden="true"><canvas id="fx-projects"></canvas></div>
 
-    <!-- Navbar -->
-    <nav class="navbar" id="navbar">
+    <nav class="navbar" id="navbar" aria-label="Primary">
       <div class="navbar-inner glass-panel">
         <div class="logo-container magnetic-wrap">
-          <a href="/" class="logo magnetic-target">
-            MDANIKHASAN.COM<span class="dot"></span>
-          </a>
+          <a href="/" class="logo magnetic-target">MDANIKHASAN.COM<span class="dot"></span></a>
         </div>
 
-        <ul class="nav-links">
-          <li class="magnetic-wrap">
-            <a href="/" class="nav-link magnetic-target">Home</a>
-          </li>
-          <li class="magnetic-wrap">
-            <a href="/projects/" class="nav-link magnetic-target active">Projects</a>
-          </li>
-          <li class="magnetic-wrap">
-            <a href="/about/" class="nav-link magnetic-target">About</a>
-          </li>
-          <li class="magnetic-wrap">
-            <a href="/contact/" class="nav-link magnetic-target">Contact</a>
-          </li>
+        <ul class="nav-links" id="nav-links">
+          <li class="magnetic-wrap"><a href="/" class="nav-link magnetic-target">Home</a></li>
+          <li class="magnetic-wrap"><a href="/projects/" class="nav-link magnetic-target active">Projects</a></li>
+<li class="magnetic-wrap"><a href="/contact/" class="nav-link magnetic-target">Contact</a></li>
         </ul>
 
-        <div class="mobile-menu-toggle" aria-label="Open menu" role="button" tabindex="0">
-          <span></span>
-          <span></span>
+        <div
+          class="mobile-menu-toggle"
+          aria-label="Open menu"
+          aria-expanded="false"
+          aria-controls="nav-links"
+          role="button"
+          tabindex="0"
+        >
+          <span></span><span></span>
         </div>
       </div>
     </nav>
 
-    <!-- Main -->
-    <main class="page-wrapper">
+    <main id="main-content" class="page-wrapper">
       <section class="projects-section">
         <div class="container">
           <div class="section-header fade-up">
             <span class="eyebrow">Works</span>
-            <h2 class="section-title">Selected Projects</h2>
+            <h1 class="section-title">Selected Projects</h1>
           </div>
 
           <div class="projects-grid">
-            <!-- Project 1 -->
             <article class="project-card tilt-card fade-up delay-1">
               <div class="card-content">
                 <span class="card-eyebrow">Discord Automation</span>
                 <h3 class="card-title">UIUBot</h3>
-
                 <p class="card-desc">
                   A Discord bot engineered for UIU students, featuring automated scheduling, resource
                   management, and community moderation tools.
@@ -120,6 +158,7 @@
                 <a
                   href="https://github.com/mdanikhasan-dev/UIU-BOT-Discord"
                   target="_blank"
+                  rel="noopener"
                   class="btn btn-secondary magnetic-wrap"
                   style="padding: 12px 24px; font-size: 0.8rem"
                 >
@@ -130,12 +169,10 @@
               <div class="card-glow"></div>
             </article>
 
-            <!-- Project 2 -->
             <article class="project-card tilt-card fade-up delay-2">
               <div class="card-content">
                 <span class="card-eyebrow">Frontend Architecture</span>
                 <h3 class="card-title">Portfolio</h3>
-
                 <p class="card-desc">The high-performance architecture behind this website.</p>
 
                 <div class="tech-stack">
@@ -149,6 +186,7 @@
                 <a
                   href="https://github.com/mdanikhasan-dev/Protfolio-web"
                   target="_blank"
+                  rel="noopener"
                   class="btn btn-secondary magnetic-wrap"
                   style="padding: 12px 24px; font-size: 0.8rem"
                 >
@@ -163,14 +201,15 @@
       </section>
     </main>
 
-    <!-- Footer -->
     <footer class="main-footer">
       <div class="container">
         <p>&copy; 2026 MD Anik Hasan. All rights reserved.</p>
       </div>
     </footer>
 
-    <!-- Site JS -->
-    <script defer src="/script.js"></script>
-  </body>
+    <script defer src="/js/core.js"></script>
+    <script defer src="/js/interactions.js"></script>
+
+  <script defer src="/js/fx.js"></script>
+</body>
 </html>

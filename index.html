@@ -1,33 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Social / Open Graph -->
-    <meta name="twitter:image" content="https://mdanikhasan.com/assets/icons/favicon.png" />
-    <meta
-      name="twitter:description"
-      content="Official portfolio of MD Anik Hasan (Anik Hasan) — Unreal Engine developer and 3D artist from Bangladesh. Projects, 3D works, and contact."
-    />
-    <meta name="twitter:title" content="MD Anik Hasan — Unreal Engine Developer & 3D Artist" />
-    <meta name="twitter:card" content="summary_large_image" />
-
-    <meta property="og:image" content="https://mdanikhasan.com/assets/icons/favicon.png" />
-    <meta property="og:url" content="https://mdanikhasan.com/" />
-    <meta
-      property="og:description"
-      content="Official portfolio of MD Anik Hasan (Anik Hasan) — Unreal Engine developer and 3D artist from Bangladesh. Projects, 3D works, and contact."
-    />
-    <meta property="og:title" content="MD Anik Hasan — Unreal Engine Developer & 3D Artist" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="MD Anik Hasan" />
-
-    <!-- Icons -->
-    <link rel="apple-touch-icon" href="/assets/icons/favicon.png" />
-    <link rel="icon" href="/assets/icons/favicon.png" type="image/png" />
-
     <!-- Basics -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0b0f14" />
+    <meta name="theme-color" content="#07080A" />
+    <meta name="robots" content="index,follow" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <link rel="canonical" href="https://mdanikhasan.com/" />
 
     <title>MD Anik Hasan — Unreal Engine Developer & 3D Artist</title>
     <meta
@@ -35,19 +15,45 @@
       content="Official portfolio of MD Anik Hasan (Anik Hasan) — Unreal Engine developer and 3D artist from Bangladesh. Projects, 3D works, and contact."
     />
     <meta name="author" content="MD Anik Hasan" />
-    <meta name="robots" content="index,follow" />
-    <link rel="canonical" href="https://mdanikhasan.com/" />
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="/style.css" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="MD Anik Hasan — Unreal Engine Developer & 3D Artist" />
+    <meta
+      property="og:description"
+      content="Official portfolio of MD Anik Hasan (Anik Hasan) — Unreal Engine developer and 3D artist from Bangladesh. Projects, 3D works, and contact."
+    />
+    <meta property="og:url" content="https://mdanikhasan.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MD Anik Hasan" />
+    <meta property="og:image" content="https://mdanikhasan.com/assets/og/preview.png" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MD Anik Hasan — Unreal Engine Developer & 3D Artist" />
+    <meta
+      name="twitter:description"
+      content="Official portfolio of MD Anik Hasan (Anik Hasan) — Unreal Engine developer and 3D artist from Bangladesh. Projects, 3D works, and contact."
+    />
+    <meta name="twitter:image" content="https://mdanikhasan.com/assets/og/preview.png" />
+
+    <!-- Icons -->
+    <link rel="icon" href="/assets/icons/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/assets/icons/favicon.png" />
+
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Fonts (perf) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://unpkg.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;600&display=swap"
       rel="stylesheet"
     />
 
-    <!-- Libraries -->
-    <script defer src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+    <!-- Styles -->
+    <link rel="stylesheet" href="/style.css" />
 
     <!-- Structured data -->
     <script type="application/ld+json">
@@ -60,73 +66,81 @@
         "image": "https://mdanikhasan.com/assets/icons/favicon.png",
         "jobTitle": "Unreal Engine Developer",
         "description": "Unreal Engine developer and 3D artist from Bangladesh. Portfolio of MD Anik Hasan.",
-        "sameAs": ["https://github.com/mdanikhasan-dev/Protfolio-web"]
+        "sameAs": [
+          "https://github.com/mdanikhasan-dev",
+          "https://www.linkedin.com/in/mdanikhasan-dev/",
+          "https://x.com/mdanikhasan_dev"
+        ]
       }
     </script>
+
+    <!-- SEO: site + breadcrumbs -->
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "MD Anik Hasan",
+  "url": "https://mdanikhasan.com/"
+}
+    </script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://mdanikhasan.com/"
+    }
+  ]
+}
+    </script>
+
+
+    <!-- Libraries needed for home bg -->
+    <script defer src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
   </head>
 
   <body class="home-page">
-    <!-- Intro blocks -->
-    <div class="intro-block" style="--i: 2"></div>
-    <div class="intro-block" style="--i: 3"></div>
-    <div class="intro-block" style="--i: 4"></div>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+    <!-- Home background is injected by /js/home-bg.js -->
 
     <!-- Navbar -->
-    <nav class="navbar" id="navbar">
+    <nav class="navbar" id="navbar" aria-label="Primary">
       <div class="navbar-inner glass-panel">
         <div class="logo-container magnetic-wrap">
-          <a href="/" class="logo magnetic-target">
-            MDANIKHASAN.COM<span class="dot"></span>
-          </a>
+          <a href="/" class="logo magnetic-target">MDANIKHASAN.COM<span class="dot"></span></a>
         </div>
 
-        <ul class="nav-links">
-          <li class="magnetic-wrap">
-            <a href="/" class="nav-link magnetic-target active">Home</a>
-          </li>
-          <li class="magnetic-wrap">
-            <a href="/projects/" class="nav-link magnetic-target">Projects</a>
-          </li>
-          <li class="magnetic-wrap">
-            <a href="/about/" class="nav-link magnetic-target">About</a>
-          </li>
-          <li class="magnetic-wrap">
-            <a href="/contact/" class="nav-link magnetic-target">Contact</a>
-          </li>
+        <ul class="nav-links" id="nav-links">
+          <li class="magnetic-wrap"><a href="/" class="nav-link magnetic-target active">Home</a></li>
+          <li class="magnetic-wrap"><a href="/projects/" class="nav-link magnetic-target">Projects</a></li>
+<li class="magnetic-wrap"><a href="/contact/" class="nav-link magnetic-target">Contact</a></li>
         </ul>
 
-        <div class="mobile-menu-toggle" aria-label="Open menu" role="button" tabindex="0">
-          <span></span>
-          <span></span>
+        <div
+          class="mobile-menu-toggle"
+          aria-label="Open menu"
+          aria-expanded="false"
+          aria-controls="nav-links"
+          role="button"
+          tabindex="0"
+        >
+          <span></span><span></span>
         </div>
       </div>
     </nav>
 
-    <!-- Smooth wrapper -->
     <div id="smooth-wrapper">
       <div id="smooth-content">
-        <main>
+        <main id="main-content">
           <!-- Hero -->
           <section class="hero-section immersive-hero">
-            <div class="stage" aria-hidden="true">
-              <canvas id="fx-particles"></canvas>
-              <canvas id="fx-noise"></canvas>
-
-              <div class="stage-layer layer-a"></div>
-              <div class="stage-layer layer-b"></div>
-              <div class="stage-layer layer-c"></div>
-              <div class="stage-layer layer-d"></div>
-              <div class="stage-layer layer-e"></div>
-
-              <div class="stage-grid" id="stageGrid"></div>
-              <div class="stage-nodes" id="stageNodes"></div>
-              <div class="stage-spotlight" id="spotlight"></div>
-              <div class="stage-vignette"></div>
-            </div>
-
             <div class="container">
               <div class="hero-content" id="hero-tilt-layer">
-                <h2 class="hero-greeting fade-up"></h2>
+                <p class="hero-greeting fade-up">Hi, I’m</p>
 
                 <h1 class="hero-title fade-up delay-1">
                   MD ANIK HASAN <br />
@@ -164,8 +178,7 @@
                 <article class="home-card project-card tilt-card fade-up delay-1">
                   <div class="card-content">
                     <span class="card-eyebrow">Interaction</span>
-                    <h3 class="card-title">Micro
-                    </h3>
+                    <h3 class="card-title">Micro</h3>
                     <p class="card-desc">UI reacts like it has weight, tension, and momentum.</p>
 
                     <div class="tech-stack">
@@ -197,14 +210,13 @@
                     <span class="card-eyebrow">Scroll</span>
                     <h3 class="card-title">Buttery Smooth</h3>
                     <p class="card-desc">
-                      Scroll feels like it’s riding on rails steady, soft, and cinematic without losing
-                      control.
+                      Scroll feels like it’s riding on rails steady, soft, and cinematic without losing control.
                     </p>
 
                     <div class="tech-stack">
-                      <span class="tech-tag">Lenis</span>
                       <span class="tech-tag">RAF</span>
                       <span class="tech-tag">Flow</span>
+                      <span class="tech-tag">Performance</span>
                     </div>
                   </div>
                   <div class="card-glow"></div>
@@ -244,24 +256,13 @@
                     <h3 class="card-title">What I do</h3>
                     <p class="card-desc">
                       I make small pixel art games that are inspired by my nightmares and awkward situations
-                      that I just can’t forget. While they may look simple at first glance, I put a lot of
-                      thought into how I want them to make players feel, along with small details that I
-                      think make them more meaningful.
+                      that I just can’t forget.
                     </p>
 
                     <div class="mini-list">
-                      <div class="mini-list-item">
-                        <span class="mini-dot"></span>
-                        <span>3D games with pixel art aesthetics</span>
-                      </div>
-                      <div class="mini-list-item">
-                        <span class="mini-dot"></span>
-                        <span>Unreal Engine world building</span>
-                      </div>
-                      <div class="mini-list-item">
-                        <span class="mini-dot"></span>
-                        <span>Self made 3D models</span>
-                      </div>
+                      <div class="mini-list-item"><span class="mini-dot"></span><span>3D games with pixel art aesthetics</span></div>
+                      <div class="mini-list-item"><span class="mini-dot"></span><span>Unreal Engine world building</span></div>
+                      <div class="mini-list-item"><span class="mini-dot"></span><span>Self made 3D models</span></div>
                     </div>
                   </div>
                 </div>
@@ -271,8 +272,8 @@
                     <span class="card-eyebrow">Community</span>
                     <h3 class="card-title">Open source</h3>
                     <p class="card-desc">
-                      I am willing to contribute to open source projects. I want to learn teamwork and
-                      improve my communication skills by working with different backgrounds of programmers.
+                      I am willing to contribute to open source projects. I want to learn teamwork and improve
+                      my communication skills by working with different backgrounds of programmers.
                     </p>
                   </div>
                 </div>
@@ -297,7 +298,7 @@
                       <span class="timeline-title">United International University (UIU)</span>
                       <span class="timeline-meta">2025 — 2029</span>
                     </div>
-                    <p>Just learning the fundamentals and plan to enjoy the whole journey .</p>
+                    <p>Just learning the fundamentals and plan to enjoy the whole journey.</p>
                   </div>
                 </div>
 
@@ -308,10 +309,7 @@
                       <span class="timeline-title">Unreal Engine world building</span>
                       <span class="timeline-meta">Ongoing</span>
                     </div>
-                    <p>
-                      I focus on environmental work, open-world spaces, atmosphere, and detail that feels
-                      alive.
-                    </p>
+                    <p>I focus on environmental work, open-world spaces, atmosphere, and detail that feels alive.</p>
                   </div>
                 </div>
 
@@ -323,9 +321,7 @@
                       <span class="timeline-meta">Since 2025</span>
                     </div>
                     <p>
-                      I’m creating my own 3D pixel art open-world game using Unreal Engine. I started
-                      working on my game in 2025. I’ll just wait until my game is ready. No hurry, just a
-                      bit lazy.
+                      I’m creating my own 3D pixel art open-world game using Unreal Engine. I started working on my game in 2025.
                     </p>
                   </div>
                 </div>
@@ -346,7 +342,6 @@
           </section>
         </main>
 
-        <!-- Footer -->
         <footer class="main-footer">
           <div class="container">
             <p>&copy; 2026 MD Anik Hasan. All rights reserved.</p>
@@ -355,7 +350,10 @@
       </div>
     </div>
 
-    <!-- Site JS -->
-    <script defer src="/script.js"></script>
+    <!-- JS -->
+    <script defer src="/js/core.js"></script>
+    <script defer src="/js/interactions.js"></script>
+    <script defer src="/js/home-bg.js"></script>
+      <script defer src="/js/fx.js"></script>
   </body>
 </html>
