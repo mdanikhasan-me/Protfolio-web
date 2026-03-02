@@ -54,7 +54,7 @@
       });
     });
 
-    // Tilt effect (disabled for reduced motion)
+    // Tilt effect disabled reduced motion
     const tiltCards = qsa('.project-card, .tilt-card, .feature-card, .glass-card, .social-card2, .contact-email-card');
     if (!tiltCards.length) return;
 
@@ -165,7 +165,6 @@
       };
 
       if (reduced) {
-        // Ensure transforms don't stick for reduced motion users.
         card.style.transform = '';
         return;
       }
