@@ -68,8 +68,6 @@
 
       let isHovering = false;
       let rafId = 0;
-
-      // Bounds updates: avoid layout thrash on scroll by rAF coalescing.
       let boundsDirty = false;
       let boundsRaf = 0;
 
@@ -102,7 +100,7 @@
         target = { x: 0, y: 0, rx: 0, ry: 0, s: 1.0 };
         window.removeEventListener('scroll', queueBoundsUpdate);
         window.removeEventListener('resize', queueBoundsUpdate);
-        // Let the animation ease back to rest.
+        // animation easerest.
         if (!rafId) rafId = requestAnimationFrame(animate);
       };
 

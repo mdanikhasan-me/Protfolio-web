@@ -2,15 +2,10 @@
   'use strict';
 
   document.documentElement.classList.add('js');
-
-  // Accessibility + UX: do not block copy/selection/context-menu.
-  // If you ever want to enable it, set this to true.
   const BLOCK_COPY = false;
 
   const qs = (s, root = document) => root.querySelector(s);
   const qsa = (s, root = document) => Array.from(root.querySelectorAll(s));
-
-  // Expose tiny utilities for other scripts (non-breaking).
   window.__siteUtils = window.__siteUtils || { qs, qsa };
 
   const prefersReducedMotion = () =>
@@ -22,7 +17,6 @@
     const navLinks = qs('#nav-links') || qs('.nav-links');
     const path = (location.pathname || '/').toLowerCase();
 
-    // Active nav link sync (+ show About only on /about/)
     if (navLinks) {
       const isAbout = document.body.classList.contains('about-page') || path.startsWith('/about');
       const existingAbout = qs('a[href="/about/"]', navLinks);
@@ -42,7 +36,6 @@
         existingAbout.closest('li')?.remove();
       }
 
-      // Reset active state + aria-current
       qsa('a.nav-link', navLinks).forEach(a => {
         a.classList.remove('active');
         a.removeAttribute('aria-current');
@@ -61,7 +54,6 @@
       }
     }
 
-    // Navbar: hide on first downward scroll with smooth slide (rAF-throttled)
     let lastY = window.scrollY || 0;
     let raf = 0;
 
@@ -81,15 +73,14 @@
       if (navbar) {
         navbar.classList.toggle('scrolled', y > 10);
 
-        // Show at very top
         if (y <= 12) {
           navbar.classList.remove('hidden');
         } else if (delta > 0) {
-          // Downward scroll: hide (smoothly via CSS transition)
+         
           navbar.classList.add('hidden');
           closeMenu();
         } else if (delta < -2) {
-          // Upward scroll: show again
+       
           navbar.classList.remove('hidden');
         }
       }
@@ -138,7 +129,6 @@
       }, { passive: true });
     }
 
-    // Reveal (respect reduced motion: reveal immediately)
     const fadeEls = qsa('.fade-up');
     if (fadeEls.length) {
       if (prefersReducedMotion()) {
@@ -178,7 +168,7 @@
       });
     }
 
-    // Block selection/copy/context menu (disabled by default)
+    // Block selection/copy/context menu 
     if (BLOCK_COPY) {
       const stop = (e) => { e.preventDefault(); return false; };
       document.addEventListener('contextmenu', stop);

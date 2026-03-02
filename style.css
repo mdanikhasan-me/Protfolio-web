@@ -251,7 +251,6 @@ section{padding:92px 0;position:relative}
 }
 .hero-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
 
-/* Cards / grids */
 .home-section.alt-stage{
   background:
     radial-gradient(900px 560px at 18% 35%, rgba(52,86,140,.08), transparent 68%),
@@ -321,7 +320,7 @@ section{padding:92px 0;position:relative}
 }
 .pill:hover{transform:translateY(-2px);border-color:rgba(52,86,140,.38)}
 
-/* Split grid / glass */
+
 .split-grid{margin-top:34px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .glass-card{
   border:1px solid rgba(255,255,255,.06);
@@ -422,7 +421,7 @@ html.js .fade-up.in-view{opacity:1;transform:translateY(0)}
 #home-bg .layer-mid{height:62vh;bottom:-11vh;opacity:.75;clip-path:polygon(0% 80%,8% 70%,18% 76%,28% 60%,36% 68%,46% 52%,56% 66%,66% 50%,76% 64%,86% 54%,94% 64%,100% 56%,100% 100%,0% 100%)}
 #home-bg .layer-front{height:70vh;bottom:-12vh;opacity:.92;clip-path:polygon(0% 84%,10% 72%,22% 82%,32% 64%,42% 78%,52% 60%,62% 76%,72% 58%,82% 74%,92% 62%,100% 72%,100% 100%,0% 100%)}
 
-/* Home mountains parallax (mouse reactive) */
+/* mouse reactive */
 #home-bg{ --mx: 0.55; --my: 0.35; }
 #home-bg .layer-back{
   transform: translate3d(calc((var(--mx) - 0.5) * -26px), calc((var(--my) - 0.5) * 10px), 0);
@@ -453,14 +452,14 @@ html.js .fade-up.in-view{opacity:1;transform:translateY(0)}
 .about-page .page-fx,.projects-page .page-fx,.contact-page .page-fx{opacity:.70;filter:saturate(.95) contrast(1.05)}
 
 
-/* Desktop layout: less centered (requested) */
+/* Desktop layout */
 @media (min-width:1024px){
   .home-page .hero-content{text-align:left;max-width:980px;margin-inline:auto}
   .home-page .hero-actions{justify-content:flex-start}
   .home-page .section-header{text-align:left;margin-left:0;max-width:980px}
   .home-page .section-lead{margin-inline:0}
 }
-/* About on phones: slightly left (not centered) */
+/*phones: slightly left */
 @media (max-width:980px){
   .about-page .section-header{text-align:left}
   .about-text{text-align:left}
@@ -734,7 +733,7 @@ html.js .fade-up.in-view{opacity:1;transform:translateY(0)}
 }
 
 
-/* Desktop: lock scroll on About/Contact (requested) */
+/* Desktop: lock scroll on About/Contact */
 .fit-section{padding-top:0}
 @media (min-width:1024px){
   body.about-page,body.contact-page{height:100vh;overflow:hidden}
@@ -751,7 +750,7 @@ html.js .fade-up.in-view{opacity:1;transform:translateY(0)}
   .contact-page .section-header{margin-bottom:26px}
 }
 
-/* Contact social grid: compact + uniform */
+/* Contact social grid*/
 .social-grid2{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
@@ -776,7 +775,6 @@ html.js .fade-up.in-view{opacity:1;transform:translateY(0)}
   .social-grid2{grid-template-columns:1fr}
 }
 .social-k{font-size:.66rem}
-/* ===== v13 tuning ===== */
 html, body, *{cursor:default !important}
 a, button{cursor:default !important}
 body{user-select:none;-webkit-user-select:none}
@@ -792,10 +790,7 @@ body{user-select:none;-webkit-user-select:none}
   -webkit-backdrop-filter:blur(var(--glass-blur));
 }
 
-/* About code card (more transparent like others) */
 .code-block-visual{background:var(--glass-bg)}
-
-/* Contact social grid: smaller, uniform like GitHub */
 .social-grid2{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -828,33 +823,25 @@ body{user-select:none;-webkit-user-select:none}
   .social-grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
-/* === Projects: bring header up slightly (responsive) === */
 body.projects-page .projects-section{
-  padding-top: 110px !important; /* was larger; bring up a bit for phones/tablets */
+  padding-top: 110px !important;
 }
 @media (min-width: 1024px){
   body.projects-page .projects-section{
-    padding-top: 92px !important; /* desktop: bring more towards top */
+    padding-top: 92px !important; 
   }
 }
-/* iPad-ish: keep comfortable spacing */
+
 @media (min-width: 768px) and (max-width: 1023px){
   body.projects-page .projects-section{
     padding-top: 104px !important;
   }
 }
-
-/* === Tweaks: Projects header align + Contact right-card tint balance === */
-
-/* Projects: align header with grid start (less "centered") */
 body.projects-page .section-header{
   margin-left: 0 !important;
   margin-right: 0 !important;
   max-width: none !important;
 }
-
-/* Contact: right-card ambient overlay was tinting it green/blue vs left card.
-   Neutralize it so both cards read the same against the dark background. */
 body.contact-page .contact-grid-bg{
   background:
     radial-gradient(900px 520px at 70% 20%, rgba(255,255,255,0.05), transparent 62%),
@@ -862,9 +849,6 @@ body.contact-page .contact-grid-bg{
     linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
   opacity: 0.38 !important;
 }
-
-/* === Projects + Contact: subtle green ambience (no 3D) === */
-/* A very light green wash behind content, keeps pages from feeling pure black */
 body.projects-page::before,
 body.contact-page::before{
   content:'';
@@ -877,16 +861,11 @@ body.contact-page::before{
     radial-gradient(900px 520px at 88% 30%, rgba(46,107,79,0.06), rgba(7,8,10,0) 64%);
   opacity: 0.9;
 }
-
-/* Make sure card surfaces remain neutral glass (avoid green-tint inside cards) */
 body.projects-page .glass-card,
 body.contact-page .glass-card{
   background: rgba(13,15,19,0.50);
 }
 
-
-
-/* Accessibility: skip link (doesn't affect visuals unless focused) */
 .skip-link{
   position:absolute;
   top:0;

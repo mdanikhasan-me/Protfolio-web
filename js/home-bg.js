@@ -62,7 +62,7 @@
       const y = (e.clientY ?? (innerHeight * 0.35)) / Math.max(1, innerHeight);
       state.mxT = clamp01(x);
       state.myT = clamp01(y);
-      // also drive CSS-only background (works even if WebGL/CDN fails)
+
       if (bg) {
         bg.style.setProperty('--bgx', (state.mxT * 100).toFixed(2) + '%');
         bg.style.setProperty('--bgy', (state.myT * 100).toFixed(2) + '%');
@@ -102,7 +102,6 @@
 
     document.addEventListener('visibilitychange', () => { state.running = !document.hidden; }, { passive: true });
 
-    // If THREE is available, keep the premium shader background. If not, keep CSS + mountains only.
     if (!canvas || !window.THREE) {
       const tick = (now) => {
         requestAnimationFrame(tick);
@@ -123,8 +122,7 @@
           state.scroll += (state.scrollT - state.scroll) * 0.12;
           updateMountains();
         }
-
-        // If dt is too small for fixed-step, still run one cheap smoothing update.
+        
         if (sub === 0) {
           state.mx += (state.mxT - state.mx) * (lowPower ? 0.10 : 0.14);
           state.my += (state.myT - state.my) * 0.14;

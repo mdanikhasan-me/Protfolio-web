@@ -34,9 +34,6 @@
   const initThreePageFx = (canvasId, preset) => {
     if (!window.THREE) return;
 
-    // Respect user preference without removing the background entirely.
-    // If reduced motion is enabled, we keep the scene but tone down animation intensity.
-
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
 
@@ -73,10 +70,6 @@
     const lowPower = isLowPowerDevice();
     const maxDpr = tier === 'high' ? 2 : (tier === 'low' ? 1.25 : 1.5);
     const dpr = Math.min(maxDpr, window.devicePixelRatio || 1);
-
-
-    // Particle budget: keep visuals, reduce workload when needed.
-
 
     const size = () => {
       const w = window.innerWidth;
@@ -137,7 +130,6 @@
       return new THREE.Points(geo, mat);
     };
 
-    // Particle budget: preserve look, reduce CPU on low-power devices.
     const particleCount = strong ? (lowPower ? 900 : 1400) : (lowPower ? 650 : 1000);
     const particles = mkParticles(preset === 'projects' ? particleCount : particleCount);
     particles.position.z = -6;
@@ -229,8 +221,7 @@
     };
 
     rafId = requestAnimationFrame(loop);
-
-    // Cleanup to avoid dangling listeners (single-page or bfcache friendly)
+    
     const cleanup = () => {
       running = false;
       if (rafId) cancelAnimationFrame(rafId);
