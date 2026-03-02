@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mdanikhasan.com/sitemap.xml
+Sitemap: https://www.mdanikhasan.com/sitemap.xml
