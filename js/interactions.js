@@ -4,14 +4,21 @@
   const utils = window.__siteUtils || {};
   const qs = utils.qs || ((s, root = document) => root.querySelector(s));
   const qsa = utils.qsa || ((s, root = document) => Array.from(root.querySelectorAll(s)));
+  const prefersReducedMotion = utils.isReducedMotion || (() =>
+    window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-  const prefersReducedMotion = () =>
-    window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const onReady = (fn) => {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
+    else fn();
+  };
 
-  document.addEventListener('DOMContentLoaded', () => {
-    // Magnetic effect
-    qsa('.magnetic-wrap').forEach((wrap) => {
-      const target = qs('.magnetic-target', wrap);
+  // Magnetic effect
+  function initMagnetic() {
+    const wraps = qsa('.magnetic-wrap');
+    if (!wraps.length) return;
+
+    wraps.forEach((wrap) => {
+      const target = wrap.querySelector('.magnetic-target') || wrap.firstElementChild;
       if (!target) return;
 
       let rect = null;
@@ -25,6 +32,7 @@
         raf = 0;
         curX += (toX - curX) * 0.22;
         curY += (toY - curY) * 0.22;
+
         target.style.transform = `translate3d(${curX.toFixed(2)}px, ${curY.toFixed(2)}px, 0)`;
 
         if (Math.abs(toX - curX) > 0.02 || Math.abs(toY - curY) > 0.02) {
@@ -32,12 +40,12 @@
         }
       };
 
-      wrap.addEventListener('pointerenter', () => {
-        rect = wrap.getBoundingClientRect();
-      });
+      const updateRect = () => { rect = wrap.getBoundingClientRect(); };
+
+      wrap.addEventListener('pointerenter', updateRect, { passive: true });
 
       wrap.addEventListener('pointermove', (e) => {
-        if (!rect) rect = wrap.getBoundingClientRect();
+        if (!rect) updateRect();
         const x = e.clientX - rect.left - rect.width / 2;
         const y = e.clientY - rect.top - rect.height / 2;
 
@@ -51,88 +59,35 @@
         toX = 0; toY = 0;
         rect = null;
         if (!raf) raf = requestAnimationFrame(animate);
-      });
+      }, { passive: true });
     });
+  }
 
-    // Tilt effect disabled reduced motion
-    const tiltCards = qsa('.project-card, .tilt-card, .feature-card, .glass-card, .social-card2, .contact-email-card');
-    if (!tiltCards.length) return;
+  // Tilt effect (cards)
+  function initTilt() {
+    const reduced = !!prefersReducedMotion();
+    const cards = qsa('.project-card, .tilt-card, .feature-card, .glass-card, .social-card2, .contact-email-card');
+    if (!cards.length) return;
 
-    const reduced = prefersReducedMotion();
+    if (reduced) {
+      cards.forEach((c) => { c.style.transform = ''; });
+      return;
+    }
 
-    tiltCards.forEach(card => {
+    cards.forEach((card) => {
       let bounds = null;
-
-      let current = { x: 0, y: 0, rx: 0, ry: 0, s: 1.0 };
-      let target = { x: 0, y: 0, rx: 0, ry: 0, s: 1.0 };
-
       let isHovering = false;
       let rafId = 0;
-      let boundsDirty = false;
-      let boundsRaf = 0;
+
+      const current = { x: 0, y: 0, rx: 0, ry: 0, s: 1.0 };
+      const target = { x: 0, y: 0, rx: 0, ry: 0, s: 1.0 };
 
       const updateBounds = () => { bounds = card.getBoundingClientRect(); };
-
-      const queueBoundsUpdate = () => {
-        boundsDirty = true;
-        if (boundsRaf) return;
-        boundsRaf = requestAnimationFrame(() => {
-          boundsRaf = 0;
-          if (!boundsDirty) return;
-          boundsDirty = false;
-          updateBounds();
-        });
-      };
-
-      const onEnter = () => {
-        if (reduced) return;
-        isHovering = true;
-        updateBounds();
-        target.s = 1.02;
-        window.addEventListener('scroll', queueBoundsUpdate, { passive: true });
-        window.addEventListener('resize', queueBoundsUpdate, { passive: true });
-        if (!rafId) rafId = requestAnimationFrame(animate);
-      };
-
-      const onLeave = () => {
-        if (reduced) return;
-        isHovering = false;
-        target = { x: 0, y: 0, rx: 0, ry: 0, s: 1.0 };
-        window.removeEventListener('scroll', queueBoundsUpdate);
-        window.removeEventListener('resize', queueBoundsUpdate);
-        // animation easerest.
-        if (!rafId) rafId = requestAnimationFrame(animate);
-      };
-
-      const onMove = (e) => {
-        if (reduced) return;
-        if (!bounds) return;
-
-        const x = e.clientX - bounds.left;
-        const y = e.clientY - bounds.top;
-
-        card.style.setProperty('--mouse-x', x + 'px');
-        card.style.setProperty('--mouse-y', y + 'px');
-
-        const cx = bounds.width / 2;
-        const cy = bounds.height / 2;
-        const dx = x - cx;
-        const dy = y - cy;
-
-        const tilt = 6;
-        target.rx = -(dy / Math.max(1, cy)) * tilt;
-        target.ry = (dx / Math.max(1, cx)) * tilt;
-        target.x = dx * 0.05;
-        target.y = dy * 0.05;
-
-        if (!rafId) rafId = requestAnimationFrame(animate);
-      };
 
       const animate = () => {
         rafId = 0;
 
         const ease = isHovering ? 0.25 : 0.1;
-
         current.x += (target.x - current.x) * ease;
         current.y += (target.y - current.y) * ease;
         current.rx += (target.rx - current.rx) * ease;
@@ -164,18 +119,57 @@
         rafId = requestAnimationFrame(animate);
       };
 
-      if (reduced) {
-        card.style.transform = '';
-        return;
-      }
+      const onEnter = () => {
+        isHovering = true;
+        updateBounds();
+        target.s = 1.02;
+        if (!rafId) rafId = requestAnimationFrame(animate);
+      };
 
-      card.addEventListener('pointerenter', onEnter);
+      const onLeave = () => {
+        isHovering = false;
+        target.x = 0; target.y = 0; target.rx = 0; target.ry = 0; target.s = 1.0;
+        if (!rafId) rafId = requestAnimationFrame(animate);
+      };
+
+      const onMove = (e) => {
+        if (!bounds) return;
+
+        const x = e.clientX - bounds.left;
+        const y = e.clientY - bounds.top;
+
+        card.style.setProperty('--mouse-x', x + 'px');
+        card.style.setProperty('--mouse-y', y + 'px');
+
+        const cx = bounds.width / 2;
+        const cy = bounds.height / 2;
+        const dx = x - cx;
+        const dy = y - cy;
+
+        const tilt = 6;
+        target.rx = -(dy / Math.max(1, cy)) * tilt;
+        target.ry = (dx / Math.max(1, cx)) * tilt;
+        target.x = dx * 0.05;
+        target.y = dy * 0.05;
+
+        if (!rafId) rafId = requestAnimationFrame(animate);
+      };
+
+      card.addEventListener('pointerenter', onEnter, { passive: true });
       card.addEventListener('pointermove', onMove, { passive: true });
-      card.addEventListener('pointerleave', onLeave);
-    });
+      card.addEventListener('pointerleave', onLeave, { passive: true });
 
-    // Social hover accent (color shift)
-    qsa('.social-card2').forEach(card => {
+      // Keep bounds correct when layout changes
+      const ro = new ResizeObserver(() => updateBounds());
+      ro.observe(card);
+
+      document.addEventListener('site:inactive', () => { if (rafId) cancelAnimationFrame(rafId); rafId = 0; }, { passive: true });
+      document.addEventListener('site:active', () => { if (isHovering && !rafId) rafId = requestAnimationFrame(animate); }, { passive: true });
+    });
+  }
+
+  function initSocialHover() {
+    qsa('.social-card2').forEach((card) => {
       const accent = card.getAttribute('data-accent');
       if (accent) card.style.setProperty('--social-accent', accent);
 
@@ -185,5 +179,11 @@
         card.style.setProperty('--mouse-y', (e.clientY - r.top) + 'px');
       }, { passive: true });
     });
+  }
+
+  onReady(() => {
+    initMagnetic();
+    initTilt();
+    initSocialHover();
   });
 })();

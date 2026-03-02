@@ -1,5 +1,17 @@
 (() => {
   'use strict';
+
+  const perf = window.__sitePerf || { reducedMotion: false };
+  if (perf.reducedMotion) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const root = document.documentElement;
+      root.style.setProperty('--flash-x', '55%');
+      root.style.setProperty('--flash-y', '35%');
+      root.style.setProperty('--bgx', '55%');
+      root.style.setProperty('--bgy', '35%');
+    });
+    return;
+  }
   const root = document.documentElement;
   const state = { x: 0.5, y: 0.35, tx: 0.5, ty: 0.35, raf: 0 };
   const clamp01 = (v) => Math.max(0, Math.min(1, v));

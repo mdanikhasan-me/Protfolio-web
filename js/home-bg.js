@@ -100,11 +100,21 @@
       if (mtnFront) mtnFront.style.transform = `translate3d(${(mx*70 + s*24).toFixed(2)}px, ${(my*48 + s*38).toFixed(2)}px, 0)`;
     };
 
-    document.addEventListener('visibilitychange', () => { state.running = !document.hidden; }, { passive: true });
+        const onInactive = () => {
+      state.running = false;
+      if (state._raf) cancelAnimationFrame(state._raf);
+      state._raf = 0;
+    };
+    const onActive = () => {
+      state.running = true;
+      if (!state._raf) state._raf = state._raf = requestAnimationFrame(tick);
+    };
+    document.addEventListener('site:inactive', onInactive, { passive: true });
+    document.addEventListener('site:active', onActive, { passive: true });
 
     if (!canvas || !window.THREE) {
       const tick = (now) => {
-        requestAnimationFrame(tick);
+        state._raf = requestAnimationFrame(tick);
         if (!state.running) { state._lastT = now || performance.now(); return; }
 
         if (!state._lastT) state._lastT = now || performance.now();
@@ -130,7 +140,7 @@
           updateMountains();
         }
       };
-      requestAnimationFrame(tick);
+      state._raf = requestAnimationFrame(tick);
       return;
     }
 
@@ -216,7 +226,7 @@
     `;
 
     const ensureSize = () => {
-      const dpr = Math.min(lowPower ? 1 : 2, window.devicePixelRatio || 1);
+      const dpr = (perf && perf.dpr) ? perf.dpr : Math.min(lowPower ? 1 : 2, window.devicePixelRatio || 1);
       renderer.setPixelRatio(dpr);
       renderer.setSize(Math.max(1, innerWidth), Math.max(1, innerHeight), false);
       uniforms.uRes.value.set(Math.max(1, innerWidth), Math.max(1, innerHeight), dpr);
@@ -236,7 +246,7 @@
 
     let last = performance.now();
     const tick = (now) => {
-      requestAnimationFrame(tick);
+      state._raf = requestAnimationFrame(tick);
       if (!state.running) return;
 
       const dt = Math.min(0.033, (now - last) / 1000);
@@ -256,6 +266,6 @@
 
       renderer.render(scene, camera);
     };
-    requestAnimationFrame(tick);
+    state._raf = requestAnimationFrame(tick);
   });
 })();

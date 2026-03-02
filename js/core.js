@@ -23,9 +23,7 @@
 
       if (isAbout && !existingAbout) {
         const li = document.createElement('li');
-        li.className = 'magnetic-wrap';
         const a = document.createElement('a');
-        a.className = 'nav-link magnetic-target';
         a.href = '/about/';
         a.textContent = 'About';
         li.appendChild(a);

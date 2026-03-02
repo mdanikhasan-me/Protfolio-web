@@ -69,7 +69,7 @@
         const tier = (window.__sitePerf && window.__sitePerf.tier) || 'mid';
     const lowPower = isLowPowerDevice();
     const maxDpr = tier === 'high' ? 2 : (tier === 'low' ? 1.25 : 1.5);
-    const dpr = Math.min(maxDpr, window.devicePixelRatio || 1);
+    const dpr = (window.__sitePerf && window.__sitePerf.dpr) ? Math.min(maxDpr, window.__sitePerf.dpr) : Math.min(maxDpr, window.devicePixelRatio || 1);
 
     const size = () => {
       const w = window.innerWidth;
@@ -189,7 +189,8 @@
       running = document.visibilityState === 'visible';
       if (running && !rafId) rafId = requestAnimationFrame(loop);
     };
-    document.addEventListener('visibilitychange', onVisibility);
+        document.addEventListener('site:inactive', () => { running = false; }, { passive: true });
+    document.addEventListener('site:active', () => { running = true; if (!rafId) rafId = requestAnimationFrame(loop); }, { passive: true });
 
     const loop = (t) => {
       rafId = 0;
