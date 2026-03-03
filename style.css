@@ -27,7 +27,15 @@
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
-html{font-size:15px;overflow-x:hidden}
+html{font-size:15px;overflow-x:hidden
+  background:
+    radial-gradient(1200px 800px at 18% 12%, rgba(124,150,182,.18), rgba(7,8,10,0) 62%),
+    radial-gradient(900px 700px at 82% 28%, rgba(46,107,79,.12), rgba(7,8,10,0) 60%),
+    radial-gradient(1100px 900px at 50% 110%, rgba(43,76,126,.10), rgba(7,8,10,0) 58%),
+    #07080A;
+  background-color:#07080A;
+}
+
 body{
   background:var(--bg-dark);
   color:var(--text-main);
@@ -922,24 +930,4 @@ a:visited{
 }
 a:hover{
   text-decoration: none;
-}
-@supports (-webkit-touch-callout:none){
-  body{padding-bottom:env(safe-area-inset-bottom)}
-  #home-bg::before,#home-bg::after{
-    content:"";
-    position:fixed;
-    left:0;
-    right:0;
-    pointer-events:none
-  }
-  #home-bg::before{
-    top:0;
-    height:calc(env(safe-area-inset-top) + 56px);
-    background:linear-gradient(to bottom, rgba(255,255,255,.05), rgba(255,255,255,0))
-  }
-  #home-bg::after{
-    bottom:0;
-    height:calc(env(safe-area-inset-bottom) + 140px);
-    background:linear-gradient(to top, rgba(255,255,255,.06), rgba(255,255,255,0))
-  }
 }
