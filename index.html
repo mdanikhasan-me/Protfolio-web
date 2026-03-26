@@ -1,376 +1,257 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Basics -->
-  <meta charset="utf-8" />
-  <script src="/js/boot.js"></script>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#07080A" />
-  <meta name="color-scheme" content="dark" />
-  <meta name="googlebot" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
-  <meta name="robots" content="index,follow" />
-  <meta name="referrer" content="strict-origin-when-cross-origin" />
-
-  <!-- Canonical + Hreflang -->
-  <link rel="canonical" href="https://mdanikhasan.com/" />
-  <link rel="alternate" hreflang="en" href="https://mdanikhasan.com/" />
-
-  <!-- Title + Description -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="MD Anik Hasan">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <!-- SEO-->
+  <meta name="description" content="MD Anik Hasan — CSE student at UIU building coding fundamentals, game development skills, Unreal Engine environments, and pixel art projects. View portfolio and projects.">
+  <meta name="keywords" content="MD Anik Hasan, mdanikhasan, CSE student UIU, game developer Bangladesh, Unreal Engine, pixel art, portfolio">
+  <meta name="theme-color" content="#07100d">
+  <meta name="color-scheme" content="dark">
+  <meta name="application-name" content="MD Anik Hasan">
   <title>MD Anik Hasan</title>
-  <meta
-    name="description"
-    content="MD Anik Hasan’s personal website. Projects, experiments, and things I’m learning while studying CSE and building with Unreal Engine."
-  />
-  <meta name="author" content="MD Anik Hasan" />
-
+  <link rel="canonical" href="https://mdanikhasan.com/">
+  <link rel="alternate" href="https://mdanikhasan.com/" hreflang="en">
   <!-- Open Graph -->
-  <meta property="og:title" content="MD Anik Hasan Unreal Engine Developer &amp; 3D Artist" />
-  <meta
-    property="og:description"
-    content="MD Anik Hasan’s personal website. Projects, experiments, and things I’m learning while studying CSE and building with Unreal Engine."
-  />
-  <meta property="og:url" content="https://mdanikhasan.com/" />
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="MD Anik Hasan" />
-  <meta property="og:locale" content="en_US" />
-  <meta property="og:image" content="https://mdanikhasan.com/assets/og/preview.png" />
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:creator" content="@mdanikhasan" />
-  <meta name="twitter:title" content="MD Anik Hasan Unreal Engine Developer &amp; 3D Artist" />
-  <meta
-    name="twitter:description"
-    content="MD Anik Hasan’s personal website. Projects, experiments, and things I’m learning while studying CSE and building with Unreal Engine."
-  />
-  <meta name="twitter:image" content="https://mdanikhasan.com/assets/og/preview.png" />
-
-  <!-- Icons -->
-  <link rel="icon" type="image/png" href="/assets/icons/favicon.png" />
-  <link rel="apple-touch-icon" href="/assets/icons/favicon.png" />
-
-  <!-- Manifest -->
-  <link rel="manifest" href="/manifest.webmanifest" />
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preconnect" href="https://unpkg.com" crossorigin />
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;600&amp;display=swap"
-  />
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="/style.css" />
-  <style>
-    :focus { outline: none; }
-    :focus-visible { outline: 2px solid rgba(255,255,255,0.8); outline-offset: 3px; }
-  </style>
-
-  <!-- Structured Data -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="MD Anik Hasan | CSE Student, Game Developer &amp; Portfolio">
+  <meta property="og:description" content="MD Anik Hasan — CSE student at UIU building coding fundamentals, game development skills, Unreal Engine environments, and pixel art projects.">
+  <meta property="og:url" content="https://mdanikhasan.com/">
+  <meta property="og:site_name" content="MD Anik Hasan">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:image" content="https://mdanikhasan.com/assets/og/preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="MD Anik Hasan — personal portfolio preview">
+  <!-- X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@mdanikhasan_dev">
+  <meta name="twitter:creator" content="@mdanikhasan_dev">
+  <meta name="twitter:title" content="MD Anik Hasan | CSE Student, Game Developer &amp; Portfolio">
+  <meta name="twitter:description" content="MD Anik Hasan — CSE student at UIU building coding fundamentals, game development skills, Unreal Engine environments, and pixel art projects.">
+  <meta name="twitter:image" content="https://mdanikhasan.com/assets/og/preview.png">
+  <meta name="twitter:image:alt" content="MD Anik Hasan — personal portfolio preview">
+  <!-- Performance: preload LCP image and critical CSS before render -->
+  <link rel="preload" as="image" href="/assets/bg/jungle-home.avif" type="image/avif" fetchpriority="high">
+  <script src="/js/boot.js?v=20260323"></script>
+  <link rel="preload" href="/style.css?v=20260323" as="style">
+  <link rel="stylesheet" href="/style.css?v=20260323">
+  <link rel="icon" href="/assets/icons/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <!-- JSON-LD: Person + WebSite + WebPage for Google -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    "name": "MD Anik Hasan",
-    "alternateName": ["MDAnikHasan", "mdanikhasan", "Anik Hasan"],
-    "url": "https://mdanikhasan.com/",
-    "image": "https://mdanikhasan.com/assets/og/preview.png",
-    "jobTitle": "Unreal Engine Developer & 3D Artist",
-    "description": "Unreal Engine developer and 3D artist from Bangladesh. Portfolio of MD Anik Hasan.",
-    "sameAs": [
-      "https://github.com/mdanikhasan-dev",
-      "https://www.linkedin.com/in/mdanikhasan-dev/",
-      "https://x.com/mdanikhasan_dev"
-    ]
-  }
-  </script>
-
-  <!-- WebSite (Google “site name” signal) -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "MD Anik Hasan",
-    "alternateName": ["MDAnikHasan", "mdanikhasan", "Anik Hasan"],
-    "url": "https://mdanikhasan.com/"
-  }
-  </script>
-
-  <!-- Optional: Navigation -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "itemListElement": [
-      { "@type": "SiteNavigationElement", "position": 1, "name": "Home", "url": "https://mdanikhasan.com/" },
-      { "@type": "SiteNavigationElement", "position": 2, "name": "Projects", "url": "https://mdanikhasan.com/projects/" },
-      { "@type": "SiteNavigationElement", "position": 3, "name": "About", "url": "https://mdanikhasan.com/about/" },
-      { "@type": "SiteNavigationElement", "position": 4, "name": "Contact", "url": "https://mdanikhasan.com/contact/" }
-    ]
-  }
-  </script>
-
-  <!-- Breadcrumbs -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mdanikhasan.com/" }
-    ]
-  }
-  </script>
-
-  <!-- Libraries for home bg -->
-  <script
-    src="https://unpkg.com/three@0.160.0/build/three.min.js"
-    defer
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  ></script>
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://mdanikhasan.com/#website",
+      "name": "MD Anik Hasan",
+      "url": "https://mdanikhasan.com/",
+      "inLanguage": "en-US",
+      "description": "Personal portfolio of MD Anik Hasan — CSE student, game developer, and Unreal Engine enthusiast.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://mdanikhasan.com/?s={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://mdanikhasan.com/#person",
+      "name": "MD Anik Hasan",
+      "url": "https://mdanikhasan.com/",
+      "image": {
+        "@type": "ImageObject",
+        "url": "https://mdanikhasan.com/assets/og/preview.png",
+        "width": 1200,
+        "height": 630
+      },
+      "jobTitle": "CSE Student & Aspiring Game Developer",
+      "description": "MD Anik Hasan is a Computer Science and Engineering student at United International University (UIU) with interests in game development, Unreal Engine world building, pixel art, and programming fundamentals.",
+      "email": "anikhasan2@icloud.com",
+      "alumniOf": {
+        "@type": "EducationalOrganization",
+        "name": "United International University",
+        "alternateName": "UIU"
+      },
+      "knowsAbout": [
+        "Computer Science",
+        "Game Development",
+        "Unreal Engine",
+        "Pixel Art",
+        "C++",
+        "JavaScript",
+        "Python",
+        "Three.js",
+        "Blender"
+      ],
+      "sameAs": [
+        "https://github.com/mdanikhasan-dev",
+        "https://x.com/mdanikhasan_dev",
+        "https://www.linkedin.com/in/mdanikhasan-dev/",
+        "https://www.facebook.com/mdanikhasan.dev"
+      ]
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://mdanikhasan.com/#webpage",
+      "name": "MD Anik Hasan | CSE Student, Game Developer & Portfolio",
+      "url": "https://mdanikhasan.com/",
+      "inLanguage": "en-US",
+      "description": "MD Anik Hasan — CSE student at UIU building coding fundamentals, game development skills, Unreal Engine environments, and pixel art projects.",
+      "isPartOf": { "@id": "https://mdanikhasan.com/#website" },
+      "about": { "@id": "https://mdanikhasan.com/#person" },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://mdanikhasan.com/assets/og/preview.png"
+      }
+    }
+  ]
+}
+</script>
 </head>
+<body class="page page-home" data-page="home">
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
-<body class="home-page">
-  <a aria-label="Skip to main content" class="skip-link" href="#main-content">Skip to content</a>
+<div class="site-bg" aria-hidden="true">
+  <div class="bg-photo"></div>
+  <div class="bg-shade"></div>
+  <div class="bg-mist"></div>
+  <div class="bg-edge bg-edge-left"></div>
+  <div class="bg-edge bg-edge-right"></div>
+</div>
 
-  <!-- Navbar -->
-  <nav aria-label="Primary" class="navbar" id="navbar">
-    <div class="navbar-inner glass-panel">
-      <div class="logo-container magnetic-wrap">
-        <a class="logo magnetic-target" href="/">MD ANIK HASAN<span class="dot"></span></a>
-      </div>
-
-      <ul class="nav-links" id="nav-links">
-        <li class="magnetic-wrap"><a class="nav-link magnetic-target active" href="/">Home</a></li>
-        <li class="magnetic-wrap"><a class="nav-link magnetic-target" href="/projects/">Projects</a></li>
-        <li class="magnetic-wrap"><a class="nav-link magnetic-target" href="/contact/">Contact</a></li>
-      </ul>
-
-      <button aria-controls="nav-links" aria-expanded="false" aria-label="Open menu" class="mobile-menu-toggle" type="button">
-        <span></span><span></span>
-      </button>
-    </div>
-  </nav>
-
-  <div id="smooth-wrapper">
-    <div id="smooth-content">
-      <main id="main-content">
-
-        <!-- Hero -->
-        <section class="hero-section immersive-hero">
-          <div class="container">
-            <div class="hero-content" id="hero-tilt-layer">
-              <p class="hero-greeting fade-up">Hi, I’m</p>
-
-              <h1 class="hero-title fade-up delay-1">
-                MD ANIK HASAN <br />
-              </h1>
-
-              <p class="hero-subtitle fade-up delay-2">
-                UIU CSE Student.<br />
-                Practicing DSA &amp; building game dev skills with Unreal Engine 5 and Blender.<br />
-                Future focus: Machine Learning &amp; AI.
-              </p>
-
-              <div class="hero-actions fade-up delay-3">
-                <a class="btn btn-primary magnetic-wrap" href="/about/" id="who-btn">
-                  <span class="magnetic-target">Who is MD Anik Hasan?</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Home section 1 -->
-        <section class="home-section">
-          <div class="container">
-            <div class="section-header fade-up">
-              <span class="eyebrow">System</span>
-              <h2 class="section-title">Let’s talk about this website.</h2>
-              <p class="section-lead">
-                This home page design appears to be alive due to the reaction of the layers to the movement
-                of the cursor and scrolling. It also has widgets that tilt, and the background reacts to
-                movement with controlled energy.
-              </p>
-            </div>
-
-            <div class="home-grid">
-              <article class="home-card project-card tilt-card fade-up delay-1">
-                <div class="card-content">
-                  <span class="card-eyebrow">Interaction</span>
-                  <h3 class="card-title">Micro</h3>
-                  <p class="card-desc">UI reacts like it has weight, tension, and momentum.</p>
-                  <div class="tech-stack">
-                    <span class="tech-tag">Pointer</span>
-                    <span class="tech-tag">Depth</span>
-                    <span class="tech-tag">Easing</span>
-                  </div>
-                </div>
-                <div class="card-glow"></div>
-              </article>
-
-              <article class="home-card project-card tilt-card fade-up delay-2">
-                <div class="card-content">
-                  <span class="card-eyebrow">Stage</span>
-                  <h3 class="card-title">Layered Depth</h3>
-                  <p class="card-desc">Multi plane parallax + spotlight + particle depth field.</p>
-                  <div class="tech-stack">
-                    <span class="tech-tag">Parallax</span>
-                    <span class="tech-tag">Particles</span>
-                    <span class="tech-tag">Aurora</span>
-                  </div>
-                </div>
-                <div class="card-glow"></div>
-              </article>
-
-              <article class="home-card project-card tilt-card fade-up delay-3">
-                <div class="card-content">
-                  <span class="card-eyebrow">Scroll</span>
-                  <h3 class="card-title">Buttery Smooth</h3>
-                  <p class="card-desc">
-                    Scroll feels like it’s riding on rails steady, soft, and cinematic without losing control.
-                  </p>
-                  <div class="tech-stack">
-                    <span class="tech-tag">RAF</span>
-                    <span class="tech-tag">Flow</span>
-                    <span class="tech-tag">Performance</span>
-                  </div>
-                </div>
-                <div class="card-glow"></div>
-              </article>
-            </div>
-          </div>
-        </section>
-
-        <!-- Home section 2 -->
-        <section class="home-section alt-stage">
-          <div class="container">
-            <div class="section-header fade-up">
-              <span class="eyebrow">Template</span>
-              <h2 class="section-title">Skills &amp; tools</h2>
-              <p class="section-lead">Only the real stuff. The rest can come later.</p>
-            </div>
-
-            <div class="pill-grid fade-up delay-1">
-              <span class="pill">C</span>
-              <span class="pill">C++</span>
-              <span class="pill">JavaScript</span>
-              <span class="pill">Python</span>
-              <span class="pill">HTML</span>
-              <span class="pill">CSS</span>
-              <span class="pill">Three.js</span>
-              <span class="pill">Unreal Engine</span>
-              <span class="pill">Blender</span>
-              <span class="pill">Unity</span>
-              <span class="pill">Aseprite</span>
-              <span class="pill">Docker</span>
-            </div>
-
-            <div class="split-grid">
-              <div class="glass-card big-card tilt-card fade-up delay-2">
-                <div class="big-card-inner">
-                  <span class="card-eyebrow">Template block</span>
-                  <h3 class="card-title">What I do</h3>
-                  <p class="card-desc">
-                    I make small pixel art games that are inspired by my nightmares and awkward situations
-                    that I just can’t forget.
-                  </p>
-
-                  <div class="mini-list">
-                    <div class="mini-list-item"><span class="mini-dot"></span><span>3D games with pixel art aesthetics</span></div>
-                    <div class="mini-list-item"><span class="mini-dot"></span><span>Unreal Engine world building</span></div>
-                    <div class="mini-list-item"><span class="mini-dot"></span><span>Self made 3D models</span></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="glass-card big-card tilt-card fade-up delay-3">
-                <div class="big-card-inner">
-                  <span class="card-eyebrow">Community</span>
-                  <h3 class="card-title">Open source</h3>
-                  <p class="card-desc">
-                    I am willing to contribute to open source projects. I want to learn teamwork and improve
-                    my communication skills by working with different backgrounds of programmers.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Timeline -->
-        <section class="home-section alt-stage">
-          <div class="container">
-            <div class="section-header fade-up">
-              <span class="eyebrow">Timeline</span>
-              <h2 class="section-title">Where I’m heading</h2>
-              <p class="section-lead">A simple timeline clean, honest, and forward looking.</p>
-            </div>
-
-            <div class="timeline">
-              <div class="timeline-item fade-up delay-1">
-                <div class="timeline-dot"></div>
-                <div class="timeline-body">
-                  <div class="timeline-top">
-                    <span class="timeline-title">United International University (UIU)</span>
-                    <span class="timeline-meta">2025 — 2029</span>
-                  </div>
-                  <p>Just learning the fundamentals and plan to enjoy the whole journey.</p>
-                </div>
-              </div>
-
-              <div class="timeline-item fade-up delay-2">
-                <div class="timeline-dot"></div>
-                <div class="timeline-body">
-                  <div class="timeline-top">
-                    <span class="timeline-title">Unreal Engine world building</span>
-                    <span class="timeline-meta">Ongoing</span>
-                  </div>
-                  <p>I focus on environmental work, open-world spaces, atmosphere, and detail that feels alive.</p>
-                </div>
-              </div>
-
-              <div class="timeline-item fade-up delay-3">
-                <div class="timeline-dot"></div>
-                <div class="timeline-body">
-                  <div class="timeline-top">
-                    <span class="timeline-title">Next milestone</span>
-                    <span class="timeline-meta">Since 2025</span>
-                  </div>
-                  <p>
-                    I’m creating my own 3D pixel art open-world game using Unreal Engine. I started working on my game in 2025.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="cta-strip fade-up delay-2">
-              <div class="cta-left">
-                <span class="cta-k">Want to collaborate?</span>
-                <h3>Let’s build something that feels real.</h3>
-              </div>
-              <div class="cta-right"></div>
-            </div>
-          </div>
-        </section>
-
-      </main>
-
-      <footer class="main-footer">
-        <div class="container">
-          <p>© 2026 MD Anik Hasan. All rights reserved.</p>
+  <div class="site-shell">
+    <header class="site-header" data-header>
+      <nav class="site-nav shell shell-wide" aria-label="Primary">
+        <a class="site-brand" href="/" aria-label="MD Anik Hasan home">MDANIKHASAN.COM</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="Open menu" data-nav-toggle>
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div class="site-menu" id="site-menu" data-nav-panel>
+          <ul class="site-nav__list">
+            <li><a href="/" aria-current="page">Home</a></li>
+            <li><a href="/projects/">Projects</a></li>
+            <li><a href="/blog/">Blog</a></li>
+            <li><a href="/contact/">Contact</a></li>
+          </ul>
         </div>
-      </footer>
-    </div>
-  </div>
+      </nav>
+    </header>
 
-  <!-- JS -->
-  <script defer src="/js/core.js"></script>
-  <script defer src="/js/interactions.js"></script>
-  <script defer src="/js/home-bg.js"></script>
-  <script defer src="/js/fx.js"></script>
+    <main id="main-content" class="site-main shell shell-wide">
+      <section class="hero">
+        <div class="hero-inner">
+          <div class="measure flow-lg">
+            <h1>MD Anik Hasan</h1>
+            <p>
+I study Computer Science and Engineering at UIU, but most of my curiosity started long before university through 
+games, computers, and spending too much time trying to understand how things work. 
+Right now I am focused on learning coding fundamentals, improving my logic, and building the skills I will need for game development later on.
+</p>
+            <p><a class="text-link" href="/about/">Who is MD Anik Hasan?</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-line">
+        <div class="section-grid flow-lg">
+          <div class="measure flow-md">
+            <h2>Skills &amp; tools</h2>
+            <p>Only the real stuff. The rest can come later.</p>
+          </div>
+          <ul class="tag-list" aria-label="Skills and tools used by MD Anik Hasan">
+            <li>C</li>
+            <li>C++</li>
+            <li>JavaScript</li>
+            <li>Python</li>
+            <li>HTML</li>
+            <li>CSS</li>
+            <li>Three.js</li>
+            <li>Unreal Engine</li>
+            <li>Blender</li>
+            <li>Unity</li>
+            <li>Aseprite</li>
+            <li>Docker</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section section-line">
+        <div class="split-layout">
+          <div class="measure flow-md">
+            <h2>What I do</h2>
+            <p>
+          I make small pixel art games that are inspired by my nightmares and awkward situations
+          that I just can't forget.
+        </p>
+            <ul class="tag-list" aria-label="MD Anik Hasan's areas of work">
+              <li>3D games with pixel art aesthetics</li>
+              <li>Unreal Engine world building</li>
+              <li>Self made 3D models</li>
+            </ul>
+          </div>
+
+          <aside class="soft-panel flow-sm">
+            <h3>Open source</h3>
+            <p>
+          I am willing to contribute to open source projects. I want to learn teamwork and improve
+          my communication skills by working with different backgrounds of programmers.
+        </p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section section-line">
+        <div class="measure flow-md">
+          <h2>Where I'm heading</h2>
+          <p>A simple timeline clean, honest, and forward looking.</p>
+        </div>
+
+        <div class="timeline-list" aria-label="MD Anik Hasan timeline">
+          <article class="timeline-item flow-sm">
+            <h3>United International University (UIU)</h3>
+            <p>2025 — 2029</p>
+            <p>Just learning the fundamentals and plan to enjoy the whole journey.</p>
+          </article>
+
+          <article class="timeline-item flow-sm">
+            <h3>Unreal Engine world building</h3>
+            <p>Ongoing</p>
+            <p>I focus on environmental work and experimenting with level design and atmosphere.</p>
+          </article>
+
+          <article class="timeline-item flow-sm">
+            <h3>Next milestone</h3>
+            <p>Since 2025</p>
+            <p>I'm working solo on my 3D pixel art open-world game using Unreal Engine and Aseprite.
+               I started working on my game in 2025.</p>
+          </article>
+        </div>
+
+        <div class="closing-line flow-sm">
+          <h3>Let's build something real.</h3>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell shell-wide">
+        <p>© 2026 MD Anik Hasan. All rights reserved.</p>
+      </div>
+    </footer>
+  </div>
+  <script defer src="/js/core.js?v=20260323"></script>
+  <script defer src="/js/fx.js?v=20260323"></script>
+  <script defer src="/js/interactions.js?v=20260323"></script>
 </body>
 </html>

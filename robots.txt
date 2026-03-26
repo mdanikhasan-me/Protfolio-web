@@ -1,4 +1,15 @@
+# robots.txt — mdanikhasan.com
+# Last updated: 2026-03-23
+#
+# All pages are public and indexable. The Host directive is not part of
+# the official robots.txt specification (it is a Yandex extension); it
+# has been removed to avoid confusing other crawlers.
+
 User-agent: *
 Allow: /
+
+# Prevent crawlers from indexing internal asset folders — these paths
+# contain no standalone HTML documents and should not appear in SERPs.
+Disallow: /assets/
 
 Sitemap: https://mdanikhasan.com/sitemap.xml

@@ -1,20 +1,31 @@
 {
+  "id": "/",
   "name": "MD Anik Hasan",
   "short_name": "MDAnik",
+  "description": "Personal portfolio of MD Anik Hasan — CSE student at UIU, aspiring game developer, and Unreal Engine enthusiast.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#07080A",
-  "theme_color": "#07080A",
+  "orientation": "any",
+  "background_color": "#07100d",
+  "theme_color": "#07100d",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["portfolio", "personal", "developer"],
   "icons": [
     {
       "src": "/assets/icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
       "src": "/assets/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable any"
     }
-  ]
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
 }

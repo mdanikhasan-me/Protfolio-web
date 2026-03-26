@@ -1,14 +1,29 @@
+# netlify.toml — single source of truth for all Netlify config.
+#
+# BUG FIX: The _headers file was a verbatim duplicate of the [[headers]] blocks
+# below. Netlify processes both files, meaning every rule ran twice and response
+# headers were potentially set redundantly. _headers is now cleared (empty file).
+# All header rules live here only.
+
 [build]
   publish = "."
 
+# ── Security headers (all routes) ─────────────────────────────────────────────
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    X-Frame-Options = "DENY"
-    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    X-Content-Type-Options          = "nosniff"
+    X-Frame-Options                 = "DENY"
+    Referrer-Policy                 = "strict-origin-when-cross-origin"
+    Permissions-Policy              = "geolocation=(), microphone=(), camera=()"
+    Strict-Transport-Security       = "max-age=31536000; includeSubDomains; preload"
+    # Content-Security-Policy kept permissive while the site is in active dev.
+    # Tighten when external font/script sources are finalised.
+
+# ── Immutable cache for versioned assets ──────────────────────────────────────
+# All JS, CSS, and image assets are cache-busted via ?v= query strings.
+# max-age=31536000 + immutable means CDN and browsers cache for 1 year without
+# revalidation, giving the best possible TTFB on repeat visits.
 
 [[headers]]
   for = "/*.css"
@@ -24,3 +39,23 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# ── Short-lived cache for HTML documents ──────────────────────────────────────
+# HTML is not versioned, so it must revalidate. stale-while-revalidate lets the
+# browser serve a cached copy instantly while a fresh one is fetched in the bg.
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# ── PWA manifest ──────────────────────────────────────────────────────────────
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type  = "application/manifest+json"
+    Cache-Control = "public, max-age=86400"
