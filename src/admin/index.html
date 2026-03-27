@@ -9,27 +9,21 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg-1: #03100f;
-      --bg-2: #071816;
-      --panel: rgba(9, 22, 20, 0.84);
-      --panel-2: rgba(255, 255, 255, 0.03);
+      --bg-1: #041110;
+      --bg-2: #071917;
+      --panel: rgba(9, 22, 20, 0.86);
       --line: rgba(255, 255, 255, 0.08);
       --line-strong: rgba(214, 170, 96, 0.34);
       --text: #f4f7f5;
       --muted: #97a7a0;
       --gold: #d6aa60;
-      --gold-strong: #e1ba79;
+      --gold-strong: #e6bf7d;
       --danger: #ff8f7a;
-      --radius: 24px;
+      --success: #b6d9bf;
       --shadow: 0 30px 90px rgba(0, 0, 0, 0.42);
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
+    * { box-sizing: border-box; }
+    html, body {
       min-height: 100%;
       margin: 0;
       background:
@@ -39,16 +33,13 @@
       color: var(--text);
       font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-
-    body {
-      overflow: hidden;
-    }
-
+    body { overflow: hidden; }
     body.cms-live {
       overflow: auto;
-      background: #0a1311;
+      background:
+        radial-gradient(circle at top, rgba(214, 170, 96, 0.06), transparent 24%),
+        linear-gradient(180deg, #071211 0%, #0b1513 100%);
     }
-
     #gate {
       position: fixed;
       inset: 0;
@@ -58,19 +49,11 @@
       z-index: 9999;
       transition: opacity 0.22s ease, visibility 0.22s ease;
     }
-
     #gate.is-hidden {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
     }
-
-    #gate.is-widget-open {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
     .shell {
       width: min(92vw, 520px);
       border-radius: 28px;
@@ -84,7 +67,6 @@
       position: relative;
       isolation: isolate;
     }
-
     .shell::before {
       content: "";
       position: absolute;
@@ -95,12 +77,10 @@
       pointer-events: none;
       z-index: -1;
     }
-
     .head {
       padding: 34px 34px 22px;
       border-bottom: 1px solid var(--line);
     }
-
     .brand {
       margin: 0;
       font-size: clamp(42px, 7vw, 58px);
@@ -109,7 +89,6 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
-
     .label {
       margin-top: 10px;
       font-size: 13px;
@@ -117,48 +96,26 @@
       text-transform: uppercase;
       color: var(--muted);
     }
-
     .body {
       padding: 28px 34px 32px;
       display: grid;
       gap: 18px;
     }
-
     .status {
       min-height: 22px;
       font-size: 14px;
       color: var(--muted);
     }
-
-    .status.is-error {
-      color: var(--danger);
-    }
-
-    .status.is-success {
-      color: #b6d9bf;
-    }
-
-    form {
-      display: grid;
-      gap: 14px;
-    }
-
-    .field {
-      display: grid;
-      gap: 8px;
-    }
-
+    .status.is-error { color: var(--danger); }
+    .status.is-success { color: var(--success); }
+    form { display: grid; gap: 14px; }
+    .field { display: grid; gap: 8px; }
     .field label {
       font-size: 12px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--muted);
     }
-
-    .input-wrap {
-      position: relative;
-    }
-
     .input-wrap input {
       width: 100%;
       height: 56px;
@@ -171,20 +128,17 @@
       outline: none;
       transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
     }
-
     .input-wrap input:focus {
       border-color: var(--line-strong);
       box-shadow: 0 0 0 4px rgba(214, 170, 96, 0.1);
       background: rgba(255, 255, 255, 0.05);
     }
-
     .row {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
       align-items: center;
     }
-
     button {
       appearance: none;
       border: 0;
@@ -195,72 +149,47 @@
       cursor: pointer;
       transition: transform 0.18s ease, background 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
     }
-
-    button:hover {
-      transform: translateY(-1px);
-    }
-
+    button:hover { transform: translateY(-1px); }
     button:disabled {
       opacity: 0.7;
       cursor: wait;
       transform: none;
     }
-
     .primary {
       min-width: 148px;
       background: linear-gradient(180deg, var(--gold-strong), var(--gold));
       color: #1b1205;
       box-shadow: 0 10px 24px rgba(214, 170, 96, 0.2);
     }
-
     .secondary {
       background: rgba(255, 255, 255, 0.05);
       color: var(--text);
       border: 1px solid var(--line);
     }
-
     .text-btn {
       background: transparent;
       color: var(--muted);
       padding: 0;
       border-radius: 0;
     }
-
+    .mode-note,
     .helper {
       font-size: 13px;
       color: var(--muted);
     }
-
-    .helper strong {
-      color: var(--text);
-    }
-
-    .mode-note {
-      font-size: 13px;
-      color: var(--muted);
-      display: none;
-    }
-
-    .mode-note.is-visible {
-      display: block;
-    }
-
-    .netlify-identity-widget .modal {
-      backdrop-filter: blur(8px);
-    }
-
+    .mode-note { display: none; }
+    .mode-note.is-visible { display: block; }
+    .netlify-identity-widget .modal { backdrop-filter: blur(8px); }
     .netlify-identity-widget .content {
       border-radius: 24px !important;
       overflow: hidden !important;
       box-shadow: 0 30px 90px rgba(0, 0, 0, 0.42) !important;
       border: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
-
     .netlify-identity-widget .btn {
       border-radius: 14px !important;
       font-weight: 700 !important;
     }
-
     .netlify-identity-widget a[href="#signup"],
     .netlify-identity-widget button[data-netlify-identity-button="signup"],
     .netlify-identity-widget .tab.signup,
@@ -268,29 +197,12 @@
     .netlify-identity-widget [href*="signup"] {
       display: none !important;
     }
-
     @media (max-width: 600px) {
-      .head {
-        padding: 28px 24px 18px;
-      }
-
-      .body {
-        padding: 22px 24px 26px;
-      }
-
-      .brand {
-        font-size: 40px;
-      }
-
-      .row {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .primary,
-      .secondary {
-        width: 100%;
-      }
+      .head { padding: 28px 24px 18px; }
+      .body { padding: 22px 24px 26px; }
+      .brand { font-size: 40px; }
+      .row { flex-direction: column; align-items: stretch; }
+      .primary, .secondary { width: 100%; }
     }
   </style>
   <script>
@@ -328,7 +240,6 @@
             <button class="text-btn" id="forgot-btn" type="button">Forgot password</button>
           </div>
         </form>
-        <div class="helper"><strong>Tip:</strong> invite links and recovery links will open automatically here.</div>
       </div>
     </section>
   </div>
@@ -370,18 +281,102 @@
       setStatus(active ? "Enter your email to receive a password reset link." : "Enter your email and password to continue.");
     };
 
+    const applyAdminTheme = () => {
+      if (document.getElementById("sawlper-admin-theme")) return;
+      const style = document.createElement("style");
+      style.id = "sawlper-admin-theme";
+      style.textContent = `
+        body.cms-live, body.cms-live #root, body.cms-live #nc-root {
+          background:
+            radial-gradient(circle at top, rgba(214,170,96,.05), transparent 24%),
+            linear-gradient(180deg, #0a1311 0%, #0d1715 100%) !important;
+          color: #eef4f0 !important;
+          font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+        }
+        body.cms-live * { box-sizing: border-box; }
+        body.cms-live a { color: #e4bd77 !important; }
+        body.cms-live input,
+        body.cms-live textarea,
+        body.cms-live select {
+          border-radius: 16px !important;
+          border: 1px solid rgba(255,255,255,.1) !important;
+          background: rgba(255,255,255,.04) !important;
+          color: #eef4f0 !important;
+          box-shadow: none !important;
+        }
+        body.cms-live input:focus,
+        body.cms-live textarea:focus,
+        body.cms-live select:focus {
+          outline: none !important;
+          border-color: rgba(214,170,96,.42) !important;
+          box-shadow: 0 0 0 4px rgba(214,170,96,.08) !important;
+        }
+        body.cms-live button,
+        body.cms-live [role="button"] {
+          border-radius: 14px !important;
+          font-weight: 700 !important;
+        }
+        body.cms-live aside,
+        body.cms-live nav,
+        body.cms-live main,
+        body.cms-live section,
+        body.cms-live article,
+        body.cms-live header,
+        body.cms-live [role="navigation"],
+        body.cms-live [role="dialog"],
+        body.cms-live [role="menu"],
+        body.cms-live [role="listbox"],
+        body.cms-live [data-slate-editor="true"] {
+          border-color: rgba(255,255,255,.08) !important;
+        }
+        body.cms-live aside,
+        body.cms-live nav {
+          background: rgba(8,19,17,.86) !important;
+          backdrop-filter: blur(14px) !important;
+        }
+        body.cms-live main {
+          background: transparent !important;
+        }
+        body.cms-live section,
+        body.cms-live article,
+        body.cms-live [role="dialog"] > div,
+        body.cms-live [role="menu"],
+        body.cms-live [role="listbox"] {
+          background: rgba(12,23,20,.82) !important;
+          backdrop-filter: blur(14px) !important;
+          border: 1px solid rgba(255,255,255,.08) !important;
+          border-radius: 20px !important;
+          box-shadow: 0 22px 60px rgba(0,0,0,.24) !important;
+        }
+        body.cms-live table,
+        body.cms-live tbody,
+        body.cms-live thead,
+        body.cms-live tr,
+        body.cms-live td,
+        body.cms-live th {
+          background: transparent !important;
+          border-color: rgba(255,255,255,.08) !important;
+          color: #eef4f0 !important;
+        }
+        body.cms-live img[alt*="Netlify"],
+        body.cms-live svg[aria-label*="Netlify"] {
+          opacity: .0 !important;
+        }
+      `;
+      document.head.appendChild(style);
+    };
+
     const startCMS = async () => {
       if (cmsStarted) return;
       cmsStarted = true;
       document.body.classList.add("cms-live");
       gate.classList.add("is-hidden");
+      applyAdminTheme();
       if (window.CMS) {
         await window.CMS.init();
       }
+      new MutationObserver(() => applyAdminTheme()).observe(document.body, { childList: true, subtree: true });
     };
-
-    const closeWidgetGate = () => gate.classList.remove("is-widget-open");
-    const openWidgetGate = () => gate.classList.add("is-widget-open");
 
     const hasMagicToken = () => {
       const hash = window.location.hash || "";
@@ -393,7 +388,6 @@
         setStatus("Identity could not be loaded.", "error");
         return;
       }
-
       window.netlifyIdentity.on("init", async (user) => {
         if (user) {
           setStatus("Opening editor…", "success");
@@ -403,31 +397,19 @@
             setStatus(error?.message || "Could not start the editor.", "error");
           }
         } else {
-          closeWidgetGate();
           setStatus("Enter your email and password to continue.");
         }
       });
-
       window.netlifyIdentity.on("login", async () => {
-        closeWidgetGate();
         setStatus("Opening editor…", "success");
         await startCMS();
       });
-
-      window.netlifyIdentity.on("close", () => {
-        if (!window.netlifyIdentity.currentUser()) closeWidgetGate();
-      });
-
       window.netlifyIdentity.on("error", (error) => {
-        closeWidgetGate();
         setBusy(false);
         setStatus(error?.message || "Authentication failed.", "error");
       });
-
       window.netlifyIdentity.init({ locale: "en", logo: false, namePlaceholder: "Name" });
-
       if (hasMagicToken()) {
-        openWidgetGate();
         window.netlifyIdentity.open();
       }
     };
@@ -438,7 +420,6 @@
         setStatus("Identity is not ready yet.", "error");
         return;
       }
-
       const email = emailInput.value.trim();
       const password = passwordInput.value;
       if (!email) {
@@ -446,9 +427,7 @@
         emailInput.focus();
         return;
       }
-
       setBusy(true);
-
       try {
         if (recoveryMode) {
           await window.netlifyIdentity.gotrue.requestPasswordRecovery(email);
@@ -481,9 +460,7 @@
 
     refreshBtn.addEventListener("click", async () => {
       if (window.netlifyIdentity && window.netlifyIdentity.currentUser()) {
-        try {
-          await window.netlifyIdentity.refresh();
-        } catch (_) {}
+        try { await window.netlifyIdentity.refresh(); } catch (_) {}
       }
       window.location.reload();
     });

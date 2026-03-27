@@ -8,7 +8,7 @@ public_folder: "/uploads"
 site_url: "https://mdanikhasan.com"
 display_url: "https://mdanikhasan.com"
 logo_url: "/assets/icons/icon-192.png"
-publish_mode: editorial_workflow
+publish_mode: simple
 locale: "en"
 
 slug:
@@ -21,7 +21,7 @@ editor:
 
 collections:
   - name: "posts"
-    label: "Blog Posts"
+    label: "Blog"
     label_singular: "Post"
     folder: "src/content/posts"
     create: true
@@ -30,22 +30,15 @@ collections:
     extension: "md"
     format: "frontmatter"
     summary: "{{title}}"
-    sortable_fields: ["date", "title"]
-    view_filters:
-      - label: "Published"
-        field: "draft"
-        pattern: false
-      - label: "Drafts"
-        field: "draft"
-        pattern: true
     fields:
       - { label: "Title", name: "title", widget: "string" }
-      - { label: "Slug", name: "slug", widget: "string" }
-      - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
-      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Slug", name: "slug", widget: "string", hint: "Use lowercase words with hyphens." }
+      - { label: "Publish Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
+      - { label: "Short Description", name: "description", widget: "text", hint: "This is used in the blog list." }
       - { label: "Cover Image", name: "cover", widget: "image", required: false, allow_multiple: false }
+      - { label: "Tags", name: "tags", widget: "list", required: false, collapsed: false }
       - { label: "Draft", name: "draft", widget: "boolean", default: false, required: false }
-      - { label: "Body", name: "body", widget: "markdown" }
+      - { label: "Article", name: "body", widget: "markdown", hint: "Write the full blog post here." }
 
   - name: "projects"
     label: "Projects"
@@ -58,35 +51,39 @@ collections:
     format: "frontmatter"
     summary: "{{title}}"
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Slug", name: "slug", widget: "string" }
-      - { label: "Short Description", name: "description", widget: "text" }
-      - { label: "Thumbnail", name: "thumbnail", widget: "image", required: false }
-      - { label: "Tech Stack", name: "stack", widget: "list", required: false }
-      - { label: "Live URL", name: "live_url", widget: "string", required: false }
-      - { label: "GitHub URL", name: "github_url", widget: "string", required: false }
+      - { label: "Project Title", name: "title", widget: "string" }
+      - { label: "Slug", name: "slug", widget: "string", hint: "Use lowercase words with hyphens." }
+      - { label: "Description", name: "description", widget: "text", hint: "Short summary for the project card." }
+      - label: "Tools Used"
+        name: "tools"
+        widget: "list"
+        summary: "{{fields.name}}"
+        allow_add: true
+        collapsed: false
+        field: { label: "Tool", name: "name", widget: "string" }
+      - { label: "Source Code", name: "source_code", widget: "string", required: false, hint: "Paste the repository link here." }
+      - { label: "Live Demo", name: "live_demo", widget: "string", required: false, hint: "Paste the live project link here if you have one." }
       - { label: "Featured", name: "featured", widget: "boolean", default: false, required: false }
-      - { label: "Body", name: "body", widget: "markdown", required: false }
 
   - name: "pages"
-    label: "Pages"
+    label: "Website Copy"
     files:
-      - label: "Homepage"
+      - label: "Home"
         name: "homepage"
         file: "src/content/pages/homepage.yml"
         fields:
           - { label: "Hero Title", name: "hero_title", widget: "string" }
           - { label: "Hero Subtitle", name: "hero_subtitle", widget: "text" }
-          - { label: "Hero Primary Button", name: "hero_primary_label", widget: "string", required: false }
-          - { label: "Hero Secondary Button", name: "hero_secondary_label", widget: "string", required: false }
-      - label: "About Page"
+          - { label: "Primary Button Label", name: "hero_primary_label", widget: "string", required: false }
+          - { label: "Secondary Button Label", name: "hero_secondary_label", widget: "string", required: false }
+      - label: "About"
         name: "about"
         file: "src/content/pages/about.yml"
         fields:
           - { label: "Page Title", name: "title", widget: "string" }
           - { label: "Intro", name: "intro", widget: "text" }
           - { label: "Body", name: "body", widget: "markdown" }
-      - label: "Contact Page"
+      - label: "Contact"
         name: "contact"
         file: "src/content/pages/contact.yml"
         fields:
@@ -95,7 +92,7 @@ collections:
           - { label: "Phone", name: "phone", widget: "string", required: false }
           - { label: "Location", name: "location", widget: "string", required: false }
 
-  - name: "settings"
+  - name: "site"
     label: "Site Settings"
     files:
       - label: "General"
@@ -106,7 +103,7 @@ collections:
           - { label: "Site Description", name: "site_description", widget: "text" }
           - { label: "Site URL", name: "site_url", widget: "string" }
           - { label: "Logo", name: "logo", widget: "image", required: false }
-      - label: "Social Links"
+      - label: "Social"
         name: "social"
         file: "src/content/settings/social.yml"
         fields:
