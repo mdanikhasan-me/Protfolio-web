@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
   <title>SAWLPER</title>
-  <meta name="robots" content="noindex,nofollow">
-  <link rel="icon" href="/assets/icons/favicon.png" type="image/png">
+  <link rel="icon" href="/assets/icons/favicon.png" type="image/png" />
   <style>
     html, body { height: 100%; }
     body {
@@ -40,27 +40,19 @@
     </div>
   </div>
 
-<!-- Netlify Identity widget -->
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
-<!-- Decap CMS application — use the correct bundle name -->
-<script src="https://unpkg.com/@decap-cms/app@latest/dist/cms.js"></script>
-
-<script>
-  if (window.netlifyIdentity) {
-    window.netlifyIdentity.on('init', user => {
-      if (!user) {
-        window.netlifyIdentity.on('login', () => document.location.reload());
-      }
-    });
-    window.netlifyIdentity.init();
-  }
-  window.CMS_MANUAL_INIT = true;
-  document.addEventListener('DOMContentLoaded', () => {
-    if (window.CMS) {
-      window.CMS.init();
+  <script>
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", function(user) {
+        if (!user) {
+          window.netlifyIdentity.on("login", function() {
+            document.location.reload();
+          });
+        }
+      });
     }
-  });
-</script>
+  </script>
 </body>
 </html>
