@@ -1,152 +1,71 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <meta name="theme-color" content="#07100d">
-  <title>SAWLPER</title>
-  <link rel="stylesheet" href="./app.css?v=20260327b">
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAWLPER</title>
+
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #0b0f0c;
+  color: #e6f1ec;
+  font-family: system-ui;
+}
+
+.container {
+  text-align: center;
+}
+
+h1 {
+  font-size: 42px;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+p {
+  color: #7a8f86;
+  margin-bottom: 30px;
+}
+
+button {
+  padding: 12px 28px;
+  border-radius: 999px;
+  border: 1px solid #1c2a25;
+  background: transparent;
+  color: #e6f1ec;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0f3d2e;
+}
+</style>
 </head>
+
 <body>
-  <div class="admin-bg" aria-hidden="true">
-    <div class="admin-bg__photo"></div>
-    <div class="admin-bg__shade"></div>
-    <div class="admin-bg__mist"></div>
-  </div>
 
-  <div class="gate" id="gate">
-    <div class="gate__inner">
-      <p class="gate__eyebrow">Private admin</p>
-      <h1 class="gate__brand">SAWLPER</h1>
-      <button class="gate__enter" id="enterPortal" type="button">Enter portal</button>
-      <p class="gate__status" id="gateStatus">Secure access for site content.</p>
-    </div>
-  </div>
+<div class="container">
+  <h1>SAWLPER</h1>
+  <p>Enter Portal</p>
+  <button onclick="login()">Enter</button>
+</div>
 
-  <div class="app-shell is-hidden" id="appShell">
-    <aside class="sidebar">
-      <div class="brand-block">
-        <a class="brand-link" href="#overview">SAWLPER</a>
-        <p>Content Studio</p>
-      </div>
+<script>
+function login() {
+  netlifyIdentity.open();
+}
 
-      <nav class="sidebar-nav" aria-label="Admin sections">
-        <a href="#overview" data-route-link="overview">Overview</a>
-        <a href="#blog" data-route-link="blog">Blog</a>
-        <a href="#projects" data-route-link="projects">Projects</a>
-        <a href="#social" data-route-link="social">Social Links</a>
-        <a href="#media" data-route-link="media">Media</a>
-      </nav>
+netlifyIdentity.on("login", () => {
+  window.location.href = "/sawlper/decap.html";
+});
+</script>
 
-      <div class="sidebar-foot" id="sidebarFoot">
-        <div class="identity-meta" id="identityMeta">
-          <span class="identity-kicker">Signed in as</span>
-          <strong id="identityEmail">—</strong>
-        </div>
-        <button class="ghost-btn ghost-btn--full" id="logoutBtn" type="button">Sign out</button>
-      </div>
-    </aside>
-
-    <div class="workspace">
-      <header class="topbar">
-        <div>
-          <p class="topbar__eyebrow" id="topbarEyebrow">Private admin</p>
-          <h1 class="topbar__title" id="topbarTitle">Overview</h1>
-        </div>
-        <div class="topbar__actions">
-          <button class="ghost-btn" id="syncBtn" type="button">Refresh</button>
-          <a class="ghost-btn" href="/" target="_blank" rel="noopener noreferrer">Open site</a>
-        </div>
-      </header>
-
-      <main class="content" id="appContent"></main>
-    </div>
-  </div>
-
-  <template id="overviewTemplate">
-    <section class="section-block summary-strip">
-      <div>
-        <span class="label">Posts</span>
-        <strong data-count-posts>0</strong>
-      </div>
-      <div>
-        <span class="label">Projects</span>
-        <strong data-count-projects>0</strong>
-      </div>
-      <div>
-        <span class="label">Profiles</span>
-        <strong data-count-social>0</strong>
-      </div>
-      <div>
-        <span class="label">Uploads</span>
-        <strong data-count-media>0</strong>
-      </div>
-    </section>
-
-    <section class="section-block flow-gap">
-      <div class="section-head">
-        <div>
-          <p class="label">Publishing</p>
-          <h2>Quick actions</h2>
-        </div>
-      </div>
-      <div class="line-list line-list--tight">
-        <button class="line-row line-row--button" data-action="new-post" type="button">
-          <span>
-            <strong>New post</strong>
-            <small>Write and publish a fresh blog entry.</small>
-          </span>
-          <em>Open</em>
-        </button>
-        <button class="line-row line-row--button" data-action="new-project" type="button">
-          <span>
-            <strong>New project</strong>
-            <small>Add a new portfolio entry without touching the frontend.</small>
-          </span>
-          <em>Open</em>
-        </button>
-        <button class="line-row line-row--button" data-route-jump="social" type="button">
-          <span>
-            <strong>Edit social links</strong>
-            <small>Update profile URLs in one place.</small>
-          </span>
-          <em>Open</em>
-        </button>
-        <button class="line-row line-row--button" data-route-jump="media" type="button">
-          <span>
-            <strong>Upload media</strong>
-            <small>Drag and drop images into the uploads folder.</small>
-          </span>
-          <em>Open</em>
-        </button>
-      </div>
-    </section>
-
-    <section class="section-block flow-gap">
-      <div class="section-head">
-        <div>
-          <p class="label">Latest content</p>
-          <h2>Recent blog posts</h2>
-        </div>
-        <button class="ghost-btn" data-route-jump="blog" type="button">View all</button>
-      </div>
-      <div class="line-list" data-overview-posts></div>
-    </section>
-
-    <section class="section-block flow-gap">
-      <div class="section-head">
-        <div>
-          <p class="label">Portfolio</p>
-          <h2>Recent projects</h2>
-        </div>
-        <button class="ghost-btn" data-route-jump="projects" type="button">View all</button>
-      </div>
-      <div class="line-list" data-overview-projects></div>
-    </section>
-  </template>
-
-  <script src="./app.js?v=20260327b" defer></script>
 </body>
 </html>
