@@ -43,21 +43,24 @@
 <!-- Netlify Identity widget -->
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
-<!-- Decap CMS application — always load the latest version -->
-<script src="https://unpkg.com/@decap-cms/app@latest/dist/decap-cms.js"></script>
+<!-- Decap CMS application — use the correct bundle name -->
+<script src="https://unpkg.com/@decap-cms/app@latest/dist/cms.js"></script>
 
 <script>
-  // Initialize Netlify Identity and redirect after login
   if (window.netlifyIdentity) {
-    window.netlifyIdentity.on("init", user => {
+    window.netlifyIdentity.on('init', user => {
       if (!user) {
-        window.netlifyIdentity.on("login", () => {
-          document.location.href = "/sawlper/";
-        });
+        window.netlifyIdentity.on('login', () => document.location.reload());
       }
     });
     window.netlifyIdentity.init();
   }
+  window.CMS_MANUAL_INIT = true;
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.CMS) {
+      window.CMS.init();
+    }
+  });
 </script>
 </body>
 </html>
