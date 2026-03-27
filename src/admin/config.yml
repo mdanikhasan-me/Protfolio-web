@@ -34,11 +34,10 @@ collections:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Slug", name: "slug", widget: "string", hint: "Use lowercase words with hyphens." }
       - { label: "Publish Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
-      - { label: "Short Description", name: "description", widget: "text", hint: "This is used in the blog list." }
+      - { label: "Short Description", name: "description", widget: "text", hint: "Shows on the blog list." }
       - { label: "Cover Image", name: "cover", widget: "image", required: false, allow_multiple: false }
-      - { label: "Tags", name: "tags", widget: "list", required: false, collapsed: false }
       - { label: "Draft", name: "draft", widget: "boolean", default: false, required: false }
-      - { label: "Article", name: "body", widget: "markdown", hint: "Write the full blog post here." }
+      - { label: "Article", name: "body", widget: "markdown" }
 
   - name: "projects"
     label: "Projects"
@@ -54,68 +53,22 @@ collections:
       - { label: "Project Title", name: "title", widget: "string" }
       - { label: "Slug", name: "slug", widget: "string", hint: "Use lowercase words with hyphens." }
       - { label: "Description", name: "description", widget: "text", hint: "Short summary for the project card." }
-      - label: "Tools Used"
-        name: "tools"
-        widget: "list"
-        summary: "{{fields.name}}"
-        allow_add: true
-        collapsed: false
-        field: { label: "Tool", name: "name", widget: "string" }
-      - { label: "Source Code", name: "source_code", widget: "string", required: false, hint: "Paste the repository link here." }
-      - { label: "Live Demo", name: "live_demo", widget: "string", required: false, hint: "Paste the live project link here if you have one." }
+      - { label: "Tools Used", name: "tools", widget: "list", hint: "One tool per line." }
+      - { label: "Source Code", name: "source_code", widget: "string", required: false }
+      - { label: "Live Demo", name: "live_demo", widget: "string", required: false }
       - { label: "Featured", name: "featured", widget: "boolean", default: false, required: false }
 
-  - name: "pages"
-    label: "Website Copy"
+  - name: "social"
+    label: "Social Links"
     files:
-      - label: "Home"
-        name: "homepage"
-        file: "src/content/pages/homepage.yml"
-        fields:
-          - { label: "Hero Title", name: "hero_title", widget: "string" }
-          - { label: "Hero Subtitle", name: "hero_subtitle", widget: "text" }
-          - { label: "Primary Button Label", name: "hero_primary_label", widget: "string", required: false }
-          - { label: "Secondary Button Label", name: "hero_secondary_label", widget: "string", required: false }
-      - label: "About"
-        name: "about"
-        file: "src/content/pages/about.yml"
-        fields:
-          - { label: "Page Title", name: "title", widget: "string" }
-          - { label: "Intro", name: "intro", widget: "text" }
-          - { label: "Body", name: "body", widget: "markdown" }
-      - label: "Contact"
-        name: "contact"
-        file: "src/content/pages/contact.yml"
-        fields:
-          - { label: "Page Title", name: "title", widget: "string" }
-          - { label: "Email", name: "email", widget: "string" }
-          - { label: "Phone", name: "phone", widget: "string", required: false }
-          - { label: "Location", name: "location", widget: "string", required: false }
-
-  - name: "site"
-    label: "Site Settings"
-    files:
-      - label: "General"
-        name: "general"
-        file: "src/content/settings/general.yml"
-        fields:
-          - { label: "Site Title", name: "site_title", widget: "string" }
-          - { label: "Site Description", name: "site_description", widget: "text" }
-          - { label: "Site URL", name: "site_url", widget: "string" }
-          - { label: "Logo", name: "logo", widget: "image", required: false }
-      - label: "Social"
-        name: "social"
+      - label: "Social Profiles"
+        name: "profiles"
         file: "src/content/settings/social.yml"
         fields:
+          - { label: "GitHub", name: "github", widget: "string", required: false }
+          - { label: "LinkedIn", name: "linkedin", widget: "string", required: false }
           - { label: "Facebook", name: "facebook", widget: "string", required: false }
           - { label: "Instagram", name: "instagram", widget: "string", required: false }
-          - { label: "LinkedIn", name: "linkedin", widget: "string", required: false }
-          - { label: "GitHub", name: "github", widget: "string", required: false }
           - { label: "YouTube", name: "youtube", widget: "string", required: false }
-      - label: "SEO"
-        name: "seo"
-        file: "src/content/settings/seo.yml"
-        fields:
-          - { label: "Meta Title", name: "meta_title", widget: "string" }
-          - { label: "Meta Description", name: "meta_description", widget: "text" }
-          - { label: "Open Graph Image", name: "og_image", widget: "image", required: false }
+          - { label: "X", name: "x", widget: "string", required: false }
+          - { label: "Discord", name: "discord", widget: "string", required: false }

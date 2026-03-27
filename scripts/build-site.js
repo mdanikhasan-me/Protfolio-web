@@ -7,6 +7,8 @@ const publicDir = path.join(root, "public");
 const pagesDir = path.join(root, "src", "pages");
 const adminDir = path.join(root, "src", "admin");
 const postSourceDir = path.join(root, "src", "content", "posts");
+const projectSourceDir = path.join(root, "src", "content", "projects");
+const socialFile = path.join(root, "src", "content", "settings", "social.yml");
 const BUILD_VERSION = "20260327";
 
 const pageRoutes = [
@@ -55,23 +57,81 @@ function copyPages() {
   copyDir(adminDir, adminOutput);
 }
 
+function stripQuotes(value) {
+  let out = String(value || "").trim();
+  if ((out.startsWith('"') && out.endsWith('"')) || (out.startsWith("'") && out.endsWith("'"))) out = out.slice(1, -1);
+  return out;
+}
+
+function readYamlFile(file) {
+  if (!fs.existsSync(file)) return {};
+  const out = {};
+  const lines = fs.readFileSync(file, "utf8").replace(/\r/g, "").split("\n");
+  for (const line of lines) {
+    if (!line.trim() || line.trim().startsWith("#")) continue;
+    const idx = line.indexOf(":");
+    if (idx === -1) continue;
+    const key = line.slice(0, idx).trim();
+    const value = stripQuotes(line.slice(idx + 1));
+    out[key] = value;
+  }
+  return out;
+}
+
+function parseValue(raw) {
+  const value = stripQuotes(raw);
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return value;
+}
+
 function readFrontMatter(raw) {
   if (!raw.startsWith("---")) return { data: {}, body: raw.trim() };
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!match) return { data: {}, body: raw.trim() };
 
   const data = {};
-  for (const line of match[1].split(/\r?\n/)) {
-    const idx = line.indexOf(":");
-    if (idx === -1) continue;
-    const key = line.slice(0, idx).trim();
-    let value = line.slice(idx + 1).trim();
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-      value = value.slice(1, -1);
+  const lines = match[1].replace(/\r/g, "").split("\n");
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+    if (!line.trim()) {
+      i += 1;
+      continue;
     }
-    if (value === "false") value = false;
-    else if (value === "true") value = true;
-    data[key] = value;
+    const baseMatch = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
+    if (!baseMatch) {
+      i += 1;
+      continue;
+    }
+    const key = baseMatch[1];
+    const rest = baseMatch[2];
+    if (rest) {
+      data[key] = parseValue(rest);
+      i += 1;
+      continue;
+    }
+
+    const list = [];
+    i += 1;
+    while (i < lines.length) {
+      const itemLine = lines[i];
+      if (!itemLine.trim()) {
+        i += 1;
+        continue;
+      }
+      if (!/^\s+/.test(itemLine)) break;
+      const trimmed = itemLine.trim();
+      if (trimmed.startsWith("- ")) {
+        const itemValue = trimmed.slice(2).trim();
+        const objMatch = itemValue.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
+        if (objMatch) list.push(parseValue(objMatch[2]));
+        else list.push(parseValue(itemValue));
+      }
+      i += 1;
+    }
+    data[key] = list;
   }
 
   return { data, body: match[2].trim() };
@@ -84,6 +144,10 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function slugify(value) {
@@ -200,6 +264,31 @@ function getPosts() {
   return posts;
 }
 
+function getProjects() {
+  if (!fs.existsSync(projectSourceDir)) return [];
+  const files = fs.readdirSync(projectSourceDir).filter((name) => name.endsWith(".md"));
+  const projects = [];
+
+  for (const file of files) {
+    const raw = fs.readFileSync(path.join(projectSourceDir, file), "utf8");
+    const { data } = readFrontMatter(raw);
+    const slug = data.slug ? slugify(data.slug) : slugify(file.replace(/\.md$/, ""));
+    const tools = Array.isArray(data.tools) ? data.tools.filter(Boolean).map((item) => String(item).trim()).filter(Boolean) : [];
+    projects.push({
+      title: data.title || slug,
+      slug,
+      description: data.description || "",
+      tools,
+      sourceCode: data.source_code || "",
+      liveDemo: data.live_demo || "",
+      featured: data.featured === true || data.featured === "true"
+    });
+  }
+
+  projects.sort((a, b) => Number(b.featured) - Number(a.featured) || a.title.localeCompare(b.title));
+  return projects;
+}
+
 function replaceBlogIndex(posts) {
   const blogPath = path.join(dist, "blog", "index.html");
   if (!fs.existsSync(blogPath)) return;
@@ -242,6 +331,49 @@ ${cards}
   let html = fs.readFileSync(blogPath, "utf8");
   html = html.replace(/<main id="main-content"[\s\S]*?<\/main>/, replacement);
   fs.writeFileSync(blogPath, html);
+}
+
+function replaceProjectsPage(projects) {
+  const pagePath = path.join(dist, "projects", "index.html");
+  if (!fs.existsSync(pagePath)) return;
+
+  const cards = projects.length
+    ? projects
+        .map((project) => {
+          const tools = project.tools.length
+            ? `<ul class="tag-list" aria-label="${escapeHtml(project.title)} technologies">${project.tools.map((tool) => `<li>${escapeHtml(tool)}</li>`).join("")}</ul>`
+            : "";
+          const links = [
+            project.sourceCode ? `<p><a class="text-link" href="${escapeHtml(project.sourceCode)}" target="_blank" rel="noopener noreferrer">Source Code</a></p>` : "",
+            project.liveDemo ? `<p><a class="text-link" href="${escapeHtml(project.liveDemo)}" target="_blank" rel="noopener noreferrer">Live Demo</a></p>` : ""
+          ].filter(Boolean).join("");
+          return `
+          <article class="project-entry flow-sm">
+            <h3>${escapeHtml(project.title)}</h3>
+            <p>${escapeHtml(project.description)}</p>
+            ${tools}
+            <div class="flow-xs">${links}</div>
+          </article>`;
+        })
+        .join("\n")
+    : `<article class="project-entry flow-sm"><h3>No projects yet</h3><p>Create your first project from SAWLPER.</p></article>`;
+
+  const mainReplacement = `
+    <main id="main-content" class="site-main shell shell-wide">
+      <section class="section section-line">
+        <div class="measure flow-md">
+          <h1>Projects</h1>
+        </div>
+
+        <div class="project-list">
+${cards}
+        </div>
+      </section>
+    </main>`;
+
+  let html = fs.readFileSync(pagePath, "utf8");
+  html = html.replace(/<main id="main-content"[\s\S]*?<\/main>/, mainReplacement);
+  fs.writeFileSync(pagePath, html);
 }
 
 function createPostPages(posts) {
@@ -372,12 +504,47 @@ function createFeed(posts) {
   fs.writeFileSync(path.join(dist, "blog", "feed.json"), JSON.stringify(data, null, 2));
 }
 
+function applySocialLinks(social) {
+  const files = [];
+  function collect(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) collect(full);
+      else if (entry.name.endsWith(".html")) files.push(full);
+    }
+  }
+  collect(dist);
+
+  const replacements = {
+    "https://github.com/mdanikhasan-dev": social.github,
+    "https://www.linkedin.com/in/mdanikhasan-dev/": social.linkedin,
+    "https://www.facebook.com/mdanikhasan.dev": social.facebook,
+    "https://x.com/mdanikhasan_dev": social.x,
+    "https://discord.com/users/751170057664462938": social.discord,
+    "https://www.instagram.com/": social.instagram,
+    "https://www.youtube.com/": social.youtube
+  };
+
+  for (const file of files) {
+    let html = fs.readFileSync(file, "utf8");
+    for (const [from, to] of Object.entries(replacements)) {
+      if (!to) continue;
+      html = html.replace(new RegExp(escapeRegExp(from), "g"), to);
+    }
+    fs.writeFileSync(file, html);
+  }
+}
+
 clearDir(dist);
 copyPublic();
 copyPages();
 const posts = getPosts();
+const projects = getProjects();
+const social = readYamlFile(socialFile);
 replaceBlogIndex(posts);
+replaceProjectsPage(projects);
 createPostPages(posts);
 createFeed(posts);
 createSitemap(posts);
-console.log(`Built ${posts.length} post(s) into ${dist}`);
+applySocialLinks(social);
+console.log(`Built ${posts.length} post(s) and ${projects.length} project(s) into ${dist}`);

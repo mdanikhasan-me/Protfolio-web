@@ -37,8 +37,8 @@
     body.cms-live {
       overflow: auto;
       background:
-        radial-gradient(circle at top, rgba(214, 170, 96, 0.06), transparent 24%),
-        linear-gradient(180deg, #071211 0%, #0b1513 100%);
+        radial-gradient(circle at top, rgba(214, 170, 96, 0.05), transparent 24%),
+        linear-gradient(180deg, #06110f 0%, #081614 100%);
     }
     #gate {
       position: fixed;
@@ -54,7 +54,7 @@
       visibility: hidden;
       pointer-events: none;
     }
-    .shell {
+    #gate .shell {
       width: min(92vw, 520px);
       border-radius: 28px;
       border: 1px solid var(--line);
@@ -67,7 +67,7 @@
       position: relative;
       isolation: isolate;
     }
-    .shell::before {
+    #gate .shell::before {
       content: "";
       position: absolute;
       inset: 0;
@@ -77,11 +77,11 @@
       pointer-events: none;
       z-index: -1;
     }
-    .head {
+    #gate .head {
       padding: 34px 34px 22px;
       border-bottom: 1px solid var(--line);
     }
-    .brand {
+    #gate .brand {
       margin: 0;
       font-size: clamp(42px, 7vw, 58px);
       line-height: 0.92;
@@ -89,34 +89,34 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
-    .label {
+    #gate .label {
       margin-top: 10px;
       font-size: 13px;
       letter-spacing: 0.16em;
       text-transform: uppercase;
       color: var(--muted);
     }
-    .body {
+    #gate .body {
       padding: 28px 34px 32px;
       display: grid;
       gap: 18px;
     }
-    .status {
+    #gate .status {
       min-height: 22px;
       font-size: 14px;
       color: var(--muted);
     }
-    .status.is-error { color: var(--danger); }
-    .status.is-success { color: var(--success); }
-    form { display: grid; gap: 14px; }
-    .field { display: grid; gap: 8px; }
-    .field label {
+    #gate .status.is-error { color: var(--danger); }
+    #gate .status.is-success { color: var(--success); }
+    #gate form { display: grid; gap: 14px; }
+    #gate .field { display: grid; gap: 8px; }
+    #gate .field label {
       font-size: 12px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--muted);
     }
-    .input-wrap input {
+    #gate .input-wrap input {
       width: 100%;
       height: 56px;
       border-radius: 16px;
@@ -128,18 +128,18 @@
       outline: none;
       transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
     }
-    .input-wrap input:focus {
+    #gate .input-wrap input:focus {
       border-color: var(--line-strong);
       box-shadow: 0 0 0 4px rgba(214, 170, 96, 0.1);
       background: rgba(255, 255, 255, 0.05);
     }
-    .row {
+    #gate .row {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
       align-items: center;
     }
-    button {
+    #gate button {
       appearance: none;
       border: 0;
       border-radius: 16px;
@@ -149,36 +149,140 @@
       cursor: pointer;
       transition: transform 0.18s ease, background 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
     }
-    button:hover { transform: translateY(-1px); }
-    button:disabled {
+    #gate button:hover { transform: translateY(-1px); }
+    #gate button:disabled {
       opacity: 0.7;
       cursor: wait;
       transform: none;
     }
-    .primary {
+    #gate .primary {
       min-width: 148px;
       background: linear-gradient(180deg, var(--gold-strong), var(--gold));
       color: #1b1205;
       box-shadow: 0 10px 24px rgba(214, 170, 96, 0.2);
     }
-    .secondary {
+    #gate .secondary {
       background: rgba(255, 255, 255, 0.05);
       color: var(--text);
       border: 1px solid var(--line);
     }
-    .text-btn {
+    #gate .text-btn {
       background: transparent;
       color: var(--muted);
       padding: 0;
       border-radius: 0;
     }
-    .mode-note,
-    .helper {
+    #gate .mode-note,
+    #gate .helper {
       font-size: 13px;
       color: var(--muted);
     }
-    .mode-note { display: none; }
-    .mode-note.is-visible { display: block; }
+    #gate .mode-note { display: none; }
+    #gate .mode-note.is-visible { display: block; }
+
+    body.cms-live #nc-root,
+    body.cms-live #nc-root * {
+      box-sizing: border-box;
+    }
+    body.cms-live #nc-root {
+      color: #eef3f1;
+    }
+    body.cms-live #nc-root a {
+      color: #ddb56d;
+    }
+    body.cms-live #nc-root button,
+    body.cms-live #nc-root [role="button"],
+    body.cms-live #nc-root .btn,
+    body.cms-live #nc-root input,
+    body.cms-live #nc-root textarea,
+    body.cms-live #nc-root select {
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    }
+    body.cms-live #nc-root button,
+    body.cms-live #nc-root [role="button"],
+    body.cms-live #nc-root .btn {
+      border-radius: 14px !important;
+      box-shadow: none !important;
+    }
+    body.cms-live #nc-root input,
+    body.cms-live #nc-root textarea,
+    body.cms-live #nc-root select {
+      border-radius: 14px !important;
+      background: #0d1514 !important;
+      color: #f4f7f5 !important;
+      border: 1px solid rgba(255,255,255,.10) !important;
+      box-shadow: none !important;
+    }
+    body.cms-live #nc-root label,
+    body.cms-live #nc-root small,
+    body.cms-live #nc-root p,
+    body.cms-live #nc-root span,
+    body.cms-live #nc-root h1,
+    body.cms-live #nc-root h2,
+    body.cms-live #nc-root h3,
+    body.cms-live #nc-root h4,
+    body.cms-live #nc-root h5,
+    body.cms-live #nc-root h6 {
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    }
+    body.cms-live #nc-root > div,
+    body.cms-live #nc-root main,
+    body.cms-live #nc-root section,
+    body.cms-live #nc-root article,
+    body.cms-live #nc-root aside,
+    body.cms-live #nc-root nav,
+    body.cms-live #nc-root header {
+      background-color: transparent;
+    }
+    body.cms-live #nc-root aside,
+    body.cms-live #nc-root nav[aria-label],
+    body.cms-live #nc-root [class*="Sidebar"] {
+      background: rgba(6, 17, 16, 0.9) !important;
+      border-right: 1px solid rgba(255,255,255,.08) !important;
+      backdrop-filter: blur(10px);
+    }
+    body.cms-live #nc-root header,
+    body.cms-live #nc-root [class*="TopBar"],
+    body.cms-live #nc-root [class*="Toolbar"] {
+      background: rgba(9, 18, 17, 0.94) !important;
+      border-bottom: 1px solid rgba(255,255,255,.08) !important;
+      backdrop-filter: blur(10px);
+    }
+    body.cms-live #nc-root main,
+    body.cms-live #nc-root [class*="CollectionTop"],
+    body.cms-live #nc-root [class*="EditorContainer"],
+    body.cms-live #nc-root [class*="EditorPane"],
+    body.cms-live #nc-root [class*="ListCard"],
+    body.cms-live #nc-root [class*="Card"] {
+      background: transparent !important;
+    }
+    body.cms-live #nc-root [class*="ListCard"],
+    body.cms-live #nc-root [class*="Card"],
+    body.cms-live #nc-root article,
+    body.cms-live #nc-root [class*="Entry"],
+    body.cms-live #nc-root [class*="Frame"] {
+      border-radius: 18px !important;
+    }
+    body.cms-live #nc-root ul,
+    body.cms-live #nc-root ol {
+      padding-left: 1.2rem;
+    }
+    body.cms-live #nc-root [data-slate-editor="true"] {
+      min-height: 280px;
+      border-radius: 16px !important;
+      background: #0d1514 !important;
+      color: #f4f7f5 !important;
+      border: 1px solid rgba(255,255,255,.10) !important;
+      padding: 16px !important;
+    }
+    body.cms-live #nc-root [href*="#signup"],
+    body.cms-live .netlify-identity-widget a[href="#signup"],
+    body.cms-live .netlify-identity-widget button[data-netlify-identity-button="signup"],
+    body.cms-live .netlify-identity-widget .tab.signup,
+    body.cms-live .netlify-identity-widget .signup,
+    body.cms-live .netlify-identity-widget [href*="signup"] {
+      display: none !important;
+    }
     .netlify-identity-widget .modal { backdrop-filter: blur(8px); }
     .netlify-identity-widget .content {
       border-radius: 24px !important;
@@ -190,19 +294,12 @@
       border-radius: 14px !important;
       font-weight: 700 !important;
     }
-    .netlify-identity-widget a[href="#signup"],
-    .netlify-identity-widget button[data-netlify-identity-button="signup"],
-    .netlify-identity-widget .tab.signup,
-    .netlify-identity-widget .signup,
-    .netlify-identity-widget [href*="signup"] {
-      display: none !important;
-    }
     @media (max-width: 600px) {
-      .head { padding: 28px 24px 18px; }
-      .body { padding: 22px 24px 26px; }
-      .brand { font-size: 40px; }
-      .row { flex-direction: column; align-items: stretch; }
-      .primary, .secondary { width: 100%; }
+      #gate .head { padding: 28px 24px 18px; }
+      #gate .body { padding: 22px 24px 26px; }
+      #gate .brand { font-size: 40px; }
+      #gate .row { flex-direction: column; align-items: stretch; }
+      #gate .primary, #gate .secondary { width: 100%; }
     }
   </style>
   <script>
@@ -246,180 +343,54 @@
 
   <script>
     const gate = document.getElementById("gate");
-    const statusEl = document.getElementById("status");
     const form = document.getElementById("auth-form");
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
     const passwordField = document.getElementById("password-field");
+    const statusEl = document.getElementById("status");
     const submitBtn = document.getElementById("submit-btn");
     const refreshBtn = document.getElementById("refresh-btn");
     const forgotBtn = document.getElementById("forgot-btn");
     const modeNote = document.getElementById("mode-note");
-    let recoveryMode = false;
+
+    let isRecoverMode = false;
     let cmsStarted = false;
 
-    const setStatus = (text, tone) => {
-      statusEl.textContent = text;
-      statusEl.classList.remove("is-error", "is-success");
-      if (tone === "error") statusEl.classList.add("is-error");
-      if (tone === "success") statusEl.classList.add("is-success");
+    const setStatus = (message, type) => {
+      statusEl.textContent = message;
+      statusEl.className = "status" + (type ? " is-" + type : "");
     };
 
-    const setBusy = (busy) => {
-      submitBtn.disabled = busy;
-      refreshBtn.disabled = busy;
-      forgotBtn.disabled = busy;
+    const setLoading = (loading) => {
+      submitBtn.disabled = loading;
+      refreshBtn.disabled = loading;
+      forgotBtn.disabled = loading;
     };
 
-    const setRecoveryMode = (active) => {
-      recoveryMode = active;
-      passwordField.style.display = active ? "none" : "grid";
-      passwordInput.required = !active;
-      submitBtn.textContent = active ? "Send reset link" : "Sign in";
-      forgotBtn.textContent = active ? "Back to sign in" : "Forgot password";
-      modeNote.classList.toggle("is-visible", active);
-      setStatus(active ? "Enter your email to receive a password reset link." : "Enter your email and password to continue.");
+    const setRecoverMode = (recover) => {
+      isRecoverMode = recover;
+      passwordField.style.display = recover ? "none" : "grid";
+      passwordInput.required = !recover;
+      submitBtn.textContent = recover ? "Send reset link" : "Sign in";
+      forgotBtn.textContent = recover ? "Back to sign in" : "Forgot password";
+      modeNote.classList.toggle("is-visible", recover);
+      setStatus(recover ? "Enter your email to get a reset link." : "Enter your email and password to continue.");
     };
 
-    const applyAdminTheme = () => {
-      if (document.getElementById("sawlper-admin-theme")) return;
-      const style = document.createElement("style");
-      style.id = "sawlper-admin-theme";
-      style.textContent = `
-        body.cms-live, body.cms-live #root, body.cms-live #nc-root {
-          background:
-            radial-gradient(circle at top, rgba(214,170,96,.05), transparent 24%),
-            linear-gradient(180deg, #0a1311 0%, #0d1715 100%) !important;
-          color: #eef4f0 !important;
-          font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-        }
-        body.cms-live * { box-sizing: border-box; }
-        body.cms-live a { color: #e4bd77 !important; }
-        body.cms-live input,
-        body.cms-live textarea,
-        body.cms-live select {
-          border-radius: 16px !important;
-          border: 1px solid rgba(255,255,255,.1) !important;
-          background: rgba(255,255,255,.04) !important;
-          color: #eef4f0 !important;
-          box-shadow: none !important;
-        }
-        body.cms-live input:focus,
-        body.cms-live textarea:focus,
-        body.cms-live select:focus {
-          outline: none !important;
-          border-color: rgba(214,170,96,.42) !important;
-          box-shadow: 0 0 0 4px rgba(214,170,96,.08) !important;
-        }
-        body.cms-live button,
-        body.cms-live [role="button"] {
-          border-radius: 14px !important;
-          font-weight: 700 !important;
-        }
-        body.cms-live aside,
-        body.cms-live nav,
-        body.cms-live main,
-        body.cms-live section,
-        body.cms-live article,
-        body.cms-live header,
-        body.cms-live [role="navigation"],
-        body.cms-live [role="dialog"],
-        body.cms-live [role="menu"],
-        body.cms-live [role="listbox"],
-        body.cms-live [data-slate-editor="true"] {
-          border-color: rgba(255,255,255,.08) !important;
-        }
-        body.cms-live aside,
-        body.cms-live nav {
-          background: rgba(8,19,17,.86) !important;
-          backdrop-filter: blur(14px) !important;
-        }
-        body.cms-live main {
-          background: transparent !important;
-        }
-        body.cms-live section,
-        body.cms-live article,
-        body.cms-live [role="dialog"] > div,
-        body.cms-live [role="menu"],
-        body.cms-live [role="listbox"] {
-          background: rgba(12,23,20,.82) !important;
-          backdrop-filter: blur(14px) !important;
-          border: 1px solid rgba(255,255,255,.08) !important;
-          border-radius: 20px !important;
-          box-shadow: 0 22px 60px rgba(0,0,0,.24) !important;
-        }
-        body.cms-live table,
-        body.cms-live tbody,
-        body.cms-live thead,
-        body.cms-live tr,
-        body.cms-live td,
-        body.cms-live th {
-          background: transparent !important;
-          border-color: rgba(255,255,255,.08) !important;
-          color: #eef4f0 !important;
-        }
-        body.cms-live img[alt*="Netlify"],
-        body.cms-live svg[aria-label*="Netlify"] {
-          opacity: .0 !important;
-        }
-      `;
-      document.head.appendChild(style);
-    };
-
-    const startCMS = async () => {
-      if (cmsStarted) return;
-      cmsStarted = true;
+    const hideGate = () => {
       document.body.classList.add("cms-live");
       gate.classList.add("is-hidden");
-      applyAdminTheme();
-      if (window.CMS) {
-        await window.CMS.init();
-      }
-      new MutationObserver(() => applyAdminTheme()).observe(document.body, { childList: true, subtree: true });
     };
 
-    const hasMagicToken = () => {
-      const hash = window.location.hash || "";
-      return hash.includes("invite_token=") || hash.includes("recovery_token=") || hash.includes("confirmation_token=");
+    const startCMS = () => {
+      if (cmsStarted || !window.CMS) return;
+      cmsStarted = true;
+      window.CMS.init();
+      hideGate();
     };
 
-    const initIdentity = () => {
-      if (!window.netlifyIdentity) {
-        setStatus("Identity could not be loaded.", "error");
-        return;
-      }
-      window.netlifyIdentity.on("init", async (user) => {
-        if (user) {
-          setStatus("Opening editor…", "success");
-          try {
-            await startCMS();
-          } catch (error) {
-            setStatus(error?.message || "Could not start the editor.", "error");
-          }
-        } else {
-          setStatus("Enter your email and password to continue.");
-        }
-      });
-      window.netlifyIdentity.on("login", async () => {
-        setStatus("Opening editor…", "success");
-        await startCMS();
-      });
-      window.netlifyIdentity.on("error", (error) => {
-        setBusy(false);
-        setStatus(error?.message || "Authentication failed.", "error");
-      });
-      window.netlifyIdentity.init({ locale: "en", logo: false, namePlaceholder: "Name" });
-      if (hasMagicToken()) {
-        window.netlifyIdentity.open();
-      }
-    };
-
-    form.addEventListener("submit", async (event) => {
+    const handleLogin = async (event) => {
       event.preventDefault();
-      if (!window.netlifyIdentity || !window.netlifyIdentity.gotrue) {
-        setStatus("Identity is not ready yet.", "error");
-        return;
-      }
       const email = emailInput.value.trim();
       const password = passwordInput.value;
       if (!email) {
@@ -427,45 +398,64 @@
         emailInput.focus();
         return;
       }
-      setBusy(true);
+      if (!isRecoverMode && !password) {
+        setStatus("Enter your password.", "error");
+        passwordInput.focus();
+        return;
+      }
+      if (!window.netlifyIdentity) {
+        setStatus("Identity service is unavailable right now.", "error");
+        return;
+      }
+      setLoading(true);
       try {
-        if (recoveryMode) {
-          await window.netlifyIdentity.gotrue.requestPasswordRecovery(email);
+        if (isRecoverMode) {
+          await window.netlifyIdentity.requestPasswordRecovery(email);
           setStatus("Reset link sent. Check your email.", "success");
-          setRecoveryMode(false);
-          emailInput.focus();
-        } else {
-          if (!password) {
-            setBusy(false);
-            setStatus("Enter your password.", "error");
-            passwordInput.focus();
-            return;
-          }
-          setStatus("Signing in…");
-          await window.netlifyIdentity.gotrue.login(email, password, true);
-          window.location.href = "/sawlper/";
+          setLoading(false);
+          return;
         }
+        await window.netlifyIdentity.login(email, password, true);
       } catch (error) {
-        setStatus(error?.message || "Request failed.", "error");
-      } finally {
-        setBusy(false);
+        setStatus((error && error.message) || "Sign in failed.", "error");
+      }
+      setLoading(false);
+    };
+
+    form.addEventListener("submit", handleLogin);
+    refreshBtn.addEventListener("click", () => window.location.reload());
+    forgotBtn.addEventListener("click", () => setRecoverMode(!isRecoverMode));
+
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("login", () => {
+        setStatus("Opening editor…", "success");
+        startCMS();
+      });
+      window.netlifyIdentity.on("init", (user) => {
+        if (user) {
+          startCMS();
+        } else {
+          setRecoverMode(false);
+        }
+      });
+      window.netlifyIdentity.on("error", (error) => {
+        setStatus((error && error.message) || "Authentication error.", "error");
+        setLoading(false);
+      });
+      window.netlifyIdentity.on("logout", () => window.location.reload());
+      window.netlifyIdentity.init();
+    } else {
+      setStatus("Identity service failed to load.", "error");
+    }
+
+    window.addEventListener("hashchange", () => {
+      if (window.location.hash.includes("recovery_token")) {
+        setStatus("Continue in the email reset flow to set a new password.", "success");
+      }
+      if (window.location.hash.includes("invite_token")) {
+        setStatus("Finish the invite flow from your email, then sign in here.", "success");
       }
     });
-
-    forgotBtn.addEventListener("click", () => {
-      setRecoveryMode(!recoveryMode);
-      if (recoveryMode) emailInput.focus();
-      else passwordInput.focus();
-    });
-
-    refreshBtn.addEventListener("click", async () => {
-      if (window.netlifyIdentity && window.netlifyIdentity.currentUser()) {
-        try { await window.netlifyIdentity.refresh(); } catch (_) {}
-      }
-      window.location.reload();
-    });
-
-    initIdentity();
   </script>
 </body>
 </html>
