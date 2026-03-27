@@ -4,202 +4,149 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>SAWLPER CMS</title>
-
-  <script>
-    window.CMS_MANUAL_INIT = true;
-  </script>
-
+  <meta name="theme-color" content="#07100d">
+  <title>SAWLPER</title>
+  <link rel="stylesheet" href="./app.css?v=20260327b">
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-
-  <style>
-    html, body {
-      margin: 0;
-      min-height: 100%;
-      background:
-        radial-gradient(circle at top, rgba(214,171,92,.08), transparent 32%),
-        linear-gradient(180deg, #04110f 0%, #031816 100%);
-      color: #f4f5ef;
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    .gate {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background:
-        radial-gradient(circle at center, rgba(214,171,92,.06), transparent 32%),
-        linear-gradient(180deg, rgba(3,16,14,.8), rgba(2,19,17,.9));
-    }
-
-    .gate.hidden {
-      display: none;
-    }
-
-    .card {
-      width: 100%;
-      max-width: 520px;
-      border-radius: 24px;
-      border: 1px solid rgba(255,255,255,.08);
-      background: rgba(7,20,18,.9);
-      box-shadow: 0 20px 60px rgba(0,0,0,.4);
-      overflow: hidden;
-    }
-
-    .top {
-      padding: 30px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-
-    .title {
-      margin: 0;
-      font-size: 48px;
-      font-weight: 900;
-    }
-
-    .subtitle {
-      margin: 6px 0 0;
-      font-size: 14px;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      opacity: .7;
-    }
-
-    .body {
-      padding: 24px 30px 30px;
-    }
-
-    .status {
-      margin-bottom: 16px;
-      font-size: 14px;
-    }
-
-    .status.error { color: #ff8d78; }
-    .status.success { color: #9be29b; }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border: none;
-      border-radius: 12px;
-      padding: 12px 18px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .primary {
-      background: #d8ae63;
-      color: #111;
-    }
-
-    .secondary {
-      background: rgba(255,255,255,.06);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,.08);
-    }
-
-    .link {
-      background: transparent;
-      color: rgba(255,255,255,.7);
-    }
-
-    .netlify-identity-widget {
-      z-index: 10000 !important;
-    }
-  </style>
 </head>
-
 <body>
+  <div class="admin-bg" aria-hidden="true">
+    <div class="admin-bg__photo"></div>
+    <div class="admin-bg__shade"></div>
+    <div class="admin-bg__mist"></div>
+  </div>
 
   <div class="gate" id="gate">
-    <div class="card">
-      <div class="top">
-        <h1 class="title">SAWLPER</h1>
-        <p class="subtitle">Content Studio</p>
-      </div>
-
-      <div class="body">
-        <div class="status" id="status">Ready.</div>
-
-        <div class="actions">
-          <button class="btn primary" id="loginBtn">Sign in</button>
-          <button class="btn secondary" id="refreshBtn">Refresh</button>
-          <button class="btn link" id="forgotBtn">Forgot password</button>
-        </div>
-      </div>
+    <div class="gate__inner">
+      <p class="gate__eyebrow">Private admin</p>
+      <h1 class="gate__brand">SAWLPER</h1>
+      <button class="gate__enter" id="enterPortal" type="button">Enter portal</button>
+      <p class="gate__status" id="gateStatus">Secure access for site content.</p>
     </div>
   </div>
 
-  <script>
-  (function () {
-    const gate = document.getElementById("gate");
-    const statusEl = document.getElementById("status");
+  <div class="app-shell is-hidden" id="appShell">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <a class="brand-link" href="#overview">SAWLPER</a>
+        <p>Content Studio</p>
+      </div>
 
-    function setStatus(msg, type) {
-      statusEl.textContent = msg;
-      statusEl.className = "status" + (type ? " " + type : "");
-    }
+      <nav class="sidebar-nav" aria-label="Admin sections">
+        <a href="#overview" data-route-link="overview">Overview</a>
+        <a href="#blog" data-route-link="blog">Blog</a>
+        <a href="#projects" data-route-link="projects">Projects</a>
+        <a href="#social" data-route-link="social">Social Links</a>
+        <a href="#media" data-route-link="media">Media</a>
+      </nav>
 
-    function startCMS() {
-      if (!window.CMS_STARTED) {
-        window.CMS_STARTED = true;
-        window.CMS.init();
-        gate.classList.add("hidden");
-      }
-    }
+      <div class="sidebar-foot" id="sidebarFoot">
+        <div class="identity-meta" id="identityMeta">
+          <span class="identity-kicker">Signed in as</span>
+          <strong id="identityEmail">—</strong>
+        </div>
+        <button class="ghost-btn ghost-btn--full" id="logoutBtn" type="button">Sign out</button>
+      </div>
+    </aside>
 
-    document.getElementById("loginBtn").onclick = function () {
-      setStatus("Opening login...");
-      window.netlifyIdentity.open();
-    };
+    <div class="workspace">
+      <header class="topbar">
+        <div>
+          <p class="topbar__eyebrow" id="topbarEyebrow">Private admin</p>
+          <h1 class="topbar__title" id="topbarTitle">Overview</h1>
+        </div>
+        <div class="topbar__actions">
+          <button class="ghost-btn" id="syncBtn" type="button">Refresh</button>
+          <a class="ghost-btn" href="/" target="_blank" rel="noopener noreferrer">Open site</a>
+        </div>
+      </header>
 
-    document.getElementById("forgotBtn").onclick = function () {
-      setStatus("Opening recovery...");
-      window.netlifyIdentity.open("recover");
-    };
+      <main class="content" id="appContent"></main>
+    </div>
+  </div>
 
-    document.getElementById("refreshBtn").onclick = function () {
-      location.reload();
-    };
+  <template id="overviewTemplate">
+    <section class="section-block summary-strip">
+      <div>
+        <span class="label">Posts</span>
+        <strong data-count-posts>0</strong>
+      </div>
+      <div>
+        <span class="label">Projects</span>
+        <strong data-count-projects>0</strong>
+      </div>
+      <div>
+        <span class="label">Profiles</span>
+        <strong data-count-social>0</strong>
+      </div>
+      <div>
+        <span class="label">Uploads</span>
+        <strong data-count-media>0</strong>
+      </div>
+    </section>
 
-    if (!window.netlifyIdentity) {
-      setStatus("Identity failed to load", "error");
-      return;
-    }
+    <section class="section-block flow-gap">
+      <div class="section-head">
+        <div>
+          <p class="label">Publishing</p>
+          <h2>Quick actions</h2>
+        </div>
+      </div>
+      <div class="line-list line-list--tight">
+        <button class="line-row line-row--button" data-action="new-post" type="button">
+          <span>
+            <strong>New post</strong>
+            <small>Write and publish a fresh blog entry.</small>
+          </span>
+          <em>Open</em>
+        </button>
+        <button class="line-row line-row--button" data-action="new-project" type="button">
+          <span>
+            <strong>New project</strong>
+            <small>Add a new portfolio entry without touching the frontend.</small>
+          </span>
+          <em>Open</em>
+        </button>
+        <button class="line-row line-row--button" data-route-jump="social" type="button">
+          <span>
+            <strong>Edit social links</strong>
+            <small>Update profile URLs in one place.</small>
+          </span>
+          <em>Open</em>
+        </button>
+        <button class="line-row line-row--button" data-route-jump="media" type="button">
+          <span>
+            <strong>Upload media</strong>
+            <small>Drag and drop images into the uploads folder.</small>
+          </span>
+          <em>Open</em>
+        </button>
+      </div>
+    </section>
 
-    window.netlifyIdentity.on("init", function (user) {
-      if (user) {
-        setStatus("Loading dashboard...", "success");
-        startCMS();
-      } else {
-        setStatus("Ready.");
-      }
-    });
+    <section class="section-block flow-gap">
+      <div class="section-head">
+        <div>
+          <p class="label">Latest content</p>
+          <h2>Recent blog posts</h2>
+        </div>
+        <button class="ghost-btn" data-route-jump="blog" type="button">View all</button>
+      </div>
+      <div class="line-list" data-overview-posts></div>
+    </section>
 
-    window.netlifyIdentity.on("login", function () {
-      setStatus("Loading dashboard...", "success");
-      startCMS();
-    });
+    <section class="section-block flow-gap">
+      <div class="section-head">
+        <div>
+          <p class="label">Portfolio</p>
+          <h2>Recent projects</h2>
+        </div>
+        <button class="ghost-btn" data-route-jump="projects" type="button">View all</button>
+      </div>
+      <div class="line-list" data-overview-projects></div>
+    </section>
+  </template>
 
-    window.netlifyIdentity.on("logout", function () {
-      location.reload();
-    });
-
-    window.netlifyIdentity.on("error", function (err) {
-      setStatus(err.message || "Auth error", "error");
-    });
-
-    window.netlifyIdentity.init();
-  })();
-  </script>
-
+  <script src="./app.js?v=20260327b" defer></script>
 </body>
 </html>

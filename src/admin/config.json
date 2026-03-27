@@ -1,0 +1,12 @@
+{
+  "owner": "mdanikhasan-dev",
+  "repo": "Protfolio-web",
+  "branch": "main",
+  "site": "https://mdanikhasan.com",
+  "paths": {
+    "posts": "src/content/posts",
+    "projects": "src/content/projects",
+    "social": "src/content/settings/social.yml",
+    "media": "public/uploads"
+  }
+}
