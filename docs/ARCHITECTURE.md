@@ -21,7 +21,7 @@
 4. Read markdown from `src/content/posts/`
 5. Generate blog index, blog post pages, `feed.json`, and `sitemap.xml`
 
-## Reason
+## Why this is better
 
 - clear separation between source, content, static assets, and generated output
 - easier path management for GitHub + Netlify deployment
