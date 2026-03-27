@@ -124,7 +124,7 @@
     window.addEventListener('resize', applyNavShutter, { passive: true });
     window.addEventListener('orientationchange', applyNavShutter, { passive: true });
 
-    /* Removed synthetic wheel smoothing. Native desktop scrolling preserves speed, precision, and performance. */
+    
 
     var copyButton  = document.querySelector('[data-copy-email]');
     var liveRegion  = document.getElementById('copy-status');
