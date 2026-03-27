@@ -40,7 +40,24 @@
     </div>
   </div>
 
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/decap-cms@3.5.1/dist/decap-cms.js"></script>
+<!-- Netlify Identity widget -->
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
+<!-- Decap CMS application — always load the latest version -->
+<script src="https://unpkg.com/@decap-cms/app@latest/dist/decap-cms.js"></script>
+
+<script>
+  // Initialize Netlify Identity and redirect after login
+  if (window.netlifyIdentity) {
+    window.netlifyIdentity.on("init", user => {
+      if (!user) {
+        window.netlifyIdentity.on("login", () => {
+          document.location.href = "/sawlper/";
+        });
+      }
+    });
+    window.netlifyIdentity.init();
+  }
+</script>
 </body>
 </html>
