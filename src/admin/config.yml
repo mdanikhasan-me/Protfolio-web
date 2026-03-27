@@ -8,13 +8,16 @@ public_folder: "/uploads"
 site_url: "https://mdanikhasan.com"
 display_url: "https://mdanikhasan.com"
 logo_url: "/assets/icons/icon-192.png"
-
-publish_mode: "simple"
+publish_mode: editorial_workflow
+locale: "en"
 
 slug:
   encoding: "ascii"
   clean_accents: true
   sanitize_replacement: "-"
+
+editor:
+  preview: false
 
 collections:
   - name: "posts"
@@ -28,15 +31,19 @@ collections:
     format: "frontmatter"
     summary: "{{title}}"
     sortable_fields: ["date", "title"]
-    view_groups:
-      - label: "Draft"
+    view_filters:
+      - label: "Published"
         field: "draft"
+        pattern: false
+      - label: "Drafts"
+        field: "draft"
+        pattern: true
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Slug", name: "slug", widget: "string" }
       - { label: "Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
       - { label: "Description", name: "description", widget: "text" }
-      - { label: "Cover", name: "cover", widget: "image", required: false, allow_multiple: false }
+      - { label: "Cover Image", name: "cover", widget: "image", required: false, allow_multiple: false }
       - { label: "Draft", name: "draft", widget: "boolean", default: false, required: false }
       - { label: "Body", name: "body", widget: "markdown" }
 
@@ -50,16 +57,12 @@ collections:
     extension: "md"
     format: "frontmatter"
     summary: "{{title}}"
-    sortable_fields: ["title", "featured"]
-    view_groups:
-      - label: "Featured"
-        field: "featured"
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Slug", name: "slug", widget: "string" }
-      - { label: "Description", name: "description", widget: "text" }
-      - { label: "Thumbnail", name: "thumbnail", widget: "image", required: false, allow_multiple: false }
-      - { label: "Tech Stack", name: "stack", widget: "list", required: false, collapsed: false }
+      - { label: "Short Description", name: "description", widget: "text" }
+      - { label: "Thumbnail", name: "thumbnail", widget: "image", required: false }
+      - { label: "Tech Stack", name: "stack", widget: "list", required: false }
       - { label: "Live URL", name: "live_url", widget: "string", required: false }
       - { label: "GitHub URL", name: "github_url", widget: "string", required: false }
       - { label: "Featured", name: "featured", widget: "boolean", default: false, required: false }
@@ -72,39 +75,37 @@ collections:
         name: "homepage"
         file: "src/content/pages/homepage.yml"
         fields:
-          - { label: "Hero Title", name: "hero_title", widget: "string", required: false }
-          - { label: "Hero Subtitle", name: "hero_subtitle", widget: "text", required: false }
-          - { label: "Hero Image", name: "hero_image", widget: "image", required: false }
-
+          - { label: "Hero Title", name: "hero_title", widget: "string" }
+          - { label: "Hero Subtitle", name: "hero_subtitle", widget: "text" }
+          - { label: "Hero Primary Button", name: "hero_primary_label", widget: "string", required: false }
+          - { label: "Hero Secondary Button", name: "hero_secondary_label", widget: "string", required: false }
       - label: "About Page"
         name: "about"
         file: "src/content/pages/about.yml"
         fields:
-          - { label: "Title", name: "title", widget: "string", required: false }
-          - { label: "Intro", name: "intro", widget: "text", required: false }
-          - { label: "Body", name: "body", widget: "markdown", required: false }
-
+          - { label: "Page Title", name: "title", widget: "string" }
+          - { label: "Intro", name: "intro", widget: "text" }
+          - { label: "Body", name: "body", widget: "markdown" }
       - label: "Contact Page"
         name: "contact"
         file: "src/content/pages/contact.yml"
         fields:
-          - { label: "Title", name: "title", widget: "string", required: false }
-          - { label: "Email", name: "email", widget: "string", required: false }
+          - { label: "Page Title", name: "title", widget: "string" }
+          - { label: "Email", name: "email", widget: "string" }
           - { label: "Phone", name: "phone", widget: "string", required: false }
           - { label: "Location", name: "location", widget: "string", required: false }
 
   - name: "settings"
     label: "Site Settings"
     files:
-      - label: "General Settings"
+      - label: "General"
         name: "general"
         file: "src/content/settings/general.yml"
         fields:
-          - { label: "Site Title", name: "site_title", widget: "string", required: false }
-          - { label: "Site Description", name: "site_description", widget: "text", required: false }
-          - { label: "Canonical URL", name: "site_url", widget: "string", required: false }
+          - { label: "Site Title", name: "site_title", widget: "string" }
+          - { label: "Site Description", name: "site_description", widget: "text" }
+          - { label: "Site URL", name: "site_url", widget: "string" }
           - { label: "Logo", name: "logo", widget: "image", required: false }
-
       - label: "Social Links"
         name: "social"
         file: "src/content/settings/social.yml"
@@ -114,3 +115,10 @@ collections:
           - { label: "LinkedIn", name: "linkedin", widget: "string", required: false }
           - { label: "GitHub", name: "github", widget: "string", required: false }
           - { label: "YouTube", name: "youtube", widget: "string", required: false }
+      - label: "SEO"
+        name: "seo"
+        file: "src/content/settings/seo.yml"
+        fields:
+          - { label: "Meta Title", name: "meta_title", widget: "string" }
+          - { label: "Meta Description", name: "meta_description", widget: "text" }
+          - { label: "Open Graph Image", name: "og_image", widget: "image", required: false }
