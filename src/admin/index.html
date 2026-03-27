@@ -4,21 +4,24 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex,nofollow" />
-  <title>SAWLPER CMS</title>
+  <title>SAWLPER</title>
   <link rel="icon" href="/assets/icons/favicon.png" type="image/png" />
   <style>
     :root {
       color-scheme: dark;
-      --bg: #04110f;
-      --bg-soft: rgba(10, 24, 21, 0.88);
-      --line: rgba(212, 168, 94, 0.24);
-      --line-soft: rgba(255, 255, 255, 0.08);
-      --text: #eef4f1;
-      --muted: #9eb0a9;
-      --accent: #d4a85e;
-      --accent-strong: #e0b56c;
-      --shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
-      --radius: 22px;
+      --bg-1: #03100f;
+      --bg-2: #071816;
+      --panel: rgba(9, 22, 20, 0.84);
+      --panel-2: rgba(255, 255, 255, 0.03);
+      --line: rgba(255, 255, 255, 0.08);
+      --line-strong: rgba(214, 170, 96, 0.34);
+      --text: #f4f7f5;
+      --muted: #97a7a0;
+      --gold: #d6aa60;
+      --gold-strong: #e1ba79;
+      --danger: #ff8f7a;
+      --radius: 24px;
+      --shadow: 0 30px 90px rgba(0, 0, 0, 0.42);
     }
 
     * {
@@ -30,18 +33,19 @@
       min-height: 100%;
       margin: 0;
       background:
-        radial-gradient(circle at top, rgba(212, 168, 94, 0.1), transparent 30%),
-        radial-gradient(circle at bottom left, rgba(38, 98, 83, 0.18), transparent 28%),
-        linear-gradient(180deg, #04110f 0%, #071715 100%);
+        radial-gradient(circle at 14% 18%, rgba(214, 170, 96, 0.08), transparent 24%),
+        radial-gradient(circle at 85% 16%, rgba(77, 129, 114, 0.1), transparent 26%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
       color: var(--text);
       font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     body {
-      overflow-x: hidden;
+      overflow: hidden;
     }
 
-    body.cms-active {
+    body.cms-live {
+      overflow: auto;
       background: #0a1311;
     }
 
@@ -52,7 +56,7 @@
       place-items: center;
       padding: 24px;
       z-index: 9999;
-      transition: opacity 0.28s ease, visibility 0.28s ease;
+      transition: opacity 0.22s ease, visibility 0.22s ease;
     }
 
     #gate.is-hidden {
@@ -61,13 +65,19 @@
       pointer-events: none;
     }
 
-    .gate-shell {
-      width: min(92vw, 470px);
-      border-radius: 30px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+    #gate.is-widget-open {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .shell {
+      width: min(92vw, 520px);
+      border-radius: 28px;
+      border: 1px solid var(--line);
       background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
-        rgba(7, 19, 17, 0.82);
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)),
+        var(--panel);
       box-shadow: var(--shadow);
       backdrop-filter: blur(16px);
       overflow: hidden;
@@ -75,141 +85,175 @@
       isolation: isolate;
     }
 
-    .gate-shell::before {
+    .shell::before {
       content: "";
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at 18% 18%, rgba(212, 168, 94, 0.14), transparent 28%),
-        radial-gradient(circle at 85% 82%, rgba(84, 138, 122, 0.12), transparent 34%);
+        radial-gradient(circle at 20% 15%, rgba(214, 170, 96, 0.12), transparent 24%),
+        radial-gradient(circle at 88% 78%, rgba(84, 132, 118, 0.12), transparent 30%);
       pointer-events: none;
       z-index: -1;
     }
 
-    .gate-head {
-      padding: 28px 30px 20px;
-      border-bottom: 1px solid var(--line-soft);
+    .head {
+      padding: 34px 34px 22px;
+      border-bottom: 1px solid var(--line);
     }
 
     .brand {
       margin: 0;
-      font-size: clamp(32px, 5vw, 42px);
-      line-height: 0.95;
+      font-size: clamp(42px, 7vw, 58px);
+      line-height: 0.92;
       font-weight: 800;
-      letter-spacing: 0.08em;
-    }
-
-    .subline {
-      margin: 14px 0 0;
-      color: var(--muted);
-      font-size: 14px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
-    .gate-body {
-      padding: 26px 30px 30px;
+    .label {
+      margin-top: 10px;
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .body {
+      padding: 28px 34px 32px;
       display: grid;
       gap: 18px;
     }
 
     .status {
       min-height: 22px;
-      color: var(--muted);
       font-size: 14px;
+      color: var(--muted);
     }
 
-    .status strong {
+    .status.is-error {
+      color: var(--danger);
+    }
+
+    .status.is-success {
+      color: #b6d9bf;
+    }
+
+    form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap input {
+      width: 100%;
+      height: 56px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
       color: var(--text);
-      font-weight: 600;
+      padding: 0 16px;
+      font: inherit;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
     }
 
-    .actions {
+    .input-wrap input:focus {
+      border-color: var(--line-strong);
+      box-shadow: 0 0 0 4px rgba(214, 170, 96, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .row {
       display: flex;
-      flex-wrap: wrap;
       gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
     }
 
     button {
       appearance: none;
       border: 0;
-      border-radius: 15px;
-      padding: 14px 22px;
+      border-radius: 16px;
+      padding: 15px 22px;
       font: inherit;
       font-weight: 700;
       cursor: pointer;
-      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+      transition: transform 0.18s ease, background 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
     }
 
     button:hover {
       transform: translateY(-1px);
     }
 
-    button:active {
-      transform: translateY(0);
+    button:disabled {
+      opacity: 0.7;
+      cursor: wait;
+      transform: none;
     }
 
-    .btn-primary {
+    .primary {
       min-width: 148px;
-      background: linear-gradient(180deg, var(--accent-strong), var(--accent));
-      color: #1b1307;
-      box-shadow: 0 10px 24px rgba(212, 168, 94, 0.2);
+      background: linear-gradient(180deg, var(--gold-strong), var(--gold));
+      color: #1b1205;
+      box-shadow: 0 10px 24px rgba(214, 170, 96, 0.2);
     }
 
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.06);
+    .secondary {
+      background: rgba(255, 255, 255, 0.05);
       color: var(--text);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--line);
     }
 
-    .btn-link {
+    .text-btn {
       background: transparent;
       color: var(--muted);
-      padding-left: 2px;
-      padding-right: 2px;
+      padding: 0;
+      border-radius: 0;
     }
 
-    .loader {
-      display: none;
-      align-items: center;
-      gap: 10px;
+    .helper {
+      font-size: 13px;
       color: var(--muted);
-      font-size: 14px;
     }
 
-    .loader.is-visible {
-      display: inline-flex;
+    .helper strong {
+      color: var(--text);
     }
 
-    .loader-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: var(--accent);
-      box-shadow: 0 0 0 0 rgba(212, 168, 94, 0.48);
-      animation: pulse 1.2s infinite;
+    .mode-note {
+      font-size: 13px;
+      color: var(--muted);
+      display: none;
     }
 
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(212, 168, 94, 0.48); }
-      70% { box-shadow: 0 0 0 12px rgba(212, 168, 94, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(212, 168, 94, 0); }
-    }
-
-    .netlify-identity-widget,
-    .netlify-identity-widget * {
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    .mode-note.is-visible {
+      display: block;
     }
 
     .netlify-identity-widget .modal {
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(8px);
     }
 
     .netlify-identity-widget .content {
-      border-radius: 22px !important;
+      border-radius: 24px !important;
       overflow: hidden !important;
-      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.44) !important;
-      border: 1px solid rgba(255, 255, 255, 0.07) !important;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.42) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
 
     .netlify-identity-widget .btn {
@@ -217,27 +261,34 @@
       font-weight: 700 !important;
     }
 
-    .netlify-identity-widget input,
-    .netlify-identity-widget textarea,
-    .netlify-identity-widget select {
-      border-radius: 14px !important;
+    .netlify-identity-widget a[href="#signup"],
+    .netlify-identity-widget button[data-netlify-identity-button="signup"],
+    .netlify-identity-widget .tab.signup,
+    .netlify-identity-widget .signup,
+    .netlify-identity-widget [href*="signup"] {
+      display: none !important;
     }
 
-    @media (max-width: 560px) {
-      .gate-head {
-        padding: 24px 22px 18px;
+    @media (max-width: 600px) {
+      .head {
+        padding: 28px 24px 18px;
       }
 
-      .gate-body {
-        padding: 22px;
+      .body {
+        padding: 22px 24px 26px;
       }
 
-      .actions {
-        display: grid;
+      .brand {
+        font-size: 40px;
       }
 
-      .btn-primary,
-      .btn-secondary {
+      .row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .primary,
+      .secondary {
         width: 100%;
       }
     }
@@ -250,145 +301,194 @@
 </head>
 <body>
   <div id="gate">
-    <section class="gate-shell" aria-label="Admin sign in">
-      <div class="gate-head">
+    <section class="shell" aria-label="Admin sign in">
+      <div class="head">
         <h1 class="brand">SAWLPER</h1>
-        <p class="subline">Content Studio</p>
+        <div class="label">Content Studio</div>
       </div>
-      <div class="gate-body">
-        <div class="status" id="status"><strong>Ready.</strong> Sign in to open the editor.</div>
-        <div class="actions">
-          <button class="btn-primary" id="signInButton" type="button">Sign in</button>
-          <button class="btn-secondary" id="refreshButton" type="button">Refresh</button>
-          <button class="btn-link" id="forgotButton" type="button">Forgot password</button>
-        </div>
-        <div class="loader" id="loader"><span class="loader-dot"></span><span>Opening editor</span></div>
+      <div class="body">
+        <div class="status" id="status">Enter your email and password to continue.</div>
+        <form id="auth-form" autocomplete="on">
+          <div class="field">
+            <label for="email">Email</label>
+            <div class="input-wrap">
+              <input id="email" name="email" type="email" inputmode="email" autocomplete="email" required />
+            </div>
+          </div>
+          <div class="field" id="password-field">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <input id="password" name="password" type="password" autocomplete="current-password" required />
+            </div>
+          </div>
+          <div class="mode-note" id="mode-note">Password recovery sends a reset link to your email.</div>
+          <div class="row">
+            <button class="primary" id="submit-btn" type="submit">Sign in</button>
+            <button class="secondary" id="refresh-btn" type="button">Refresh</button>
+            <button class="text-btn" id="forgot-btn" type="button">Forgot password</button>
+          </div>
+        </form>
+        <div class="helper"><strong>Tip:</strong> invite links and recovery links will open automatically here.</div>
       </div>
     </section>
   </div>
 
   <script>
-    (function () {
-      var gate = document.getElementById("gate");
-      var status = document.getElementById("status");
-      var loader = document.getElementById("loader");
-      var signInButton = document.getElementById("signInButton");
-      var refreshButton = document.getElementById("refreshButton");
-      var forgotButton = document.getElementById("forgotButton");
-      var cmsStarted = false;
-      var authTokenPattern = /invite_token|confirmation_token|recovery_token|email_change_token/i;
-      var authTokenPresent = authTokenPattern.test(window.location.hash + window.location.search);
+    const gate = document.getElementById("gate");
+    const statusEl = document.getElementById("status");
+    const form = document.getElementById("auth-form");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const passwordField = document.getElementById("password-field");
+    const submitBtn = document.getElementById("submit-btn");
+    const refreshBtn = document.getElementById("refresh-btn");
+    const forgotBtn = document.getElementById("forgot-btn");
+    const modeNote = document.getElementById("mode-note");
+    let recoveryMode = false;
+    let cmsStarted = false;
 
-      function setStatus(html) {
-        status.innerHTML = html;
+    const setStatus = (text, tone) => {
+      statusEl.textContent = text;
+      statusEl.classList.remove("is-error", "is-success");
+      if (tone === "error") statusEl.classList.add("is-error");
+      if (tone === "success") statusEl.classList.add("is-success");
+    };
+
+    const setBusy = (busy) => {
+      submitBtn.disabled = busy;
+      refreshBtn.disabled = busy;
+      forgotBtn.disabled = busy;
+    };
+
+    const setRecoveryMode = (active) => {
+      recoveryMode = active;
+      passwordField.style.display = active ? "none" : "grid";
+      passwordInput.required = !active;
+      submitBtn.textContent = active ? "Send reset link" : "Sign in";
+      forgotBtn.textContent = active ? "Back to sign in" : "Forgot password";
+      modeNote.classList.toggle("is-visible", active);
+      setStatus(active ? "Enter your email to receive a password reset link." : "Enter your email and password to continue.");
+    };
+
+    const startCMS = async () => {
+      if (cmsStarted) return;
+      cmsStarted = true;
+      document.body.classList.add("cms-live");
+      gate.classList.add("is-hidden");
+      if (window.CMS) {
+        await window.CMS.init();
+      }
+    };
+
+    const closeWidgetGate = () => gate.classList.remove("is-widget-open");
+    const openWidgetGate = () => gate.classList.add("is-widget-open");
+
+    const hasMagicToken = () => {
+      const hash = window.location.hash || "";
+      return hash.includes("invite_token=") || hash.includes("recovery_token=") || hash.includes("confirmation_token=");
+    };
+
+    const initIdentity = () => {
+      if (!window.netlifyIdentity) {
+        setStatus("Identity could not be loaded.", "error");
+        return;
       }
 
-      function setLoading(isLoading) {
-        loader.classList.toggle("is-visible", !!isLoading);
-        signInButton.disabled = !!isLoading;
-        refreshButton.disabled = !!isLoading;
-        forgotButton.disabled = !!isLoading;
-      }
-
-      function hideGate() {
-        document.body.classList.add("cms-active");
-        gate.classList.add("is-hidden");
-      }
-
-      function tuneIdentityWidget() {
-        var textNodes = Array.prototype.slice.call(document.querySelectorAll("button, a, div, span"));
-        var loginTab = textNodes.find(function (node) {
-          return node.textContent && node.textContent.trim().toLowerCase() === "log in";
-        });
-        var signUpTab = textNodes.find(function (node) {
-          return node.textContent && node.textContent.trim().toLowerCase() === "sign up";
-        });
-        var needAccount = textNodes.find(function (node) {
-          return node.textContent && /need an account\?/i.test(node.textContent.trim());
-        });
-        if (signUpTab) {
-          if (signUpTab.parentElement) signUpTab.parentElement.style.display = "none";
-          signUpTab.style.display = "none";
+      window.netlifyIdentity.on("init", async (user) => {
+        if (user) {
+          setStatus("Opening editor…", "success");
+          try {
+            await startCMS();
+          } catch (error) {
+            setStatus(error?.message || "Could not start the editor.", "error");
+          }
+        } else {
+          closeWidgetGate();
+          setStatus("Enter your email and password to continue.");
         }
-        if (needAccount) {
-          if (needAccount.parentElement) needAccount.parentElement.style.display = "none";
-          needAccount.style.display = "none";
-        }
-        if (loginTab && typeof loginTab.click === "function") {
-          loginTab.click();
-        }
-      }
-
-      function startCMS() {
-        if (cmsStarted || !window.CMS) return;
-        cmsStarted = true;
-        setLoading(true);
-        setStatus("<strong>Signed in.</strong> Opening editor.");
-        hideGate();
-        window.CMS.init();
-        window.setTimeout(function () {
-          setLoading(false);
-        }, 1200);
-      }
-
-      function openLogin() {
-        if (!window.netlifyIdentity) return;
-        setStatus("<strong>Sign in required.</strong>");
-        window.netlifyIdentity.open("login");
-        window.setTimeout(tuneIdentityWidget, 80);
-        window.setTimeout(tuneIdentityWidget, 240);
-        window.setTimeout(tuneIdentityWidget, 640);
-      }
-
-      function openRecovery() {
-        if (!window.netlifyIdentity) return;
-        window.netlifyIdentity.open("forgot");
-      }
-
-      signInButton.addEventListener("click", openLogin);
-      refreshButton.addEventListener("click", function () {
-        window.location.reload();
       });
-      forgotButton.addEventListener("click", openRecovery);
 
-      var observer = new MutationObserver(function () {
-        tuneIdentityWidget();
+      window.netlifyIdentity.on("login", async () => {
+        closeWidgetGate();
+        setStatus("Opening editor…", "success");
+        await startCMS();
       });
-      observer.observe(document.documentElement, { childList: true, subtree: true });
 
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", function (user) {
-          if (user) {
-            startCMS();
+      window.netlifyIdentity.on("close", () => {
+        if (!window.netlifyIdentity.currentUser()) closeWidgetGate();
+      });
+
+      window.netlifyIdentity.on("error", (error) => {
+        closeWidgetGate();
+        setBusy(false);
+        setStatus(error?.message || "Authentication failed.", "error");
+      });
+
+      window.netlifyIdentity.init({ locale: "en", logo: false, namePlaceholder: "Name" });
+
+      if (hasMagicToken()) {
+        openWidgetGate();
+        window.netlifyIdentity.open();
+      }
+    };
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!window.netlifyIdentity || !window.netlifyIdentity.gotrue) {
+        setStatus("Identity is not ready yet.", "error");
+        return;
+      }
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      if (!email) {
+        setStatus("Enter your email address.", "error");
+        emailInput.focus();
+        return;
+      }
+
+      setBusy(true);
+
+      try {
+        if (recoveryMode) {
+          await window.netlifyIdentity.gotrue.requestPasswordRecovery(email);
+          setStatus("Reset link sent. Check your email.", "success");
+          setRecoveryMode(false);
+          emailInput.focus();
+        } else {
+          if (!password) {
+            setBusy(false);
+            setStatus("Enter your password.", "error");
+            passwordInput.focus();
             return;
           }
-          if (authTokenPresent) {
-            setStatus("<strong>Verification in progress.</strong>");
-            window.netlifyIdentity.open();
-            window.setTimeout(tuneIdentityWidget, 120);
-            return;
-          }
-          setStatus("<strong>Ready.</strong> Sign in to open the editor.");
-        });
-
-        window.netlifyIdentity.on("login", function () {
+          setStatus("Signing in…");
+          await window.netlifyIdentity.gotrue.login(email, password, true);
           window.location.href = "/sawlper/";
-        });
-
-        window.netlifyIdentity.on("logout", function () {
-          window.location.href = "/sawlper/";
-        });
-
-        window.netlifyIdentity.on("error", function () {
-          setLoading(false);
-          setStatus("<strong>Could not sign in.</strong> Refresh and try again.");
-        });
-
-        window.netlifyIdentity.init();
-      } else {
-        setStatus("<strong>Identity unavailable.</strong> Refresh and try again.");
+        }
+      } catch (error) {
+        setStatus(error?.message || "Request failed.", "error");
+      } finally {
+        setBusy(false);
       }
-    })();
+    });
+
+    forgotBtn.addEventListener("click", () => {
+      setRecoveryMode(!recoveryMode);
+      if (recoveryMode) emailInput.focus();
+      else passwordInput.focus();
+    });
+
+    refreshBtn.addEventListener("click", async () => {
+      if (window.netlifyIdentity && window.netlifyIdentity.currentUser()) {
+        try {
+          await window.netlifyIdentity.refresh();
+        } catch (_) {}
+      }
+      window.location.reload();
+    });
+
+    initIdentity();
   </script>
 </body>
 </html>
