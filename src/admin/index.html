@@ -16,18 +16,17 @@
       margin: 0;
       min-height: 100%;
       background:
-        radial-gradient(circle at top, rgba(214, 171, 92, 0.08), transparent 30%),
+        radial-gradient(circle at top, rgba(214,171,92,.08), transparent 32%),
         linear-gradient(180deg, #04110f 0%, #031816 100%);
       color: #f4f5ef;
       font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     body {
-      position: relative;
       overflow-x: hidden;
     }
 
-    .auth-shell {
+    .gate {
       position: fixed;
       inset: 0;
       z-index: 9999;
@@ -36,69 +35,69 @@
       justify-content: center;
       padding: 24px;
       background:
-        radial-gradient(circle at center, rgba(214, 171, 92, 0.06), transparent 32%),
-        linear-gradient(180deg, rgba(3, 16, 14, 0.78), rgba(2, 19, 17, 0.9));
+        radial-gradient(circle at center, rgba(214,171,92,.06), transparent 32%),
+        linear-gradient(180deg, rgba(3,16,14,.78), rgba(2,19,17,.9));
       backdrop-filter: blur(8px);
     }
 
-    .auth-shell.hidden {
+    .gate.hidden {
       display: none;
     }
 
-    .auth-card {
+    .card {
       width: 100%;
       max-width: 560px;
-      border-radius: 30px;
+      border-radius: 28px;
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255,255,255,.08);
       background:
-        linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.07), rgba(255,255,255,0.02)),
-        rgba(7, 20, 18, 0.88);
-      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.38);
+        linear-gradient(90deg, rgba(255,255,255,.03), rgba(255,255,255,.07), rgba(255,255,255,.02)),
+        rgba(7,20,18,.88);
+      box-shadow: 0 28px 90px rgba(0,0,0,.38);
     }
 
-    .auth-top {
+    .top {
       padding: 34px 34px 18px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255,255,255,.08);
     }
 
-    .auth-title {
+    .title {
       margin: 0;
       font-size: 64px;
-      line-height: 0.95;
-      letter-spacing: 0.02em;
+      line-height: .95;
+      letter-spacing: .02em;
       font-weight: 900;
       color: #f5f5ef;
     }
 
-    .auth-subtitle {
+    .subtitle {
       margin: 10px 0 0;
-      font-size: 23px;
-      letter-spacing: 0.18em;
+      font-size: 20px;
+      letter-spacing: .16em;
       text-transform: uppercase;
-      color: rgba(245, 245, 239, 0.72);
+      color: rgba(245,245,239,.72);
     }
 
-    .auth-body {
+    .body {
       padding: 28px 34px 34px;
     }
 
-    .auth-status {
+    .status {
       min-height: 28px;
       margin: 0 0 22px;
-      font-size: 18px;
+      font-size: 16px;
       color: #f0f1ea;
     }
 
-    .auth-status.error {
+    .status.error {
       color: #ff8d78;
     }
 
-    .auth-status.success {
+    .status.success {
       color: #b8e6b1;
     }
 
-    .auth-actions {
+    .actions {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
@@ -108,42 +107,31 @@
     .btn {
       appearance: none;
       border: 0;
-      border-radius: 18px;
-      padding: 17px 28px;
+      border-radius: 16px;
+      padding: 16px 24px;
       font: inherit;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 700;
       cursor: pointer;
-      transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease, border-color 0.15s ease;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
     }
 
     .btn-primary {
-      min-width: 160px;
+      min-width: 150px;
       background: #d8ae63;
       color: #111713;
     }
 
     .btn-secondary {
-      background: rgba(255, 255, 255, 0.06);
+      background: rgba(255,255,255,.06);
       color: #eff1ea;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255,255,255,.08);
     }
 
     .btn-link {
       background: transparent;
-      color: rgba(244, 245, 239, 0.78);
+      color: rgba(244,245,239,.78);
       padding-left: 0;
       padding-right: 0;
-    }
-
-    .btn:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-      transform: none;
     }
 
     .netlify-identity-widget {
@@ -151,27 +139,27 @@
     }
 
     @media (max-width: 640px) {
-      .auth-card {
-        border-radius: 24px;
+      .card {
+        border-radius: 22px;
       }
 
-      .auth-top {
-        padding: 26px 22px 16px;
+      .top {
+        padding: 24px 20px 14px;
       }
 
-      .auth-title {
-        font-size: 44px;
+      .title {
+        font-size: 42px;
       }
 
-      .auth-subtitle {
-        font-size: 16px;
+      .subtitle {
+        font-size: 14px;
       }
 
-      .auth-body {
-        padding: 22px 22px 26px;
+      .body {
+        padding: 20px 20px 24px;
       }
 
-      .auth-actions {
+      .actions {
         flex-direction: column;
         align-items: stretch;
       }
@@ -190,15 +178,15 @@
   </style>
 </head>
 <body>
-  <div class="auth-shell" id="authShell">
-    <div class="auth-card">
-      <div class="auth-top">
-        <h1 class="auth-title">SAWLPER</h1>
-        <p class="auth-subtitle">Content Studio</p>
+  <div class="gate" id="gate">
+    <div class="card">
+      <div class="top">
+        <h1 class="title">SAWLPER</h1>
+        <p class="subtitle">Content Studio</p>
       </div>
-      <div class="auth-body">
-        <div class="auth-status" id="authStatus">Ready.</div>
-        <div class="auth-actions">
+      <div class="body">
+        <div class="status" id="status">Ready.</div>
+        <div class="actions">
           <button class="btn btn-primary" id="loginBtn" type="button">Sign in</button>
           <button class="btn btn-secondary" id="refreshBtn" type="button">Refresh</button>
           <button class="btn btn-link" id="forgotBtn" type="button">Forgot password</button>
@@ -209,49 +197,53 @@
 
   <script>
     (function () {
-      const authShell = document.getElementById("authShell");
-      const authStatus = document.getElementById("authStatus");
+      const gate = document.getElementById("gate");
+      const statusEl = document.getElementById("status");
       const loginBtn = document.getElementById("loginBtn");
       const refreshBtn = document.getElementById("refreshBtn");
       const forgotBtn = document.getElementById("forgotBtn");
+      let cmsStarted = false;
+      let authPopupOpen = false;
 
       function setStatus(message, type) {
-        authStatus.textContent = message;
-        authStatus.className = "auth-status" + (type ? " " + type : "");
+        statusEl.textContent = message;
+        statusEl.className = "status" + (type ? " " + type : "");
       }
 
-      function showCMS() {
+      function startCMS() {
+        if (cmsStarted) return;
+        cmsStarted = true;
         if (window.CMS && typeof window.CMS.init === "function") {
           window.CMS.init();
         }
-        authShell.classList.add("hidden");
+        gate.classList.add("hidden");
       }
 
       function openLogin() {
-        if (!window.netlifyIdentity) {
-          setStatus("Login service unavailable.", "error");
-          return;
-        }
+        if (!window.netlifyIdentity || authPopupOpen) return;
+        authPopupOpen = true;
         setStatus("Opening sign in…");
         window.netlifyIdentity.open("login");
+        setTimeout(function () {
+          authPopupOpen = false;
+        }, 800);
       }
 
       function openRecover() {
-        if (!window.netlifyIdentity) {
-          setStatus("Recovery service unavailable.", "error");
-          return;
-        }
+        if (!window.netlifyIdentity || authPopupOpen) return;
+        authPopupOpen = true;
         setStatus("Opening password recovery…");
         window.netlifyIdentity.open("recover");
-      }
-
-      function refreshState() {
-        window.location.reload();
+        setTimeout(function () {
+          authPopupOpen = false;
+        }, 800);
       }
 
       loginBtn.addEventListener("click", openLogin);
       forgotBtn.addEventListener("click", openRecover);
-      refreshBtn.addEventListener("click", refreshState);
+      refreshBtn.addEventListener("click", function () {
+        window.location.reload();
+      });
 
       if (!window.netlifyIdentity) {
         setStatus("Netlify Identity failed to load.", "error");
@@ -262,24 +254,37 @@
         const hash = window.location.hash || "";
         const search = window.location.search || "";
 
+        if (user) {
+          setStatus("Opening dashboard…", "success");
+          startCMS();
+          return;
+        }
+
         if (hash.includes("invite_token") || search.includes("invite_token")) {
           setStatus("Complete your invited account setup.");
-          window.netlifyIdentity.open("signup");
+          if (!authPopupOpen) {
+            authPopupOpen = true;
+            window.netlifyIdentity.open("signup");
+            setTimeout(function () {
+              authPopupOpen = false;
+            }, 800);
+          }
           return;
         }
 
         if (hash.includes("recovery_token") || search.includes("recovery_token")) {
           setStatus("Reset your password.");
-          window.netlifyIdentity.open("recover");
+          if (!authPopupOpen) {
+            authPopupOpen = true;
+            window.netlifyIdentity.open("recover");
+            setTimeout(function () {
+              authPopupOpen = false;
+            }, 800);
+          }
           return;
         }
 
-        if (user) {
-          setStatus("Opening dashboard…", "success");
-          showCMS();
-        } else {
-          setStatus("Ready.");
-        }
+        setStatus("Ready.");
       });
 
       window.netlifyIdentity.on("login", function () {
@@ -291,7 +296,12 @@
         window.location.href = "/sawlper/";
       });
 
+      window.netlifyIdentity.on("close", function () {
+        authPopupOpen = false;
+      });
+
       window.netlifyIdentity.on("error", function (err) {
+        authPopupOpen = false;
         const message = err && err.message ? err.message : "Authentication failed.";
         setStatus(message, "error");
       });
