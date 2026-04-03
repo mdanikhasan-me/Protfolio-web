@@ -7,6 +7,12 @@
   to = "/assets/icons/favicon.png"
   status = 200
 
+[[redirects]]
+  from = "/sawlper"
+  to = "/sawlper/"
+  status = 301
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
@@ -53,14 +59,13 @@
     Cache-Control = "public, max-age=3600"
 
 [[headers]]
+  for = "/sawlper/"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Content-Security-Policy = """default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://identity.netlify.com https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://identity.netlify.com https://*.netlify.com https://api.netlify.com https://api.github.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self';"""
+
+[[headers]]
   for = "/sawlper/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' https://identity.netlify.com https://unpkg.com 'unsafe-inline' 'unsafe-eval'; 
-    style-src 'self' 'unsafe-inline';
-     img-src 'self' data: https: blob:; 
-     font-src 'self' data: https:; 
-     connect-src 'self' https://identity.netlify.com https://*.netlify.com https://api.netlify.com https://api.github.com; frame-src 'none'; 
-     object-src 'none'; 
-     base-uri 'self';
-      form-action 'self';"
+    Content-Security-Policy = """default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://identity.netlify.com https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://identity.netlify.com https://*.netlify.com https://api.netlify.com https://api.github.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self';"""
