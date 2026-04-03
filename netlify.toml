@@ -15,7 +15,14 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' https://identity.netlify.com https://unpkg.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://identity.netlify.com https://*.netlify.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';"
+    Content-Security-Policy = "default-src 'self'; 
+    script-src 'self' https://identity.netlify.com https://unpkg.com 'unsafe-inline'; 
+    style-src 'self' 'unsafe-inline'; 
+    img-src 'self' data: https:; font-src 'self'; 
+    connect-src 'self' https://identity.netlify.com https://*.netlify.com; frame-src 'none'; 
+    object-src 'none'; 
+    base-uri 'self'; 
+    form-action 'self';"
 
 [[headers]]
   for = "/assets/*"
@@ -57,4 +64,13 @@
   for = "/sawlper/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' https://identity.netlify.com https://unpkg.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' https:; connect-src 'self' https://identity.netlify.com https://*.netlify.com https://api.github.com; frame-src 'none'; object-src 'none';"
+    Content-Security-Policy = "default-src 'self'; 
+    script-src 'self' https://identity.netlify.com https://unpkg.com 'unsafe-inline' 'unsafe-eval'; 
+    style-src 'self' 'unsafe-inline'; 
+    img-src 'self' data: https: blob:; 
+    font-src 'self' data: https:; 
+    connect-src 'self' https://identity.netlify.com https://*.netlify.com https://api.netlify.com https://api.github.com; 
+    frame-src 'none'; 
+    object-src 'none'; 
+    base-uri 'self'; 
+    form-action 'self';"
