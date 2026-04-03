@@ -17,10 +17,10 @@ const ROBOTS_DEFAULT = 'index,follow,max-image-preview:large,max-snippet:-1,max-
 
 module.exports = {
   home: {
-    title: 'MD Anik Hasan',
+    title: 'MD Anik Hasan | Portfolio, Projects & Blog',
     description: 'MD Anik Hasan is a CSE student building strong coding fundamentals, game development skills, Unreal Engine environments, and pixel art projects. Explore the portfolio and blog.',
     robots: ROBOTS_DEFAULT,
-    canonical: `${SITE_URL}/404.html`,
+    canonical: `${SITE_URL}/`,
     ogType: 'website',
     ogDescription: 'MD Anik Hasan is a CSE student building strong coding fundamentals, game development skills, Unreal Engine environments, and pixel art projects.',
     ogImage: OG_IMAGE,
@@ -36,7 +36,7 @@ module.exports = {
         {
           '@type': 'WebPage',
           '@id': `${SITE_URL}/#webpage`,
-          name: 'MD Anik Hasan, Anik Hasan, Anik, MD Anik',
+          name: 'MD Anik Hasan',
           url: `${SITE_URL}/`,
           inLanguage: 'en-US',
           description: 'MD Anik Hasan a CSE student focusing coding fundamentals, game development skills, Unreal Engine environments, and pixel art projects.',
@@ -52,12 +52,12 @@ module.exports = {
   },
 
   about: {
-    title: 'About MD Anik Hasan',
-    description: 'Learn about MD Anik Hasan who grew up modding games and now studies programming fundamentals on the road to game development.',
+    title: 'Who Is MD Anik Hasan? | About',
+    description: 'Who is MD Anik Hasan? Learn about the background, curiosity, and path that led MD Anik Hasan toward programming and game development.',
     robots: ROBOTS_DEFAULT,
     canonical: `${SITE_URL}/about/`,
     ogType: 'website',
-    ogDescription: 'Learn about MD Anik Hasan who grew up modding games and now studies programming fundamentals on the road to game development.',
+    ogDescription: 'Who is MD Anik Hasan? Learn about the background, curiosity, and path that led MD Anik Hasan toward programming and game development.',
     ogImage: OG_IMAGE,
     ogImageAlt: OG_IMAGE_ALT,
     themeColor: THEME_COLOR,
@@ -71,10 +71,10 @@ module.exports = {
         {
           '@type': 'AboutPage',
           '@id': `${SITE_URL}/about/#webpage`,
-          name: 'About MD Anik Hasan',
+          name: 'Who Is MD Anik Hasan?',
           url: `${SITE_URL}/about/`,
           inLanguage: 'en-US',
-          description: 'Learn about MD Anik Hasan who grew up modding games and now studies programming fundamentals on the road to game development.',
+          description: 'Who is MD Anik Hasan? Learn about the background, curiosity, and path that led MD Anik Hasan toward programming and game development.',
           isPartOf: { '@id': `${SITE_URL}/#website` },
           mainEntity: { '@id': `${SITE_URL}/#person` },
         },
@@ -195,7 +195,7 @@ module.exports = {
         {
           '@type': 'CollectionPage',
           '@id': `${SITE_URL}/projects/#webpage`,
-          name: 'Projects by MD Anik Hasan Game Developer & Open Source Work',
+          name: 'Projects by MD Anik Hasan',
           url: `${SITE_URL}/projects/`,
           inLanguage: 'en-US',
           description: 'Projects by MD Anik Hasan UIUBot (a Discord bot for UIU students) and the personal portfolio website.',
@@ -229,7 +229,7 @@ module.exports = {
     title: 'Page Not Found for MD Anik Hasan',
     description: 'The page you are looking for is not available. Head back to the homepage of MD Anik Hasan.',
     robots: 'noindex,follow',
-    canonical: `${SITE_URL}/404.html`,
+    canonical: `${SITE_URL}/`,
     ogType: 'website',
     ogDescription: 'The page you are looking for is not available.',
     ogImage: OG_IMAGE,

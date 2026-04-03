@@ -591,14 +591,14 @@ html[data-scrolled="true"] .site-header {
   margin-top: 0 !important;
 }
 
-.page-contact .contact-main h2 {
+.page-contact .contact-main .contact-label {
   font-size: 0.78rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
 
-.page-contact .contact-main h1 {
+.page-contact .contact-main .contact-title {
   max-width: none;
 }
 

@@ -58,11 +58,28 @@ collections:
       - { label: "Live Demo", name: "live_demo", widget: "string", required: false }
       - { label: "Featured", name: "featured", widget: "boolean", default: false, required: false }
 
-  - name: "social"
-    label: "Social Links"
+  - name: "site_settings"
+    label: "Site Settings"
     files:
-      - label: "Social Profiles"
-        name: "profiles"
+      - label: "General"
+        name: "general"
+        file: "src/content/settings/general.yml"
+        fields:
+          - { label: "Site Title", name: "site_title", widget: "string" }
+          - { label: "Site Description", name: "site_description", widget: "text" }
+          - { label: "Site URL", name: "site_url", widget: "string" }
+          - { label: "Logo", name: "logo", widget: "image", required: false }
+
+      - label: "SEO"
+        name: "seo"
+        file: "src/content/settings/seo.yml"
+        fields:
+          - { label: "Meta Title", name: "meta_title", widget: "string" }
+          - { label: "Meta Description", name: "meta_description", widget: "text" }
+          - { label: "Open Graph Image", name: "og_image", widget: "image", required: false }
+
+      - label: "Social Links"
+        name: "social"
         file: "src/content/settings/social.yml"
         fields:
           - { label: "GitHub", name: "github", widget: "string", required: false }
@@ -72,3 +89,26 @@ collections:
           - { label: "YouTube", name: "youtube", widget: "string", required: false }
           - { label: "X", name: "x", widget: "string", required: false }
           - { label: "Discord", name: "discord", widget: "string", required: false }
+
+      - label: "Contact Info"
+        name: "contact"
+        file: "src/content/settings/contact.yml"
+        fields:
+          - { label: "Email", name: "email", widget: "string" }
+          - { label: "Response Time", name: "response_time", widget: "string", required: false }
+          - { label: "Location", name: "location", widget: "string", required: false }
+
+      - label: "Analytics"
+        name: "analytics"
+        file: "src/content/settings/analytics.yml"
+        fields:
+          - label: "Provider"
+            name: "provider"
+            widget: "select"
+            required: false
+            options:
+              - { label: "Disabled", value: "" }
+              - { label: "Plausible", value: "plausible" }
+              - { label: "GoatCounter", value: "goatcounter" }
+          - { label: "Domain or Endpoint", name: "domain", widget: "string", required: false, hint: "Plausible: your domain. GoatCounter: your hosted endpoint or subdomain." }
+          - { label: "Custom Script Source", name: "script_src", widget: "string", required: false, hint: "Optional override for the provider script URL." }

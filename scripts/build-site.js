@@ -11,6 +11,7 @@ const partialsDir = path.join(root, 'src', 'partials');
 const postSourceDir = path.join(root, 'src', 'content', 'posts');
 const projectSourceDir = path.join(root, 'src', 'content', 'projects');
 const socialFile = path.join(root, 'src', 'content', 'settings', 'social.yml');
+const analyticsFile = path.join(root, 'src', 'content', 'settings', 'analytics.yml');
 
 const site = require('../src/data/site');
 const pages = require('../src/data/pages');
@@ -54,6 +55,176 @@ function buildVersion() {
   ];
   const content = assetPaths.filter(fs.existsSync).map(p => fs.readFileSync(p)).join('');
   return crypto.createHash('sha256').update(content).digest('hex').slice(0, 12);
+}
+
+function getMimeTypeByExt(file) {
+  const raw = String(file || '').toLowerCase();
+  const ext = raw.startsWith('.') ? raw : path.extname(raw);
+  if (ext === '.png') return 'image/png';
+  if (ext === '.jpg' || ext === '.jpeg') return 'image/jpeg';
+  if (ext === '.webp') return 'image/webp';
+  if (ext === '.avif') return 'image/avif';
+  if (ext === '.gif') return 'image/gif';
+  if (ext === '.svg') return 'image/svg+xml';
+  if (ext === '.ico') return 'image/x-icon';
+  return 'image/png';
+}
+
+function getImageSizeFromBuffer(buffer, ext) {
+  const normalized = String(ext || '').toLowerCase();
+  if (normalized === '.png') {
+    return {
+      width: buffer.readUInt32BE(16),
+      height: buffer.readUInt32BE(20),
+    };
+  }
+
+  if (normalized === '.jpg' || normalized === '.jpeg') {
+    let offset = 2;
+    while (offset < buffer.length) {
+      if (buffer[offset] !== 0xFF) { offset += 1; continue; }
+      const marker = buffer[offset + 1];
+      const length = buffer.readUInt16BE(offset + 2);
+      const isSOF = [0xC0,0xC1,0xC2,0xC3,0xC5,0xC6,0xC7,0xC9,0xCA,0xCB,0xCD,0xCE,0xCF].includes(marker);
+      if (isSOF) {
+        return {
+          height: buffer.readUInt16BE(offset + 5),
+          width: buffer.readUInt16BE(offset + 7),
+        };
+      }
+      if (!length || length < 2) break;
+      offset += 2 + length;
+    }
+  }
+
+  return { width: 1200, height: 630 };
+}
+
+function getImageMeta(publicUrl) {
+  const cleanUrl = String(publicUrl || '').split('?')[0];
+  if (!cleanUrl.startsWith('/')) {
+    return { width: 1200, height: 630, type: getMimeTypeByExt(cleanUrl || '.png') };
+  }
+  const localPath = path.join(publicDir, cleanUrl.replace(/^\//, ''));
+  if (!fs.existsSync(localPath)) {
+    return { width: 1200, height: 630, type: getMimeTypeByExt(cleanUrl || '.png') };
+  }
+  const buffer = fs.readFileSync(localPath);
+  const ext = path.extname(localPath);
+  const size = getImageSizeFromBuffer(buffer, ext);
+  return {
+    width: size.width || 1200,
+    height: size.height || 630,
+    type: getMimeTypeByExt(ext),
+  };
+}
+
+function getAdjacentWebp(publicUrl) {
+  const cleanUrl = String(publicUrl || '').split('?')[0];
+  if (!cleanUrl.startsWith('/')) return '';
+  const localPath = path.join(publicDir, cleanUrl.replace(/^\//, ''));
+  const parsed = path.parse(localPath);
+  const webpPath = path.join(parsed.dir, `${parsed.name}.webp`);
+  if (!fs.existsSync(webpPath)) return '';
+  return `${path.posix.dirname(cleanUrl)}/${parsed.name}.webp`.replace(/\/+/g, '/').replace(/^\.\//, '/');
+}
+
+function buildResponsiveImage(publicUrl, alt, className, attrs = '') {
+  const meta = getImageMeta(publicUrl);
+  const webpUrl = getAdjacentWebp(publicUrl);
+  const widthAttr = ` width="${meta.width}"`;
+  const heightAttr = ` height="${meta.height}"`;
+  const classAttr = className ? ` class="${className}"` : '';
+  const extra = attrs ? ` ${attrs.trim()}` : '';
+  const img = `<img${classAttr} src="${escapeHtml(publicUrl)}" alt="${escapeHtml(alt)}"${widthAttr}${heightAttr}${extra}>`;
+
+  if (!webpUrl || webpUrl === publicUrl) {
+    return { html: img, meta };
+  }
+
+  return {
+    html: `<picture>${`<source srcset="${escapeHtml(webpUrl)}" type="image/webp">`}${img}</picture>`,
+    meta,
+  };
+}
+
+function buildInlineBootScript(buildV) {
+  const bootPath = path.join(publicDir, 'assets', 'js', 'boot.js');
+  if (!fs.existsSync(bootPath)) return '';
+  const code = fs.readFileSync(bootPath, 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\n+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  return `  <script>${code}</script>`;
+}
+
+function buildAnalyticsSnippet() {
+  const analytics = readYamlFile(analyticsFile);
+  const provider = String(analytics.provider || '').trim().toLowerCase();
+  const domain = String(analytics.domain || '').trim();
+  const scriptSrc = String(analytics.script_src || '').trim();
+
+  if (provider === 'plausible' && domain) {
+    const src = scriptSrc || 'https://plausible.io/js/script.js';
+    return `  <script defer data-domain="${escapeHtml(domain)}" src="${escapeHtml(src)}"></script>`;
+  }
+
+  if (provider === 'goatcounter' && domain) {
+    const src = scriptSrc || '//gc.zgo.at/count.js';
+    const endpoint = /^https?:\/\//i.test(domain) ? domain : `https://${domain.replace(/\/$/, '')}/count`;
+    return `  <script data-goatcounter="${escapeHtml(endpoint)}" async src="${escapeHtml(src)}"></script>`;
+  }
+
+  return '';
+}
+
+function buildHrefLangLinks(canonicalUrl) {
+  return [
+    `  <link rel="alternate" href="${canonicalUrl}" hreflang="en">`,
+    `  <link rel="alternate" href="${canonicalUrl}" hreflang="x-default">`,
+  ].join('\n');
+}
+
+function minifyCss(css) {
+  return String(css)
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s*([{}:;,>])\s*/g, '$1')
+    .replace(/;}/g, '}')
+    .trim();
+}
+
+function minifyDistCss() {
+  const cssDir = path.join(dist, 'assets', 'css');
+  if (!fs.existsSync(cssDir)) return;
+  for (const entry of fs.readdirSync(cssDir)) {
+    if (!entry.endsWith('.css')) continue;
+    const full = path.join(cssDir, entry);
+    const css = fs.readFileSync(full, 'utf8');
+    fs.writeFileSync(full, minifyCss(css));
+  }
+}
+
+function applyContactSettings(contact) {
+  if (!contact || !contact.email) return;
+  const files = [];
+  function collect(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) collect(full);
+      else if (entry.name.endsWith('.html')) files.push(full);
+    }
+  }
+  collect(dist);
+  for (const file of files) {
+    let html = fs.readFileSync(file, 'utf8');
+    html = html.replace(/anikhasan2@icloud\.com/g, contact.email);
+    if (contact.response_time) {
+      html = html.replace(/I usually respond within 24 to 48 hours\./g, contact.response_time);
+    }
+    fs.writeFileSync(file, html);
+  }
 }
 
 function stripQuotes(value) {
@@ -209,12 +380,15 @@ function getPosts() {
     const { data, body } = readFrontMatter(raw);
     if (data.draft === true || data.draft === 'true') continue;
     const slug = data.slug ? slugify(data.slug) : slugify(file.replace(/\.md$/, ''));
+    const cover = data.cover || '/assets/og/preview.png';
     posts.push({
       title: data.title || slug,
       slug,
       date: data.date || '',
       description: data.description || '',
-      cover: data.cover || '/assets/og/preview.png',
+      cover,
+      coverWebp: getAdjacentWebp(cover),
+      coverMeta: getImageMeta(cover),
       body,
       bodyHtml: markdownToHtml(body),
     });
@@ -262,20 +436,28 @@ function buildSeoHead(meta, buildV) {
     ? `  <script type="application/ld+json">\n${JSON.stringify(meta.jsonLd, null, 2)}\n  </script>`
     : '';
 
+  const ogImageMeta = getImageMeta(meta.ogImage);
+
   return seoTemplate
     .replace('{{META_ROBOTS}}', meta.robots)
     .replace(/\{\{META_DESCRIPTION\}\}/g, escapeHtml(meta.description))
     .replace('{{THEME_COLOR}}', meta.themeColor)
-    .replace('{{GOOGLE_VERIFICATION}}\n', googleVerificationLine ? googleVerificationLine + '\n' : '')
+    .replace('{{GOOGLE_VERIFICATION}}\n', googleVerificationLine ? `${googleVerificationLine}\n` : '')
     .replace('{{PAGE_TITLE}}', escapeHtml(meta.title))
     .replace(/\{\{CANONICAL_URL\}\}/g, meta.canonical)
+    .replace('{{HREFLANG_LINKS}}', buildHrefLangLinks(meta.canonical))
     .replace('{{OG_TYPE}}', meta.ogType)
     .replace(/\{\{OG_TITLE\}\}/g, escapeHtml(meta.title))
     .replace('{{OG_DESCRIPTION}}', escapeHtml(meta.ogDescription))
     .replace('{{TWITTER_DESCRIPTION}}', escapeHtml(meta.description))
     .replace(/\{\{OG_IMAGE\}\}/g, meta.ogImage)
+    .replace('{{OG_IMAGE_WIDTH}}', String(ogImageMeta.width))
+    .replace('{{OG_IMAGE_HEIGHT}}', String(ogImageMeta.height))
+    .replace('{{OG_IMAGE_TYPE}}', ogImageMeta.type)
     .replace(/\{\{OG_IMAGE_ALT\}\}/g, escapeHtml(meta.ogImageAlt))
-    .replace('{{PRELOAD_BG}}\n', preloadBg ? preloadBg + '\n' : '')
+    .replace('{{PRELOAD_BG}}\n', preloadBg ? `${preloadBg}\n` : '')
+    .replace('{{BOOT_INLINE}}', buildInlineBootScript(buildV))
+    .replace('{{ANALYTICS_SNIPPET}}', buildAnalyticsSnippet())
     .replace(/\{\{BUILD_V\}\}/g, buildV)
     .replace('{{JSON_LD}}', jsonLdBlock);
 }
@@ -307,7 +489,9 @@ function buildPostSeoHead(post, buildV) {
   };
 
   const seoTemplate = fs.readFileSync(path.join(partialsDir, 'seo.html'), 'utf8');
+  const canonicalUrl = `${site.SITE_URL}/blog/posts/${post.slug}/`;
   const ogImage = post.cover.startsWith('http') ? post.cover : `${site.SITE_URL}${post.cover}`;
+  const ogImageMeta = getImageMeta(post.cover);
 
   return seoTemplate
     .replace('{{META_ROBOTS}}', 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1')
@@ -315,17 +499,24 @@ function buildPostSeoHead(post, buildV) {
     .replace('{{THEME_COLOR}}', site.THEME_COLOR)
     .replace('{{GOOGLE_VERIFICATION}}\n', '')
     .replace('{{PAGE_TITLE}}', escapeHtml(`${post.title} | MD Anik Hasan`))
-    .replace(/\{\{CANONICAL_URL\}\}/g, `${site.SITE_URL}/blog/posts/${post.slug}/`)
+    .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
+    .replace('{{HREFLANG_LINKS}}', buildHrefLangLinks(canonicalUrl))
     .replace('{{OG_TYPE}}', 'article')
     .replace(/\{\{OG_TITLE\}\}/g, escapeHtml(post.title))
     .replace('{{OG_DESCRIPTION}}', escapeHtml(post.description))
     .replace('{{TWITTER_DESCRIPTION}}', escapeHtml(post.description))
     .replace(/\{\{OG_IMAGE\}\}/g, ogImage)
+    .replace('{{OG_IMAGE_WIDTH}}', String(ogImageMeta.width))
+    .replace('{{OG_IMAGE_HEIGHT}}', String(ogImageMeta.height))
+    .replace('{{OG_IMAGE_TYPE}}', ogImageMeta.type)
     .replace(/\{\{OG_IMAGE_ALT\}\}/g, escapeHtml(post.title))
     .replace('{{PRELOAD_BG}}\n', '')
+    .replace('{{BOOT_INLINE}}', buildInlineBootScript(buildV))
+    .replace('{{ANALYTICS_SNIPPET}}', buildAnalyticsSnippet())
     .replace(/\{\{BUILD_V\}\}/g, buildV)
     .replace('{{JSON_LD}}', `  <script type="application/ld+json">\n${JSON.stringify(jsonLd, null, 2)}\n  </script>`);
 }
+
 
 function buildNavHeader(activePage) {
   const navLinks = ['/', '/projects/', '/blog/', '/contact/'];
@@ -388,10 +579,12 @@ function replaceBlogIndex(posts) {
   if (!fs.existsSync(blogPath)) return;
 
   const cards = posts.length
-    ? posts.map(post => `
+    ? posts.map(post => {
+        const cover = buildResponsiveImage(post.cover, post.title, 'blog-preview-card__media', 'loading="lazy" decoding="async"');
+        return `
           <article class="soft-panel blog-preview-card">
             <a class="blog-preview-card__media-link" href="/blog/posts/${post.slug}/" aria-label="Read ${escapeHtml(post.title)}">
-              <img class="blog-preview-card__media" src="${escapeHtml(post.cover)}" alt="${escapeHtml(post.title)}" loading="lazy" decoding="async">
+              ${cover.html}
             </a>
             <div class="blog-preview-card__body">
               <div class="flow-sm">
@@ -403,7 +596,8 @@ function replaceBlogIndex(posts) {
                 <a href="/blog/posts/${post.slug}/">Read article</a>
               </div>
             </div>
-          </article>`).join("\n")
+          </article>`;
+      }).join('\n')
     : `
           <div class="soft-panel flow-md" style="padding:24px">
             <h2 style="margin:0">No posts yet</h2>
@@ -415,7 +609,9 @@ function replaceBlogIndex(posts) {
       <section class="section section-line">
         <div class="measure flow-md">
           <h1>Blog</h1>
-          <p>Dev logs, project breakdowns, and learning notes from MD Anik Hasan.</p>
+          <p>
+        Dev logs, learning notes, project breakdowns, and updates from MD Anik Hasan.
+      </p>
         </div>
       </section>
       <section class="section">
@@ -429,6 +625,7 @@ ${cards}
   html = html.replace(/<main id="main-content"[\s\S]*?<\/main>/, replacement);
   fs.writeFileSync(blogPath, html);
 }
+
 
 function replaceProjectsPage(projects) {
   const pagePath = path.join(dist, 'projects', 'index.html');
@@ -460,6 +657,7 @@ function replaceProjectsPage(projects) {
           <h1>Projects</h1>
         </div>
 
+        <h2 class="sr-only">Project list</h2>
         <div class="project-list">
 ${cards}
         </div>
@@ -478,7 +676,7 @@ function createPostPages(posts, buildV) {
 
     const seoHead = buildPostSeoHead(post, buildV);
     const coverImg = post.cover
-      ? `<img src="${escapeHtml(post.cover)}" alt="${escapeHtml(post.title)}" style="width:100%;height:auto;border-radius:20px;margin:8px 0 16px;display:block">`
+      ? buildResponsiveImage(post.cover, post.title, '', 'style="width:100%;height:auto;border-radius:20px;margin:8px 0 16px;display:block" loading="eager" decoding="async"').html
       : '';
 
     const page = `<!DOCTYPE html>
@@ -563,6 +761,27 @@ function createFeed(posts) {
   }));
   ensureDir(path.join(dist, 'blog'));
   fs.writeFileSync(path.join(dist, 'blog', 'feed.json'), JSON.stringify(data, null, 2));
+
+  const feedItems = posts.map(post => `  <item>
+    <title>${escapeHtml(post.title)}</title>
+    <link>${site.SITE_URL}/blog/posts/${post.slug}/</link>
+    <guid>${site.SITE_URL}/blog/posts/${post.slug}/</guid>
+    <pubDate>${new Date(post.date || Date.now()).toUTCString()}</pubDate>
+    <description>${escapeHtml(post.description)}</description>
+  </item>`).join('\n');
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>MD Anik Hasan Blog</title>
+    <link>${site.SITE_URL}/blog/</link>
+    <description>Blog posts from MD Anik Hasan.</description>
+    <language>en-us</language>
+${feedItems}
+  </channel>
+</rss>
+`;
+  fs.writeFileSync(path.join(dist, 'blog', 'feed.xml'), xml);
 }
 
 function applySocialLinks(social) {
@@ -582,6 +801,7 @@ function applySocialLinks(social) {
     [site.SOCIAL_DEFAULTS.facebook]: social.facebook,
     [site.SOCIAL_DEFAULTS.x]: social.x,
     [site.SOCIAL_DEFAULTS.discord]: social.discord,
+    [site.SOCIAL_DEFAULTS.youtube || 'https://www.youtube.com/@mdanikhasan_dev']: social.youtube,
   };
 
   for (const file of files) {
@@ -603,6 +823,7 @@ copyPages(buildV);
 const posts = getPosts();
 const projects = getProjects();
 const social = readYamlFile(socialFile);
+const contact = readYamlFile(path.join(root, 'src', 'content', 'settings', 'contact.yml'));
 
 replaceBlogIndex(posts);
 replaceProjectsPage(projects);
@@ -610,5 +831,7 @@ createPostPages(posts, buildV);
 createFeed(posts);
 createSitemap(posts);
 applySocialLinks(social);
+applyContactSettings(contact);
+minifyDistCss();
 
 console.log(`Built ${posts.length} post(s) and ${projects.length} project(s) into dist/ [v=${buildV}]`);
