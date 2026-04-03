@@ -1,5 +1,0 @@
-# This file is intentionally empty.
-# All HTTP headers are managed exclusively in netlify.toml to avoid
-# the duplication bug where both files were previously defining the
-# same rules, causing headers to be applied redundantly.
-# See netlify.toml for the full header configuration.

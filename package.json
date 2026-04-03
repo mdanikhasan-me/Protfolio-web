@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "build": "node scripts/build-site.js",
-    "preview": "npx serve dist"
+    "preview": "npx serve dist",
+    "validate:html": "npx html-validate \"dist/**/*.html\" \"dist/*.html\"",
+    "check": "node -e \"require('./src/data/site'); require('./src/data/pages'); console.log('Config OK');\""
   },
   "engines": {
     "node": "20.x"

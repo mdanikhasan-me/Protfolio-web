@@ -2,8 +2,7 @@
 title: My Workflow
 slug: my-workflow
 date: 2026-03-28
-description: I did not want a typical CMS setup, so I built my own workflow
-  using Git and a custom admin panel. This is what I learned from that process.
+description: I did not want a typical CMS setup, so I built my own workflow using Git and a custom admin panel. This is what I learned from that process.
 cover: /uploads/coding_class.jpg
 draft: false
 ---
