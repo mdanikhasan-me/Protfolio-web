@@ -20,6 +20,8 @@
       --line: rgba(255,255,255,.14);
       --button: rgba(255,255,255,.06);
       --button-hover: rgba(255,255,255,.1);
+      --admin-bg: #f4f6f5;
+      --admin-text: #111111;
     }
 
     * {
@@ -37,9 +39,23 @@
       font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
+    html.admin-live,
+    html.admin-live body,
     body.admin-live {
-      background: #fff;
-      color: #111;
+      background: var(--admin-bg) !important;
+      color: var(--admin-text);
+    }
+
+    body.admin-live {
+      min-height: 100vh;
+    }
+
+    body.admin-live > #nc-root,
+    body.admin-live > div[id="nc-root"],
+    body.admin-live > div[id^="nc-root"],
+    body.admin-live > div:not(.gate):not(.loader) {
+      min-height: 100vh;
+      background: var(--admin-bg);
     }
 
     .gate,
@@ -132,6 +148,7 @@
 
   <script>
     (function () {
+      var html = document.documentElement;
       var gate = document.getElementById("gate");
       var loader = document.getElementById("loader");
       var loaderText = document.getElementById("loaderText");
@@ -143,6 +160,7 @@
         gate.hidden = false;
         loader.hidden = true;
         gateStatus.textContent = message || "";
+        html.classList.remove("admin-live");
         document.body.classList.remove("admin-live");
       }
 
@@ -155,16 +173,21 @@
       function startCMS() {
         if (started) return;
         started = true;
+        html.classList.add("admin-live");
         document.body.classList.add("admin-live");
         showLoader("Loading editor");
 
         try {
           window.CMS.init();
-          setTimeout(function () {
-            loader.hidden = true;
-          }, 600);
+          window.requestAnimationFrame(function () {
+            setTimeout(function () {
+              loader.hidden = true;
+            }, 500);
+          });
         } catch (error) {
           started = false;
+          html.classList.remove("admin-live");
+          document.body.classList.remove("admin-live");
           showGate("Editor failed to start.");
           console.error(error);
         }
@@ -194,6 +217,8 @@
 
       window.netlifyIdentity.on("logout", function () {
         started = false;
+        html.classList.remove("admin-live");
+        document.body.classList.remove("admin-live");
         window.location.replace("/sawlper/");
       });
 
