@@ -67,6 +67,7 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
+  caret-color: transparent;
 }
 
 main,
@@ -106,6 +107,14 @@ textarea,
 select {
   font: inherit;
   color: inherit;
+}
+
+input,
+textarea,
+select,
+[contenteditable="true"],
+[contenteditable="plaintext-only"] {
+  caret-color: auto;
 }
 
 :focus-visible {
@@ -1750,6 +1759,7 @@ html.reduce-motion .bg-shade {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
+  line-clamp: 4;
   overflow: hidden;
 }
 

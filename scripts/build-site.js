@@ -273,24 +273,47 @@ function readFrontMatter(raw) {
     if (!baseMatch) { i += 1; continue; }
     const key = baseMatch[1];
     const rest = baseMatch[2];
-    if (rest) { data[key] = parseValue(rest); i += 1; continue; }
+    if (rest) {
+      const continuation = [];
+      let next = i + 1;
+      while (next < lines.length) {
+        const continuationLine = lines[next];
+        if (!continuationLine.trim()) { break; }
+        if (!/^\s+/.test(continuationLine) || continuationLine.trim().startsWith('- ')) { break; }
+        continuation.push(continuationLine.trim());
+        next += 1;
+      }
+      data[key] = parseValue([rest].concat(continuation).join(' '));
+      i = next;
+      continue;
+    }
 
     const list = [];
+    const scalarLines = [];
     i += 1;
     while (i < lines.length) {
       const itemLine = lines[i];
-      if (!itemLine.trim()) { i += 1; continue; }
+      if (!itemLine.trim()) {
+        if (scalarLines.length) { break; }
+        i += 1;
+        continue;
+      }
       if (!/^\s+/.test(itemLine)) break;
       const trimmed = itemLine.trim();
       if (trimmed.startsWith('- ')) {
+        if (scalarLines.length) { break; }
         const itemValue = trimmed.slice(2).trim();
         const objMatch = itemValue.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
         if (objMatch) list.push(parseValue(objMatch[2]));
         else list.push(parseValue(itemValue));
+        i += 1;
+        continue;
       }
+      if (list.length) { break; }
+      scalarLines.push(trimmed);
       i += 1;
     }
-    data[key] = list;
+    data[key] = list.length ? list : parseValue(scalarLines.join(' '));
   }
 
   return { data, body: match[2].trim() };
