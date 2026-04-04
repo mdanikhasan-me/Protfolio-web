@@ -6,8 +6,8 @@ stack:
 title: UIU Bot
 slug: uiu-bot
 thumbnail: /assets/og/preview.png
-description: A Discord bot engineered for UIU students, featuring automated
-  scheduling, resource management, and community moderation tools.
+description: A Discord bot engineered for UIU students automated scheduling,
+  resource management, and moderation tools.
 tools:
   - Python
   - Discord.py
