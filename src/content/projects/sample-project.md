@@ -3,7 +3,7 @@ stack:
   - HTML
   - CSS
   - JavaScript
-title: UIUBot
+title: UIU Bot
 slug: uiu-bot
 thumbnail: /assets/og/preview.png
 description: A Discord bot engineered for UIU students, featuring automated
