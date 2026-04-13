@@ -124,7 +124,28 @@
     window.addEventListener('resize', applyNavShutter, { passive: true });
     window.addEventListener('orientationchange', applyNavShutter, { passive: true });
 
-    
+    // ── About page: code-block typing animation ──────────────────────────────
+    if (document.body.dataset.page === 'about') {
+      var pre = document.querySelector('.about-story__card pre');
+      var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (pre && !reducedMotion) {
+        var fullText  = pre.textContent;
+        var charIndex = 0;
+        var textNode  = document.createTextNode('');
+        pre.textContent = '';
+        pre.appendChild(textNode);
+
+        function typeChar() {
+          if (charIndex >= fullText.length) { return; }
+          textNode.nodeValue += fullText[charIndex];
+          charIndex += 1;
+          window.setTimeout(typeChar, fullText[charIndex - 1] === '\n' ? 22 : 9);
+        }
+
+        typeChar();
+      }
+    }
 
     var copyButton  = document.querySelector('[data-copy-email]');
     var liveRegion  = document.getElementById('copy-status');
