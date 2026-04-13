@@ -21,11 +21,11 @@ editor:
 
 collections:
 
-  # ── Blog Posts ──────────────────────────────────────────────────────────────
+  # Ã¢â€â‚¬Ã¢â€â‚¬ Blog Posts Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   - name: "posts"
     label: "Blog"
     label_singular: "Post"
-    folder: "src/content/blog"
+    folder: "src/content/posts"
     create: true
     delete: true
     slug: "{{slug}}"
@@ -42,7 +42,7 @@ collections:
       - { label: "Draft",             name: "draft",       widget: "boolean", default: false, required: false }
       - { label: "Article",           name: "body",        widget: "markdown" }
 
-  # ── Projects ────────────────────────────────────────────────────────────────
+  # Ã¢â€â‚¬Ã¢â€â‚¬ Projects Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   - name: "projects"
     label: "Projects"
     label_singular: "Project"
@@ -62,7 +62,7 @@ collections:
       - { label: "Live Demo",     name: "live_demo",   widget: "string", required: false }
       - { label: "Featured",      name: "featured",    widget: "boolean", default: false, required: false }
 
-  # ── Page Content ─────────────────────────────────────────────────────────────
+  # Ã¢â€â‚¬Ã¢â€â‚¬ Page Content Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   - name: "pages"
     label: "Page Content"
     files:
@@ -85,15 +85,15 @@ collections:
           - { label: "Open Source Body", name: "opensource_body",  widget: "text" }
           - { label: "Timeline Heading", name: "timeline_heading", widget: "string" }
           - { label: "Timeline Subtext", name: "timeline_sub",     widget: "string" }
-          - { label: "Timeline 1 — Title", name: "timeline_1_title", widget: "string" }
-          - { label: "Timeline 1 — Date",  name: "timeline_1_date",  widget: "string" }
-          - { label: "Timeline 1 — Body",  name: "timeline_1_body",  widget: "text" }
-          - { label: "Timeline 2 — Title", name: "timeline_2_title", widget: "string" }
-          - { label: "Timeline 2 — Date",  name: "timeline_2_date",  widget: "string" }
-          - { label: "Timeline 2 — Body",  name: "timeline_2_body",  widget: "text" }
-          - { label: "Timeline 3 — Title", name: "timeline_3_title", widget: "string" }
-          - { label: "Timeline 3 — Date",  name: "timeline_3_date",  widget: "string" }
-          - { label: "Timeline 3 — Body",  name: "timeline_3_body",  widget: "text" }
+          - { label: "Timeline 1 Title", name: "timeline_1_title", widget: "string" }
+          - { label: "Timeline 1 Date",  name: "timeline_1_date",  widget: "string" }
+          - { label: "Timeline 1 Body",  name: "timeline_1_body",  widget: "text" }
+          - { label: "Timeline 2 Title", name: "timeline_2_title", widget: "string" }
+          - { label: "Timeline 2 Date",  name: "timeline_2_date",  widget: "string" }
+          - { label: "Timeline 2 Body",  name: "timeline_2_body",  widget: "text" }
+          - { label: "Timeline 3 Title", name: "timeline_3_title", widget: "string" }
+          - { label: "Timeline 3 Date",  name: "timeline_3_date",  widget: "string" }
+          - { label: "Timeline 3 Body",  name: "timeline_3_body",  widget: "text" }
           - { label: "Closing CTA",      name: "closing_cta",      widget: "string" }
 
       - label: "About"
@@ -115,7 +115,7 @@ collections:
           - { label: "Intro Text",     name: "intro", widget: "text",   hint: "The paragraph shown below the heading." }
           - { label: "Side Note",      name: "note",  widget: "text",   hint: "The note shown in the social panel." }
 
-  # ── Site Settings ─────────────────────────────────────────────────────────────
+  # Ã¢â€â‚¬Ã¢â€â‚¬ Site Settings Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   - name: "site_settings"
     label: "Site Settings"
     files:

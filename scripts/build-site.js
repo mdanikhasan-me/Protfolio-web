@@ -5,12 +5,11 @@ const crypto = require('crypto');
 const root = process.cwd();
 const dist = path.join(root, 'dist');
 const publicDir = path.join(root, 'public');
-const pagesDir = path.join(root, 'src', 'templates');
+const pagesDir = path.join(root, 'src', 'pages');
 const adminDir = path.join(root, 'src', 'admin');
-const partialsDir = path.join(root, 'src', 'components');
-const postSourceDir = path.join(root, 'src', 'content', 'blog');
+const partialsDir = path.join(root, 'src', 'partials');
+const postSourceDir = path.join(root, 'src', 'content', 'posts');
 const projectSourceDir = path.join(root, 'src', 'content', 'projects');
-const socialFile = path.join(root, 'src', 'content', 'settings', 'social.yml');
 const analyticsFile = path.join(root, 'src', 'content', 'settings', 'analytics.yml');
 
 const site = require('../src/data/site');
@@ -73,6 +72,7 @@ function getMimeTypeByExt(file) {
 function getImageSizeFromBuffer(buffer, ext) {
   const normalized = String(ext || '').toLowerCase();
   if (normalized === '.png') {
+    if (buffer.length < 24) return { width: 1200, height: 630 };
     return {
       width: buffer.readUInt32BE(16),
       height: buffer.readUInt32BE(20),
@@ -81,18 +81,21 @@ function getImageSizeFromBuffer(buffer, ext) {
 
   if (normalized === '.jpg' || normalized === '.jpeg') {
     let offset = 2;
-    while (offset < buffer.length) {
+    while (offset + 3 < buffer.length) {
       if (buffer[offset] !== 0xFF) { offset += 1; continue; }
       const marker = buffer[offset + 1];
+      if (offset + 4 > buffer.length) break;
       const length = buffer.readUInt16BE(offset + 2);
       const isSOF = [0xC0,0xC1,0xC2,0xC3,0xC5,0xC6,0xC7,0xC9,0xCA,0xCB,0xCD,0xCE,0xCF].includes(marker);
       if (isSOF) {
+        if (offset + 8 >= buffer.length) break;
         return {
           height: buffer.readUInt16BE(offset + 5),
           width: buffer.readUInt16BE(offset + 7),
         };
       }
       if (!length || length < 2) break;
+      if (offset + 2 + length > buffer.length) break;
       offset += 2 + length;
     }
   }
@@ -109,14 +112,18 @@ function getImageMeta(publicUrl) {
   if (!fs.existsSync(localPath)) {
     return { width: 1200, height: 630, type: getMimeTypeByExt(cleanUrl || '.png') };
   }
-  const buffer = fs.readFileSync(localPath);
-  const ext = path.extname(localPath);
-  const size = getImageSizeFromBuffer(buffer, ext);
-  return {
-    width: size.width || 1200,
-    height: size.height || 630,
-    type: getMimeTypeByExt(ext),
-  };
+  try {
+    const buffer = fs.readFileSync(localPath);
+    const ext = path.extname(localPath);
+    const size = getImageSizeFromBuffer(buffer, ext);
+    return {
+      width: size.width || 1200,
+      height: size.height || 630,
+      type: getMimeTypeByExt(ext),
+    };
+  } catch (error) {
+    return { width: 1200, height: 630, type: getMimeTypeByExt(cleanUrl || '.png') };
+  }
 }
 
 function getAdjacentWebp(publicUrl) {
@@ -130,15 +137,16 @@ function getAdjacentWebp(publicUrl) {
 }
 
 function buildResponsiveImage(publicUrl, alt, className, attrs = '') {
-  const meta = getImageMeta(publicUrl);
-  const webpUrl = getAdjacentWebp(publicUrl);
+  const safeUrl = sanitizeUrl(publicUrl, { allowDataImage: true }) || '/assets/og/preview.png';
+  const meta = getImageMeta(safeUrl);
+  const webpUrl = getAdjacentWebp(safeUrl);
   const widthAttr = ` width="${meta.width}"`;
   const heightAttr = ` height="${meta.height}"`;
   const classAttr = className ? ` class="${className}"` : '';
   const extra = attrs ? ` ${attrs.trim()}` : '';
-  const img = `<img${classAttr} src="${escapeHtml(publicUrl)}" alt="${escapeHtml(alt)}"${widthAttr}${heightAttr}${extra}>`;
+  const img = `<img${classAttr} src="${escapeHtml(safeUrl)}" alt="${escapeHtml(alt)}"${widthAttr}${heightAttr}${extra}>`;
 
-  if (!webpUrl || webpUrl === publicUrl) {
+  if (!webpUrl || webpUrl === safeUrl) {
     return { html: img, meta };
   }
 
@@ -167,13 +175,17 @@ function buildAnalyticsSnippet() {
 
   if (provider === 'plausible' && domain) {
     const src = scriptSrc || 'https://plausible.io/js/script.js';
-    return `  <script defer data-domain="${escapeHtml(domain)}" src="${escapeHtml(src)}"></script>`;
+    const safeSrc = sanitizeUrl(src, { allowProtocolRelative: true });
+    if (!safeSrc) return '';
+    return `  <script defer data-domain="${escapeHtml(domain)}" src="${escapeHtml(safeSrc)}"></script>`;
   }
 
   if (provider === 'goatcounter' && domain) {
     const src = scriptSrc || '//gc.zgo.at/count.js';
     const endpoint = /^https?:\/\//i.test(domain) ? domain : `https://${domain.replace(/\/$/, '')}/count`;
-    return `  <script data-goatcounter="${escapeHtml(endpoint)}" async src="${escapeHtml(src)}"></script>`;
+    const safeSrc = sanitizeUrl(src, { allowProtocolRelative: true });
+    if (!safeSrc) return '';
+    return `  <script data-goatcounter="${escapeHtml(endpoint)}" async src="${escapeHtml(safeSrc)}"></script>`;
   }
 
   return '';
@@ -181,8 +193,8 @@ function buildAnalyticsSnippet() {
 
 function buildHrefLangLinks(canonicalUrl) {
   return [
-    `  <link rel="alternate" href="${canonicalUrl}" hreflang="en">`,
-    `  <link rel="alternate" href="${canonicalUrl}" hreflang="x-default">`,
+    `  <link rel="alternate" href="${escapeHtml(canonicalUrl)}" hreflang="en">`,
+    `  <link rel="alternate" href="${escapeHtml(canonicalUrl)}" hreflang="x-default">`,
   ].join('\n');
 }
 
@@ -203,27 +215,6 @@ function minifyDistCss() {
     const full = path.join(cssDir, entry);
     const css = fs.readFileSync(full, 'utf8');
     fs.writeFileSync(full, minifyCss(css));
-  }
-}
-
-function applyContactSettings(contact) {
-  if (!contact || !contact.email) return;
-  const files = [];
-  function collect(dir) {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) collect(full);
-      else if (entry.name.endsWith('.html')) files.push(full);
-    }
-  }
-  collect(dist);
-  for (const file of files) {
-    let html = fs.readFileSync(file, 'utf8');
-    html = html.replace(/anikhasan2@icloud\.com/g, contact.email);
-    if (contact.response_time) {
-      html = html.replace(/I usually respond within 24 to 48 hours\./g, contact.response_time);
-    }
-    fs.writeFileSync(file, html);
   }
 }
 
@@ -322,9 +313,18 @@ function buildAboutVars(c) {
 
 // Build contact page template variables from CMS YML content
 function buildContactVars(c) {
+  const socialLinks = site.SOCIAL_LINKS || {};
   return {
     CONTACT_INTRO: escapeHtml(c.intro || ''),
     CONTACT_NOTE:  escapeHtml(c.note  || ''),
+    CONTACT_EMAIL: escapeHtml(site.EMAIL || ''),
+    CONTACT_RESPONSE_TIME: escapeHtml(site.RESPONSE_TIME || ''),
+    SOCIAL_GITHUB_URL: escapeHtml(sanitizeUrl(socialLinks.github) || '#'),
+    SOCIAL_DISCORD_URL: escapeHtml(sanitizeUrl(socialLinks.discord) || '#'),
+    SOCIAL_X_URL: escapeHtml(sanitizeUrl(socialLinks.x) || '#'),
+    SOCIAL_LINKEDIN_URL: escapeHtml(sanitizeUrl(socialLinks.linkedin) || '#'),
+    SOCIAL_FACEBOOK_URL: escapeHtml(sanitizeUrl(socialLinks.facebook) || '#'),
+    SOCIAL_YOUTUBE_URL: escapeHtml(sanitizeUrl(socialLinks.youtube) || '#'),
   };
 }
 
@@ -410,6 +410,45 @@ function escapeRegExp(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function sanitizeUrl(value, options = {}) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  const normalized = raw.replace(/[\u0000-\u001F\u007F\s]+/g, '').toLowerCase();
+  const hasExplicitScheme = /^[a-z][a-z0-9+.-]*:/i.test(normalized);
+
+  if (options.allowDataImage && /^data:image\//i.test(normalized)) {
+    return raw;
+  }
+
+  if (options.allowProtocolRelative && raw.startsWith('//')) {
+    return raw;
+  }
+
+  if (/^(https?:|mailto:|tel:)/i.test(normalized)) {
+    return raw;
+  }
+
+  if (/^(\/(?!\/)|\.\/|\.\.\/|#|\?)/.test(raw)) {
+    return raw;
+  }
+
+  if (!hasExplicitScheme) {
+    return raw;
+  }
+
+  return '';
+}
+
+function serializeJsonForHtml(value) {
+  return JSON.stringify(value, null, 2)
+    .replace(/</g, '\\u003C')
+    .replace(/>/g, '\\u003E')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
 function slugify(value) {
   return String(value || '')
     .toLowerCase()
@@ -426,6 +465,60 @@ function formatDate(value) {
   return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(date);
 }
 
+function markdownToPlainText(md) {
+  return String(md || '')
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '$1')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
+    .replace(/[`*_>#]/g, ' ')
+    .replace(/^\s*[-*]\s+/gm, ' ')
+    .replace(/\r/g, ' ')
+    .replace(/\n+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function makeExcerpt(text, maxLength = 160) {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  if (!clean) return '';
+  if (clean.length <= maxLength) return clean;
+  const slice = clean.slice(0, maxLength + 1);
+  const lastSpace = slice.lastIndexOf(' ');
+  return `${(lastSpace > 80 ? slice.slice(0, lastSpace) : clean.slice(0, maxLength)).trim()}...`;
+}
+
+function toIsoDateTime(value, fallback) {
+  const raw = String(value || '').trim();
+  if (raw) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+      return new Date(`${raw}T00:00:00Z`).toISOString();
+    }
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) return parsed.toISOString();
+  }
+
+  const fallbackDate = fallback instanceof Date ? fallback : new Date(fallback || Date.now());
+  if (!Number.isNaN(fallbackDate.getTime())) return fallbackDate.toISOString();
+  return new Date().toISOString();
+}
+
+function latestIsoDate() {
+  const dates = Array.from(arguments)
+    .flat()
+    .filter(Boolean)
+    .map(value => new Date(value))
+    .filter(date => !Number.isNaN(date.getTime()))
+    .sort((a, b) => b.getTime() - a.getTime());
+  return dates[0] ? dates[0].toISOString() : new Date().toISOString();
+}
+
+function buildAbsoluteSiteUrl(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return site.SITE_URL;
+  if (/^https?:\/\//i.test(raw)) return raw;
+  return `${site.SITE_URL}${raw.startsWith('/') ? raw : `/${raw.replace(/^\.?\//, '')}`}`;
+}
+
 function markdownToHtml(md) {
   const html = [];
   let inCode = false;
@@ -435,8 +528,14 @@ function markdownToHtml(md) {
 
   function renderInline(text) {
     let t = escapeHtml(text);
-    t = t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
-    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    t = t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function (_, alt, url) {
+      const safeUrl = sanitizeUrl(url, { allowDataImage: true });
+      return safeUrl ? `<img src="${escapeHtml(safeUrl)}" alt="${alt}">` : alt;
+    });
+    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, label, url) {
+      const safeUrl = sanitizeUrl(url);
+      return safeUrl ? `<a href="${escapeHtml(safeUrl)}">${label}</a>` : label;
+    });
     t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     t = t.replace(/\*([^*]+)\*/g, '<em>$1</em>');
     t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
@@ -477,23 +576,33 @@ function getPosts() {
   if (!fs.existsSync(postSourceDir)) return [];
   const posts = [];
   for (const file of fs.readdirSync(postSourceDir).filter(n => n.endsWith('.md'))) {
-    const raw = fs.readFileSync(path.join(postSourceDir, file), 'utf8');
+    const sourcePath = path.join(postSourceDir, file);
+    const raw = fs.readFileSync(sourcePath, 'utf8');
+    const stat = fs.statSync(sourcePath);
     const { data, body } = readFrontMatter(raw);
     if (data.draft === true || data.draft === 'true') continue;
     const slug = data.slug ? slugify(data.slug) : slugify(file.replace(/\.md$/, ''));
-    const cover = data.cover || '/assets/og/preview.png';
+    const cover = sanitizeUrl(data.cover, { allowDataImage: true }) || '/assets/og/preview.png';
+    const plainText = markdownToPlainText(body);
+    const publishedAt = toIsoDateTime(data.date, stat.mtime);
+    const modifiedAt = latestIsoDate(
+      toIsoDateTime(data.updated || data.modified, stat.mtime),
+      publishedAt
+    );
     posts.push({
       title: data.title || slug,
       slug,
-      date: data.date || '',
-      description: data.description || '',
+      date: data.date || publishedAt.slice(0, 10),
+      description: data.description || makeExcerpt(plainText),
       cover,
-      coverWebp: getAdjacentWebp(cover),
-      coverMeta: getImageMeta(cover),
       body,
       bodyHtml: markdownToHtml(body),
       tags: Array.isArray(data.tags) ? data.tags.filter(Boolean).map(t => String(t).trim()).filter(Boolean) : [],
       readingTime: estimateReadingTime(body),
+      wordCount: plainText ? plainText.split(/\s+/).filter(Boolean).length : 0,
+      publishedAt,
+      modifiedAt,
+      sourcePath,
     });
   }
   posts.sort((a, b) => String(b.date).localeCompare(String(a.date)));
@@ -504,20 +613,36 @@ function getProjects() {
   if (!fs.existsSync(projectSourceDir)) return [];
   const projects = [];
   for (const file of fs.readdirSync(projectSourceDir).filter(n => n.endsWith('.md'))) {
-    const raw = fs.readFileSync(path.join(projectSourceDir, file), 'utf8');
-    const { data } = readFrontMatter(raw);
+    const sourcePath = path.join(projectSourceDir, file);
+    const raw = fs.readFileSync(sourcePath, 'utf8');
+    const stat = fs.statSync(sourcePath);
+    const { data, body } = readFrontMatter(raw);
     const slug = data.slug ? slugify(data.slug) : slugify(file.replace(/\.md$/, ''));
     const tools = Array.isArray(data.tools)
       ? data.tools.filter(Boolean).map(t => String(t).trim()).filter(Boolean)
-      : [];
+      : (Array.isArray(data.stack) ? data.stack.filter(Boolean).map(t => String(t).trim()).filter(Boolean) : []);
+    const plainText = markdownToPlainText(body);
+    const description = data.description || makeExcerpt(plainText);
+    const thumbnail = sanitizeUrl(data.thumbnail || data.cover, { allowDataImage: true }) || '/assets/og/preview.png';
+    const publishedAt = toIsoDateTime(data.date, stat.mtime);
+    const modifiedAt = latestIsoDate(
+      toIsoDateTime(data.updated || data.modified, stat.mtime),
+      publishedAt
+    );
     projects.push({
       title: data.title || slug,
       slug,
-      description: data.description || '',
+      description,
       tools,
-      sourceCode: data.source_code || '',
-      liveDemo: data.live_demo || '',
+      sourceCode: sanitizeUrl(data.source_code) || '',
+      liveDemo: sanitizeUrl(data.live_demo) || '',
       featured: data.featured === true || data.featured === 'true',
+      thumbnail,
+      body,
+      bodyHtml: markdownToHtml(body),
+      publishedAt,
+      modifiedAt,
+      sourcePath,
     });
   }
   projects.sort((a, b) => Number(b.featured) - Number(a.featured) || a.title.localeCompare(b.title));
@@ -528,7 +653,7 @@ function buildSeoHead(meta, buildV) {
   const seoTemplate = fs.readFileSync(path.join(partialsDir, 'seo.html'), 'utf8');
 
   const googleVerificationLine = meta.googleVerification
-    ? `  <meta name="google-site-verification" content="${meta.googleVerification}">`
+    ? `  <meta name="google-site-verification" content="${escapeHtml(meta.googleVerification)}">`
     : '';
 
   const preloadBg = meta.preloadHomeBackground
@@ -536,24 +661,28 @@ function buildSeoHead(meta, buildV) {
     : '';
 
   const jsonLdBlock = meta.jsonLd
-    ? `  <script type="application/ld+json">\n${JSON.stringify(meta.jsonLd, null, 2)}\n  </script>`
+    ? `  <script type="application/ld+json">\n${serializeJsonForHtml(meta.jsonLd)}\n  </script>`
     : '';
+  const extraHead = meta.extraHead || '';
 
   const ogImageMeta = getImageMeta(meta.ogImage);
 
   return seoTemplate
+    .replace(/\{\{SITE_NAME\}\}/g, escapeHtml(site.SITE_NAME))
+    .replace('{{AUTHOR_URL}}', escapeHtml(site.AUTHOR_URL || `${site.SITE_URL}/about/`))
     .replace('{{META_ROBOTS}}', meta.robots)
     .replace(/\{\{META_DESCRIPTION\}\}/g, escapeHtml(meta.description))
+    .replace(/\{\{TWITTER_HANDLE\}\}/g, escapeHtml(site.TWITTER_HANDLE || ''))
     .replace('{{THEME_COLOR}}', meta.themeColor)
     .replace('{{GOOGLE_VERIFICATION}}\n', googleVerificationLine ? `${googleVerificationLine}\n` : '')
     .replace('{{PAGE_TITLE}}', escapeHtml(meta.title))
-    .replace(/\{\{CANONICAL_URL\}\}/g, meta.canonical)
+    .replace(/\{\{CANONICAL_URL\}\}/g, escapeHtml(meta.canonical))
     .replace('{{HREFLANG_LINKS}}', buildHrefLangLinks(meta.canonical))
     .replace('{{OG_TYPE}}', meta.ogType)
     .replace(/\{\{OG_TITLE\}\}/g, escapeHtml(meta.title))
     .replace('{{OG_DESCRIPTION}}', escapeHtml(meta.ogDescription))
     .replace('{{TWITTER_DESCRIPTION}}', escapeHtml(meta.description))
-    .replace(/\{\{OG_IMAGE\}\}/g, meta.ogImage)
+    .replace(/\{\{OG_IMAGE\}\}/g, escapeHtml(meta.ogImage))
     .replace('{{OG_IMAGE_WIDTH}}', String(ogImageMeta.width))
     .replace('{{OG_IMAGE_HEIGHT}}', String(ogImageMeta.height))
     .replace('{{OG_IMAGE_TYPE}}', ogImageMeta.type)
@@ -562,13 +691,14 @@ function buildSeoHead(meta, buildV) {
     .replace('{{BOOT_INLINE}}', buildInlineBootScript(buildV))
     .replace('{{ANALYTICS_SNIPPET}}', buildAnalyticsSnippet())
     .replace(/\{\{BUILD_V\}\}/g, buildV)
+    .replace('{{EXTRA_HEAD}}', extraHead)
     .replace('{{JSON_LD}}', jsonLdBlock)
     .replace('{{ARTICLE_META}}', '');
 }
 
 function buildPostSeoHead(post, buildV) {
   const coverImageMeta = getImageMeta(post.cover);
-  const coverAbsoluteUrl = post.cover.startsWith('http') ? post.cover : `${site.SITE_URL}${post.cover}`;
+  const coverAbsoluteUrl = buildAbsoluteSiteUrl(post.cover);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -585,8 +715,8 @@ function buildPostSeoHead(post, buildV) {
           '@type': 'WebPage',
           '@id': `${site.SITE_URL}/blog/posts/${post.slug}/`,
         },
-        datePublished: post.date,
-        dateModified: post.date,
+        datePublished: post.publishedAt,
+        dateModified: post.modifiedAt,
         author: { '@id': `${site.SITE_URL}/#person` },
         publisher: { '@id': `${site.SITE_URL}/#person` },
         image: {
@@ -597,7 +727,7 @@ function buildPostSeoHead(post, buildV) {
         },
         isPartOf: { '@id': `${site.SITE_URL}/blog/#webpage` },
         inLanguage: 'en-US',
-        wordCount: String(post.body || '').trim().split(/\s+/).filter(Boolean).length,
+        wordCount: post.wordCount,
         timeRequired: `PT${post.readingTime || 1}M`,
         ...(post.tags && post.tags.length ? { keywords: post.tags.join(', ') } : {}),
       },
@@ -617,12 +747,16 @@ function buildPostSeoHead(post, buildV) {
   const canonicalUrl = `${site.SITE_URL}/blog/posts/${post.slug}/`;
   const ogImage = coverAbsoluteUrl;
   const ogImageMeta = coverImageMeta;
+  const extraHead = [
+    `  <link rel="alternate" type="application/feed+json" title="${escapeHtml(site.SITE_NAME)} Blog JSON Feed" href="/blog/feed.json">`,
+  ].join('\n');
 
   // Article-specific Open Graph + Twitter card extras
   const tagMeta = (post.tags || []).map(t => `  <meta property="article:tag" content="${escapeHtml(t)}">`).join('\n');
   const articleMeta = [
-    post.date ? `  <meta property="article:published_time" content="${escapeHtml(post.date)}">` : '',
-    post.date ? `  <meta property="article:modified_time"  content="${escapeHtml(post.date)}">` : '',
+    `  <meta property="article:published_time" content="${escapeHtml(post.publishedAt)}">`,
+    `  <meta property="article:modified_time"  content="${escapeHtml(post.modifiedAt)}">`,
+    `  <meta property="og:updated_time" content="${escapeHtml(post.modifiedAt)}">`,
     `  <meta property="article:author" content="${escapeHtml(site.SITE_URL)}/#person">`,
     `  <meta property="article:section" content="Development">`,
     tagMeta,
@@ -634,18 +768,21 @@ function buildPostSeoHead(post, buildV) {
   ].filter(Boolean).join('\n');
 
   return seoTemplate
+    .replace(/\{\{SITE_NAME\}\}/g, escapeHtml(site.SITE_NAME))
+    .replace('{{AUTHOR_URL}}', escapeHtml(site.AUTHOR_URL || `${site.SITE_URL}/about/`))
     .replace('{{META_ROBOTS}}', 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1')
     .replace(/\{\{META_DESCRIPTION\}\}/g, escapeHtml(post.description))
+    .replace(/\{\{TWITTER_HANDLE\}\}/g, escapeHtml(site.TWITTER_HANDLE || ''))
     .replace('{{THEME_COLOR}}', site.THEME_COLOR)
     .replace('{{GOOGLE_VERIFICATION}}\n', '')
-    .replace('{{PAGE_TITLE}}', escapeHtml(`${post.title} | MD Anik Hasan`))
-    .replace(/\{\{CANONICAL_URL\}\}/g, canonicalUrl)
+    .replace('{{PAGE_TITLE}}', escapeHtml(`${post.title} by ${site.SITE_NAME}`))
+    .replace(/\{\{CANONICAL_URL\}\}/g, escapeHtml(canonicalUrl))
     .replace('{{HREFLANG_LINKS}}', buildHrefLangLinks(canonicalUrl))
     .replace('{{OG_TYPE}}', 'article')
     .replace(/\{\{OG_TITLE\}\}/g, escapeHtml(post.title))
     .replace('{{OG_DESCRIPTION}}', escapeHtml(post.description))
     .replace('{{TWITTER_DESCRIPTION}}', escapeHtml(post.description))
-    .replace(/\{\{OG_IMAGE\}\}/g, ogImage)
+    .replace(/\{\{OG_IMAGE\}\}/g, escapeHtml(ogImage))
     .replace('{{OG_IMAGE_WIDTH}}', String(ogImageMeta.width))
     .replace('{{OG_IMAGE_HEIGHT}}', String(ogImageMeta.height))
     .replace('{{OG_IMAGE_TYPE}}', ogImageMeta.type)
@@ -654,8 +791,133 @@ function buildPostSeoHead(post, buildV) {
     .replace('{{BOOT_INLINE}}', buildInlineBootScript(buildV))
     .replace('{{ANALYTICS_SNIPPET}}', buildAnalyticsSnippet())
     .replace(/\{\{BUILD_V\}\}/g, buildV)
-    .replace('{{JSON_LD}}', `  <script type="application/ld+json">\n${JSON.stringify(jsonLd, null, 2)}\n  </script>`)
+    .replace('{{EXTRA_HEAD}}', extraHead)
+    .replace('{{JSON_LD}}', `  <script type="application/ld+json">\n${serializeJsonForHtml(jsonLd)}\n  </script>`)
     .replace('{{ARTICLE_META}}', articleMeta);
+}
+
+function buildProjectSchemaEntity(project, canonicalUrl, imageUrl, imageMeta) {
+  const baseEntity = {
+    '@id': `${canonicalUrl}#project`,
+    name: project.title,
+    description: project.description,
+    image: {
+      '@type': 'ImageObject',
+      url: imageUrl,
+      width: imageMeta.width,
+      height: imageMeta.height,
+    },
+    author: { '@id': `${site.SITE_URL}/#person` },
+    creator: { '@id': `${site.SITE_URL}/#person` },
+    ...(project.liveDemo || project.sourceCode ? { sameAs: [project.liveDemo, project.sourceCode].filter(Boolean) } : {}),
+    ...(project.tools.length ? { keywords: project.tools.join(', ') } : {}),
+  };
+
+  if (project.sourceCode) {
+    return {
+      '@type': 'SoftwareSourceCode',
+      ...baseEntity,
+      url: canonicalUrl,
+      codeRepository: project.sourceCode,
+      ...(project.tools.length ? { programmingLanguage: project.tools } : {}),
+      ...(project.liveDemo ? {
+        targetProduct: {
+          '@type': 'WebSite',
+          name: project.title,
+          url: project.liveDemo,
+        },
+      } : {}),
+    };
+  }
+
+  if (project.liveDemo) {
+    return {
+      '@type': 'WebSite',
+      ...baseEntity,
+      url: project.liveDemo,
+    };
+  }
+
+  return {
+    '@type': 'CreativeWork',
+    ...baseEntity,
+    url: canonicalUrl,
+  };
+}
+
+function buildProjectSeoHead(project, buildV) {
+  const seoTemplate = fs.readFileSync(path.join(partialsDir, 'seo.html'), 'utf8');
+  const canonicalUrl = `${site.SITE_URL}/projects/${project.slug}/`;
+  const ogImage = buildAbsoluteSiteUrl(project.thumbnail);
+  const ogImageMeta = getImageMeta(project.thumbnail);
+  const projectEntity = buildProjectSchemaEntity(project, canonicalUrl, ogImage, ogImageMeta);
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      site.WEBSITE_SCHEMA_STUB,
+      site.PERSON_SCHEMA_STUB,
+      {
+        '@type': 'WebPage',
+        '@id': `${canonicalUrl}#webpage`,
+        url: canonicalUrl,
+        name: `${project.title} by ${site.SITE_NAME}`,
+        description: project.description,
+        inLanguage: 'en-US',
+        isPartOf: { '@id': `${site.SITE_URL}/#website` },
+        about: { '@id': `${site.SITE_URL}/#person` },
+        mainEntity: { '@id': `${canonicalUrl}#project` },
+        primaryImageOfPage: {
+          '@type': 'ImageObject',
+          url: ogImage,
+        },
+        datePublished: project.publishedAt,
+        dateModified: project.modifiedAt,
+      },
+      projectEntity,
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${canonicalUrl}#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${site.SITE_URL}/` },
+          { '@type': 'ListItem', position: 2, name: 'Projects', item: `${site.SITE_URL}/projects/` },
+          { '@type': 'ListItem', position: 3, name: project.title, item: canonicalUrl },
+        ],
+      },
+    ],
+  };
+
+  const extraHead = [
+    project.tools.length ? `  <meta name="keywords" content="${escapeHtml(project.tools.join(', '))}">` : '',
+    `  <meta property="og:updated_time" content="${escapeHtml(project.modifiedAt)}">`,
+  ].filter(Boolean).join('\n');
+
+  return seoTemplate
+    .replace(/\{\{SITE_NAME\}\}/g, escapeHtml(site.SITE_NAME))
+    .replace('{{AUTHOR_URL}}', escapeHtml(site.AUTHOR_URL || `${site.SITE_URL}/about/`))
+    .replace('{{META_ROBOTS}}', 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1')
+    .replace(/\{\{META_DESCRIPTION\}\}/g, escapeHtml(project.description))
+    .replace(/\{\{TWITTER_HANDLE\}\}/g, escapeHtml(site.TWITTER_HANDLE || ''))
+    .replace('{{THEME_COLOR}}', site.THEME_COLOR)
+    .replace('{{GOOGLE_VERIFICATION}}\n', '')
+    .replace('{{PAGE_TITLE}}', escapeHtml(`${project.title} by ${site.SITE_NAME}`))
+    .replace(/\{\{CANONICAL_URL\}\}/g, escapeHtml(canonicalUrl))
+    .replace('{{HREFLANG_LINKS}}', buildHrefLangLinks(canonicalUrl))
+    .replace('{{OG_TYPE}}', 'website')
+    .replace(/\{\{OG_TITLE\}\}/g, escapeHtml(project.title))
+    .replace('{{OG_DESCRIPTION}}', escapeHtml(project.description))
+    .replace('{{TWITTER_DESCRIPTION}}', escapeHtml(project.description))
+    .replace(/\{\{OG_IMAGE\}\}/g, escapeHtml(ogImage))
+    .replace('{{OG_IMAGE_WIDTH}}', String(ogImageMeta.width))
+    .replace('{{OG_IMAGE_HEIGHT}}', String(ogImageMeta.height))
+    .replace('{{OG_IMAGE_TYPE}}', ogImageMeta.type)
+    .replace(/\{\{OG_IMAGE_ALT\}\}/g, escapeHtml(`${project.title} preview`))
+    .replace('{{PRELOAD_BG}}\n', '')
+    .replace('{{BOOT_INLINE}}', buildInlineBootScript(buildV))
+    .replace('{{ANALYTICS_SNIPPET}}', buildAnalyticsSnippet())
+    .replace(/\{\{BUILD_V\}\}/g, buildV)
+    .replace('{{EXTRA_HEAD}}', extraHead)
+    .replace('{{JSON_LD}}', `  <script type="application/ld+json">\n${serializeJsonForHtml(jsonLd)}\n  </script>`)
+    .replace('{{ARTICLE_META}}', '');
 }
 
 
@@ -732,7 +994,7 @@ function replaceBlogIndex(posts) {
   if (!fs.existsSync(blogPath)) return;
 
   const cards = posts.length
-    ? posts.map(post => {
+      ? posts.map(post => {
         const cover = buildResponsiveImage(post.cover, post.title, 'blog-preview-card__media', 'loading="lazy" decoding="async"');
         return `
           <article class="soft-panel blog-preview-card">
@@ -741,7 +1003,7 @@ function replaceBlogIndex(posts) {
             </a>
             <div class="blog-preview-card__body">
               <div class="flow-sm">
-                <p class="eyebrow">${escapeHtml(formatDate(post.date))}</p>
+                <p class="eyebrow"><time datetime="${escapeHtml(post.publishedAt)}">${escapeHtml(formatDate(post.date))}</time></p>
                 <h2 class="blog-preview-card__title"><a href="/blog/posts/${post.slug}/">${escapeHtml(post.title)}</a></h2>
                 <p class="blog-preview-card__excerpt">${escapeHtml(post.description)}</p>
               </div>
@@ -763,7 +1025,7 @@ function replaceBlogIndex(posts) {
         <div class="measure flow-md">
           <h1>Blog</h1>
           <p>
-        Dev logs, learning notes, project breakdowns, and updates from MD Anik Hasan.
+        Programming notes, workflow writeups, project breakdowns, and game development updates from ${escapeHtml(site.SITE_NAME)}.
       </p>
         </div>
       </section>
@@ -782,7 +1044,7 @@ ${cards}
       '@context': 'https://schema.org',
       '@type': 'ItemList',
       '@id': `${site.SITE_URL}/blog/#itemlist`,
-      name: 'Blog posts by MD Anik Hasan',
+      name: `Blog posts by ${site.SITE_NAME}`,
       itemListElement: posts.map((p, i) => ({
         '@type': 'ListItem',
         position: i + 1,
@@ -790,7 +1052,7 @@ ${cards}
         url: `${site.SITE_URL}/blog/posts/${p.slug}/`,
       })),
     };
-    html = html.replace('</body>', `  <script type="application/ld+json">\n${JSON.stringify(itemListLd, null, 2)}\n  </script>\n</body>`);
+    html = html.replace('</body>', `  <script type="application/ld+json">\n${serializeJsonForHtml(itemListLd)}\n  </script>\n</body>`);
   }
 
   fs.writeFileSync(blogPath, html);
@@ -803,18 +1065,19 @@ function replaceProjectsPage(projects) {
 
   const cards = projects.length
     ? projects.map(project => {
+        const detailUrl = `/projects/${project.slug}/`;
         const tools = project.tools.length
           ? `<ul class="tag-list" aria-label="${escapeHtml(project.title)} technologies">${project.tools.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>`
           : '';
         const links = [
+          `<p><a class="text-link" href="${detailUrl}">Project Details</a></p>`,
           project.sourceCode ? `<p><a class="text-link" href="${escapeHtml(project.sourceCode)}" target="_blank" rel="noopener noreferrer">Source Code</a></p>` : '',
           project.liveDemo ? `<p><a class="text-link" href="${escapeHtml(project.liveDemo)}" target="_blank" rel="noopener noreferrer">Live Demo</a></p>` : '',
         ].filter(Boolean).join('');
-        const schemaType = project.liveDemo ? 'WebApplication' : 'SoftwareApplication';
         return `
-          <article class="project-entry flow-sm" itemscope itemtype="https://schema.org/${schemaType}">
-            <h3 itemprop="name">${escapeHtml(project.title)}</h3>
-            <p itemprop="description">${escapeHtml(project.description)}</p>
+          <article class="project-entry flow-sm">
+            <h3><a href="${detailUrl}">${escapeHtml(project.title)}</a></h3>
+            <p>${escapeHtml(project.description)}</p>
             ${tools}
             <div class="flow-xs">${links}</div>
           </article>`;
@@ -826,6 +1089,7 @@ function replaceProjectsPage(projects) {
       <section class="section section-line">
         <div class="measure flow-md">
           <h1>Projects</h1>
+          <p>Explore software projects, experiments, and technical build pages by ${escapeHtml(site.SITE_NAME)} with source code and live demos when available.</p>
         </div>
 
         <h2 class="sr-only">Project list</h2>
@@ -841,31 +1105,17 @@ ${cards}
   if (projects.length > 0) {
     const itemListLd = {
       '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'ItemList',
-          '@id': `${site.SITE_URL}/projects/#itemlist`,
-          name: 'Projects by MD Anik Hasan',
-          itemListElement: projects.map((p, i) => ({
-            '@type': 'ListItem',
-            position: i + 1,
-            name: p.title,
-            url: p.liveDemo || p.sourceCode || `${site.SITE_URL}/projects/`,
-          })),
-        },
-        ...projects.map(p => ({
-          '@type': p.liveDemo ? 'WebApplication' : 'SoftwareApplication',
-          name: p.title,
-          description: p.description,
-          applicationCategory: 'DeveloperApplication',
-          ...(p.tools.length ? { programmingLanguage: p.tools } : {}),
-          ...(p.sourceCode ? { codeRepository: p.sourceCode } : {}),
-          ...(p.liveDemo ? { url: p.liveDemo } : {}),
-          author: { '@id': `${site.SITE_URL}/#person` },
-        })),
-      ],
+      '@type': 'ItemList',
+      '@id': `${site.SITE_URL}/projects/#itemlist`,
+      name: `Projects by ${site.SITE_NAME}`,
+      itemListElement: projects.map((p, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: p.title,
+        url: `${site.SITE_URL}/projects/${p.slug}/`,
+      })),
     };
-    html = html.replace('</body>', `  <script type="application/ld+json">\n${JSON.stringify(itemListLd, null, 2)}\n  </script>\n</body>`);
+    html = html.replace('</body>', `  <script type="application/ld+json">\n${serializeJsonForHtml(itemListLd)}\n  </script>\n</body>`);
   }
 
   fs.writeFileSync(pagePath, html);
@@ -900,7 +1150,7 @@ ${buildNavHeader('/blog/')}
     <main id="main-content" class="site-main shell shell-wide">
       <section class="section section-line">
         <article class="blog-post-card flow-md soft-panel">
-          <p class="eyebrow">${escapeHtml(formatDate(post.date))}</p>
+          <p class="eyebrow"><time datetime="${escapeHtml(post.publishedAt)}">${escapeHtml(formatDate(post.date))}</time></p>
           <h1>${escapeHtml(post.title)}</h1>
           <p>${escapeHtml(post.description)}</p>
           ${coverImg}
@@ -919,22 +1169,111 @@ ${buildDeferredScripts(buildV)}
   }
 }
 
-function createSitemap(posts) {
-  const today = new Date().toISOString().slice(0, 10);
+function createProjectPages(projects, buildV) {
+  for (const project of projects) {
+    const dir = path.join(dist, 'projects', project.slug);
+    ensureDir(dir);
+
+    const seoHead = buildProjectSeoHead(project, buildV);
+    const coverImg = project.thumbnail
+      ? buildResponsiveImage(project.thumbnail, project.title, '', 'style="width:100%;height:auto;border-radius:20px;margin:8px 0 16px;display:block" loading="eager" decoding="async"').html
+      : '';
+    const tools = project.tools.length
+      ? `<ul class="tag-list" aria-label="${escapeHtml(project.title)} technologies">${project.tools.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>`
+      : '';
+    const links = [
+      project.sourceCode ? `<p><a class="text-link" href="${escapeHtml(project.sourceCode)}" target="_blank" rel="noopener noreferrer">Source Code</a></p>` : '',
+      project.liveDemo ? `<p><a class="text-link" href="${escapeHtml(project.liveDemo)}" target="_blank" rel="noopener noreferrer">Live Demo</a></p>` : '',
+    ].filter(Boolean).join('');
+    const bodyPlainText = markdownToPlainText(project.body);
+    const body = /use this entry as a starting point for portfolio items\./i.test(bodyPlainText)
+      ? ''
+      : String(project.bodyHtml || '').trim();
+
+    const page = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+${seoHead}
+</head>
+<body class="page page-blog-post page-project-detail" data-page="project-detail">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="site-bg site-bg-inner" aria-hidden="true">
+    <div class="bg-photo"></div>
+    <div class="bg-shade"></div>
+    <div class="bg-mist"></div>
+  </div>
+  <div class="site-shell">
+${buildNavHeader('/projects/')}
+    <main id="main-content" class="site-main shell shell-wide">
+      <section class="section section-line">
+        <article class="blog-post-card flow-md soft-panel">
+          <p class="eyebrow">Project updated <time datetime="${escapeHtml(project.modifiedAt)}">${escapeHtml(formatDate(project.modifiedAt))}</time></p>
+          <h1>${escapeHtml(project.title)}</h1>
+          <p>${escapeHtml(project.description)}</p>
+          ${coverImg}
+          ${tools}
+          ${links ? `<div class="flow-xs">${links}</div>` : ''}
+          ${body ? `<div class="flow-md">${body}</div>` : ''}
+          <p><a class="blog-back-link" href="/projects/">Back to projects</a></p>
+        </article>
+      </section>
+    </main>
+${buildFooter()}
+  </div>
+${buildDeferredScripts(buildV)}
+</body>
+</html>`;
+
+    fs.writeFileSync(path.join(dir, 'index.html'), page);
+  }
+}
+
+function createSitemap(posts, projects) {
+  const pageLastmods = {
+    '/': latestIsoDate(
+      fs.existsSync(path.join(root, 'src', 'content', 'pages', 'homepage.yml')) ? fs.statSync(path.join(root, 'src', 'content', 'pages', 'homepage.yml')).mtime : null,
+      fs.existsSync(path.join(pagesDir, 'index.html')) ? fs.statSync(path.join(pagesDir, 'index.html')).mtime : null
+    ),
+    '/about/': latestIsoDate(
+      fs.existsSync(path.join(root, 'src', 'content', 'pages', 'about.yml')) ? fs.statSync(path.join(root, 'src', 'content', 'pages', 'about.yml')).mtime : null,
+      fs.existsSync(path.join(pagesDir, 'about.html')) ? fs.statSync(path.join(pagesDir, 'about.html')).mtime : null
+    ),
+    '/projects/': latestIsoDate(
+      projects.map(project => project.modifiedAt),
+      fs.existsSync(path.join(pagesDir, 'projects.html')) ? fs.statSync(path.join(pagesDir, 'projects.html')).mtime : null
+    ),
+    '/blog/': latestIsoDate(
+      posts.map(post => post.modifiedAt),
+      fs.existsSync(path.join(pagesDir, 'blog.html')) ? fs.statSync(path.join(pagesDir, 'blog.html')).mtime : null
+    ),
+    '/contact/': latestIsoDate(
+      fs.existsSync(path.join(root, 'src', 'content', 'pages', 'contact.yml')) ? fs.statSync(path.join(root, 'src', 'content', 'pages', 'contact.yml')).mtime : null,
+      fs.existsSync(path.join(pagesDir, 'contact.html')) ? fs.statSync(path.join(pagesDir, 'contact.html')).mtime : null
+    ),
+  };
+
   const staticPages = [
-    { url: '/', priority: '1.0', changefreq: 'weekly', lastmod: today },
-    { url: '/about/', priority: '0.9', changefreq: 'monthly', lastmod: today },
-    { url: '/projects/', priority: '0.8', changefreq: 'monthly', lastmod: today },
-    { url: '/blog/', priority: '0.7', changefreq: 'weekly', lastmod: posts[0]?.date || today },
-    { url: '/contact/', priority: '0.6', changefreq: 'yearly', lastmod: today },
+    { url: '/', priority: '1.0', changefreq: 'weekly', lastmod: pageLastmods['/'] },
+    { url: '/about/', priority: '0.9', changefreq: 'monthly', lastmod: pageLastmods['/about/'] },
+    { url: '/projects/', priority: '0.8', changefreq: 'weekly', lastmod: pageLastmods['/projects/'] },
+    { url: '/blog/', priority: '0.8', changefreq: 'weekly', lastmod: pageLastmods['/blog/'] },
+    { url: '/contact/', priority: '0.6', changefreq: 'yearly', lastmod: pageLastmods['/contact/'] },
   ];
 
   const urls = staticPages.concat(
     posts.map(post => ({
       url: `/blog/posts/${post.slug}/`,
-      priority: '0.65',
+      priority: '0.7',
       changefreq: 'monthly',
-      lastmod: post.date || today,
+      lastmod: post.modifiedAt,
+    })),
+    projects.map(project => ({
+      url: `/projects/${project.slug}/`,
+      priority: '0.7',
+      changefreq: 'monthly',
+      lastmod: project.modifiedAt,
     }))
   );
 
@@ -953,14 +1292,30 @@ ${urls.map(item => `  <url>
 }
 
 function createFeed(posts) {
-  const data = posts.map(post => ({
-    title: post.title,
-    slug: post.slug,
-    date: post.date,
-    description: post.description,
-    cover: post.cover,
-    url: `/blog/posts/${post.slug}/`,
-  }));
+  const data = {
+    version: 'https://jsonfeed.org/version/1.1',
+    title: `${site.SITE_NAME} Blog`,
+    home_page_url: `${site.SITE_URL}/blog/`,
+    feed_url: `${site.SITE_URL}/blog/feed.json`,
+    description: `Programming and game development posts by ${site.SITE_NAME}.`,
+    authors: [
+      {
+        name: site.SITE_NAME,
+        url: site.AUTHOR_URL || `${site.SITE_URL}/about/`,
+      },
+    ],
+    items: posts.map(post => ({
+      id: `${site.SITE_URL}/blog/posts/${post.slug}/`,
+      url: `${site.SITE_URL}/blog/posts/${post.slug}/`,
+      title: post.title,
+      summary: post.description,
+      image: buildAbsoluteSiteUrl(post.cover),
+      date_published: post.publishedAt,
+      date_modified: post.modifiedAt,
+      tags: post.tags || [],
+      content_html: post.bodyHtml || '',
+    })),
+  };
   ensureDir(path.join(dist, 'blog'));
   fs.writeFileSync(path.join(dist, 'blog', 'feed.json'), JSON.stringify(data, null, 2));
 
@@ -968,24 +1323,26 @@ function createFeed(posts) {
     <title>${escapeHtml(post.title)}</title>
     <link>${site.SITE_URL}/blog/posts/${post.slug}/</link>
     <guid isPermaLink="true">${site.SITE_URL}/blog/posts/${post.slug}/</guid>
-    <pubDate>${new Date(post.date || Date.now()).toUTCString()}</pubDate>
+    <pubDate>${new Date(post.publishedAt || Date.now()).toUTCString()}</pubDate>
     <description>${escapeHtml(post.description)}</description>
     <content:encoded><![CDATA[${post.bodyHtml || ''}]]></content:encoded>
     ${(post.tags || []).map(t => `<category>${escapeHtml(t)}</category>`).join('\n    ')}
   </item>`).join('\n');
 
+  const lastBuildDate = latestIsoDate(posts.map(post => post.modifiedAt));
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>MD Anik Hasan Blog</title>
+    <title>${escapeHtml(site.SITE_NAME)} Blog</title>
     <link>${site.SITE_URL}/blog/</link>
     <atom:link href="${site.SITE_URL}/blog/feed.xml" rel="self" type="application/rss+xml"/>
-    <description>Dev logs, learning notes, and game development updates from MD Anik Hasan.</description>
+    <description>Programming and game development posts by ${escapeHtml(site.SITE_NAME)}.</description>
     <language>en-us</language>
-    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <lastBuildDate>${new Date(lastBuildDate).toUTCString()}</lastBuildDate>
     <image>
       <url>${site.OG_IMAGE || `${site.SITE_URL}/assets/og/preview.png`}</url>
-      <title>MD Anik Hasan Blog</title>
+      <title>${escapeHtml(site.SITE_NAME)} Blog</title>
       <link>${site.SITE_URL}/blog/</link>
     </image>
 ${feedItems}
@@ -993,36 +1350,6 @@ ${feedItems}
 </rss>
 `;
   fs.writeFileSync(path.join(dist, 'blog', 'feed.xml'), xml);
-}
-
-function applySocialLinks(social) {
-  const files = [];
-  function collect(dir) {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) collect(full);
-      else if (entry.name.endsWith('.html')) files.push(full);
-    }
-  }
-  collect(dist);
-
-  const replacements = {
-    [site.SOCIAL_DEFAULTS.github]: social.github,
-    [site.SOCIAL_DEFAULTS.linkedin]: social.linkedin,
-    [site.SOCIAL_DEFAULTS.facebook]: social.facebook,
-    [site.SOCIAL_DEFAULTS.x]: social.x,
-    [site.SOCIAL_DEFAULTS.discord]: social.discord,
-    [site.SOCIAL_DEFAULTS.youtube || 'https://www.youtube.com/@mdanikhasan_dev']: social.youtube,
-  };
-
-  for (const file of files) {
-    let html = fs.readFileSync(file, 'utf8');
-    for (const [from, to] of Object.entries(replacements)) {
-      if (!from || !to) continue;
-      html = html.replace(new RegExp(escapeRegExp(from), 'g'), to);
-    }
-    fs.writeFileSync(file, html);
-  }
 }
 
 clearDir(dist);
@@ -1033,16 +1360,13 @@ copyPages(buildV);
 
 const posts = getPosts();
 const projects = getProjects();
-const social = readYamlFile(socialFile);
-const contact = readYamlFile(path.join(root, 'src', 'content', 'settings', 'contact.yml'));
 
 replaceBlogIndex(posts);
 replaceProjectsPage(projects);
 createPostPages(posts, buildV);
+createProjectPages(projects, buildV);
 createFeed(posts);
-createSitemap(posts);
-applySocialLinks(social);
-applyContactSettings(contact);
+createSitemap(posts, projects);
 minifyDistCss();
 
 console.log(`Built ${posts.length} post(s) and ${projects.length} project(s) into dist/ [v=${buildV}]`);
