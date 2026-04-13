@@ -567,6 +567,9 @@ function buildSeoHead(meta, buildV) {
 }
 
 function buildPostSeoHead(post, buildV) {
+  const coverImageMeta = getImageMeta(post.cover);
+  const coverAbsoluteUrl = post.cover.startsWith('http') ? post.cover : `${site.SITE_URL}${post.cover}`;
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -578,13 +581,19 @@ function buildPostSeoHead(post, buildV) {
         headline: post.title,
         description: post.description,
         url: `${site.SITE_URL}/blog/posts/${post.slug}/`,
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `${site.SITE_URL}/blog/posts/${post.slug}/`,
+        },
         datePublished: post.date,
         dateModified: post.date,
         author: { '@id': `${site.SITE_URL}/#person` },
         publisher: { '@id': `${site.SITE_URL}/#person` },
         image: {
           '@type': 'ImageObject',
-          url: post.cover.startsWith('http') ? post.cover : `${site.SITE_URL}${post.cover}`,
+          url: coverAbsoluteUrl,
+          width: coverImageMeta.width,
+          height: coverImageMeta.height,
         },
         isPartOf: { '@id': `${site.SITE_URL}/blog/#webpage` },
         inLanguage: 'en-US',
@@ -606,8 +615,8 @@ function buildPostSeoHead(post, buildV) {
 
   const seoTemplate = fs.readFileSync(path.join(partialsDir, 'seo.html'), 'utf8');
   const canonicalUrl = `${site.SITE_URL}/blog/posts/${post.slug}/`;
-  const ogImage = post.cover.startsWith('http') ? post.cover : `${site.SITE_URL}${post.cover}`;
-  const ogImageMeta = getImageMeta(post.cover);
+  const ogImage = coverAbsoluteUrl;
+  const ogImageMeta = coverImageMeta;
 
   // Article-specific Open Graph + Twitter card extras
   const tagMeta = (post.tags || []).map(t => `  <meta property="article:tag" content="${escapeHtml(t)}">`).join('\n');
@@ -767,6 +776,23 @@ ${cards}
 
   let html = fs.readFileSync(blogPath, 'utf8');
   html = html.replace(/<main id="main-content"[\s\S]*?<\/main>/, replacement);
+
+  if (posts.length > 0) {
+    const itemListLd = {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      '@id': `${site.SITE_URL}/blog/#itemlist`,
+      name: 'Blog posts by MD Anik Hasan',
+      itemListElement: posts.map((p, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: p.title,
+        url: `${site.SITE_URL}/blog/posts/${p.slug}/`,
+      })),
+    };
+    html = html.replace('</body>', `  <script type="application/ld+json">\n${JSON.stringify(itemListLd, null, 2)}\n  </script>\n</body>`);
+  }
+
   fs.writeFileSync(blogPath, html);
 }
 
@@ -784,10 +810,11 @@ function replaceProjectsPage(projects) {
           project.sourceCode ? `<p><a class="text-link" href="${escapeHtml(project.sourceCode)}" target="_blank" rel="noopener noreferrer">Source Code</a></p>` : '',
           project.liveDemo ? `<p><a class="text-link" href="${escapeHtml(project.liveDemo)}" target="_blank" rel="noopener noreferrer">Live Demo</a></p>` : '',
         ].filter(Boolean).join('');
+        const schemaType = project.liveDemo ? 'WebApplication' : 'SoftwareApplication';
         return `
-          <article class="project-entry flow-sm">
-            <h3>${escapeHtml(project.title)}</h3>
-            <p>${escapeHtml(project.description)}</p>
+          <article class="project-entry flow-sm" itemscope itemtype="https://schema.org/${schemaType}">
+            <h3 itemprop="name">${escapeHtml(project.title)}</h3>
+            <p itemprop="description">${escapeHtml(project.description)}</p>
             ${tools}
             <div class="flow-xs">${links}</div>
           </article>`;
@@ -810,6 +837,37 @@ ${cards}
 
   let html = fs.readFileSync(pagePath, 'utf8');
   html = html.replace(/<main id="main-content"[\s\S]*?<\/main>/, mainReplacement);
+
+  if (projects.length > 0) {
+    const itemListLd = {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'ItemList',
+          '@id': `${site.SITE_URL}/projects/#itemlist`,
+          name: 'Projects by MD Anik Hasan',
+          itemListElement: projects.map((p, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            name: p.title,
+            url: p.liveDemo || p.sourceCode || `${site.SITE_URL}/projects/`,
+          })),
+        },
+        ...projects.map(p => ({
+          '@type': p.liveDemo ? 'WebApplication' : 'SoftwareApplication',
+          name: p.title,
+          description: p.description,
+          applicationCategory: 'DeveloperApplication',
+          ...(p.tools.length ? { programmingLanguage: p.tools } : {}),
+          ...(p.sourceCode ? { codeRepository: p.sourceCode } : {}),
+          ...(p.liveDemo ? { url: p.liveDemo } : {}),
+          author: { '@id': `${site.SITE_URL}/#person` },
+        })),
+      ],
+    };
+    html = html.replace('</body>', `  <script type="application/ld+json">\n${JSON.stringify(itemListLd, null, 2)}\n  </script>\n</body>`);
+  }
+
   fs.writeFileSync(pagePath, html);
 }
 
@@ -909,18 +967,27 @@ function createFeed(posts) {
   const feedItems = posts.map(post => `  <item>
     <title>${escapeHtml(post.title)}</title>
     <link>${site.SITE_URL}/blog/posts/${post.slug}/</link>
-    <guid>${site.SITE_URL}/blog/posts/${post.slug}/</guid>
+    <guid isPermaLink="true">${site.SITE_URL}/blog/posts/${post.slug}/</guid>
     <pubDate>${new Date(post.date || Date.now()).toUTCString()}</pubDate>
     <description>${escapeHtml(post.description)}</description>
+    <content:encoded><![CDATA[${post.bodyHtml || ''}]]></content:encoded>
+    ${(post.tags || []).map(t => `<category>${escapeHtml(t)}</category>`).join('\n    ')}
   </item>`).join('\n');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>MD Anik Hasan Blog</title>
     <link>${site.SITE_URL}/blog/</link>
-    <description>Blog posts from MD Anik Hasan.</description>
+    <atom:link href="${site.SITE_URL}/blog/feed.xml" rel="self" type="application/rss+xml"/>
+    <description>Dev logs, learning notes, and game development updates from MD Anik Hasan.</description>
     <language>en-us</language>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <image>
+      <url>${site.OG_IMAGE || `${site.SITE_URL}/assets/og/preview.png`}</url>
+      <title>MD Anik Hasan Blog</title>
+      <link>${site.SITE_URL}/blog/</link>
+    </image>
 ${feedItems}
   </channel>
 </rss>

@@ -78,6 +78,14 @@ module.exports = {
           isPartOf: { '@id': `${SITE_URL}/#website` },
           mainEntity: { '@id': `${SITE_URL}/#person` },
         },
+        {
+          '@type': 'BreadcrumbList',
+          '@id': `${SITE_URL}/about/#breadcrumb`,
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home',  item: `${SITE_URL}/` },
+            { '@type': 'ListItem', position: 2, name: 'About', item: `${SITE_URL}/about/` },
+          ],
+        },
       ],
     },
   },
@@ -108,6 +116,14 @@ module.exports = {
           description: 'Dev logs, learning notes, project breakdowns, and updates from MD Anik Hasan who is exploring game development and programming.',
           isPartOf: { '@id': `${SITE_URL}/#website` },
           author: { '@id': `${SITE_URL}/#person` },
+        },
+        {
+          '@type': 'BreadcrumbList',
+          '@id': `${SITE_URL}/blog/#breadcrumb`,
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+            { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE_URL}/blog/` },
+          ],
         },
       ],
     },
@@ -158,6 +174,14 @@ module.exports = {
             contactType: 'portfolio inquiries',
             availableLanguage: 'English',
           },
+        },
+        {
+          '@type': 'BreadcrumbList',
+          '@id': `${SITE_URL}/contact/#breadcrumb`,
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home',    item: `${SITE_URL}/` },
+            { '@type': 'ListItem', position: 2, name: 'Contact', item: `${SITE_URL}/contact/` },
+          ],
         },
       ],
     },
@@ -219,6 +243,14 @@ module.exports = {
               codeRepository: 'https://github.com/mdanikhasan-dev/Protfolio-web',
               author: { '@id': `${SITE_URL}/#person` },
             },
+          ],
+        },
+        {
+          '@type': 'BreadcrumbList',
+          '@id': `${SITE_URL}/projects/#breadcrumb`,
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home',     item: `${SITE_URL}/` },
+            { '@type': 'ListItem', position: 2, name: 'Projects', item: `${SITE_URL}/projects/` },
           ],
         },
       ],
