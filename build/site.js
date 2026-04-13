@@ -5,10 +5,10 @@ const crypto = require('crypto');
 const root = process.cwd();
 const dist = path.join(root, 'dist');
 const publicDir = path.join(root, 'public');
-const pagesDir = path.join(root, 'src', 'pages');
+const pagesDir = path.join(root, 'src', 'templates');
 const adminDir = path.join(root, 'src', 'admin');
-const partialsDir = path.join(root, 'src', 'partials');
-const postSourceDir = path.join(root, 'src', 'content', 'posts');
+const partialsDir = path.join(root, 'src', 'components');
+const postSourceDir = path.join(root, 'src', 'content', 'blog');
 const projectSourceDir = path.join(root, 'src', 'content', 'projects');
 const socialFile = path.join(root, 'src', 'content', 'settings', 'social.yml');
 const analyticsFile = path.join(root, 'src', 'content', 'settings', 'analytics.yml');
@@ -250,6 +250,84 @@ function readYamlFile(file) {
   return out;
 }
 
+// Parses a page YML file reusing readFrontMatter (handles strings + lists)
+function readPageYml(file) {
+  if (!fs.existsSync(file)) return {};
+  const raw = fs.readFileSync(file, 'utf8').replace(/\r/g, '');
+  const { data } = readFrontMatter(`---\n${raw}\n---\n`);
+  return data;
+}
+
+// Estimate reading time in minutes (200 wpm average)
+function estimateReadingTime(text) {
+  const words = String(text || '').trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200));
+}
+
+// Generic placeholder injection: replaces {{KEY}} with value for every entry in vars
+function injectContentVars(html, vars) {
+  let result = html;
+  for (const [key, value] of Object.entries(vars)) {
+    result = result.replace(new RegExp(`\\{\\{${escapeRegExp(key)}\\}\\}`, 'g'), String(value));
+  }
+  return result;
+}
+
+// Build homepage template variables from CMS YML content
+function buildHomeVars(c) {
+  const skills = Array.isArray(c.skills) ? c.skills : ['C','C++','JavaScript','Python','HTML','CSS','Three.js','Unreal Engine','Blender','Unity','Aseprite','Docker'];
+  const skillsHtml = skills.map(s => `            <li>${escapeHtml(String(s))}</li>`).join('\n');
+  const whatidoTags = Array.isArray(c.whatido_tags) ? c.whatido_tags : ['3D games with pixel art aesthetics','Unreal Engine world building','Self made 3D models'];
+  const whatidoTagsHtml = whatidoTags.map(t => `              <li>${escapeHtml(String(t))}</li>`).join('\n');
+  return {
+    HOME_HERO_TITLE:         escapeHtml(c.hero_title         || 'MD Anik Hasan'),
+    HOME_HERO_BODY:          escapeHtml(c.hero_body          || ''),
+    HOME_HERO_CTA_LABEL:     escapeHtml(c.hero_cta_label     || 'Who is MD Anik Hasan?'),
+    HOME_HERO_CTA_URL:       escapeHtml(c.hero_cta_url       || '/about/'),
+    HOME_SKILLS_HEADING:     escapeHtml(c.skills_heading     || 'Skills &amp; tools'),
+    HOME_SKILLS_SUB:         escapeHtml(c.skills_sub         || 'Only the real stuff. The rest can come later.'),
+    HOME_SKILLS_LIST:        skillsHtml,
+    HOME_WHATIDO_HEADING:    escapeHtml(c.whatido_heading    || 'What I do'),
+    HOME_WHATIDO_BODY:       escapeHtml(c.whatido_body       || ''),
+    HOME_WHATIDO_TAGS:       whatidoTagsHtml,
+    HOME_OPENSOURCE_HEADING: escapeHtml(c.opensource_heading || 'Open source'),
+    HOME_OPENSOURCE_BODY:    escapeHtml(c.opensource_body    || ''),
+    HOME_TIMELINE_HEADING:   escapeHtml(c.timeline_heading   || "Where I'm heading"),
+    HOME_TIMELINE_SUB:       escapeHtml(c.timeline_sub       || ''),
+    HOME_TIMELINE_1_TITLE:   escapeHtml(c.timeline_1_title   || ''),
+    HOME_TIMELINE_1_DATE:    escapeHtml(c.timeline_1_date    || ''),
+    HOME_TIMELINE_1_BODY:    escapeHtml(c.timeline_1_body    || ''),
+    HOME_TIMELINE_2_TITLE:   escapeHtml(c.timeline_2_title   || ''),
+    HOME_TIMELINE_2_DATE:    escapeHtml(c.timeline_2_date    || ''),
+    HOME_TIMELINE_2_BODY:    escapeHtml(c.timeline_2_body    || ''),
+    HOME_TIMELINE_3_TITLE:   escapeHtml(c.timeline_3_title   || ''),
+    HOME_TIMELINE_3_DATE:    escapeHtml(c.timeline_3_date    || ''),
+    HOME_TIMELINE_3_BODY:    escapeHtml(c.timeline_3_body    || ''),
+    HOME_CLOSING_CTA:        escapeHtml(c.closing_cta        || "Let's build something real."),
+  };
+}
+
+// Build about page template variables from CMS YML content
+function buildAboutVars(c) {
+  return {
+    ABOUT_STORY_HEADING: escapeHtml(c.story_heading || 'Behind the Code'),
+    ABOUT_BODY_1: escapeHtml(c.body_1 || ''),
+    ABOUT_BODY_2: escapeHtml(c.body_2 || ''),
+    ABOUT_BODY_3: escapeHtml(c.body_3 || ''),
+    ABOUT_BODY_4: escapeHtml(c.body_4 || ''),
+    ABOUT_BODY_5: escapeHtml(c.body_5 || ''),
+    ABOUT_BODY_6: escapeHtml(c.body_6 || ''),
+  };
+}
+
+// Build contact page template variables from CMS YML content
+function buildContactVars(c) {
+  return {
+    CONTACT_INTRO: escapeHtml(c.intro || ''),
+    CONTACT_NOTE:  escapeHtml(c.note  || ''),
+  };
+}
+
 function parseValue(raw) {
   const value = stripQuotes(raw);
   if (value === 'true') return true;
@@ -414,6 +492,8 @@ function getPosts() {
       coverMeta: getImageMeta(cover),
       body,
       bodyHtml: markdownToHtml(body),
+      tags: Array.isArray(data.tags) ? data.tags.filter(Boolean).map(t => String(t).trim()).filter(Boolean) : [],
+      readingTime: estimateReadingTime(body),
     });
   }
   posts.sort((a, b) => String(b.date).localeCompare(String(a.date)));
@@ -482,7 +562,8 @@ function buildSeoHead(meta, buildV) {
     .replace('{{BOOT_INLINE}}', buildInlineBootScript(buildV))
     .replace('{{ANALYTICS_SNIPPET}}', buildAnalyticsSnippet())
     .replace(/\{\{BUILD_V\}\}/g, buildV)
-    .replace('{{JSON_LD}}', jsonLdBlock);
+    .replace('{{JSON_LD}}', jsonLdBlock)
+    .replace('{{ARTICLE_META}}', '');
 }
 
 function buildPostSeoHead(post, buildV) {
@@ -507,6 +588,18 @@ function buildPostSeoHead(post, buildV) {
         },
         isPartOf: { '@id': `${site.SITE_URL}/blog/#webpage` },
         inLanguage: 'en-US',
+        wordCount: String(post.body || '').trim().split(/\s+/).filter(Boolean).length,
+        timeRequired: `PT${post.readingTime || 1}M`,
+        ...(post.tags && post.tags.length ? { keywords: post.tags.join(', ') } : {}),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${site.SITE_URL}/blog/posts/${post.slug}/#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${site.SITE_URL}/` },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: `${site.SITE_URL}/blog/` },
+          { '@type': 'ListItem', position: 3, name: post.title, item: `${site.SITE_URL}/blog/posts/${post.slug}/` },
+        ],
       },
     ],
   };
@@ -515,6 +608,21 @@ function buildPostSeoHead(post, buildV) {
   const canonicalUrl = `${site.SITE_URL}/blog/posts/${post.slug}/`;
   const ogImage = post.cover.startsWith('http') ? post.cover : `${site.SITE_URL}${post.cover}`;
   const ogImageMeta = getImageMeta(post.cover);
+
+  // Article-specific Open Graph + Twitter card extras
+  const tagMeta = (post.tags || []).map(t => `  <meta property="article:tag" content="${escapeHtml(t)}">`).join('\n');
+  const articleMeta = [
+    post.date ? `  <meta property="article:published_time" content="${escapeHtml(post.date)}">` : '',
+    post.date ? `  <meta property="article:modified_time"  content="${escapeHtml(post.date)}">` : '',
+    `  <meta property="article:author" content="${escapeHtml(site.SITE_URL)}/#person">`,
+    `  <meta property="article:section" content="Development">`,
+    tagMeta,
+    post.tags && post.tags.length ? `  <meta name="keywords" content="${escapeHtml(post.tags.join(', '))}">` : '',
+    post.readingTime ? `  <meta name="twitter:label1" content="Reading time">` : '',
+    post.readingTime ? `  <meta name="twitter:data1" content="${post.readingTime} min read">` : '',
+    `  <meta name="twitter:label2" content="Written by">`,
+    `  <meta name="twitter:data2" content="${escapeHtml(site.SITE_NAME)}">`,
+  ].filter(Boolean).join('\n');
 
   return seoTemplate
     .replace('{{META_ROBOTS}}', 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1')
@@ -537,7 +645,8 @@ function buildPostSeoHead(post, buildV) {
     .replace('{{BOOT_INLINE}}', buildInlineBootScript(buildV))
     .replace('{{ANALYTICS_SNIPPET}}', buildAnalyticsSnippet())
     .replace(/\{\{BUILD_V\}\}/g, buildV)
-    .replace('{{JSON_LD}}', `  <script type="application/ld+json">\n${JSON.stringify(jsonLd, null, 2)}\n  </script>`);
+    .replace('{{JSON_LD}}', `  <script type="application/ld+json">\n${JSON.stringify(jsonLd, null, 2)}\n  </script>`)
+    .replace('{{ARTICLE_META}}', articleMeta);
 }
 
 
@@ -567,13 +676,14 @@ function buildDeferredScripts(buildV) {
   <script defer src="/assets/js/interactions.js?v=${buildV}"></script>`;
 }
 
-function processPage(src, dest, meta, buildV, activePage) {
+function processPage(src, dest, meta, buildV, activePage, contentVars) {
   if (!fs.existsSync(src)) return;
   let html = fs.readFileSync(src, 'utf8');
   html = html.replace('{{SEO_HEAD}}', buildSeoHead(meta, buildV));
   html = html.replace('{{NAV_HEADER}}', buildNavHeader(activePage));
   html = html.replace('{{SITE_FOOTER}}', buildFooter());
   html = html.replace(/\{\{BUILD_V\}\}/g, buildV);
+  if (contentVars) html = injectContentVars(html, contentVars);
   ensureDir(path.dirname(dest));
   fs.writeFileSync(dest, html);
 }
@@ -583,13 +693,24 @@ function copyPublic() {
 }
 
 function copyPages(buildV) {
+  const homepageContent = readPageYml(path.join(root, 'src', 'content', 'pages', 'homepage.yml'));
+  const aboutContent    = readPageYml(path.join(root, 'src', 'content', 'pages', 'about.yml'));
+  const contactContent  = readPageYml(path.join(root, 'src', 'content', 'pages', 'contact.yml'));
+
+  const varsBySource = {
+    'index.html':   buildHomeVars(homepageContent),
+    'about.html':   buildAboutVars(aboutContent),
+    'contact.html': buildContactVars(contactContent),
+  };
+
   for (const route of pageRoutes) {
     processPage(
       path.join(pagesDir, route.source),
       path.join(dist, route.output),
       route.meta,
       buildV,
-      route.activePage
+      route.activePage,
+      varsBySource[route.source] || null
     );
   }
   const adminOutput = path.join(dist, 'sawlper');

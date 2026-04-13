@@ -1,3 +1,15 @@
+# Dependencies
 node_modules/
+
+# Build output (auto-generated, never commit)
 dist/
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Environment & secrets — never commit these
+.env
+.env.local
+.env.*.local
+

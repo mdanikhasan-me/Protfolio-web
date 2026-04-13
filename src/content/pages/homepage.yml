@@ -1,4 +1,47 @@
-hero_title: "MD Anik Hasan"
-hero_subtitle: "Game developer, system builder, and portfolio owner."
-hero_primary_label: "View Projects"
-hero_secondary_label: "Read Blog"
+hero_title: MD Anik Hasan
+hero_body: I study Computer Science and Engineering at UIU, but most of my curiosity started long before university through games, computers, and spending too much time trying to understand how things work. Right now I am focused on learning coding fundamentals, improving my logic, and building the skills I will need for game development later on.
+hero_cta_label: Who is MD Anik Hasan?
+hero_cta_url: /about/
+
+skills_heading: Skills & tools
+skills_sub: Only the real stuff. The rest can come later.
+skills:
+  - C
+  - C++
+  - JavaScript
+  - Python
+  - HTML
+  - CSS
+  - Three.js
+  - Unreal Engine
+  - Blender
+  - Unity
+  - Aseprite
+  - Docker
+
+whatido_heading: What I do
+whatido_body: I make small pixel art games that are inspired by my nightmares and awkward situations that I just can't forget.
+whatido_tags:
+  - 3D games with pixel art aesthetics
+  - Unreal Engine world building
+  - Self made 3D models
+
+opensource_heading: Open source
+opensource_body: I am willing to contribute to open source projects. I want to learn teamwork and improve my communication skills by working with different backgrounds of programmers.
+
+timeline_heading: Where I'm heading
+timeline_sub: A simple timeline, clean, honest, and forward looking.
+
+timeline_1_title: United International University (UIU)
+timeline_1_date: 2025 to 2029
+timeline_1_body: Just learning the fundamentals and plan to enjoy the whole journey.
+
+timeline_2_title: Unreal Engine world building
+timeline_2_date: Ongoing
+timeline_2_body: I focus on environmental work and experimenting with level design and atmosphere.
+
+timeline_3_title: Next milestone
+timeline_3_date: Since 2025
+timeline_3_body: I'm working solo on my 3D pixel art open-world game using Unreal Engine and Aseprite. I started working on my game in 2025.
+
+closing_cta: Let's build something real.

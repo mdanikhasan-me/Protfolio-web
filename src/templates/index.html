@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{{SEO_HEAD}}
+</head>
+<body class="page page-home" data-page="home">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+<div class="site-bg" aria-hidden="true">
+  <div class="bg-photo"></div>
+  <div class="bg-shade"></div>
+  <div class="bg-mist"></div>
+  <div class="bg-edge bg-edge-left"></div>
+  <div class="bg-edge bg-edge-right"></div>
+</div>
+
+  <div class="site-shell">
+{{NAV_HEADER}}
+
+    <main id="main-content" class="site-main shell shell-wide">
+      <section class="hero">
+        <div class="hero-inner">
+          <div class="measure flow-lg">
+            <h1>{{HOME_HERO_TITLE}}</h1>
+            <p>{{HOME_HERO_BODY}}</p>
+            <p><a class="text-link" href="{{HOME_HERO_CTA_URL}}">{{HOME_HERO_CTA_LABEL}}</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-line">
+        <div class="section-grid flow-lg">
+          <div class="measure flow-md">
+            <h2>{{HOME_SKILLS_HEADING}}</h2>
+            <p>{{HOME_SKILLS_SUB}}</p>
+          </div>
+          <ul class="tag-list" aria-label="Skills and tools used by MD Anik Hasan">
+{{HOME_SKILLS_LIST}}
+          </ul>
+        </div>
+      </section>
+
+      <section class="section section-line">
+        <div class="split-layout">
+          <div class="measure flow-md">
+            <h2>{{HOME_WHATIDO_HEADING}}</h2>
+            <p>{{HOME_WHATIDO_BODY}}</p>
+            <ul class="tag-list" aria-label="MD Anik Hasan's areas of work">
+{{HOME_WHATIDO_TAGS}}
+            </ul>
+          </div>
+
+          <aside class="soft-panel flow-sm">
+            <h3>{{HOME_OPENSOURCE_HEADING}}</h3>
+            <p>{{HOME_OPENSOURCE_BODY}}</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section section-line">
+        <div class="measure flow-md">
+          <h2>{{HOME_TIMELINE_HEADING}}</h2>
+          <p>{{HOME_TIMELINE_SUB}}</p>
+        </div>
+
+        <div class="timeline-list" aria-label="MD Anik Hasan timeline">
+          <article class="timeline-item flow-sm">
+            <h3>{{HOME_TIMELINE_1_TITLE}}</h3>
+            <p>{{HOME_TIMELINE_1_DATE}}</p>
+            <p>{{HOME_TIMELINE_1_BODY}}</p>
+          </article>
+
+          <article class="timeline-item flow-sm">
+            <h3>{{HOME_TIMELINE_2_TITLE}}</h3>
+            <p>{{HOME_TIMELINE_2_DATE}}</p>
+            <p>{{HOME_TIMELINE_2_BODY}}</p>
+          </article>
+
+          <article class="timeline-item flow-sm">
+            <h3>{{HOME_TIMELINE_3_TITLE}}</h3>
+            <p>{{HOME_TIMELINE_3_DATE}}</p>
+            <p>{{HOME_TIMELINE_3_BODY}}</p>
+          </article>
+        </div>
+
+        <div class="closing-line flow-sm">
+          <h3>{{HOME_CLOSING_CTA}}</h3>
+        </div>
+      </section>
+    </main>
+
+{{SITE_FOOTER}}
+  </div>
+  <script defer src="/assets/js/core.js?v={{BUILD_V}}"></script>
+  <script defer src="/assets/js/fx.js?v={{BUILD_V}}"></script>
+  <script defer src="/assets/js/interactions.js?v={{BUILD_V}}"></script>
+</body>
+</html>

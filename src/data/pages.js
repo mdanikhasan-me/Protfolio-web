@@ -17,7 +17,7 @@ const ROBOTS_DEFAULT = 'index,follow,max-image-preview:large,max-snippet:-1,max-
 
 module.exports = {
   home: {
-    title: 'MD Anik Hasan | Portfolio, Projects & Blog',
+    title: 'MD Anik Hasan',
     description: 'MD Anik Hasan is a CSE student building strong coding fundamentals, game development skills, Unreal Engine environments, and pixel art projects. Explore the portfolio and blog.',
     robots: ROBOTS_DEFAULT,
     canonical: `${SITE_URL}/`,
@@ -52,7 +52,7 @@ module.exports = {
   },
 
   about: {
-    title: 'Who Is MD Anik Hasan? | About',
+    title: 'Who Is MD Anik Hasan?',
     description: 'Who is MD Anik Hasan? Learn about the background, curiosity, and path that led MD Anik Hasan toward programming and game development.',
     robots: ROBOTS_DEFAULT,
     canonical: `${SITE_URL}/about/`,

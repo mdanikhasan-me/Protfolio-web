@@ -1237,7 +1237,7 @@ html.reduce-motion .bg-shade {
 @media (min-width: 120rem) {
   .page-contact .site-main > .section {
     min-height: clamp(36rem, calc(100vh - var(--header-height) - 8.5rem), 48rem);
-    align-content: start;
+    align-content: center;
   }
 }
 
@@ -1781,5 +1781,48 @@ html.reduce-motion .bg-shade {
 
   .page-blog .blog-preview-card {
     min-height: 0;
+  }
+}
+
+/* ─── Project card layout: prevent over-stretching at 2K / 4K ─── */
+
+/* Cap the project grid so cards never grow absurdly wide */
+@media (min-width: 90rem) {
+  .page-projects .project-list {
+    max-width: min(var(--layout-cards), 86rem);
+  }
+}
+
+/* At large screens add a bit more breathing room between grid rows */
+@media (min-width: 120rem) {
+  .page-projects .project-list {
+    gap: clamp(1.6rem, 2vw, 2.2rem);
+  }
+}
+
+/* Replace hard 37ch cap with clean line-clamp — fills card width properly */
+.page-projects .project-entry > p:first-of-type {
+  max-width: none;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+}
+
+/* Give cards a consistent min-height so short-content cards don't feel empty */
+@media (min-width: 74rem) {
+  .page-projects .project-entry {
+    min-height: clamp(16rem, 20vw, 22rem);
+  }
+}
+
+/* ─── Projects page: better vertical balance on tall viewports ─── */
+@media (min-width: 90rem) and (min-height: 50rem) {
+  .page-projects .site-main {
+    min-height: calc(100vh - var(--header-height));
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
   }
 }
