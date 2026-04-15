@@ -4,10 +4,10 @@ const path = require('path');
 const SETTINGS_DIR = path.join(__dirname, '..', 'content', 'settings');
 
 const DEFAULT_SITE_URL = 'https://mdanikhasan.com';
-const DEFAULT_SITE_NAME = 'Md Yani Hassan';
-const DEFAULT_SITE_DESCRIPTION = 'Personal portfolio, projects, and blog of Md Yani Hassan, a game developer from Bangladesh focused on Unreal Engine, programming, and practical web builds.';
-const DEFAULT_META_TITLE = 'Md Yani Hassan, Game Developer Portfolio in Bangladesh';
-const DEFAULT_META_DESCRIPTION = 'Md Yani Hassan is a game developer from Bangladesh and a Computer Science and Engineering student sharing portfolio projects, dev logs, and practical web builds.';
+const DEFAULT_SITE_NAME = 'MD Anik Hasan';
+const DEFAULT_SITE_DESCRIPTION = 'Personal portfolio, projects, and blog of MD Anik Hasan, a game developer from Bangladesh focused on Unreal Engine, programming, and practical web builds.';
+const DEFAULT_META_TITLE = 'MD Anik Hasan, Game Developer Portfolio in Bangladesh';
+const DEFAULT_META_DESCRIPTION = 'MD Anik Hasan is a game developer from Bangladesh and a Computer Science and Engineering student sharing portfolio projects, dev logs, and practical web builds.';
 const DEFAULT_OG_IMAGE = '/assets/og/preview.png';
 const DEFAULT_LOGO = '/assets/icons/icon-192.png';
 const DEFAULT_THEME_COLOR = '#07100d';
@@ -124,6 +124,7 @@ const EMAIL = pickFirst(contact.email, DEFAULT_EMAIL);
 const RESPONSE_TIME = pickFirst(contact.response_time, DEFAULT_RESPONSE_TIME);
 const LOCATION = pickFirst(contact.location, '');
 const COUNTRY_SCHEMA = buildCountrySchema(pickFirst(LOCATION, 'Bangladesh'));
+const PERSON_IDENTIFIER = 'mdanikhasan-profile';
 
 const SOCIAL_LINKS = {
   github: pickFirst(social.github, SOCIAL_DEFAULTS.github),
@@ -139,6 +140,11 @@ const PERSON_SCHEMA_FULL = {
   '@type': 'Person',
   '@id': `${SITE_URL}/#person`,
   name: SITE_NAME,
+  givenName: 'MD Anik',
+  additionalName: 'Anik',
+  familyName: 'Hasan',
+  alternateName: 'Md Anik Hasan',
+  identifier: PERSON_IDENTIFIER,
   url: `${SITE_URL}/`,
   mainEntityOfPage: AUTHOR_URL,
   image: configuredLogo
@@ -155,6 +161,14 @@ const PERSON_SCHEMA_FULL = {
   jobTitle: 'Game Developer and CSE Student',
   description: `${SITE_NAME} is a game developer from Bangladesh and a Computer Science and Engineering student at United International University focused on Unreal Engine, programming fundamentals, and practical web builds.`,
   email: EMAIL,
+  contactPoint: {
+    '@id': `${SITE_URL}/#contact-point`,
+    '@type': 'ContactPoint',
+    email: EMAIL,
+    contactType: 'portfolio inquiries',
+    availableLanguage: 'English',
+    url: `${SITE_URL}/contact/`,
+  },
   ...(COUNTRY_SCHEMA ? { homeLocation: buildCountrySchema(COUNTRY_SCHEMA.name), nationality: buildCountrySchema(COUNTRY_SCHEMA.name) } : {}),
   affiliation: {
     '@type': 'CollegeOrUniversity',
@@ -181,7 +195,8 @@ const PERSON_SCHEMA_STUB = {
   '@type': 'Person',
   '@id': `${SITE_URL}/#person`,
   name: SITE_NAME,
-  url: AUTHOR_URL,
+  identifier: PERSON_IDENTIFIER,
+  url: `${SITE_URL}/`,
 };
 
 const WEBSITE_SCHEMA = {
@@ -228,6 +243,7 @@ module.exports = {
   EMAIL,
   RESPONSE_TIME,
   LOCATION,
+  PERSON_IDENTIFIER,
   SOCIAL_DEFAULTS,
   SOCIAL_LINKS,
   PERSON_SCHEMA_FULL,

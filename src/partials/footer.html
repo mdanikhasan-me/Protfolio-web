@@ -1,5 +1,27 @@
-    <footer class="site-footer">
-      <div class="shell shell-wide">
-        <p>&#169; {{YEAR}} {{SITE_NAME}}. All rights reserved.</p>
+<footer class="site-footer">
+  <div class="shell shell-wide">
+    <div class="site-footer__grid">
+      <div class="site-footer__intro flow-sm">
+        <p class="site-footer__eyebrow">{{SITE_NAME}}</p>
+        <p>{{SITE_NAME}} is a game developer from Bangladesh sharing portfolio projects, blog posts, and practical development notes.</p>
       </div>
-    </footer>
+
+      <nav class="site-footer__links" aria-label="{{SITE_NAME}} site links">
+        <a href="/about/">Who Is {{SITE_NAME}}?</a>
+        <a href="/projects/">{{SITE_NAME}} Projects</a>
+        <a href="/blog/">{{SITE_NAME}} Blog</a>
+        <a href="/contact/">Contact {{SITE_NAME}}</a>
+        <a href="/sitemap/">HTML Sitemap</a>
+      </nav>
+
+      <nav class="site-footer__links site-footer__links--social" aria-label="{{SITE_NAME}} social profiles">
+        <a href="{{SOCIAL_GITHUB_URL}}" target="_blank" rel="me noopener noreferrer">{{SITE_NAME}} on GitHub</a>
+        <a href="{{SOCIAL_LINKEDIN_URL}}" target="_blank" rel="me noopener noreferrer">{{SITE_NAME}} on LinkedIn</a>
+        <a href="{{SOCIAL_X_URL}}" target="_blank" rel="me noopener noreferrer">{{SITE_NAME}} on X</a>
+        <a href="{{SOCIAL_FACEBOOK_URL}}" target="_blank" rel="me noopener noreferrer">{{SITE_NAME}} on Facebook</a>
+        <a href="{{SOCIAL_YOUTUBE_URL}}" target="_blank" rel="me noopener noreferrer">{{SITE_NAME}} on YouTube</a>
+      </nav>
+    </div>
+    <p class="site-footer__legal">&#169; {{YEAR}} {{SITE_NAME}}. All rights reserved.</p>
+  </div>
+</footer>
