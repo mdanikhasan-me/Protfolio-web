@@ -271,11 +271,11 @@ function buildHomeVars(c) {
   const whatidoTags = Array.isArray(c.whatido_tags) ? c.whatido_tags : ['3D games with pixel art aesthetics','Unreal Engine world building','Self made 3D models'];
   const whatidoTagsHtml = whatidoTags.map(t => `              <li>${escapeHtml(String(t))}</li>`).join('\n');
   return {
-    HOME_HERO_TITLE:         escapeHtml(c.hero_title         || 'MD Anik Hasan'),
+    HOME_HERO_TITLE:         escapeHtml(c.hero_title         || site.SITE_NAME),
     HOME_HERO_BODY:          escapeHtml(c.hero_body          || ''),
-    HOME_HERO_CTA_LABEL:     escapeHtml(c.hero_cta_label     || 'Who is MD Anik Hasan?'),
+    HOME_HERO_CTA_LABEL:     escapeHtml(c.hero_cta_label     || `Who is ${site.SITE_NAME}?`),
     HOME_HERO_CTA_URL:       escapeHtml(c.hero_cta_url       || '/about/'),
-    HOME_SKILLS_HEADING:     escapeHtml(c.skills_heading     || 'Skills &amp; tools'),
+    HOME_SKILLS_HEADING:     escapeHtml(c.skills_heading     || 'Skills and tools'),
     HOME_SKILLS_SUB:         escapeHtml(c.skills_sub         || 'Only the real stuff. The rest can come later.'),
     HOME_SKILLS_LIST:        skillsHtml,
     HOME_WHATIDO_HEADING:    escapeHtml(c.whatido_heading    || 'What I do'),
@@ -301,7 +301,7 @@ function buildHomeVars(c) {
 // Build about page template variables from CMS YML content
 function buildAboutVars(c) {
   return {
-    ABOUT_STORY_HEADING: escapeHtml(c.story_heading || 'Behind the Code'),
+    ABOUT_STORY_HEADING: escapeHtml(c.story_heading || `Who is ${site.SITE_NAME}?`),
     ABOUT_BODY_1: escapeHtml(c.body_1 || ''),
     ABOUT_BODY_2: escapeHtml(c.body_2 || ''),
     ABOUT_BODY_3: escapeHtml(c.body_3 || ''),
@@ -325,6 +325,24 @@ function buildContactVars(c) {
     SOCIAL_LINKEDIN_URL: escapeHtml(sanitizeUrl(socialLinks.linkedin) || '#'),
     SOCIAL_FACEBOOK_URL: escapeHtml(sanitizeUrl(socialLinks.facebook) || '#'),
     SOCIAL_YOUTUBE_URL: escapeHtml(sanitizeUrl(socialLinks.youtube) || '#'),
+  };
+}
+
+function getSiteHostLabel(siteUrl) {
+  try {
+    return new URL(siteUrl).hostname.replace(/^www\./i, '').toUpperCase();
+  } catch (error) {
+    return String(siteUrl || '')
+      .replace(/^https?:\/\//i, '')
+      .replace(/\/.*$/, '')
+      .toUpperCase();
+  }
+}
+
+function buildSharedVars() {
+  return {
+    SITE_NAME: escapeHtml(site.SITE_NAME),
+    SITE_DOMAIN_LABEL: escapeHtml(getSiteHostLabel(site.SITE_URL)),
   };
 }
 
@@ -704,7 +722,7 @@ function buildPostSeoHead(post, buildV) {
     '@context': 'https://schema.org',
     '@graph': [
       site.WEBSITE_SCHEMA_STUB,
-      site.PERSON_SCHEMA_STUB,
+      site.PERSON_SCHEMA_FULL,
       {
         '@type': 'BlogPosting',
         '@id': `${site.SITE_URL}/blog/posts/${post.slug}/#article`,
@@ -719,6 +737,7 @@ function buildPostSeoHead(post, buildV) {
         dateModified: post.modifiedAt,
         author: { '@id': `${site.SITE_URL}/#person` },
         publisher: { '@id': `${site.SITE_URL}/#person` },
+        about: { '@id': `${site.SITE_URL}/#person` },
         image: {
           '@type': 'ImageObject',
           url: coverAbsoluteUrl,
@@ -760,7 +779,6 @@ function buildPostSeoHead(post, buildV) {
     `  <meta property="article:author" content="${escapeHtml(site.SITE_URL)}/#person">`,
     `  <meta property="article:section" content="Development">`,
     tagMeta,
-    post.tags && post.tags.length ? `  <meta name="keywords" content="${escapeHtml(post.tags.join(', '))}">` : '',
     post.readingTime ? `  <meta name="twitter:label1" content="Reading time">` : '',
     post.readingTime ? `  <meta name="twitter:data1" content="${post.readingTime} min read">` : '',
     `  <meta name="twitter:label2" content="Written by">`,
@@ -775,7 +793,7 @@ function buildPostSeoHead(post, buildV) {
     .replace(/\{\{TWITTER_HANDLE\}\}/g, escapeHtml(site.TWITTER_HANDLE || ''))
     .replace('{{THEME_COLOR}}', site.THEME_COLOR)
     .replace('{{GOOGLE_VERIFICATION}}\n', '')
-    .replace('{{PAGE_TITLE}}', escapeHtml(`${post.title} by ${site.SITE_NAME}`))
+    .replace('{{PAGE_TITLE}}', escapeHtml(`${post.title}, ${site.SITE_NAME} Blog`))
     .replace(/\{\{CANONICAL_URL\}\}/g, escapeHtml(canonicalUrl))
     .replace('{{HREFLANG_LINKS}}', buildHrefLangLinks(canonicalUrl))
     .replace('{{OG_TYPE}}', 'article')
@@ -855,12 +873,12 @@ function buildProjectSeoHead(project, buildV) {
     '@context': 'https://schema.org',
     '@graph': [
       site.WEBSITE_SCHEMA_STUB,
-      site.PERSON_SCHEMA_STUB,
+      site.PERSON_SCHEMA_FULL,
       {
         '@type': 'WebPage',
         '@id': `${canonicalUrl}#webpage`,
         url: canonicalUrl,
-        name: `${project.title} by ${site.SITE_NAME}`,
+        name: `${project.title}, ${site.SITE_NAME} Project`,
         description: project.description,
         inLanguage: 'en-US',
         isPartOf: { '@id': `${site.SITE_URL}/#website` },
@@ -887,7 +905,6 @@ function buildProjectSeoHead(project, buildV) {
   };
 
   const extraHead = [
-    project.tools.length ? `  <meta name="keywords" content="${escapeHtml(project.tools.join(', '))}">` : '',
     `  <meta property="og:updated_time" content="${escapeHtml(project.modifiedAt)}">`,
   ].filter(Boolean).join('\n');
 
@@ -899,7 +916,7 @@ function buildProjectSeoHead(project, buildV) {
     .replace(/\{\{TWITTER_HANDLE\}\}/g, escapeHtml(site.TWITTER_HANDLE || ''))
     .replace('{{THEME_COLOR}}', site.THEME_COLOR)
     .replace('{{GOOGLE_VERIFICATION}}\n', '')
-    .replace('{{PAGE_TITLE}}', escapeHtml(`${project.title} by ${site.SITE_NAME}`))
+    .replace('{{PAGE_TITLE}}', escapeHtml(`${project.title}, ${site.SITE_NAME} Project`))
     .replace(/\{\{CANONICAL_URL\}\}/g, escapeHtml(canonicalUrl))
     .replace('{{HREFLANG_LINKS}}', buildHrefLangLinks(canonicalUrl))
     .replace('{{OG_TYPE}}', 'website')
@@ -932,13 +949,13 @@ function buildNavHeader(activePage) {
   }).join('\n');
 
   const template = fs.readFileSync(path.join(partialsDir, 'nav.html'), 'utf8');
-  return template.replace('{{NAV_ITEMS}}', items);
+  return injectContentVars(template.replace('{{NAV_ITEMS}}', items), buildSharedVars());
 }
 
 function buildFooter() {
   const year = new Date().getFullYear();
   const template = fs.readFileSync(path.join(partialsDir, 'footer.html'), 'utf8');
-  return template.replace('{{YEAR}}', year);
+  return injectContentVars(template.replace('{{YEAR}}', year), buildSharedVars());
 }
 
 function buildDeferredScripts(buildV) {
@@ -954,7 +971,7 @@ function processPage(src, dest, meta, buildV, activePage, contentVars) {
   html = html.replace('{{NAV_HEADER}}', buildNavHeader(activePage));
   html = html.replace('{{SITE_FOOTER}}', buildFooter());
   html = html.replace(/\{\{BUILD_V\}\}/g, buildV);
-  if (contentVars) html = injectContentVars(html, contentVars);
+  html = injectContentVars(html, { ...buildSharedVars(), ...(contentVars || {}) });
   ensureDir(path.dirname(dest));
   fs.writeFileSync(dest, html);
 }
@@ -1025,7 +1042,7 @@ function replaceBlogIndex(posts) {
         <div class="measure flow-md">
           <h1>Blog</h1>
           <p>
-        Programming notes, workflow writeups, project breakdowns, and game development updates from ${escapeHtml(site.SITE_NAME)}.
+        Programming notes, game development updates, and technical writeups by ${escapeHtml(site.SITE_NAME)}, a game developer from Bangladesh.
       </p>
         </div>
       </section>
@@ -1089,7 +1106,7 @@ function replaceProjectsPage(projects) {
       <section class="section section-line">
         <div class="measure flow-md">
           <h1>Projects</h1>
-          <p>Explore software projects, experiments, and technical build pages by ${escapeHtml(site.SITE_NAME)} with source code and live demos when available.</p>
+          <p>Explore game development, programming, and web projects by ${escapeHtml(site.SITE_NAME)} with source code and live demos when available.</p>
         </div>
 
         <h2 class="sr-only">Project list</h2>
@@ -1294,10 +1311,10 @@ ${urls.map(item => `  <url>
 function createFeed(posts) {
   const data = {
     version: 'https://jsonfeed.org/version/1.1',
-    title: `${site.SITE_NAME} Blog`,
+    title: `${site.SITE_NAME} Blog and Dev Logs`,
     home_page_url: `${site.SITE_URL}/blog/`,
     feed_url: `${site.SITE_URL}/blog/feed.json`,
-    description: `Programming and game development posts by ${site.SITE_NAME}.`,
+    description: `Programming notes and game development updates by ${site.SITE_NAME} from Bangladesh.`,
     authors: [
       {
         name: site.SITE_NAME,
@@ -1334,15 +1351,15 @@ function createFeed(posts) {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${escapeHtml(site.SITE_NAME)} Blog</title>
+    <title>${escapeHtml(site.SITE_NAME)} Blog and Dev Logs</title>
     <link>${site.SITE_URL}/blog/</link>
     <atom:link href="${site.SITE_URL}/blog/feed.xml" rel="self" type="application/rss+xml"/>
-    <description>Programming and game development posts by ${escapeHtml(site.SITE_NAME)}.</description>
+    <description>Programming notes and game development updates by ${escapeHtml(site.SITE_NAME)} from Bangladesh.</description>
     <language>en-us</language>
     <lastBuildDate>${new Date(lastBuildDate).toUTCString()}</lastBuildDate>
     <image>
       <url>${site.OG_IMAGE || `${site.SITE_URL}/assets/og/preview.png`}</url>
-      <title>${escapeHtml(site.SITE_NAME)} Blog</title>
+      <title>${escapeHtml(site.SITE_NAME)} Blog and Dev Logs</title>
       <link>${site.SITE_URL}/blog/</link>
     </image>
 ${feedItems}

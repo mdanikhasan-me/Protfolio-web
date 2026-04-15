@@ -1,10 +1,10 @@
-hero_title: MD Anik Hasan Portfolio
-hero_body: This portfolio brings together my work, learning process, and long term growth in programming and game development. I study Computer Science and Engineering at UIU, but most of my curiosity started long before university through games, computers, and spending too much time trying to understand how things work. Right now I am focused on learning coding fundamentals, improving my logic, and building the skills I will need for game development later on.
-hero_cta_label: Who is MD Anik Hasan?
+hero_title: Md Yani Hassan
+hero_body: Md Yani Hassan is a game developer from Bangladesh and a Computer Science and Engineering student at United International University. This portfolio shares my projects, dev logs, learning process, and long term growth across game development, programming, and practical web builds.
+hero_cta_label: Who is Md Yani Hassan?
 hero_cta_url: /about/
 
-skills_heading: Skills & tools
-skills_sub: Only the real stuff. The rest can come later.
+skills_heading: Skills and tools
+skills_sub: Game development, programming, and practical tools I use right now.
 skills:
   - C
   - C++
@@ -20,21 +20,21 @@ skills:
   - Docker
 
 whatido_heading: What I do
-whatido_body: I make small pixel art games that are inspired by my nightmares and awkward situations that I just can't forget.
+whatido_body: I build game development experiments, Unreal Engine world building studies, and programming projects that help me grow as a developer.
 whatido_tags:
-  - 3D games with pixel art aesthetics
-  - Unreal Engine world building
-  - Self made 3D models
+  - Game development in Unreal Engine
+  - 3D world building and atmosphere
+  - Programming and portfolio systems
 
 opensource_heading: Open source
-opensource_body: I am willing to contribute to open source projects. I want to learn teamwork and improve my communication skills by working with different backgrounds of programmers.
+opensource_body: I am open to contributing to open source projects so I can learn teamwork, communication, and better engineering habits with other developers.
 
 timeline_heading: Where I'm heading
-timeline_sub: A simple timeline, clean, honest, and forward looking.
+timeline_sub: A clear path through study, practice, and long term game development work.
 
 timeline_1_title: United International University (UIU)
 timeline_1_date: 2025 to 2029
-timeline_1_body: Just learning the fundamentals and plan to enjoy the whole journey.
+timeline_1_body: I am learning the core ideas of computer science while building real projects alongside university.
 
 timeline_2_title: Unreal Engine world building
 timeline_2_date: Ongoing
@@ -42,6 +42,6 @@ timeline_2_body: I focus on environmental work and experimenting with level desi
 
 timeline_3_title: Next milestone
 timeline_3_date: Since 2025
-timeline_3_body: I'm working solo on my 3D pixel art open world game using Unreal Engine and Aseprite. I started working on my game in 2025.
+timeline_3_body: I am building a solo 3D pixel art open world game with Unreal Engine and Aseprite, one step at a time.
 
 closing_cta: Let's build something real.

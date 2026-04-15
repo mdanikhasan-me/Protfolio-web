@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "MD Anik Hasan",
-  "short_name": "MDAnik",
-  "description": "Personal portfolio of MD Anik Hasan, a CSE student at UIU focused on game development and Unreal Engine.",
+  "name": "Md Yani Hassan",
+  "short_name": "MdYani",
+  "description": "Portfolio of Md Yani Hassan, a game developer from Bangladesh focused on Unreal Engine, programming, and practical web builds.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -14,7 +14,8 @@
   "categories": [
     "portfolio",
     "personal",
-    "developer"
+    "developer",
+    "games"
   ],
   "icons": [
     {
