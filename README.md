@@ -1,8 +1,30 @@
 <p align="center">
-  <img src="./public/assets/icons/icon-192.png" alt="MD Anik Hasan portfolio icon" width="96" height="96">
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=220&color=0:0b1320,35:0f3d3e,70:1f6f78,100:e36414&text=MD%20Anik%20Hasan&fontAlign=50&fontAlignY=38&desc=Portfolio%20%20CMS%20%20Blog%20Workflow&descAlign=50&descAlignY=58&fontColor=ffffff&descColor=e8f8ff" alt="MD Anik Hasan banner">
 </p>
 
-<h1 align="center">MD Anik Hasan Portfolio and CMS</h1>
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=22&duration=2600&pause=900&color=7FFFD4&center=true&vCenter=true&repeat=true&width=760&lines=Game+Developer+from+Bangladesh;Building+my+own+portfolio+and+publishing+workflow;Static+site+speed+with+CMS+editing+and+strong+SEO" alt="Animated intro for MD Anik Hasan README">
+</p>
+
+<p align="center">
+  <a href="https://mdanikhasan.com">
+    <img src="https://img.shields.io/badge/Live%20Site-mdanikhasan.com-0f766e?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live site badge">
+  </a>
+  <a href="https://github.com/mdanikhasan-dev/Protfolio-web">
+    <img src="https://img.shields.io/badge/Repository-Protfolio--web-1d4ed8?style=for-the-badge&logo=github&logoColor=white" alt="Repository badge">
+  </a>
+  <img src="https://img.shields.io/badge/Deploy-Netlify-0ea5e9?style=for-the-badge&logo=netlify&logoColor=white" alt="Netlify badge">
+  <img src="https://img.shields.io/badge/CMS-Decap-9333ea?style=for-the-badge&logo=decap-cms&logoColor=white" alt="Decap CMS badge">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/HTML-Static%20Pages-e36414?style=flat-square&logo=html5&logoColor=white" alt="Static HTML badge">
+  <img src="https://img.shields.io/badge/CSS-Custom%20UI-2563eb?style=flat-square&logo=css3&logoColor=white" alt="Custom CSS badge">
+  <img src="https://img.shields.io/badge/JavaScript-Build%20Logic-facc15?style=flat-square&logo=javascript&logoColor=111827" alt="JavaScript badge">
+  <img src="https://img.shields.io/badge/SEO-Structured%20Metadata-16a34a?style=flat-square" alt="SEO badge">
+  <img src="https://img.shields.io/badge/Feed-RSS%20and%20JSON-f97316?style=flat-square" alt="Feed badge">
+  <img src="https://img.shields.io/badge/Sitemap-XML%20and%20HTML-7c3aed?style=flat-square" alt="Sitemap badge">
+</p>
 
 <p align="center">
   Personal website, project archive, and publishing workflow for
@@ -25,17 +47,44 @@
   <a href="https://mdanikhasan.com/blog/">Blog</a>
 </p>
 
-## What this repo is
+## Preview
 
-This is the codebase behind my portfolio and content workflow. I kept it simple on purpose:
-static pages, markdown content, custom build logic, and final files shipped from `dist`.
-I care more about control, speed, and clean output than piling on a heavy stack just to publish projects and posts.
+<p align="center">
+  <img src="./public/assets/og/preview.png" alt="Preview of the MD Anik Hasan portfolio website">
+</p>
+
+## Visual direction
+
+<p align="center">
+  I wanted this section to feel closer to my actual work, so I used visuals from the project itself instead of random internet GIFs.
+</p>
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./public/assets/bg/jungle-home.webp" width="100%" alt="Atmospheric jungle artwork from the portfolio site">
+    </td>
+    <td width="50%" align="center">
+      <img src="./public/uploads/coding_class.webp" width="100%" alt="Project related coding visual">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <strong>Portfolio atmosphere</strong><br>
+      The visual mood that shapes the site and gives it a more cinematic identity.
+    </td>
+    <td align="center">
+      <strong>Builder mindset</strong><br>
+      A more grounded project visual that fits the work better than a generic animation.
+    </td>
+  </tr>
+</table>
 
 <table>
   <tr>
     <td width="33%">
       <strong>Portfolio first</strong><br>
-      Home, about, projects, contact, and blog pages are built for a personal brand site instead of a generic theme.
+      Home, about, projects, contact, and blog pages are built around a personal brand site instead of a generic starter.
     </td>
     <td width="33%">
       <strong>Custom publishing</strong><br>
@@ -43,10 +92,16 @@ I care more about control, speed, and clean output than piling on a heavy stack 
     </td>
     <td width="33%">
       <strong>Netlify ready</strong><br>
-      The repo works with free Netlify hosting, with optional Decap CMS editing at <code>/sawlper/</code>.
+      The repo works on the free Netlify plan, with optional Decap CMS editing at <code>/sawlper/</code>.
     </td>
   </tr>
 </table>
+
+## What this repo is
+
+This is the codebase behind my portfolio and content workflow. I kept it simple on purpose.
+Static pages, markdown content, custom build logic, and final files shipped from `dist`.
+I care more about control, speed, and clean output than piling on a heavy stack just to publish projects and posts.
 
 ## Featured projects
 
@@ -66,10 +121,21 @@ I care more about control, speed, and clean output than piling on a heavy stack 
   </tr>
   <tr>
     <td><strong>Boilabin</strong></td>
-    <td>A project I want represented in this README as part of my work, without adding any source code link here.</td>
+    <td>A separate project from my portfolio that I want represented here without adding any source code link.</td>
     <td>Listed without source code</td>
   </tr>
 </table>
+
+## Stack snapshot
+
+<p>
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5 badge">
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3 badge">
+  <img src="https://img.shields.io/badge/Vanilla%20JS-F7DF1E?style=for-the-badge&logo=javascript&logoColor=111827" alt="JavaScript badge">
+  <img src="https://img.shields.io/badge/Node.js-Build%20Script-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node badge">
+  <img src="https://img.shields.io/badge/Decap%20CMS-Content%20Editing-8b5cf6?style=for-the-badge" alt="Decap CMS badge">
+  <img src="https://img.shields.io/badge/Netlify-Deploy-00c7b7?style=for-the-badge&logo=netlify&logoColor=white" alt="Netlify badge">
+</p>
 
 ## Inside the project
 
@@ -153,3 +219,7 @@ This repo works on the free Netlify plan.
 ## Why I built it this way
 
 I wanted a site that feels personal, loads fast, stays easy to update, and does not turn into framework noise just to publish text, projects, and profile content. This setup keeps the output simple while still giving me CMS editing, structured SEO, feeds, and a clean deploy flow.
+
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&section=footer&height=120&color=0:0b1320,35:0f3d3e,70:1f6f78,100:e36414" alt="Footer wave for README">
+</p>
