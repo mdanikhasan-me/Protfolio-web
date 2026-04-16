@@ -564,6 +564,92 @@ function isRawHtmlLine(trimmed) {
   return /^<\/?[A-Za-z][\w:-]*(\s[^>]*)?>/.test(trimmed) || /^<!--/.test(trimmed);
 }
 
+const voidHtmlTags = new Set([
+  'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link',
+  'meta', 'param', 'source', 'track', 'wbr',
+]);
+
+const rawHtmlBlockTags = new Set([
+  'a', 'blockquote', 'details', 'div', 'figure', 'figcaption', 'li', 'ol',
+  'p', 'picture', 'pre', 'section', 'summary', 'table', 'tbody', 'td',
+  'tfoot', 'th', 'thead', 'tr', 'ul',
+]);
+
+function normalizeContentAssetUrl(value) {
+  return String(value || '').trim()
+    .replace(/^\.\/public\//i, '/')
+    .replace(/^public\//i, '/')
+    .replace(/^\.\/(assets|uploads)\//i, '/$1/');
+}
+
+function normalizePastedMarkdown(md) {
+  return String(md || '')
+    .replace(/\r/g, '')
+    .replace(/^(\s*)\*\*(#{1,6}\s+.+?)\*\*\s*$/gm, '$1$2')
+    .replace(/^(\s*)\\(#{1,6}\s+)/gm, '$1$2')
+    .replace(/\\`/g, '`');
+}
+
+function countRootTagDelta(line, tagName) {
+  const pattern = /<\/?([A-Za-z][\w:-]*)\b[^>]*>/g;
+  let delta = 0;
+  let match = pattern.exec(line);
+
+  while (match) {
+    const full = match[0];
+    const currentTag = match[1].toLowerCase();
+
+    if (currentTag === tagName) {
+      const isClosing = full.startsWith('</');
+      const isSelfClosing = full.endsWith('/>') || voidHtmlTags.has(currentTag);
+      if (isClosing) delta -= 1;
+      else if (!isSelfClosing) delta += 1;
+    }
+
+    match = pattern.exec(line);
+  }
+
+  return delta;
+}
+
+function collectRawHtmlBlock(lines, startIndex) {
+  const firstLine = lines[startIndex];
+  const trimmed = firstLine.trim();
+
+  if (/^<!--/.test(trimmed)) {
+    const rawBlock = [firstLine];
+    let nextIndex = startIndex;
+    while (!/-->/.test(rawBlock[rawBlock.length - 1]) && nextIndex + 1 < lines.length) {
+      nextIndex += 1;
+      rawBlock.push(lines[nextIndex]);
+    }
+    return { rawHtml: rawBlock.join('\n'), nextIndex };
+  }
+
+  const rootMatch = trimmed.match(/^<([A-Za-z][\w:-]*)\b/);
+  const rootTag = rootMatch ? rootMatch[1].toLowerCase() : '';
+
+  if (!rootTag) {
+    return { rawHtml: firstLine, nextIndex: startIndex };
+  }
+
+  if (voidHtmlTags.has(rootTag) || !rawHtmlBlockTags.has(rootTag)) {
+    return { rawHtml: firstLine, nextIndex: startIndex };
+  }
+
+  const rawBlock = [firstLine];
+  let nextIndex = startIndex;
+  let depth = countRootTagDelta(firstLine, rootTag);
+
+  while (depth > 0 && nextIndex + 1 < lines.length) {
+    nextIndex += 1;
+    rawBlock.push(lines[nextIndex]);
+    depth += countRootTagDelta(lines[nextIndex], rootTag);
+  }
+
+  return { rawHtml: rawBlock.join('\n'), nextIndex };
+}
+
 function serializeJsonForHtml(value) {
   return JSON.stringify(value, null, 2)
     .replace(/</g, '\\u003C')
@@ -590,7 +676,7 @@ function formatDate(value) {
 }
 
 function markdownToPlainText(md) {
-  return String(md || '')
+  return normalizePastedMarkdown(md)
     .replace(/```[\s\S]*?```/g, ' ')
     .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '$1')
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
@@ -647,17 +733,17 @@ function markdownToHtml(md) {
   const html = [];
   let inCode = false;
   let codeBuffer = [];
-  const lines = md.replace(/\r/g, '').split('\n');
-  let listOpen = false;
+  const lines = normalizePastedMarkdown(md).split('\n');
+  let listType = '';
 
   function renderInline(text) {
     let t = escapeHtml(text);
     t = t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function (_, alt, url) {
-      const safeUrl = sanitizeUrl(url, { allowDataImage: true });
+      const safeUrl = sanitizeUrl(normalizeContentAssetUrl(url), { allowDataImage: true });
       return safeUrl ? `<img src="${escapeHtml(safeUrl)}" alt="${alt}">` : alt;
     });
     t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, label, url) {
-      const safeUrl = sanitizeUrl(url);
+      const safeUrl = sanitizeUrl(normalizeContentAssetUrl(url));
       return safeUrl ? `<a href="${escapeHtml(safeUrl)}">${label}</a>` : label;
     });
     t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
@@ -667,7 +753,28 @@ function markdownToHtml(md) {
   }
 
   function closeList() {
-    if (listOpen) { html.push('</ul>'); listOpen = false; }
+    if (!listType) return;
+    html.push(listType === 'ol' ? '</ol>' : '</ul>');
+    listType = '';
+  }
+
+  function openList(type) {
+    if (listType === type) return;
+    closeList();
+    html.push(type === 'ol' ? '<ol>' : '<ul>');
+    listType = type;
+  }
+
+  function isListLine(trimmed) {
+    return /^[-*]\s+/.test(trimmed) || /^\d+\.\s+/.test(trimmed);
+  }
+
+  function isBlockStart(trimmed) {
+    return !trimmed
+      || trimmed.startsWith('```')
+      || isRawHtmlLine(trimmed)
+      || /^#{1,6}\s+/.test(trimmed)
+      || isListLine(trimmed);
   }
 
   for (let i = 0; i < lines.length; i += 1) {
@@ -683,24 +790,36 @@ function markdownToHtml(md) {
     if (!trimmed) { closeList(); continue; }
     if (isRawHtmlLine(trimmed)) {
       closeList();
-      const rawBlock = [line];
-      while (i + 1 < lines.length && lines[i + 1].trim()) {
-        rawBlock.push(lines[i + 1]);
-        i += 1;
-      }
-      html.push(sanitizeTrustedHtml(rawBlock.join('\n')));
+      const { rawHtml, nextIndex } = collectRawHtmlBlock(lines, i);
+      html.push(sanitizeTrustedHtml(rawHtml));
+      i = nextIndex;
       continue;
     }
     if (/^[-*]\s+/.test(trimmed)) {
-      if (!listOpen) { html.push('<ul>'); listOpen = true; }
+      openList('ul');
       html.push(`<li>${renderInline(trimmed.replace(/^[-*]\s+/, ''))}</li>`);
       continue;
     }
+    if (/^\d+\.\s+/.test(trimmed)) {
+      openList('ol');
+      html.push(`<li>${renderInline(trimmed.replace(/^\d+\.\s+/, ''))}</li>`);
+      continue;
+    }
     closeList();
-    if (/^###\s+/.test(trimmed)) html.push(`<h3>${renderInline(trimmed.replace(/^###\s+/, ''))}</h3>`);
-    else if (/^##\s+/.test(trimmed)) html.push(`<h2>${renderInline(trimmed.replace(/^##\s+/, ''))}</h2>`);
-    else if (/^#\s+/.test(trimmed)) html.push(`<h1>${renderInline(trimmed.replace(/^#\s+/, ''))}</h1>`);
-    else html.push(`<p>${renderInline(trimmed)}</p>`);
+    if (/^#{1,6}\s+/.test(trimmed)) {
+      const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
+      const level = headingMatch ? headingMatch[1].length : 2;
+      const content = headingMatch ? headingMatch[2] : trimmed;
+      html.push(`<h${level}>${renderInline(content)}</h${level}>`);
+      continue;
+    }
+
+    const paragraph = [trimmed];
+    while (i + 1 < lines.length && !isBlockStart(lines[i + 1].trim())) {
+      paragraph.push(lines[i + 1].trim());
+      i += 1;
+    }
+    html.push(`<p>${renderInline(paragraph.join(' '))}</p>`);
   }
 
   closeList();

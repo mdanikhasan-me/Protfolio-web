@@ -1919,11 +1919,11 @@ html.reduce-motion .bg-shade {
 }
 
 .page-blog-post .blog-post-content img {
-  display: block;
+  display: inline-block;
   width: auto;
   height: auto;
-  margin: 0.8rem auto;
-  border-radius: clamp(16px, 1.9vw, 24px);
+  margin: 0.35rem 0;
+  vertical-align: middle;
 }
 
 .page-blog-post .blog-post-content p[align="center"],
@@ -1933,8 +1933,27 @@ html.reduce-motion .bg-shade {
 }
 
 .page-blog-post .blog-post-content p[align="center"] img,
-.page-blog-post .blog-post-content div[align="center"] img {
-  margin-inline: auto;
+.page-blog-post .blog-post-content div[align="center"] img,
+.page-blog-post .blog-post-content p[align="center"] a,
+.page-blog-post .blog-post-content div[align="center"] a {
+  display: inline-block;
+  margin: 0.25rem 0.35rem;
+}
+
+.page-blog-post .blog-post-content p[align="center"] > img:only-child,
+.page-blog-post .blog-post-content p[align="center"] > a:only-child > img,
+.page-blog-post .blog-post-content div[align="center"] > img:only-child,
+.page-blog-post .blog-post-content div[align="center"] > a:only-child > img {
+  display: block;
+  width: min(100%, 72rem);
+  margin: 0.8rem auto;
+  border-radius: clamp(16px, 1.9vw, 24px);
+}
+
+.page-blog-post .blog-post-content p[align="center"] > a:only-child,
+.page-blog-post .blog-post-content div[align="center"] > a:only-child {
+  display: block;
+  margin: 0;
 }
 
 .page-blog-post .blog-post-content table {
