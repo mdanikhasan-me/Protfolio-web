@@ -10,7 +10,6 @@ source_code: https://github.com/mdanikhasan-dev/Protfolio-web
 live_demo: ""
 featured: true
 ---
-
 <p *align*="center">  <img src="https://capsule-render.vercel.app/api?type=waving&height=220&color=0:0b1320,35:0f3d3e,70:1f6f78,100:e36414&text=MD%20Anik%20Hasan&fontAlign=50&fontAlignY=38&desc=Portfolio%20%20CMS%20%20Blog%20Workflow&descAlign=50&descAlignY=58&fontColor=ffffff&descColor=e8f8ff" alt="MD Anik Hasan banner"></p>
 <p *align*="center">  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=22&duration=2600&pause=900&color=7FFFD4&center=true&vCenter=true&repeat=true&width=760&lines=Game+Developer+from+Bangladesh;Building+my+own+portfolio+and+publishing+workflow;Static+site+speed+with+CMS+editing+and+strong+SEO" alt="Animated intro for MD Anik Hasan README"></p>
 <p *align*="center">  <a href="https://mdanikhasan.com">    <img src="https://img.shields.io/badge/Live%20Site-mdanikhasan.com-0f766e?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live site badge">  </a>  <a href="https://github.com/mdanikhasan-dev/Protfolio-web">    <img src="https://img.shields.io/badge/Repository-Protfolio--web-1d4ed8?style=for-the-badge&logo=github&logoColor=white" alt="Repository badge">  </a>  <img src="https://img.shields.io/badge/Deploy-Netlify-0ea5e9?style=for-the-badge&logo=netlify&logoColor=white" alt="Netlify badge">  <img src="https://img.shields.io/badge/CMS-Decap-9333ea?style=for-the-badge&logo=decap-cms&logoColor=white" alt="Decap CMS badge"></p>
@@ -19,9 +18,9 @@ featured: true
 <p *align*="center">  Static portfolio, project archive, and publishing workflow with custom build output,  CMS editing, and structured SEO for <a href="https://mdanikhasan.com">mdanikhasan.com</a>.</p>
 <p *align*="center">  <a href="https://mdanikhasan.com">Live site</a>  &nbsp;&nbsp;&nbsp;  <a href="https://mdanikhasan.com/about/">About</a>  &nbsp;&nbsp;&nbsp;  <a href="https://mdanikhasan.com/projects/">Projects</a>  &nbsp;&nbsp;&nbsp;  <a href="https://mdanikhasan.com/blog/">Blog</a></p>
 **\## Visual direction**
-<p *align*="center">  Project visual</p>
-<p *align*="center">  <img src="./public/uploads/coding_class.jpg" width="100%" alt="Project related coding visual"></p>
-<p *align*="center">  <strong>Builder mindset</strong><br>  Project asset from the current visual set.</p>
+<p *align*="center">  Jungle home background</p>
+<p *align*="center">  <img src="./public/assets/bg/jungle-home.webp" width="100%" alt="Jungle home background from the website"></p>
+<p *align*="center">  <strong>Website background</strong><br>  Main background artwork used across the site.</p>
 <table>  <tr>    <td width="33%">      <strong>Portfolio first</strong><br>      Home, about, projects, contact, and blog pages are built around a personal brand site instead of a generic starter.    </td>    <td width="33%">      <strong>Custom publishing</strong><br>      Markdown content and structured settings flow through a Node build script that writes the final site into <code>dist</code>.    </td>    <td width="33%">      <strong>Netlify ready</strong><br>      The repo works on the free Netlify plan, with optional Decap CMS editing at <code>/sawlper/</code>.    </td>  </tr></table>
 **\## What this repo is**
 This codebase powers the portfolio, blog workflow, and CMS setup behind \`mdanikhasan.com\`.Static pages, markdown content, custom build logic, and generated files ship from \`dist\`.
