@@ -380,7 +380,7 @@ function buildSitemapVars(posts, projects) {
 
   return {
     HTML_SITEMAP_CONTENT: `
-        <div class="feature-list" aria-label="${escapeHtml(site.SITE_NAME)} HTML sitemap sections">
+        <div class="feature-list">
           <section class="feature-item flow-sm">
             <p class="eyebrow">Main pages</p>
             <h2>Core site sections</h2>
@@ -557,7 +557,23 @@ function sanitizeTrustedHtml(html) {
     .replace(/<link\b[^>]*>/gi, '')
     .replace(/\son[a-z-]+\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, '')
     .replace(/\s(?:href|src)\s*=\s*("javascript:[^"]*"|'javascript:[^']*'|javascript:[^\s>]+)/gi, '')
-    .replace(/\ssrcdoc\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, '');
+    .replace(/\ssrcdoc\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, '')
+    .replace(/\salign=(["'])center\1/gi, ' data-align="center"')
+    .replace(/<(td|th)\b([^>]*?)\swidth=(["'])(\d+)%\3([^>]*)>/gi, '<$1$2 data-width="$4"$5>')
+    .replace(/<img\b([^>]*?)\swidth=(["'])100%\2([^>]*)>/gi, '<img$1$3>')
+    .replace(/<img\b([^>]*?)\s*\/>/gi, '<img$1>')
+    .replace(/<br\s*\/>/gi, '<br>')
+    .replace(/<(hr|source|input|meta|link)\b([^>]*?)\s*\/>/gi, '<$1$2>')
+    .replace(/<table>([\s\S]*?)<\/table>/gi, function (_, inner) {
+      const cleanInner = String(inner || '').trim();
+      if (!cleanInner) return '<table></table>';
+      if (/<(?:thead|tbody|tfoot)\b/i.test(cleanInner) || !/<tr\b/i.test(cleanInner)) {
+        return `<table>${cleanInner}</table>`;
+      }
+      return `<table><tbody>${cleanInner}</tbody></table>`;
+    })
+    .replace(/<img\b(?![^>]*\bloading=)([^>]*)>/gi, '<img loading="lazy"$1>')
+    .replace(/<img\b(?![^>]*\bdecoding=)([^>]*)>/gi, '<img decoding="async"$1>');
 }
 
 function isRawHtmlLine(trimmed) {
@@ -598,14 +614,14 @@ function normalizePastedMarkdown(md) {
     .replace(/^(\s*)\\((?:---|\*\*\*|___))\s*$/gm, '$1$2')
     .replace(/\\!\[/g, '![')
     .replace(/\\([\[\]|])/g, '$1')
-    .replace(/```([A-Za-z0-9_+-]+)([^\n`])/g, '```$1\n$2')
+    .replace(/^```(bash|sh|zsh|powershell|ps1|cmd|env|text|html|css|js|javascript|json|yaml|yml|md|markdown)(?=\S)/gm, '```$1\n')
     .replace(/([^\n`])```/g, '$1\n```')
     .replace(/\\`/g, '`');
 
   normalized = normalized.replace(/^```(bash|sh|zsh|powershell|ps1|cmd)([\s\S]*?)```$/gm, function (_, lang, body) {
     const fixedBody = String(body || '')
       .trim()
-      .replace(/(?<=\S)(?=(?:npm|pnpm|yarn|npx|git|node|python|pip|bun|cargo|go|uv)\s)/g, '\n')
+      .replace(/(?<=\S)(?=(?:npm|pnpm|yarn|npx|git|node|python|pip|bun|cargo|go|uv)[ \t])/g, '\n')
       .replace(/\n{3,}/g, '\n\n')
       .trim();
     return `\`\`\`${lang}\n${fixedBody}\n\`\`\``;
@@ -801,7 +817,7 @@ function markdownToHtml(md) {
     let t = escapeHtml(text);
     t = t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function (_, alt, url) {
       const safeUrl = sanitizeUrl(normalizeContentAssetUrl(decodeInlineUrl(url)), { allowDataImage: true });
-      return safeUrl ? `<img src="${escapeHtml(safeUrl)}" alt="${alt}">` : alt;
+      return safeUrl ? `<img src="${escapeHtml(safeUrl)}" alt="${alt}" loading="lazy" decoding="async">` : alt;
     });
     t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, label, url) {
       const safeUrl = sanitizeUrl(normalizeContentAssetUrl(decodeInlineUrl(url)));
@@ -979,7 +995,8 @@ function getProjects() {
       : (Array.isArray(data.stack) ? data.stack.filter(Boolean).map(t => String(t).trim()).filter(Boolean) : []);
     const plainText = markdownToPlainText(body);
     const description = data.description || makeExcerpt(plainText);
-    const thumbnail = sanitizeUrl(data.thumbnail || data.cover, { allowDataImage: true }) || '/assets/og/preview.png';
+    const heroImage = sanitizeUrl(data.thumbnail || data.cover, { allowDataImage: true }) || '';
+    const thumbnail = heroImage || '/assets/og/preview.png';
     const publishedAt = toIsoDateTime(data.date, stat.mtime);
     const modifiedAt = latestIsoDate(
       toIsoDateTime(data.updated || data.modified, stat.mtime),
@@ -994,6 +1011,7 @@ function getProjects() {
       sourceCode: sanitizeUrl(data.source_code) || '',
       liveDemo: sanitizeUrl(data.live_demo) || '',
       featured: data.featured === true || data.featured === 'true',
+      heroImage,
       thumbnail,
       body,
       bodyHtml: markdownToHtml(body),
@@ -1311,6 +1329,14 @@ function buildDeferredScripts(buildV) {
   <script defer src="/assets/js/interactions.js?v=${buildV}"></script>`;
 }
 
+function finalizeGeneratedHtml(html) {
+  return String(html || '')
+    .replace(/^<!doctype html>/i, '<!DOCTYPE html>')
+    .split('\n')
+    .map(line => line.replace(/[ \t]+$/g, ''))
+    .join('\n');
+}
+
 function processPage(src, dest, meta, buildV, activePage, contentVars) {
   if (!fs.existsSync(src)) return;
   let html = fs.readFileSync(src, 'utf8');
@@ -1323,7 +1349,7 @@ function processPage(src, dest, meta, buildV, activePage, contentVars) {
   html = replaceMarkerBlock(html, 'HOME_SKILLS_LIST', contentVars && contentVars.HOME_SKILLS_LIST);
   html = replaceMarkerBlock(html, 'HOME_WHATIDO_TAGS', contentVars && contentVars.HOME_WHATIDO_TAGS);
   ensureDir(path.dirname(dest));
-  fs.writeFileSync(dest, html);
+  fs.writeFileSync(dest, finalizeGeneratedHtml(html));
 }
 
 function copyPublic() {
@@ -1423,7 +1449,7 @@ ${cards}
     html = html.replace('</body>', `  <script type="application/ld+json">\n${serializeJsonForHtml(itemListLd)}\n  </script>\n</body>`);
   }
 
-  fs.writeFileSync(blogPath, html);
+  fs.writeFileSync(blogPath, finalizeGeneratedHtml(html));
 }
 
 
@@ -1435,7 +1461,7 @@ function replaceProjectsPage(projects) {
     ? projects.map(project => {
         const detailUrl = `/projects/${project.slug}/`;
         const tools = project.tools.length
-          ? `<ul class="tag-list" aria-label="${escapeHtml(project.title)} technologies">${project.tools.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>`
+          ? `<ul class="tag-list">${project.tools.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>`
           : '';
           const links = [
             `<p><a class="text-link" href="${detailUrl}">View ${escapeHtml(project.title)} project details</a></p>`,
@@ -1486,7 +1512,7 @@ ${cards}
     html = html.replace('</body>', `  <script type="application/ld+json">\n${serializeJsonForHtml(itemListLd)}\n  </script>\n</body>`);
   }
 
-  fs.writeFileSync(pagePath, html);
+  fs.writeFileSync(pagePath, finalizeGeneratedHtml(html));
 }
 
 function createPostPages(posts, buildV) {
@@ -1534,7 +1560,7 @@ ${buildDeferredScripts(buildV)}
 </body>
 </html>`;
 
-    fs.writeFileSync(path.join(dir, 'index.html'), page);
+    fs.writeFileSync(path.join(dir, 'index.html'), finalizeGeneratedHtml(page));
   }
 }
 
@@ -1545,7 +1571,10 @@ function createProjectPages(projects, buildV) {
 
     const seoHead = buildProjectSeoHead(project, buildV);
     const tools = project.tools.length
-      ? `<ul class="tag-list" aria-label="${escapeHtml(project.title)} technologies">${project.tools.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>`
+      ? `<ul class="tag-list">${project.tools.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>`
+      : '';
+    const coverImg = project.heroImage
+      ? buildResponsiveImage(project.heroImage, project.title, 'detail-cover-image', 'loading="eager" decoding="async"').html
       : '';
     const links = [
       project.sourceCode ? `<p><a class="text-link" href="${escapeHtml(project.sourceCode)}" target="_blank" rel="noopener noreferrer">Source Code</a></p>` : '',
@@ -1580,6 +1609,7 @@ ${buildNavHeader('/projects/')}
           <h1>${escapeHtml(project.title)}</h1>
           <p>${escapeHtml(project.description)}</p>
             ${tools}
+            ${coverImg}
             ${links ? `<div class="flow-xs">${links}</div>` : ''}
             ${body ? `<div class="blog-post-content flow-md">${body}</div>` : ''}
             <p><a class="blog-back-link" href="/projects/">Back to ${escapeHtml(site.SITE_NAME)} projects</a></p>
@@ -1592,7 +1622,7 @@ ${buildDeferredScripts(buildV)}
 </body>
 </html>`;
 
-    fs.writeFileSync(path.join(dir, 'index.html'), page);
+    fs.writeFileSync(path.join(dir, 'index.html'), finalizeGeneratedHtml(page));
   }
 }
 

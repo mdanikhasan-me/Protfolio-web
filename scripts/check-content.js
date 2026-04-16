@@ -72,6 +72,29 @@ function warn(file, message) {
   warnings.push(`${file}: ${message}`);
 }
 
+function isLocalAssetPath(value) {
+  return /^(\/(assets|uploads)\/|\.\/public\/|public\/)/i.test(String(value || '').trim());
+}
+
+function resolveLocalAssetPath(value) {
+  return path.join(
+    root,
+    String(value || '')
+      .trim()
+      .replace(/^\.\/public\//i, 'public/')
+      .replace(/^public\//i, 'public/')
+      .replace(/^\//, 'public/'),
+  );
+}
+
+function checkLocalAssetReference(file, value, fieldName) {
+  if (!isLocalAssetPath(value)) return;
+  const resolved = resolveLocalAssetPath(value);
+  if (!fs.existsSync(resolved)) {
+    report(file, `${fieldName} references missing local asset "${value}"`);
+  }
+}
+
 function checkBody(file, body) {
   if (!body.trim()) return;
 
@@ -86,6 +109,14 @@ function checkBody(file, body) {
   if (/\d+\.\s+[^\n]+\d+\.\s+/.test(body)) {
     warn(file, 'body contains collapsed ordered list items');
   }
+
+  for (const match of body.matchAll(/(?:src|href)\s*=\s*["']([^"']+)["']/gi)) {
+    checkLocalAssetReference(file, match[1], 'body');
+  }
+
+  for (const match of body.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)) {
+    checkLocalAssetReference(file, match[1], 'body');
+  }
 }
 
 function validateFolderCollection(config) {
@@ -98,6 +129,8 @@ function validateFolderCollection(config) {
     const basename = file.replace(/\.md$/, '');
     const slug = getScalar(frontmatter, 'slug');
     const title = getScalar(frontmatter, 'title');
+    const thumbnail = getScalar(frontmatter, 'thumbnail');
+    const cover = getScalar(frontmatter, 'cover');
     const label = `${config.name}/${file}`;
 
     if (!frontmatter) {
@@ -144,6 +177,8 @@ function validateFolderCollection(config) {
       report(label, 'missing body content');
     }
 
+    checkLocalAssetReference(label, thumbnail, 'thumbnail');
+    checkLocalAssetReference(label, cover, 'cover');
     checkBody(label, body);
   }
 }

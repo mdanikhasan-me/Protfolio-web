@@ -3,10 +3,11 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "build": "npm run check && node scripts/build-site.js",
+    "build": "npm run check && node scripts/build-site.js && npm run check:generated",
     "preview": "npx serve dist",
     "validate:html": "npx html-validate \"dist/**/*.html\" \"dist/*.html\"",
     "check:content": "node scripts/check-content.js",
+    "check:generated": "node scripts/check-generated-html.js",
     "check:config": "node -e \"require('./src/data/site'); require('./src/data/pages'); console.log('Config OK');\"",
     "check": "npm run check:content && npm run check:config"
   },
