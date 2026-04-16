@@ -30,7 +30,9 @@ function ensureDir(dir) {
 }
 
 function clearDir(dir) {
-  if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
+  if (fs.existsSync(dir)) {
+    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 150 });
+  }
   ensureDir(dir);
 }
 
@@ -194,6 +196,7 @@ function buildAnalyticsSnippet() {
 
 function buildHrefLangLinks(canonicalUrl) {
   return [
+    `  <link rel="alternate" href="${escapeHtml(canonicalUrl)}" hreflang="en-BD">`,
     `  <link rel="alternate" href="${escapeHtml(canonicalUrl)}" hreflang="en">`,
     `  <link rel="alternate" href="${escapeHtml(canonicalUrl)}" hreflang="x-default">`,
   ].join('\n');
@@ -273,53 +276,8 @@ function injectContentVars(html, vars) {
   return result;
 }
 
-function buildHomeDiscoverySection(posts, projects) {
-  const latestPost = [...posts].sort((a, b) => new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime())[0] || null;
-  const latestProject = [...projects].sort((a, b) => new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime())[0] || null;
-  const cards = [];
-
-  if (latestPost) {
-    cards.push(`
-          <article class="feature-item flow-sm">
-            <p class="eyebrow">Latest blog post</p>
-            <h3><a href="/blog/posts/${latestPost.slug}/">${escapeHtml(latestPost.title)}</a></h3>
-            <p>${escapeHtml(latestPost.description)}</p>
-            <p><a class="text-link" href="/blog/posts/${latestPost.slug}/">Read ${escapeHtml(latestPost.title)}</a></p>
-          </article>`);
-  }
-
-  if (latestProject) {
-    cards.push(`
-          <article class="feature-item flow-sm">
-            <p class="eyebrow">Latest project page</p>
-            <h3><a href="/projects/${latestProject.slug}/">${escapeHtml(latestProject.title)}</a></h3>
-            <p>${escapeHtml(latestProject.description)}</p>
-            <p><a class="text-link" href="/projects/${latestProject.slug}/">View ${escapeHtml(latestProject.title)} details</a></p>
-          </article>`);
-  }
-
-  cards.push(`
-          <article class="feature-item flow-sm">
-            <p class="eyebrow">Discovery</p>
-            <h3><a href="/sitemap/">HTML Sitemap</a></h3>
-            <p>Browse every main page, blog post, and project from one crawlable page designed to help people and search crawlers discover content faster.</p>
-            <p><a class="text-link" href="/sitemap/">Open the HTML sitemap</a></p>
-          </article>`);
-
-  return `
-      <section class="section section-line home-discovery">
-        <div class="measure flow-md">
-          <h2>Latest updates and crawl paths</h2>
-          <p>Fresh content is linked from the homepage so visitors and search crawlers can reach new blog posts, projects, and the full HTML sitemap more easily.</p>
-        </div>
-        <div class="feature-list" aria-label="Latest updates and discovery links">
-${cards.join('\n')}
-        </div>
-      </section>`;
-}
-
 // Build homepage template variables from CMS YML content
-function buildHomeVars(c, posts, projects) {
+function buildHomeVars(c) {
   const skills = Array.isArray(c.skills) ? c.skills : ['C','C++','JavaScript','Python','HTML','CSS','Three.js','Unreal Engine','Blender','Unity','Aseprite','Docker'];
   const skillsHtml = skills.map(s => `            <li>${escapeHtml(String(s))}</li>`).join('\n');
   const whatidoTags = Array.isArray(c.whatido_tags) ? c.whatido_tags : ['3D games with pixel art aesthetics','Unreal Engine world building','Self made 3D models'];
@@ -349,7 +307,6 @@ function buildHomeVars(c, posts, projects) {
     HOME_TIMELINE_3_DATE:    escapeHtml(c.timeline_3_date    || ''),
     HOME_TIMELINE_3_BODY:    escapeHtml(c.timeline_3_body    || ''),
     HOME_CLOSING_CTA:        escapeHtml(c.closing_cta        || "Let's build something real."),
-    HOME_DISCOVERY_SECTION:  buildHomeDiscoverySection(posts, projects),
   };
 }
 
@@ -373,7 +330,6 @@ function buildContactVars(c) {
     CONTACT_NOTE:  escapeHtml(c.note  || ''),
     CONTACT_EMAIL: escapeHtml(site.EMAIL || ''),
     CONTACT_RESPONSE_TIME: escapeHtml(site.RESPONSE_TIME || ''),
-    ...buildSocialVars(),
   };
 }
 
@@ -427,17 +383,6 @@ ${projectLinksHtml}
   };
 }
 
-function getSiteHostLabel(siteUrl) {
-  try {
-    return new URL(siteUrl).hostname.replace(/^www\./i, '').toUpperCase();
-  } catch (error) {
-    return String(siteUrl || '')
-      .replace(/^https?:\/\//i, '')
-      .replace(/\/.*$/, '')
-      .toUpperCase();
-  }
-}
-
 function buildSocialVars() {
   const socialLinks = site.SOCIAL_LINKS || {};
   return {
@@ -453,7 +398,6 @@ function buildSocialVars() {
 function buildSharedVars() {
   return {
     SITE_NAME: escapeHtml(site.SITE_NAME),
-    SITE_DOMAIN_LABEL: escapeHtml(getSiteHostLabel(site.SITE_URL)),
     ...buildSocialVars(),
   };
 }
@@ -810,7 +754,6 @@ function buildSeoHead(meta, buildV) {
     .replace('{{META_ROBOTS}}', meta.robots)
     .replace(/\{\{META_DESCRIPTION\}\}/g, escapeHtml(meta.description))
     .replace(/\{\{TWITTER_HANDLE\}\}/g, escapeHtml(site.TWITTER_HANDLE || ''))
-    .replace('{{THEME_COLOR}}', meta.themeColor)
     .replace('{{GOOGLE_VERIFICATION}}\n', googleVerificationLine ? `${googleVerificationLine}\n` : '')
     .replace(/\{\{CANONICAL_URL\}\}/g, escapeHtml(meta.canonical))
     .replace('{{HREFLANG_LINKS}}', buildHrefLangLinks(meta.canonical))
@@ -871,7 +814,7 @@ function buildPostSeoHead(post, buildV) {
           height: coverImageMeta.height,
         },
         isPartOf: { '@id': `${site.SITE_URL}/blog/#webpage` },
-        inLanguage: 'en-US',
+        inLanguage: 'en-BD',
         wordCount: post.wordCount,
         timeRequired: `PT${post.readingTime || 1}M`,
         ...(post.tags && post.tags.length ? { keywords: post.tags.join(', ') } : {}),
@@ -918,7 +861,6 @@ function buildPostSeoHead(post, buildV) {
     .replace('{{META_ROBOTS}}', 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1')
     .replace(/\{\{META_DESCRIPTION\}\}/g, escapeHtml(post.description))
     .replace(/\{\{TWITTER_HANDLE\}\}/g, escapeHtml(site.TWITTER_HANDLE || ''))
-    .replace('{{THEME_COLOR}}', site.THEME_COLOR)
     .replace('{{GOOGLE_VERIFICATION}}\n', '')
     .replace(/\{\{CANONICAL_URL\}\}/g, escapeHtml(canonicalUrl))
     .replace('{{HREFLANG_LINKS}}', buildHrefLangLinks(canonicalUrl))
@@ -1006,7 +948,7 @@ function buildProjectSeoHead(project, buildV) {
         url: canonicalUrl,
         name: `${project.title}, ${site.SITE_NAME} Project`,
         description: project.description,
-        inLanguage: 'en-US',
+        inLanguage: 'en-BD',
         isPartOf: { '@id': `${site.SITE_URL}/#website` },
         about: { '@id': `${site.SITE_URL}/#person` },
         mainEntity: { '@id': `${canonicalUrl}#project` },
@@ -1041,7 +983,6 @@ function buildProjectSeoHead(project, buildV) {
     .replace('{{META_ROBOTS}}', 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1')
     .replace(/\{\{META_DESCRIPTION\}\}/g, escapeHtml(project.description))
     .replace(/\{\{TWITTER_HANDLE\}\}/g, escapeHtml(site.TWITTER_HANDLE || ''))
-    .replace('{{THEME_COLOR}}', site.THEME_COLOR)
     .replace('{{GOOGLE_VERIFICATION}}\n', '')
     .replace(/\{\{CANONICAL_URL\}\}/g, escapeHtml(canonicalUrl))
     .replace('{{HREFLANG_LINKS}}', buildHrefLangLinks(canonicalUrl))
@@ -1115,7 +1056,7 @@ function copyPages(buildV, posts, projects) {
   const contactContent  = readPageYml(path.join(root, 'src', 'content', 'pages', 'contact.yml'));
 
   const varsBySource = {
-    'index.html':   buildHomeVars(homepageContent, posts, projects),
+    'index.html':   buildHomeVars(homepageContent),
     'about.html':   buildAboutVars(aboutContent),
     'contact.html': buildContactVars(contactContent),
     'sitemap.html': buildSitemapVars(posts, projects),

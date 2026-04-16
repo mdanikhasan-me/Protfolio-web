@@ -14,7 +14,7 @@
   <meta property="og:description" content="{{OG_DESCRIPTION}}">
   <meta property="og:url" content="{{CANONICAL_URL}}">
   <meta property="og:site_name" content="{{SITE_NAME}}">
-  <meta property="og:locale" content="en_US">
+  <meta property="og:locale" content="en_BD">
   <meta property="og:image" content="{{OG_IMAGE}}">
   <meta property="og:image:secure_url" content="{{OG_IMAGE}}">
   <meta property="og:image:width" content="{{OG_IMAGE_WIDTH}}">

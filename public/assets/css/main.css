@@ -338,23 +338,25 @@ html[data-scrolled="true"] .site-header {
 
 .site-brand {
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.7rem;
+  align-items: center;
+  min-height: 2.6rem;
+  padding: 0.15rem 0;
   text-decoration: none;
-  font-weight: 700;
   color: var(--accent);
   white-space: nowrap;
+  transition: color var(--dur-fast) ease, opacity var(--dur-fast) ease;
+}
+
+.site-brand:hover,
+.site-brand:focus-visible {
+  color: var(--focus);
 }
 
 .site-brand__name {
-  font-size: 0.92rem;
-  letter-spacing: 0.12em;
-}
-
-.site-brand__domain {
-  color: var(--text-muted);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
+  font-size: clamp(0.98rem, 0.94rem + 0.22vw, 1.08rem);
+  font-weight: 780;
+  letter-spacing: 0.045em;
+  line-height: 1;
 }
 
 .nav-toggle {
@@ -1209,50 +1211,10 @@ pre {
   border-top: 1px solid rgba(211, 227, 217, 0.08);
 }
 
-.site-footer__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) repeat(2, minmax(0, 1fr));
-  gap: clamp(1rem, 2vw, 2rem);
-  align-items: start;
-}
-
-.site-footer__eyebrow {
-  margin: 0;
-  color: var(--accent);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.site-footer__intro p {
-  margin: 0;
-}
-
-.site-footer__links {
-  display: grid;
-  gap: 0.7rem;
-  align-content: start;
-}
-
-.site-footer__links a {
-  width: fit-content;
-  color: var(--text-soft);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: color var(--dur-fast) ease, border-color var(--dur-fast) ease;
-}
-
-.site-footer__links a:hover,
-.site-footer__links a:focus-visible {
-  color: var(--accent);
-  border-color: rgba(217, 229, 222, 0.42);
-}
-
 .site-footer__legal {
-  margin-top: var(--space-md);
-  padding-top: var(--space-sm);
-  border-top: 1px solid rgba(211, 227, 217, 0.08);
+  margin: 0;
+  padding: 0 0 var(--space-sm);
+  text-align: center;
 }
 
 .site-footer p {
@@ -1488,10 +1450,6 @@ html.reduce-motion .bg-shade {
     align-items: center;
   }
 
-  .site-brand__domain {
-    display: none;
-  }
-
   .site-header.is-hidden {
     transform: none;
     opacity: 1;
@@ -1550,12 +1508,6 @@ html.reduce-motion .bg-shade {
   .site-bg-inner .bg-shade,
   .site-bg-inner .bg-mist {
     transform: none;
-  }
-}
-
-@media (max-width: 60rem) {
-  .site-footer__grid {
-    grid-template-columns: 1fr;
   }
 }
 

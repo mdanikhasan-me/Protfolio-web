@@ -5,12 +5,11 @@ const SETTINGS_DIR = path.join(__dirname, '..', 'content', 'settings');
 
 const DEFAULT_SITE_URL = 'https://mdanikhasan.com';
 const DEFAULT_SITE_NAME = 'MD Anik Hasan';
-const DEFAULT_SITE_DESCRIPTION = 'Personal portfolio, projects, and blog of MD Anik Hasan, a game developer from Bangladesh focused on Unreal Engine, programming, and practical web builds.';
-const DEFAULT_META_TITLE = 'MD Anik Hasan, Game Developer Portfolio in Bangladesh';
-const DEFAULT_META_DESCRIPTION = 'MD Anik Hasan is a game developer from Bangladesh and a Computer Science and Engineering student sharing portfolio projects, dev logs, and practical web builds.';
+const DEFAULT_SITE_DESCRIPTION = 'Official website of MD Anik Hasan, a game developer from Bangladesh focused on Unreal Engine, programming, and practical web builds.';
+const DEFAULT_META_TITLE = 'MD Anik Hasan Official Website';
+const DEFAULT_META_DESCRIPTION = 'Official website of MD Anik Hasan, a game developer from Bangladesh sharing portfolio projects, dev logs, and practical web builds.';
 const DEFAULT_OG_IMAGE = '/assets/og/preview.png';
 const DEFAULT_LOGO = '/assets/icons/icon-192.png';
-const DEFAULT_THEME_COLOR = '#07100d';
 const DEFAULT_GOOGLE_VERIFICATION = 'RifOZcU90W5gHKCjrueCg9PtBGAjq9LEXamyo_TaoBE';
 const DEFAULT_EMAIL = 'anikhasan2@icloud.com';
 const DEFAULT_RESPONSE_TIME = 'I usually respond within 24 to 48 hours.';
@@ -110,15 +109,14 @@ const SITE_URL = normalizeSiteUrl(general.site_url);
 const SITE_NAME = pickFirst(general.site_title, DEFAULT_SITE_NAME);
 const AUTHOR_URL = `${SITE_URL}/about/`;
 const SITE_DESCRIPTION = pickFirst(general.site_description, DEFAULT_SITE_DESCRIPTION);
-const META_TITLE = pickFirst(seo.meta_title, `${SITE_NAME}, Game Developer Portfolio in Bangladesh`, DEFAULT_META_TITLE);
-const META_DESCRIPTION = pickFirst(seo.meta_description, `${SITE_NAME} is a game developer from Bangladesh sharing portfolio projects, dev logs, and practical web builds.`, DEFAULT_META_DESCRIPTION, SITE_DESCRIPTION);
+const META_TITLE = pickFirst(seo.meta_title, `${SITE_NAME} Official Website`, DEFAULT_META_TITLE);
+const META_DESCRIPTION = pickFirst(seo.meta_description, `Official website of ${SITE_NAME}, a game developer from Bangladesh sharing portfolio projects, dev logs, and practical web builds.`, DEFAULT_META_DESCRIPTION, SITE_DESCRIPTION);
 
 const configuredLogo = String(general.logo || '').trim();
 const LOGO_IMAGE = toAbsoluteSiteUrl(pickFirst(configuredLogo, DEFAULT_LOGO), SITE_URL);
 const OG_IMAGE = toAbsoluteSiteUrl(pickFirst(seo.og_image, DEFAULT_OG_IMAGE), SITE_URL);
 const OG_IMAGE_ALT = `Portfolio preview of ${SITE_NAME}`;
 const TWITTER_HANDLE = deriveTwitterHandle(pickFirst(social.x, SOCIAL_DEFAULTS.x), DEFAULT_TWITTER_HANDLE);
-const THEME_COLOR = DEFAULT_THEME_COLOR;
 const GOOGLE_VERIFICATION = DEFAULT_GOOGLE_VERIFICATION;
 const EMAIL = pickFirst(contact.email, DEFAULT_EMAIL);
 const RESPONSE_TIME = pickFirst(contact.response_time, DEFAULT_RESPONSE_TIME);
@@ -136,17 +134,18 @@ const SOCIAL_LINKS = {
   discord: pickFirst(social.discord, SOCIAL_DEFAULTS.discord),
 };
 
+const PERSON_SAME_AS = Object.values(SOCIAL_LINKS).filter(Boolean);
+
 const PERSON_SCHEMA_FULL = {
   '@type': 'Person',
   '@id': `${SITE_URL}/#person`,
   name: SITE_NAME,
-  givenName: 'MD Anik',
-  additionalName: 'Anik',
+  honorificPrefix: 'MD',
+  givenName: 'Anik',
   familyName: 'Hasan',
-  alternateName: 'Md Anik Hasan',
+  alternateName: ['Md Anik Hasan', 'mdanikhasan.com'],
   identifier: PERSON_IDENTIFIER,
   url: `${SITE_URL}/`,
-  mainEntityOfPage: AUTHOR_URL,
   image: configuredLogo
     ? {
         '@type': 'ImageObject',
@@ -159,6 +158,7 @@ const PERSON_SCHEMA_FULL = {
         height: 630,
       },
   jobTitle: 'Game Developer and CSE Student',
+  disambiguatingDescription: `Official personal website of ${SITE_NAME}`,
   description: `${SITE_NAME} is a game developer from Bangladesh and a Computer Science and Engineering student at United International University focused on Unreal Engine, programming fundamentals, and practical web builds.`,
   email: EMAIL,
   contactPoint: {
@@ -188,7 +188,12 @@ const PERSON_SCHEMA_FULL = {
     'Pixel Art',
     'Computer Science',
   ],
-  sameAs: Object.values(SOCIAL_LINKS).filter(Boolean),
+  sameAs: PERSON_SAME_AS,
+};
+
+const PERSON_SCHEMA_PROFILE = {
+  ...PERSON_SCHEMA_FULL,
+  mainEntityOfPage: AUTHOR_URL,
 };
 
 const PERSON_SCHEMA_STUB = {
@@ -204,10 +209,11 @@ const WEBSITE_SCHEMA = {
   '@id': `${SITE_URL}/#website`,
   name: SITE_NAME,
   url: `${SITE_URL}/`,
-  inLanguage: 'en-US',
+  inLanguage: 'en-BD',
   description: SITE_DESCRIPTION,
   logo: LOGO_IMAGE,
   image: OG_IMAGE,
+  sameAs: PERSON_SAME_AS,
   about: {
     '@id': `${SITE_URL}/#person`,
   },
@@ -224,7 +230,7 @@ const WEBSITE_SCHEMA_STUB = {
   '@id': `${SITE_URL}/#website`,
   name: SITE_NAME,
   url: `${SITE_URL}/`,
-  inLanguage: 'en-US',
+  inLanguage: 'en-BD',
 };
 
 module.exports = {
@@ -238,7 +244,6 @@ module.exports = {
   OG_IMAGE_ALT,
   LOGO_IMAGE,
   TWITTER_HANDLE,
-  THEME_COLOR,
   GOOGLE_VERIFICATION,
   EMAIL,
   RESPONSE_TIME,
@@ -247,6 +252,7 @@ module.exports = {
   SOCIAL_DEFAULTS,
   SOCIAL_LINKS,
   PERSON_SCHEMA_FULL,
+  PERSON_SCHEMA_PROFILE,
   PERSON_SCHEMA_STUB,
   WEBSITE_SCHEMA,
   WEBSITE_SCHEMA_STUB,
