@@ -10,6 +10,7 @@ tools:
   - TypeScript
   - Tailwind CSS
   - PostgreSQL
+thumbnail: /uploads/screenshot-2026-04-16-165256.jpg
 source_code: ""
 live_demo: ""
 featured: true
