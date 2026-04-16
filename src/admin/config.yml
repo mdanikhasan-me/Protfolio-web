@@ -58,9 +58,11 @@ collections:
       - { label: "Slug",          name: "slug",        widget: "string", hint: "Use lowercase words with hyphens." }
       - { label: "Description",   name: "description", widget: "text",   hint: "Short summary shown on the project card." }
       - { label: "Tools Used",    name: "tools",       widget: "list",   hint: "One tool per entry." }
+      - { label: "Thumbnail",     name: "thumbnail",   widget: "image",  required: false, allow_multiple: false, hint: "Optional project image used for SEO and cards when needed." }
       - { label: "Source Code",   name: "source_code", widget: "string", required: false }
       - { label: "Live Demo",     name: "live_demo",   widget: "string", required: false }
       - { label: "Featured",      name: "featured",    widget: "boolean", default: false, required: false }
+      - { label: "Project Details", name: "body",      widget: "markdown", required: false, hint: "Supports Markdown and safe HTML blocks, so pasted GitHub README sections like tables, images, badges, and links can render on the detail page." }
 
   # Ã¢â€â‚¬Ã¢â€â‚¬ Page Content Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   - name: "pages"

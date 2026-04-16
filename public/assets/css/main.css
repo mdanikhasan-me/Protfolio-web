@@ -1918,6 +1918,58 @@ html.reduce-motion .bg-shade {
   max-width: 100%;
 }
 
+.page-blog-post .blog-post-content img {
+  display: block;
+  width: auto;
+  height: auto;
+  margin: 0.8rem auto;
+  border-radius: clamp(16px, 1.9vw, 24px);
+}
+
+.page-blog-post .blog-post-content p[align="center"],
+.page-blog-post .blog-post-content div[align="center"] {
+  text-align: center;
+  max-width: none;
+}
+
+.page-blog-post .blog-post-content p[align="center"] img,
+.page-blog-post .blog-post-content div[align="center"] img {
+  margin-inline: auto;
+}
+
+.page-blog-post .blog-post-content table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  background: rgba(6, 9, 7, 0.44);
+}
+
+.page-blog-post .blog-post-content td,
+.page-blog-post .blog-post-content th {
+  padding: 0.95rem 1rem;
+  vertical-align: top;
+  border-top: 1px solid var(--card-border);
+}
+
+.page-blog-post .blog-post-content tr:first-child td,
+.page-blog-post .blog-post-content tr:first-child th {
+  border-top: 0;
+}
+
+.page-blog-post .blog-post-content td + td,
+.page-blog-post .blog-post-content th + th {
+  border-left: 1px solid var(--card-border);
+}
+
+.page-blog-post .blog-post-content table p,
+.page-blog-post .blog-post-content table li {
+  max-width: none;
+}
+
 .page-blog-post .blog-post-content h1,
 .page-blog-post .blog-post-content h2,
 .page-blog-post .blog-post-content h3,

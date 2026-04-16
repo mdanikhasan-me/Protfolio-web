@@ -32,9 +32,8 @@
 </p>
 
 <p align="center">
-  I wanted this repo to feel like my own space, not a copy pasted starter.
-  It stays lightweight, fast, and easy to update while still giving me a clean portfolio,
-  a blog, a CMS workflow, and strong SEO output.
+  Static portfolio, project archive, and publishing workflow with custom build output,
+  CMS editing, and structured SEO for <a href="https://mdanikhasan.com">mdanikhasan.com</a>.
 </p>
 
 <p align="center">
@@ -47,38 +46,20 @@
   <a href="https://mdanikhasan.com/blog/">Blog</a>
 </p>
 
-## Preview
-
-<p align="center">
-  <img src="./public/assets/og/preview.png" alt="Preview of the MD Anik Hasan portfolio website">
-</p>
-
 ## Visual direction
 
 <p align="center">
-  I wanted this section to feel closer to my actual work, so I used visuals from the project itself instead of random internet GIFs.
+  Project visual
 </p>
 
-<table>
-  <tr>
-    <td width="50%" align="center">
-      <img src="./public/assets/bg/jungle-home.webp" width="100%" alt="Atmospheric jungle artwork from the portfolio site">
-    </td>
-    <td width="50%" align="center">
-      <img src="./public/uploads/coding_class.webp" width="100%" alt="Project related coding visual">
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <strong>Portfolio atmosphere</strong><br>
-      The visual mood that shapes the site and gives it a more cinematic identity.
-    </td>
-    <td align="center">
-      <strong>Builder mindset</strong><br>
-      A more grounded project visual that fits the work better than a generic animation.
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <img src="./public/uploads/coding_class.jpg" width="100%" alt="Project related coding visual">
+</p>
+
+<p align="center">
+  <strong>Builder mindset</strong><br>
+  Project asset from the current visual set.
+</p>
 
 <table>
   <tr>
@@ -99,9 +80,8 @@
 
 ## What this repo is
 
-This is the codebase behind my portfolio and content workflow. I kept it simple on purpose.
-Static pages, markdown content, custom build logic, and final files shipped from `dist`.
-I care more about control, speed, and clean output than piling on a heavy stack just to publish projects and posts.
+This codebase powers the portfolio, blog workflow, and CMS setup behind `mdanikhasan.com`.
+Static pages, markdown content, custom build logic, and generated files ship from `dist`.
 
 ## Featured projects
 
@@ -121,7 +101,7 @@ I care more about control, speed, and clean output than piling on a heavy stack 
   </tr>
   <tr>
     <td><strong>Boilabin</strong></td>
-    <td>A separate project from my portfolio that I want represented here without adding any source code link.</td>
+    <td>A project listed here without a public source code link.</td>
     <td>Listed without source code</td>
   </tr>
 </table>
@@ -218,7 +198,7 @@ This repo works on the free Netlify plan.
 
 ## Why I built it this way
 
-I wanted a site that feels personal, loads fast, stays easy to update, and does not turn into framework noise just to publish text, projects, and profile content. This setup keeps the output simple while still giving me CMS editing, structured SEO, feeds, and a clean deploy flow.
+This setup keeps the site fast, easy to update, and free from unnecessary framework overhead while still supporting CMS editing, structured SEO, feeds, and a clean deploy flow.
 
 <p align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&section=footer&height=120&color=0:0b1320,35:0f3d3e,70:1f6f78,100:e36414" alt="Footer wave for README">

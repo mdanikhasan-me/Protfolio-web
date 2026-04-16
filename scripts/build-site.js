@@ -202,6 +202,31 @@ function buildHrefLangLinks(canonicalUrl) {
   ].join('\n');
 }
 
+function buildRobotsValue(indexable) {
+  return indexable === false
+    ? 'noindex,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1'
+    : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1';
+}
+
+function resolveIndexableFlag(data, fallback = true) {
+  const explicitTrue = [data.index, data.seo_index].some(value => value === true || value === 'true');
+  const explicitFalse = [data.index, data.seo_index].some(value => value === false || value === 'false')
+    || data.noindex === true
+    || data.noindex === 'true';
+
+  if (explicitTrue) return true;
+  if (explicitFalse) return false;
+
+  return fallback;
+}
+
+function hasMeaningfulProjectBody(bodyPlainText) {
+  const clean = String(bodyPlainText || '').trim();
+  if (!clean) return false;
+  if (/^use this entry as a starting point for portfolio items\.?$/i.test(clean)) return false;
+  return true;
+}
+
 function buildIdentityLinks() {
   const urls = Object.values(site.SOCIAL_LINKS || {})
     .map(url => sanitizeUrl(url))
@@ -520,6 +545,25 @@ function sanitizeUrl(value, options = {}) {
   return '';
 }
 
+function sanitizeTrustedHtml(html) {
+  return String(html || '')
+    .replace(/\s(href|src)\s*=\s*(['"])\.\/public\/([^'"]+)\2/gi, ' $1=$2/$3$2')
+    .replace(/\s(href|src)\s*=\s*(['"])public\/([^'"]+)\2/gi, ' $1=$2/$3$2')
+    .replace(/\s(href|src)\s*=\s*(['"])\.\/(assets|uploads)\/([^'"]+)\2/gi, ' $1=$2/$3/$4$2')
+    .replace(/<script\b[\s\S]*?<\/script>/gi, '')
+    .replace(/<style\b[\s\S]*?<\/style>/gi, '')
+    .replace(/<\/?(html|head|body)\b[^>]*>/gi, '')
+    .replace(/<meta\b[^>]*>/gi, '')
+    .replace(/<link\b[^>]*>/gi, '')
+    .replace(/\son[a-z-]+\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, '')
+    .replace(/\s(?:href|src)\s*=\s*("javascript:[^"]*"|'javascript:[^']*'|javascript:[^\s>]+)/gi, '')
+    .replace(/\ssrcdoc\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, '');
+}
+
+function isRawHtmlLine(trimmed) {
+  return /^<\/?[A-Za-z][\w:-]*(\s[^>]*)?>/.test(trimmed) || /^<!--/.test(trimmed);
+}
+
 function serializeJsonForHtml(value) {
   return JSON.stringify(value, null, 2)
     .replace(/</g, '\\u003C')
@@ -626,7 +670,8 @@ function markdownToHtml(md) {
     if (listOpen) { html.push('</ul>'); listOpen = false; }
   }
 
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i];
     if (line.trim().startsWith('```')) {
       closeList();
       if (!inCode) { inCode = true; codeBuffer = []; }
@@ -636,6 +681,16 @@ function markdownToHtml(md) {
     if (inCode) { codeBuffer.push(line); continue; }
     const trimmed = line.trim();
     if (!trimmed) { closeList(); continue; }
+    if (isRawHtmlLine(trimmed)) {
+      closeList();
+      const rawBlock = [line];
+      while (i + 1 < lines.length && lines[i + 1].trim()) {
+        rawBlock.push(lines[i + 1]);
+        i += 1;
+      }
+      html.push(sanitizeTrustedHtml(rawBlock.join('\n')));
+      continue;
+    }
     if (/^[-*]\s+/.test(trimmed)) {
       if (!listOpen) { html.push('<ul>'); listOpen = true; }
       html.push(`<li>${renderInline(trimmed.replace(/^[-*]\s+/, ''))}</li>`);
@@ -680,6 +735,7 @@ function getPosts() {
       tags: Array.isArray(data.tags) ? data.tags.filter(Boolean).map(t => String(t).trim()).filter(Boolean) : [],
       readingTime: estimateReadingTime(body),
       wordCount: plainText ? plainText.split(/\s+/).filter(Boolean).length : 0,
+      indexable: resolveIndexableFlag(data, true),
       publishedAt,
       modifiedAt,
       sourcePath,
@@ -709,6 +765,7 @@ function getProjects() {
       toIsoDateTime(data.updated || data.modified, stat.mtime),
       publishedAt
     );
+    const indexable = resolveIndexableFlag(data, hasMeaningfulProjectBody(plainText));
     projects.push({
       title: data.title || slug,
       slug,
@@ -720,6 +777,7 @@ function getProjects() {
       thumbnail,
       body,
       bodyHtml: markdownToHtml(body),
+      indexable,
       publishedAt,
       modifiedAt,
       sourcePath,
@@ -858,7 +916,7 @@ function buildPostSeoHead(post, buildV) {
     .replace(/\{\{SITE_NAME\}\}/g, escapeHtml(site.SITE_NAME))
     .replace('{{AUTHOR_URL}}', escapeHtml(site.AUTHOR_URL || `${site.SITE_URL}/about/`))
     .replace('{{IDENTITY_LINKS}}', buildIdentityLinks())
-    .replace('{{META_ROBOTS}}', 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1')
+    .replace('{{META_ROBOTS}}', buildRobotsValue(post.indexable))
     .replace(/\{\{META_DESCRIPTION\}\}/g, escapeHtml(post.description))
     .replace(/\{\{TWITTER_HANDLE\}\}/g, escapeHtml(site.TWITTER_HANDLE || ''))
     .replace('{{GOOGLE_VERIFICATION}}\n', '')
@@ -887,6 +945,7 @@ function buildProjectSchemaEntity(project, canonicalUrl, imageUrl, imageMeta) {
     '@id': `${canonicalUrl}#project`,
     name: project.title,
     description: project.description,
+    url: canonicalUrl,
     image: {
       '@type': 'ImageObject',
       url: imageUrl,
@@ -895,6 +954,9 @@ function buildProjectSchemaEntity(project, canonicalUrl, imageUrl, imageMeta) {
     },
     author: { '@id': `${site.SITE_URL}/#person` },
     creator: { '@id': `${site.SITE_URL}/#person` },
+    datePublished: project.publishedAt,
+    dateModified: project.modifiedAt,
+    mainEntityOfPage: canonicalUrl,
     ...(project.liveDemo || project.sourceCode ? { sameAs: [project.liveDemo, project.sourceCode].filter(Boolean) } : {}),
     ...(project.tools.length ? { keywords: project.tools.join(', ') } : {}),
   };
@@ -903,7 +965,6 @@ function buildProjectSchemaEntity(project, canonicalUrl, imageUrl, imageMeta) {
     return {
       '@type': 'SoftwareSourceCode',
       ...baseEntity,
-      url: canonicalUrl,
       codeRepository: project.sourceCode,
       ...(project.tools.length ? { programmingLanguage: project.tools } : {}),
       ...(project.liveDemo ? {
@@ -927,7 +988,6 @@ function buildProjectSchemaEntity(project, canonicalUrl, imageUrl, imageMeta) {
   return {
     '@type': 'CreativeWork',
     ...baseEntity,
-    url: canonicalUrl,
   };
 }
 
@@ -980,7 +1040,7 @@ function buildProjectSeoHead(project, buildV) {
     .replace(/\{\{SITE_NAME\}\}/g, escapeHtml(site.SITE_NAME))
     .replace('{{AUTHOR_URL}}', escapeHtml(site.AUTHOR_URL || `${site.SITE_URL}/about/`))
     .replace('{{IDENTITY_LINKS}}', buildIdentityLinks())
-    .replace('{{META_ROBOTS}}', 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1')
+    .replace('{{META_ROBOTS}}', buildRobotsValue(project.indexable))
     .replace(/\{\{META_DESCRIPTION\}\}/g, escapeHtml(project.description))
     .replace(/\{\{TWITTER_HANDLE\}\}/g, escapeHtml(site.TWITTER_HANDLE || ''))
     .replace('{{GOOGLE_VERIFICATION}}\n', '')
@@ -1220,7 +1280,7 @@ function createPostPages(posts, buildV) {
       : '';
 
     const page = `<!DOCTYPE html>
-<html lang="en">
+<html lang="en-BD">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -1243,7 +1303,7 @@ ${buildNavHeader('/blog/')}
           <h1>${escapeHtml(post.title)}</h1>
           <p>${escapeHtml(post.description)}</p>
           ${coverImg}
-          <div class="flow-md">${post.bodyHtml}</div>
+          <div class="blog-post-content flow-md">${post.bodyHtml}</div>
           <p><a class="blog-back-link" href="/blog/">Back to ${escapeHtml(site.SITE_NAME)} blog</a></p>
         </article>
       </section>
@@ -1264,9 +1324,6 @@ function createProjectPages(projects, buildV) {
     ensureDir(dir);
 
     const seoHead = buildProjectSeoHead(project, buildV);
-    const coverImg = project.thumbnail
-      ? buildResponsiveImage(project.thumbnail, project.title, 'detail-cover-image', 'loading="eager" decoding="async"').html
-      : '';
     const tools = project.tools.length
       ? `<ul class="tag-list" aria-label="${escapeHtml(project.title)} technologies">${project.tools.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>`
       : '';
@@ -1280,7 +1337,7 @@ function createProjectPages(projects, buildV) {
       : String(project.bodyHtml || '').trim();
 
     const page = `<!DOCTYPE html>
-<html lang="en">
+<html lang="en-BD">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -1302,10 +1359,9 @@ ${buildNavHeader('/projects/')}
           <p class="eyebrow">Project updated <time datetime="${escapeHtml(project.modifiedAt)}">${escapeHtml(formatDate(project.modifiedAt))}</time></p>
           <h1>${escapeHtml(project.title)}</h1>
           <p>${escapeHtml(project.description)}</p>
-          ${coverImg}
             ${tools}
             ${links ? `<div class="flow-xs">${links}</div>` : ''}
-            ${body ? `<div class="flow-md">${body}</div>` : ''}
+            ${body ? `<div class="blog-post-content flow-md">${body}</div>` : ''}
             <p><a class="blog-back-link" href="/projects/">Back to ${escapeHtml(site.SITE_NAME)} projects</a></p>
           </article>
       </section>
@@ -1321,6 +1377,8 @@ ${buildDeferredScripts(buildV)}
 }
 
 function createSitemap(posts, projects) {
+  const indexablePosts = posts.filter(post => post.indexable !== false);
+  const indexableProjects = projects.filter(project => project.indexable !== false);
   const pageLastmods = {
     '/': latestIsoDate(
       fs.existsSync(path.join(root, 'src', 'content', 'pages', 'homepage.yml')) ? fs.statSync(path.join(root, 'src', 'content', 'pages', 'homepage.yml')).mtime : null,
@@ -1335,7 +1393,7 @@ function createSitemap(posts, projects) {
       fs.existsSync(path.join(pagesDir, 'projects.html')) ? fs.statSync(path.join(pagesDir, 'projects.html')).mtime : null
     ),
     '/blog/': latestIsoDate(
-      posts.map(post => post.modifiedAt),
+      indexablePosts.map(post => post.modifiedAt),
       fs.existsSync(path.join(pagesDir, 'blog.html')) ? fs.statSync(path.join(pagesDir, 'blog.html')).mtime : null
     ),
     '/contact/': latestIsoDate(
@@ -1343,8 +1401,8 @@ function createSitemap(posts, projects) {
       fs.existsSync(path.join(pagesDir, 'contact.html')) ? fs.statSync(path.join(pagesDir, 'contact.html')).mtime : null
     ),
     '/sitemap/': latestIsoDate(
-      posts.map(post => post.modifiedAt),
-      projects.map(project => project.modifiedAt),
+      indexablePosts.map(post => post.modifiedAt),
+      indexableProjects.map(project => project.modifiedAt),
       fs.existsSync(path.join(pagesDir, 'sitemap.html')) ? fs.statSync(path.join(pagesDir, 'sitemap.html')).mtime : null,
       fs.statSync(__filename).mtime
     ),
@@ -1360,27 +1418,38 @@ function createSitemap(posts, projects) {
   ];
 
   const urls = staticPages.concat(
-    posts.map(post => ({
+    indexablePosts.map(post => ({
       url: `/blog/posts/${post.slug}/`,
       priority: '0.7',
       changefreq: 'monthly',
       lastmod: post.modifiedAt,
+      image: post.cover ? buildAbsoluteSiteUrl(post.cover) : '',
+      imageTitle: post.title,
+      imageCaption: post.description,
     })),
-    projects.map(project => ({
+    indexableProjects.map(project => ({
       url: `/projects/${project.slug}/`,
       priority: '0.7',
       changefreq: 'monthly',
       lastmod: project.modifiedAt,
+      image: project.thumbnail ? buildAbsoluteSiteUrl(project.thumbnail) : '',
+      imageTitle: project.title,
+      imageCaption: project.description,
     }))
   );
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${urls.map(item => `  <url>
     <loc>${site.SITE_URL}${item.url}</loc>
     <lastmod>${escapeHtml(item.lastmod)}</lastmod>
     <changefreq>${item.changefreq}</changefreq>
     <priority>${item.priority}</priority>
+${item.image ? `    <image:image>
+      <image:loc>${escapeHtml(item.image)}</image:loc>
+      <image:title>${escapeHtml(item.imageTitle || '')}</image:title>
+      <image:caption>${escapeHtml(item.imageCaption || '')}</image:caption>
+    </image:image>` : ''}
   </url>`).join('\n\n')}
 </urlset>
 `;
@@ -1389,6 +1458,7 @@ ${urls.map(item => `  <url>
 }
 
 function createFeed(posts) {
+  const feedPosts = posts.filter(post => post.indexable !== false);
   const data = {
     version: 'https://jsonfeed.org/version/1.1',
     title: `${site.SITE_NAME} Blog and Dev Logs`,
@@ -1401,7 +1471,7 @@ function createFeed(posts) {
         url: site.AUTHOR_URL || `${site.SITE_URL}/about/`,
       },
     ],
-    items: posts.map(post => ({
+    items: feedPosts.map(post => ({
       id: `${site.SITE_URL}/blog/posts/${post.slug}/`,
       url: `${site.SITE_URL}/blog/posts/${post.slug}/`,
       title: post.title,
@@ -1416,7 +1486,7 @@ function createFeed(posts) {
   ensureDir(path.join(dist, 'blog'));
   fs.writeFileSync(path.join(dist, 'blog', 'feed.json'), JSON.stringify(data, null, 2));
 
-  const feedItems = posts.map(post => `  <item>
+  const feedItems = feedPosts.map(post => `  <item>
     <title>${escapeHtml(post.title)}</title>
     <link>${site.SITE_URL}/blog/posts/${post.slug}/</link>
     <guid isPermaLink="true">${site.SITE_URL}/blog/posts/${post.slug}/</guid>
@@ -1426,7 +1496,7 @@ function createFeed(posts) {
     ${(post.tags || []).map(t => `<category>${escapeHtml(t)}</category>`).join('\n    ')}
   </item>`).join('\n');
 
-  const lastBuildDate = latestIsoDate(posts.map(post => post.modifiedAt));
+  const lastBuildDate = latestIsoDate(feedPosts.map(post => post.modifiedAt));
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -1435,7 +1505,7 @@ function createFeed(posts) {
     <link>${site.SITE_URL}/blog/</link>
     <atom:link href="${site.SITE_URL}/blog/feed.xml" rel="self" type="application/rss+xml"/>
     <description>Programming notes and game development updates by ${escapeHtml(site.SITE_NAME)} from Bangladesh.</description>
-    <language>en-us</language>
+    <language>en-bd</language>
     <lastBuildDate>${new Date(lastBuildDate).toUTCString()}</lastBuildDate>
     <image>
       <url>${site.OG_IMAGE || `${site.SITE_URL}/assets/og/preview.png`}</url>
