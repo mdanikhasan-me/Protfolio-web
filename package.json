@@ -3,10 +3,12 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "build": "node scripts/build-site.js",
+    "build": "npm run check && node scripts/build-site.js",
     "preview": "npx serve dist",
     "validate:html": "npx html-validate \"dist/**/*.html\" \"dist/*.html\"",
-    "check": "node -e \"require('./src/data/site'); require('./src/data/pages'); console.log('Config OK');\""
+    "check:content": "node scripts/check-content.js",
+    "check:config": "node -e \"require('./src/data/site'); require('./src/data/pages'); console.log('Config OK');\"",
+    "check": "npm run check:content && npm run check:config"
   },
   "engines": {
     "node": "20.x"

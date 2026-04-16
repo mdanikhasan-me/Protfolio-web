@@ -20,8 +20,6 @@ editor:
   preview: false
 
 collections:
-
-  # Ã¢â€â‚¬Ã¢â€â‚¬ Blog Posts Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   - name: "posts"
     label: "Blog"
     label_singular: "Post"
@@ -33,16 +31,15 @@ collections:
     format: "frontmatter"
     summary: "{{title}}"
     fields:
-      - { label: "Title",             name: "title",       widget: "string" }
-      - { label: "Slug",              name: "slug",        widget: "string", hint: "Use lowercase words with hyphens." }
-      - { label: "Publish Date",      name: "date",        widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
-      - { label: "Short Description", name: "description", widget: "text",   hint: "Shows on the blog list and in search results. Keep under 160 characters." }
-      - { label: "Cover Image",       name: "cover",       widget: "image",  required: false, allow_multiple: false }
-      - { label: "Tags",              name: "tags",        widget: "list",   hint: "Keywords that describe this post. Used for SEO and filtering.", required: false }
-      - { label: "Draft",             name: "draft",       widget: "boolean", default: false, required: false }
-      - { label: "Article",           name: "body",        widget: "markdown" }
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Slug", name: "slug", widget: "string", hint: "Use lowercase words with hyphens." }
+      - { label: "Publish Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD" }
+      - { label: "Short Description", name: "description", widget: "text", hint: "Shows on the blog list and in search results. Keep under 160 characters." }
+      - { label: "Cover Image", name: "cover", widget: "image", required: false, allow_multiple: false }
+      - { label: "Tags", name: "tags", widget: "list", hint: "Keywords that describe this post. Used for SEO and filtering.", required: false }
+      - { label: "Draft", name: "draft", widget: "boolean", default: false, required: false }
+      - { label: "Article", name: "body", widget: "markdown" }
 
-  # Ã¢â€â‚¬Ã¢â€â‚¬ Projects Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   - name: "projects"
     label: "Projects"
     label_singular: "Project"
@@ -54,110 +51,106 @@ collections:
     format: "frontmatter"
     summary: "{{title}}"
     fields:
-      - { label: "Project Title", name: "title",       widget: "string" }
-      - { label: "Slug",          name: "slug",        widget: "string", hint: "Use lowercase words with hyphens." }
-      - { label: "Description",   name: "description", widget: "text",   hint: "Short summary shown on the project card." }
-      - { label: "Tools Used",    name: "tools",       widget: "list",   hint: "One tool per entry." }
-      - { label: "Thumbnail",     name: "thumbnail",   widget: "image",  required: false, allow_multiple: false, hint: "Optional project image used for SEO and cards when needed." }
-      - { label: "Source Code",   name: "source_code", widget: "string", required: false }
-      - { label: "Live Demo",     name: "live_demo",   widget: "string", required: false }
-      - { label: "Featured",      name: "featured",    widget: "boolean", default: false, required: false }
-      - { label: "Project Details", name: "body",      widget: "markdown", required: false, hint: "Supports Markdown and safe HTML blocks, so pasted GitHub README sections like tables, images, badges, and links can render on the detail page." }
+      - { label: "Project Title", name: "title", widget: "string" }
+      - { label: "Slug", name: "slug", widget: "string", hint: "Use lowercase words with hyphens." }
+      - { label: "Description", name: "description", widget: "text", hint: "Short summary shown on the project card." }
+      - { label: "Tools Used", name: "tools", widget: "list", hint: "One tool per entry." }
+      - { label: "Thumbnail", name: "thumbnail", widget: "image", required: false, allow_multiple: false, hint: "Optional project image used for SEO and cards when needed." }
+      - { label: "Source Code", name: "source_code", widget: "string", required: false }
+      - { label: "Live Demo", name: "live_demo", widget: "string", required: false }
+      - { label: "Featured", name: "featured", widget: "boolean", default: false, required: false }
+      - { label: "Project Details", name: "body", widget: "markdown", required: false, hint: "Supports Markdown and safe HTML blocks, so pasted GitHub README sections like tables, images, badges, and links can render on the detail page." }
 
-  # Ã¢â€â‚¬Ã¢â€â‚¬ Page Content Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   - name: "pages"
     label: "Page Content"
     files:
-
       - label: "Homepage"
         name: "homepage"
         file: "src/content/pages/homepage.yml"
         fields:
-          - { label: "Hero Title",       name: "hero_title",       widget: "string" }
-          - { label: "Hero Body",        name: "hero_body",        widget: "text" }
-          - { label: "CTA Button Label", name: "hero_cta_label",   widget: "string" }
-          - { label: "CTA Button URL",   name: "hero_cta_url",     widget: "string" }
-          - { label: "Skills Heading",   name: "skills_heading",   widget: "string" }
-          - { label: "Skills Subtext",   name: "skills_sub",       widget: "string" }
-          - { label: "Skills List",      name: "skills",           widget: "list",   hint: "One skill / tool per entry." }
-          - { label: "What I Do Heading",name: "whatido_heading",  widget: "string" }
-          - { label: "What I Do Body",   name: "whatido_body",     widget: "text" }
-          - { label: "What I Do Tags",   name: "whatido_tags",     widget: "list" }
+          - { label: "Hero Title", name: "hero_title", widget: "string" }
+          - { label: "Hero Body", name: "hero_body", widget: "text" }
+          - { label: "CTA Button Label", name: "hero_cta_label", widget: "string" }
+          - { label: "CTA Button URL", name: "hero_cta_url", widget: "string" }
+          - { label: "Skills Heading", name: "skills_heading", widget: "string" }
+          - { label: "Skills Subtext", name: "skills_sub", widget: "string" }
+          - { label: "Skills List", name: "skills", widget: "list", hint: "One skill / tool per entry." }
+          - { label: "What I Do Heading", name: "whatido_heading", widget: "string" }
+          - { label: "What I Do Body", name: "whatido_body", widget: "text" }
+          - { label: "What I Do Tags", name: "whatido_tags", widget: "list" }
           - { label: "Open Source Heading", name: "opensource_heading", widget: "string" }
-          - { label: "Open Source Body", name: "opensource_body",  widget: "text" }
+          - { label: "Open Source Body", name: "opensource_body", widget: "text" }
           - { label: "Timeline Heading", name: "timeline_heading", widget: "string" }
-          - { label: "Timeline Subtext", name: "timeline_sub",     widget: "string" }
+          - { label: "Timeline Subtext", name: "timeline_sub", widget: "string" }
           - { label: "Timeline 1 Title", name: "timeline_1_title", widget: "string" }
-          - { label: "Timeline 1 Date",  name: "timeline_1_date",  widget: "string" }
-          - { label: "Timeline 1 Body",  name: "timeline_1_body",  widget: "text" }
+          - { label: "Timeline 1 Date", name: "timeline_1_date", widget: "string" }
+          - { label: "Timeline 1 Body", name: "timeline_1_body", widget: "text" }
           - { label: "Timeline 2 Title", name: "timeline_2_title", widget: "string" }
-          - { label: "Timeline 2 Date",  name: "timeline_2_date",  widget: "string" }
-          - { label: "Timeline 2 Body",  name: "timeline_2_body",  widget: "text" }
+          - { label: "Timeline 2 Date", name: "timeline_2_date", widget: "string" }
+          - { label: "Timeline 2 Body", name: "timeline_2_body", widget: "text" }
           - { label: "Timeline 3 Title", name: "timeline_3_title", widget: "string" }
-          - { label: "Timeline 3 Date",  name: "timeline_3_date",  widget: "string" }
-          - { label: "Timeline 3 Body",  name: "timeline_3_body",  widget: "text" }
-          - { label: "Closing CTA",      name: "closing_cta",      widget: "string" }
+          - { label: "Timeline 3 Date", name: "timeline_3_date", widget: "string" }
+          - { label: "Timeline 3 Body", name: "timeline_3_body", widget: "text" }
+          - { label: "Closing CTA", name: "closing_cta", widget: "string" }
 
       - label: "About"
         name: "about"
         file: "src/content/pages/about.yml"
         fields:
-          - { label: "Page Heading",  name: "story_heading", widget: "string" }
-          - { label: "Paragraph 1",   name: "body_1", widget: "text" }
-          - { label: "Paragraph 2",   name: "body_2", widget: "text" }
-          - { label: "Paragraph 3",   name: "body_3", widget: "text" }
-          - { label: "Paragraph 4",   name: "body_4", widget: "text" }
-          - { label: "Paragraph 5",   name: "body_5", widget: "text" }
-          - { label: "Paragraph 6",   name: "body_6", widget: "text" }
+          - { label: "Page Heading", name: "story_heading", widget: "string" }
+          - { label: "Paragraph 1", name: "body_1", widget: "text" }
+          - { label: "Paragraph 2", name: "body_2", widget: "text" }
+          - { label: "Paragraph 3", name: "body_3", widget: "text" }
+          - { label: "Paragraph 4", name: "body_4", widget: "text" }
+          - { label: "Paragraph 5", name: "body_5", widget: "text" }
+          - { label: "Paragraph 6", name: "body_6", widget: "text" }
 
       - label: "Contact"
         name: "contact_page"
         file: "src/content/pages/contact.yml"
         fields:
-          - { label: "Intro Text",     name: "intro", widget: "text",   hint: "The paragraph shown below the heading." }
-          - { label: "Side Note",      name: "note",  widget: "text",   hint: "The note shown in the social panel." }
+          - { label: "Intro Text", name: "intro", widget: "text", hint: "The paragraph shown below the heading." }
+          - { label: "Side Note", name: "note", widget: "text", hint: "The note shown in the social panel." }
 
-  # Ã¢â€â‚¬Ã¢â€â‚¬ Site Settings Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   - name: "site_settings"
     label: "Site Settings"
     files:
-
       - label: "General"
         name: "general"
         file: "src/content/settings/general.yml"
         fields:
-          - { label: "Site Title",       name: "site_title",       widget: "string" }
+          - { label: "Site Title", name: "site_title", widget: "string" }
           - { label: "Site Description", name: "site_description", widget: "text" }
-          - { label: "Site URL",         name: "site_url",         widget: "string" }
-          - { label: "Logo",             name: "logo",             widget: "image", required: false }
+          - { label: "Site URL", name: "site_url", widget: "string" }
+          - { label: "Logo", name: "logo", widget: "image", required: false }
 
       - label: "SEO"
         name: "seo"
         file: "src/content/settings/seo.yml"
         fields:
-          - { label: "Meta Title",        name: "meta_title",       widget: "string" }
-          - { label: "Meta Description",  name: "meta_description", widget: "text" }
-          - { label: "Open Graph Image",  name: "og_image",         widget: "image", required: false }
+          - { label: "Meta Title", name: "meta_title", widget: "string" }
+          - { label: "Meta Description", name: "meta_description", widget: "text" }
+          - { label: "Open Graph Image", name: "og_image", widget: "image", required: false }
 
       - label: "Social Links"
         name: "social"
         file: "src/content/settings/social.yml"
         fields:
-          - { label: "GitHub",    name: "github",    widget: "string", required: false }
-          - { label: "LinkedIn",  name: "linkedin",  widget: "string", required: false }
-          - { label: "Facebook",  name: "facebook",  widget: "string", required: false }
+          - { label: "GitHub", name: "github", widget: "string", required: false }
+          - { label: "LinkedIn", name: "linkedin", widget: "string", required: false }
+          - { label: "Facebook", name: "facebook", widget: "string", required: false }
           - { label: "Instagram", name: "instagram", widget: "string", required: false }
-          - { label: "YouTube",   name: "youtube",   widget: "string", required: false }
-          - { label: "X",         name: "x",         widget: "string", required: false }
-          - { label: "Discord",   name: "discord",   widget: "string", required: false }
+          - { label: "YouTube", name: "youtube", widget: "string", required: false }
+          - { label: "X", name: "x", widget: "string", required: false }
+          - { label: "Discord", name: "discord", widget: "string", required: false }
 
       - label: "Contact Info"
         name: "contact"
         file: "src/content/settings/contact.yml"
         fields:
-          - { label: "Email",         name: "email",         widget: "string" }
+          - { label: "Email", name: "email", widget: "string" }
           - { label: "Response Time", name: "response_time", widget: "string", required: false, hint: "e.g. I usually respond within 24 to 48 hours." }
-          - { label: "Location",      name: "location",      widget: "string", required: false }
+          - { label: "Location", name: "location", widget: "string", required: false }
 
       - label: "Analytics"
         name: "analytics"
@@ -168,8 +161,8 @@ collections:
             widget: "select"
             required: false
             options:
-              - { label: "Disabled",     value: "" }
-              - { label: "Plausible",    value: "plausible" }
-              - { label: "GoatCounter",  value: "goatcounter" }
-          - { label: "Domain or Endpoint",  name: "domain",     widget: "string", required: false }
-          - { label: "Custom Script Source",name: "script_src", widget: "string", required: false }
+              - { label: "Disabled", value: "" }
+              - { label: "Plausible", value: "plausible" }
+              - { label: "GoatCounter", value: "goatcounter" }
+          - { label: "Domain or Endpoint", name: "domain", widget: "string", required: false }
+          - { label: "Custom Script Source", name: "script_src", widget: "string", required: false }

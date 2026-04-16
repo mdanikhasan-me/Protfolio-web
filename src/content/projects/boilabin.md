@@ -1,5 +1,5 @@
 ---
-title: "Boilabin-Marketplace "
+title: "Boilabin-Marketplace"
 slug: boilabin
 description: A modern ecommerce marketplace built for Bangladesh with product
   discovery, flash deals, Wishlist, compare, reviews, admin management, seller
@@ -10,5 +10,7 @@ tools:
   - TypeScript
   - Tailwind CSS
   - PostgreSQL
+source_code: ""
+live_demo: ""
 featured: true
 ---
