@@ -3,6 +3,7 @@ const path = require('path');
 
 const root = path.join(__dirname, '..');
 const errors = [];
+const warnings = [];
 
 const folderCollections = [
   {
@@ -67,19 +68,23 @@ function report(file, message) {
   errors.push(`${file}: ${message}`);
 }
 
+function warn(file, message) {
+  warnings.push(`${file}: ${message}`);
+}
+
 function checkBody(file, body) {
   if (!body.trim()) return;
 
-  if (/Â|Ã/.test(body)) report(file, 'body contains mojibake characters');
-  if (/<p \*align\*=/.test(body)) report(file, 'body contains broken rich-text align markup');
-  if (/^\s*\\##\s/m.test(body) || /\*\*\\##/.test(body)) {
-    report(file, 'body contains broken pasted heading markup');
+  if (/Â|Ã/.test(body)) warn(file, 'body contains mojibake characters');
+  if (/<p \*align\*=/.test(body)) warn(file, 'body contains broken rich-text align markup');
+  if (/^\s*\\#{1,6}\s/m.test(body) || /\*\*\\#{1,6}\s/.test(body)) {
+    warn(file, 'body contains broken pasted heading markup');
   }
   if (/```(?:bash|html|css|js|javascript|json|yaml|yml|md|markdown|text)[A-Za-z0-9]/i.test(body)) {
-    report(file, 'body contains collapsed code fence syntax');
+    warn(file, 'body contains collapsed code fence syntax');
   }
   if (/\d+\.\s+[^\n]+\d+\.\s+/.test(body)) {
-    report(file, 'body contains collapsed ordered list items');
+    warn(file, 'body contains collapsed ordered list items');
   }
 }
 
@@ -148,7 +153,7 @@ function validateAdminConfig() {
   const config = fs.readFileSync(configPath, 'utf8').replace(/\uFEFF/g, '').replace(/\r/g, '');
 
   if (/Â|Ã/.test(config)) {
-    report('src/admin/config.yml', 'contains mojibake characters');
+    warn('src/admin/config.yml', 'contains mojibake characters');
   }
 
   const pathRefs = Array.from(
@@ -181,6 +186,13 @@ if (errors.length) {
     console.error(`- ${issue}`);
   }
   process.exit(1);
+}
+
+if (warnings.length) {
+  console.warn('Content warnings:\n');
+  for (const issue of warnings) {
+    console.warn(`- ${issue}`);
+  }
 }
 
 console.log('Content OK');

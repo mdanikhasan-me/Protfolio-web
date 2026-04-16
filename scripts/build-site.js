@@ -592,6 +592,12 @@ function normalizePastedMarkdown(md) {
     .replace(/^(\s*)\*\*\\(#{1,6}\s+.+?)\*\*\s*$/gm, '$1$2')
     .replace(/^(\s*)\*\*(#{1,6}\s+.+?)\*\*\s*$/gm, '$1$2')
     .replace(/^(\s*)\\(#{1,6}\s+)/gm, '$1$2')
+    .replace(/^(\s*)\\([-+*]\s+)/gm, '$1$2')
+    .replace(/^(\s*)\\(>\s+)/gm, '$1$2')
+    .replace(/^(\s*)\\(\|)/gm, '$1$2')
+    .replace(/^(\s*)\\((?:---|\*\*\*|___))\s*$/gm, '$1$2')
+    .replace(/\\!\[/g, '![')
+    .replace(/\\([\[\]|])/g, '$1')
     .replace(/```([A-Za-z0-9_+-]+)([^\n`])/g, '```$1\n$2')
     .replace(/([^\n`])```/g, '$1\n```')
     .replace(/\\`/g, '`');
@@ -608,6 +614,22 @@ function normalizePastedMarkdown(md) {
   normalized = normalized.replace(/^(\d+\.\s.*)$/gm, function (line) {
     return line.replace(/(?<=\S)(?=(?:\d+\.\s))/g, '\n');
   });
+
+  function isCompactionCandidate(trimmed) {
+    return /^!\[/.test(trimmed)
+      || /^[-*]\s+/.test(trimmed)
+      || /^\d+\.\s+/.test(trimmed)
+      || /^\|.*\|$/.test(trimmed);
+  }
+
+  const compactedLines = normalized.split('\n');
+  normalized = compactedLines.filter(function (_, index, lines) {
+    const current = lines[index].trim();
+    if (current) return true;
+    const previous = index > 0 ? lines[index - 1].trim() : '';
+    const next = index + 1 < lines.length ? lines[index + 1].trim() : '';
+    return !(isCompactionCandidate(previous) && isCompactionCandidate(next));
+  }).join('\n');
 
   return normalized;
 }
@@ -758,14 +780,31 @@ function markdownToHtml(md) {
   const lines = normalizePastedMarkdown(md).split('\n');
   let listType = '';
 
+  function decodeInlineUrl(value) {
+    let decoded = String(value || '');
+    let previous = '';
+
+    while (decoded !== previous) {
+      previous = decoded;
+      decoded = decoded
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>');
+    }
+
+    return decoded;
+  }
+
   function renderInline(text) {
     let t = escapeHtml(text);
     t = t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function (_, alt, url) {
-      const safeUrl = sanitizeUrl(normalizeContentAssetUrl(url), { allowDataImage: true });
+      const safeUrl = sanitizeUrl(normalizeContentAssetUrl(decodeInlineUrl(url)), { allowDataImage: true });
       return safeUrl ? `<img src="${escapeHtml(safeUrl)}" alt="${alt}">` : alt;
     });
     t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, label, url) {
-      const safeUrl = sanitizeUrl(normalizeContentAssetUrl(url));
+      const safeUrl = sanitizeUrl(normalizeContentAssetUrl(decodeInlineUrl(url)));
       return safeUrl ? `<a href="${escapeHtml(safeUrl)}">${label}</a>` : label;
     });
     t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
@@ -795,8 +834,25 @@ function markdownToHtml(md) {
     return !trimmed
       || trimmed.startsWith('```')
       || isRawHtmlLine(trimmed)
+      || /^\|.*\|$/.test(trimmed)
+      || /^(?:-{3,}|\*{3,}|_{3,})$/.test(trimmed)
       || /^#{1,6}\s+/.test(trimmed)
       || isListLine(trimmed);
+  }
+
+  function parseTableRow(line) {
+    const trimmed = line.trim();
+    if (!/^\|.*\|$/.test(trimmed)) return [];
+    return trimmed
+      .replace(/^\|/, '')
+      .replace(/\|$/, '')
+      .split('|')
+      .map(cell => cell.trim());
+  }
+
+  function isTableSeparatorRow(line) {
+    const cells = parseTableRow(line);
+    return cells.length > 0 && cells.every(cell => /^:?-{3,}:?$/.test(cell));
   }
 
   for (let i = 0; i < lines.length; i += 1) {
@@ -828,6 +884,29 @@ function markdownToHtml(md) {
       continue;
     }
     closeList();
+    if (/^(?:-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
+      html.push('<hr>');
+      continue;
+    }
+    if (/^\|.*\|$/.test(trimmed)) {
+      const tableLines = [trimmed];
+      while (i + 1 < lines.length && /^\|.*\|$/.test(lines[i + 1].trim())) {
+        i += 1;
+        tableLines.push(lines[i].trim());
+      }
+
+      if (tableLines.length >= 2 && isTableSeparatorRow(tableLines[1])) {
+        const headerCells = parseTableRow(tableLines[0]).map(cell => `<th>${renderInline(cell)}</th>`).join('');
+        const bodyRows = tableLines.slice(2)
+          .map(row => parseTableRow(row))
+          .filter(cells => cells.length)
+          .map(cells => `<tr>${cells.map(cell => `<td>${renderInline(cell)}</td>`).join('')}</tr>`)
+          .join('');
+
+        html.push(`<table><thead><tr>${headerCells}</tr></thead>${bodyRows ? `<tbody>${bodyRows}</tbody>` : ''}</table>`);
+        continue;
+      }
+    }
     if (/^#{1,6}\s+/.test(trimmed)) {
       const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
       const level = headingMatch ? headingMatch[1].length : 2;

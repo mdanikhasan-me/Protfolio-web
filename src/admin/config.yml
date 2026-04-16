@@ -59,7 +59,7 @@ collections:
       - { label: "Source Code", name: "source_code", widget: "string", required: false }
       - { label: "Live Demo", name: "live_demo", widget: "string", required: false }
       - { label: "Featured", name: "featured", widget: "boolean", default: false, required: false }
-      - { label: "Project Details", name: "body", widget: "markdown", required: false, hint: "Supports Markdown and safe HTML blocks, so pasted GitHub README sections like tables, images, badges, and links can render on the detail page." }
+      - { label: "Project Details", name: "body", widget: "markdown", required: false, hint: "Supports Markdown and safe HTML blocks for GitHub README sections like tables, images, badges, and links. For best results, switch to Markdown mode before pasting large README-style content." }
 
   - name: "pages"
     label: "Page Content"
