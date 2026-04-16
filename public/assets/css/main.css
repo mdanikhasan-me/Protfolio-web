@@ -1892,6 +1892,10 @@ html.reduce-motion .bg-shade {
   padding: clamp(1.4rem, 2.4vw, 2.2rem) !important;
 }
 
+.page-project-detail .blog-post-card {
+  width: min(100%, clamp(64rem, 95vw, 90rem));
+}
+
 .page-blog-post .blog-post-media {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -1908,6 +1912,15 @@ html.reduce-motion .bg-shade {
 
 .page-blog-post .blog-post-content > * {
   max-width: 72ch;
+}
+
+.page-project-detail .blog-post-content > * {
+  max-width: min(100%, 78rem);
+}
+
+.page-project-detail .blog-post-content p,
+.page-project-detail .blog-post-content li {
+  max-width: 74ch;
 }
 
 .page-blog-post .blog-post-content img,
@@ -1959,8 +1972,10 @@ html.reduce-motion .bg-shade {
 .page-blog-post .blog-post-content table {
   width: 100%;
   margin: 1rem 0;
+  display: block;
   border-collapse: separate;
   border-spacing: 0;
+  overflow-x: auto;
   overflow: hidden;
   border: 1px solid var(--card-border);
   border-radius: var(--radius-md);
@@ -2003,6 +2018,24 @@ html.reduce-motion .bg-shade {
 
 .page-blog-post .blog-post-card > h1 {
   max-width: 13ch;
+}
+
+.page-project-detail .blog-post-card > h1 {
+  max-width: none;
+}
+
+.page-project-detail .blog-post-content h1,
+.page-project-detail .blog-post-content h2,
+.page-project-detail .blog-post-content h3,
+.page-project-detail .blog-post-content h4,
+.page-project-detail .blog-post-content h5,
+.page-project-detail .blog-post-content h6,
+.page-project-detail .blog-post-content p[align="center"],
+.page-project-detail .blog-post-content div[align="center"],
+.page-project-detail .blog-post-content table,
+.page-project-detail .blog-post-content pre,
+.page-project-detail .blog-post-content .full-width {
+  max-width: none;
 }
 
 .page-blog-post .blog-back-link {

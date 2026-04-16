@@ -49,16 +49,16 @@
 ## Visual direction
 
 <p align="center">
-  Project visual
+  Jungle home background
 </p>
 
 <p align="center">
-  <img src="./public/uploads/coding_class.jpg" width="100%" alt="Project related coding visual">
+  <img src="./public/assets/bg/jungle-home.webp" width="100%" alt="Jungle home background from the website">
 </p>
 
 <p align="center">
-  <strong>Builder mindset</strong><br>
-  Project asset from the current visual set.
+  <strong>Website background</strong><br>
+  Main background artwork used across the site.
 </p>
 
 <table>
