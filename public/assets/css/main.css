@@ -1916,6 +1916,7 @@ html.reduce-motion .bg-shade {
 
 .page-project-detail .blog-post-content > * {
   max-width: min(100%, 78rem);
+  margin-inline: auto;
 }
 
 .page-project-detail .blog-post-content p,
@@ -1943,6 +1944,7 @@ html.reduce-motion .bg-shade {
 .page-blog-post .blog-post-content div[align="center"] {
   text-align: center;
   max-width: none;
+  margin-inline: auto;
 }
 
 .page-blog-post .blog-post-content p[align="center"] img,
@@ -1970,8 +1972,8 @@ html.reduce-motion .bg-shade {
 }
 
 .page-blog-post .blog-post-content table {
-  width: 100%;
-  margin: 1rem 0;
+  width: min(100%, 78rem);
+  margin: 1rem auto;
   display: block;
   border-collapse: separate;
   border-spacing: 0;
@@ -2036,6 +2038,21 @@ html.reduce-motion .bg-shade {
 .page-project-detail .blog-post-content pre,
 .page-project-detail .blog-post-content .full-width {
   max-width: none;
+}
+
+.page-project-detail .blog-post-content img:only-child,
+.page-project-detail .blog-post-content picture:only-child {
+  margin-inline: auto;
+}
+
+.page-project-detail .blog-post-content > p + p,
+.page-project-detail .blog-post-content > h1 + p,
+.page-project-detail .blog-post-content > h2 + p,
+.page-project-detail .blog-post-content > h3 + p,
+.page-project-detail .blog-post-content > h4 + p,
+.page-project-detail .blog-post-content > h5 + p,
+.page-project-detail .blog-post-content > h6 + p {
+  margin-top: 0.95rem;
 }
 
 .page-blog-post .blog-back-link {

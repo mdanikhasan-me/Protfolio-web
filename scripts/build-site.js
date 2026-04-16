@@ -583,11 +583,33 @@ function normalizeContentAssetUrl(value) {
 }
 
 function normalizePastedMarkdown(md) {
-  return String(md || '')
+  let normalized = String(md || '')
     .replace(/\r/g, '')
+    .replace(/\u00a0/g, ' ')
+    .replace(/\u00c2\u00a0/g, ' ')
+    .replace(/\u00c2/g, '')
+    .replace(/<([A-Za-z][\w:-]*)\s+\*align\*\s*=\s*(["'])(.*?)\2/gi, '<$1 align=$2$3$2')
+    .replace(/^(\s*)\*\*\\(#{1,6}\s+.+?)\*\*\s*$/gm, '$1$2')
     .replace(/^(\s*)\*\*(#{1,6}\s+.+?)\*\*\s*$/gm, '$1$2')
     .replace(/^(\s*)\\(#{1,6}\s+)/gm, '$1$2')
+    .replace(/```([A-Za-z0-9_+-]+)([^\n`])/g, '```$1\n$2')
+    .replace(/([^\n`])```/g, '$1\n```')
     .replace(/\\`/g, '`');
+
+  normalized = normalized.replace(/^```(bash|sh|zsh|powershell|ps1|cmd)([\s\S]*?)```$/gm, function (_, lang, body) {
+    const fixedBody = String(body || '')
+      .trim()
+      .replace(/(?<=\S)(?=(?:npm|pnpm|yarn|npx|git|node|python|pip|bun|cargo|go|uv)\s)/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+    return `\`\`\`${lang}\n${fixedBody}\n\`\`\``;
+  });
+
+  normalized = normalized.replace(/^(\d+\.\s.*)$/gm, function (line) {
+    return line.replace(/(?<=\S)(?=(?:\d+\.\s))/g, '\n');
+  });
+
+  return normalized;
 }
 
 function countRootTagDelta(line, tagName) {
