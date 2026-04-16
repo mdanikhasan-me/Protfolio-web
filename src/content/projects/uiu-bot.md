@@ -1,12 +1,13 @@
 ---
 title: UIU Bot
 slug: uiu-bot
-description: A Discord bot engineered for UIU students automated scheduling, resource management, and moderation tools.
+description: A Discord bot engineered for UIU students automated scheduling,
+  resource management, and moderation tools.
 tools:
   - Python
   - Discord.py
   - AsyncIO
-thumbnail: ""
+thumbnail: /uploads/screenshot-2026-04-16-171713.jpg
 source_code: https://github.com/mdanikhasan-dev/UIU-BOT-Discord
 live_demo: https://discord.com/oauth2/authorize?client_id=1434163768488890549&permissions=8&integration_type=0&scope=bot+applications.commands
 featured: true
