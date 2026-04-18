@@ -4,49 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>SAWLPER</title>
+  <title>SAWLPER Admin</title>
   <link rel="stylesheet" href="./admin.css">
-
-  <script>window.CMS_MANUAL_INIT = true;</script>
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 </head>
 <body>
-  <div class="gate" id="gate">
-    <div class="gate__inner">
-      <h1 class="gate__brand">SAWLPER</h1>
-      <p class="gate__sub">Enter portal</p>
-      <button class="gate__enter" id="enterPortal" type="button">Enter portal</button>
-      <p class="gate__status" id="gateStatus"></p>
-    </div>
-  </div>
-
-  <div class="loader" id="loader" hidden>
-    <div class="loader__text" id="loaderText">Loading editor</div>
-  </div>
-
   <script>
     (function () {
-      var html = document.documentElement;
-      var gate = document.getElementById("gate");
-      var loader = document.getElementById("loader");
-      var loaderText = document.getElementById("loaderText");
-      var gateStatus = document.getElementById("gateStatus");
-      var enterPortal = document.getElementById("enterPortal");
-      var started = false;
       var authHashPattern = /(invite_token|confirmation_token|recovery_token|email_change_token)=/i;
       var defaultCmsHash = "#/collections/posts";
+      var validHashPattern = /^#\/(collections\/[A-Za-z0-9_-]+(?:\/.*)?|media(?:\/.*)?|workflow(?:\/.*)?|search(?:\/.*)?)$/i;
 
-      function hasIdentityToken() {
-        return authHashPattern.test(window.location.hash || "");
-      }
-
-      function ensureCmsRoute() {
+      function normalizeCmsHash() {
         var hash = window.location.hash || "";
-        var normalizedHash = hash.replace(/^#/, "");
-        var hasCmsRoute = normalizedHash.indexOf("/") === 0;
-
-        if (!hash || hash === "#" || authHashPattern.test(hash) || !hasCmsRoute) {
+        if (!hash || hash === "#" || authHashPattern.test(hash)) {
+          return;
+        }
+        if (!validHashPattern.test(hash)) {
           if (window.history && window.history.replaceState) {
             window.history.replaceState(null, "", window.location.pathname + window.location.search + defaultCmsHash);
           } else {
@@ -55,83 +29,39 @@
         }
       }
 
-      function showGate(message) {
-        gate.hidden = false;
-        loader.hidden = true;
-        gateStatus.textContent = message || "";
-        html.classList.remove("admin-live");
-        document.body.classList.remove("admin-live");
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", function (user) {
+          if (user && (!window.location.hash || window.location.hash === "#" || authHashPattern.test(window.location.hash || ""))) {
+            window.location.hash = defaultCmsHash;
+          } else {
+            normalizeCmsHash();
+          }
+        });
+
+        window.netlifyIdentity.on("login", function () {
+          if (!window.location.hash || window.location.hash === "#" || authHashPattern.test(window.location.hash || "")) {
+            window.location.hash = defaultCmsHash;
+          } else {
+            normalizeCmsHash();
+          }
+        });
+
+        window.netlifyIdentity.on("logout", function () {
+          window.location.href = "./";
+        });
+
+        window.netlifyIdentity.init();
+      } else {
+        normalizeCmsHash();
       }
 
-      function showLoader(message) {
-        gate.hidden = true;
-        loader.hidden = false;
-        loaderText.textContent = message || "Loading editor";
-      }
-
-      function startCMS() {
-        if (started) return;
-        started = true;
-        ensureCmsRoute();
-        html.classList.add("admin-live");
-        document.body.classList.add("admin-live");
-        showLoader("Loading editor");
-
-        try {
-          window.CMS.init();
-          window.requestAnimationFrame(function () {
-            setTimeout(function () {
-              loader.hidden = true;
-            }, 500);
-          });
-        } catch (error) {
-          started = false;
-          html.classList.remove("admin-live");
-          document.body.classList.remove("admin-live");
-          showGate("Editor failed to start.");
-          console.error(error);
-        }
-      }
-
-      if (!window.netlifyIdentity || !window.CMS) {
-        showGate("Admin dependencies failed to load.");
-        return;
-      }
-
-      enterPortal.addEventListener("click", function () {
-        window.netlifyIdentity.open("login");
-      });
-
-      window.netlifyIdentity.on("init", function (user) {
-        if (user) {
-          startCMS();
-        } else if (hasIdentityToken()) {
-          showLoader("Opening invite");
-          window.netlifyIdentity.open();
-        } else {
-          showGate("");
+      window.addEventListener("hashchange", function () {
+        if (!authHashPattern.test(window.location.hash || "")) {
+          normalizeCmsHash();
         }
       });
-
-      window.netlifyIdentity.on("login", function () {
-        window.netlifyIdentity.close();
-        startCMS();
-      });
-
-      window.netlifyIdentity.on("logout", function () {
-        started = false;
-        html.classList.remove("admin-live");
-        document.body.classList.remove("admin-live");
-        window.location.replace("/sawlper/");
-      });
-
-      window.netlifyIdentity.on("error", function (error) {
-        var message = error && error.message ? error.message : "Authentication failed.";
-        showGate(message);
-      });
-
-      window.netlifyIdentity.init();
     })();
   </script>
+  <script src="https://unpkg.com/decap-cms@^3.8.3/dist/decap-cms.js"></script>
 </body>
 </html>
