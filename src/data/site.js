@@ -21,7 +21,6 @@ const SOCIAL_DEFAULTS = {
   facebook: 'https://www.facebook.com/mdanikhasan.dev',
   x: 'https://x.com/mdanikhasan_dev',
   discord: 'https://discord.com/users/751170057664462938',
-  instagram: '',
   youtube: 'https://www.youtube.com/@mdanikhasan_dev',
 };
 
@@ -128,7 +127,6 @@ const SOCIAL_LINKS = {
   github: pickFirst(social.github, SOCIAL_DEFAULTS.github),
   linkedin: pickFirst(social.linkedin, SOCIAL_DEFAULTS.linkedin),
   facebook: pickFirst(social.facebook, SOCIAL_DEFAULTS.facebook),
-  instagram: pickFirst(social.instagram, SOCIAL_DEFAULTS.instagram),
   youtube: pickFirst(social.youtube, SOCIAL_DEFAULTS.youtube),
   x: pickFirst(social.x, SOCIAL_DEFAULTS.x),
   discord: pickFirst(social.discord, SOCIAL_DEFAULTS.discord),
@@ -196,14 +194,6 @@ const PERSON_SCHEMA_PROFILE = {
   mainEntityOfPage: AUTHOR_URL,
 };
 
-const PERSON_SCHEMA_STUB = {
-  '@type': 'Person',
-  '@id': `${SITE_URL}/#person`,
-  name: SITE_NAME,
-  identifier: PERSON_IDENTIFIER,
-  url: `${SITE_URL}/`,
-};
-
 const WEBSITE_SCHEMA = {
   '@type': 'WebSite',
   '@id': `${SITE_URL}/#website`,
@@ -237,23 +227,17 @@ module.exports = {
   SITE_URL,
   SITE_NAME,
   AUTHOR_URL,
-  SITE_DESCRIPTION,
   META_TITLE,
   META_DESCRIPTION,
   OG_IMAGE,
   OG_IMAGE_ALT,
-  LOGO_IMAGE,
   TWITTER_HANDLE,
   GOOGLE_VERIFICATION,
   EMAIL,
   RESPONSE_TIME,
-  LOCATION,
-  PERSON_IDENTIFIER,
-  SOCIAL_DEFAULTS,
   SOCIAL_LINKS,
   PERSON_SCHEMA_FULL,
   PERSON_SCHEMA_PROFILE,
-  PERSON_SCHEMA_STUB,
   WEBSITE_SCHEMA,
   WEBSITE_SCHEMA_STUB,
 };

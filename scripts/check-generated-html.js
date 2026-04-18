@@ -75,6 +75,15 @@ function checkHtmlFile(fullPath) {
   if (/\\#{1,6}\s|```|\*\*\\#{1,6}\s/.test(html)) {
     report(rel, 'contains leaked markdown syntax');
   }
+
+  for (const match of html.matchAll(/\s(?:src|href)\s*=\s*["'](\/(?:assets|uploads)\/[^"']+)["']/gi)) {
+    const publicPath = match[1];
+    const cleanPath = publicPath.split('?')[0].split('#')[0];
+    const resolvedPath = path.join(dist, cleanPath.replace(/^\//, '').replace(/\//g, path.sep));
+    if (!fs.existsSync(resolvedPath)) {
+      report(rel, `references missing generated asset "${publicPath}"`);
+    }
+  }
 }
 
 function checkProjectPages() {

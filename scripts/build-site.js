@@ -72,6 +72,25 @@ function getMimeTypeByExt(file) {
   return 'image/png';
 }
 
+function resolveLocalPublicAssetPath(publicUrl) {
+  const cleanUrl = String(publicUrl || '').split('?')[0];
+  if (!cleanUrl.startsWith('/')) return '';
+  return path.join(publicDir, cleanUrl.replace(/^\//, ''));
+}
+
+function localPublicAssetExists(publicUrl) {
+  const localPath = resolveLocalPublicAssetPath(publicUrl);
+  return localPath ? fs.existsSync(localPath) : false;
+}
+
+function resolveSafeImageUrl(publicUrl, fallback = '/assets/og/preview.png') {
+  const safeUrl = sanitizeUrl(publicUrl, { allowDataImage: true });
+  if (!safeUrl) return fallback || '';
+  if (/^data:image\//i.test(safeUrl)) return safeUrl;
+  if (!safeUrl.startsWith('/')) return safeUrl;
+  return localPublicAssetExists(safeUrl) ? safeUrl : (fallback || '');
+}
+
 function getImageSizeFromBuffer(buffer, ext) {
   const normalized = String(ext || '').toLowerCase();
   if (normalized === '.png') {
@@ -107,11 +126,11 @@ function getImageSizeFromBuffer(buffer, ext) {
 }
 
 function getImageMeta(publicUrl) {
-  const cleanUrl = String(publicUrl || '').split('?')[0];
+  const cleanUrl = resolveSafeImageUrl(publicUrl, '/assets/og/preview.png').split('?')[0];
   if (!cleanUrl.startsWith('/')) {
     return { width: 1200, height: 630, type: getMimeTypeByExt(cleanUrl || '.png') };
   }
-  const localPath = path.join(publicDir, cleanUrl.replace(/^\//, ''));
+  const localPath = resolveLocalPublicAssetPath(cleanUrl);
   if (!fs.existsSync(localPath)) {
     return { width: 1200, height: 630, type: getMimeTypeByExt(cleanUrl || '.png') };
   }
@@ -130,9 +149,9 @@ function getImageMeta(publicUrl) {
 }
 
 function getAdjacentWebp(publicUrl) {
-  const cleanUrl = String(publicUrl || '').split('?')[0];
+  const cleanUrl = resolveSafeImageUrl(publicUrl, '').split('?')[0];
   if (!cleanUrl.startsWith('/')) return '';
-  const localPath = path.join(publicDir, cleanUrl.replace(/^\//, ''));
+  const localPath = resolveLocalPublicAssetPath(cleanUrl);
   const parsed = path.parse(localPath);
   const webpPath = path.join(parsed.dir, `${parsed.name}.webp`);
   if (!fs.existsSync(webpPath)) return '';
@@ -140,7 +159,7 @@ function getAdjacentWebp(publicUrl) {
 }
 
 function buildResponsiveImage(publicUrl, alt, className, attrs = '') {
-  const safeUrl = sanitizeUrl(publicUrl, { allowDataImage: true }) || '/assets/og/preview.png';
+  const safeUrl = resolveSafeImageUrl(publicUrl, '/assets/og/preview.png');
   const meta = getImageMeta(safeUrl);
   const webpUrl = getAdjacentWebp(safeUrl);
   const widthAttr = ` width="${meta.width}"`;
@@ -159,7 +178,7 @@ function buildResponsiveImage(publicUrl, alt, className, attrs = '') {
   };
 }
 
-function buildInlineBootScript(buildV) {
+function buildInlineBootScript() {
   const bootPath = path.join(publicDir, 'assets', 'js', 'boot.js');
   if (!fs.existsSync(bootPath)) return '';
   const code = fs.readFileSync(bootPath, 'utf8')
@@ -783,7 +802,7 @@ function latestIsoDate() {
 }
 
 function buildAbsoluteSiteUrl(value) {
-  const raw = String(value || '').trim();
+  const raw = String(resolveSafeImageUrl(value, String(value || '').trim()) || '').trim();
   if (!raw) return site.SITE_URL;
   if (/^https?:\/\//i.test(raw)) return raw;
   return `${site.SITE_URL}${raw.startsWith('/') ? raw : `/${raw.replace(/^\.?\//, '')}`}`;
@@ -816,7 +835,7 @@ function markdownToHtml(md) {
   function renderInline(text) {
     let t = escapeHtml(text);
     t = t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function (_, alt, url) {
-      const safeUrl = sanitizeUrl(normalizeContentAssetUrl(decodeInlineUrl(url)), { allowDataImage: true });
+      const safeUrl = resolveSafeImageUrl(normalizeContentAssetUrl(decodeInlineUrl(url)), '');
       return safeUrl ? `<img src="${escapeHtml(safeUrl)}" alt="${alt}" loading="lazy" decoding="async">` : alt;
     });
     t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, label, url) {
@@ -953,7 +972,7 @@ function getPosts() {
     const { data, body } = readFrontMatter(raw);
     if (data.draft === true || data.draft === 'true') continue;
     const slug = data.slug ? slugify(data.slug) : slugify(file.replace(/\.md$/, ''));
-    const cover = sanitizeUrl(data.cover, { allowDataImage: true }) || '/assets/og/preview.png';
+    const cover = resolveSafeImageUrl(data.cover, '/assets/og/preview.png');
     const plainText = markdownToPlainText(body);
     const publishedAt = toIsoDateTime(data.date, stat.mtime);
     const modifiedAt = latestIsoDate(
@@ -995,8 +1014,8 @@ function getProjects() {
       : (Array.isArray(data.stack) ? data.stack.filter(Boolean).map(t => String(t).trim()).filter(Boolean) : []);
     const plainText = markdownToPlainText(body);
     const description = data.description || makeExcerpt(plainText);
-    const heroImage = sanitizeUrl(data.thumbnail || data.cover, { allowDataImage: true }) || '';
-    const thumbnail = heroImage || '/assets/og/preview.png';
+    const heroImage = resolveSafeImageUrl(data.thumbnail || data.cover, '');
+    const thumbnail = heroImage || resolveSafeImageUrl(data.thumbnail || data.cover, '/assets/og/preview.png');
     const publishedAt = toIsoDateTime(data.date, stat.mtime);
     const modifiedAt = latestIsoDate(
       toIsoDateTime(data.updated || data.modified, stat.mtime),
@@ -1063,7 +1082,7 @@ function buildSeoHead(meta, buildV) {
     .replace('{{OG_IMAGE_TYPE}}', ogImageMeta.type)
     .replace(/\{\{OG_IMAGE_ALT\}\}/g, escapeHtml(meta.ogImageAlt))
     .replace('{{PRELOAD_BG}}\n', preloadBg ? `${preloadBg}\n` : '')
-    .replace('{{BOOT_INLINE}}', buildInlineBootScript(buildV))
+    .replace('{{BOOT_INLINE}}', buildInlineBootScript())
     .replace('{{ANALYTICS_SNIPPET}}', buildAnalyticsSnippet())
     .replace(/\{\{BUILD_V\}\}/g, buildV)
     .replace('{{EXTRA_HEAD}}', extraHead)
@@ -1170,7 +1189,7 @@ function buildPostSeoHead(post, buildV) {
     .replace('{{OG_IMAGE_TYPE}}', ogImageMeta.type)
     .replace(/\{\{OG_IMAGE_ALT\}\}/g, escapeHtml(post.title))
     .replace('{{PRELOAD_BG}}\n', '')
-    .replace('{{BOOT_INLINE}}', buildInlineBootScript(buildV))
+    .replace('{{BOOT_INLINE}}', buildInlineBootScript())
     .replace('{{ANALYTICS_SNIPPET}}', buildAnalyticsSnippet())
     .replace(/\{\{BUILD_V\}\}/g, buildV)
     .replace('{{EXTRA_HEAD}}', extraHead)
@@ -1294,7 +1313,7 @@ function buildProjectSeoHead(project, buildV) {
     .replace('{{OG_IMAGE_TYPE}}', ogImageMeta.type)
     .replace(/\{\{OG_IMAGE_ALT\}\}/g, escapeHtml(`${project.title} preview`))
     .replace('{{PRELOAD_BG}}\n', '')
-    .replace('{{BOOT_INLINE}}', buildInlineBootScript(buildV))
+    .replace('{{BOOT_INLINE}}', buildInlineBootScript())
     .replace('{{ANALYTICS_SNIPPET}}', buildAnalyticsSnippet())
     .replace(/\{\{BUILD_V\}\}/g, buildV)
     .replace('{{EXTRA_HEAD}}', extraHead)
