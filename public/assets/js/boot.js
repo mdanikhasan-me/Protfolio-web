@@ -2,6 +2,17 @@
   var root = document.documentElement;
   if (!root) { return; }
 
+  try {
+    var hash = window.location.hash || '';
+    var path = window.location.pathname || '/';
+    var hasIdentityToken = /(^|[?#&])(invite_token|confirmation_token|recovery_token|email_change_token)=/i.test(hash);
+
+    if (hasIdentityToken && !/^\/sawlper(?:\/|$)/i.test(path)) {
+      window.location.replace('/sawlper/' + (window.location.search || '') + hash);
+      return;
+    }
+  } catch (e) {}
+
   root.classList.add('js');
 
   try {

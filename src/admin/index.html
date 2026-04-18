@@ -34,6 +34,7 @@
       var gateStatus = document.getElementById("gateStatus");
       var enterPortal = document.getElementById("enterPortal");
       var started = false;
+      var hasIdentityToken = /(invite_token|confirmation_token|recovery_token|email_change_token)=/i.test(window.location.hash || "");
 
       function showGate(message) {
         gate.hidden = false;
@@ -84,6 +85,9 @@
       window.netlifyIdentity.on("init", function (user) {
         if (user) {
           startCMS();
+        } else if (hasIdentityToken) {
+          showLoader("Opening invite");
+          window.netlifyIdentity.open();
         } else {
           showGate("");
         }
@@ -99,6 +103,11 @@
         html.classList.remove("admin-live");
         document.body.classList.remove("admin-live");
         window.location.replace("/sawlper/");
+      });
+
+      window.netlifyIdentity.on("error", function (error) {
+        var message = error && error.message ? error.message : "Authentication failed.";
+        showGate(message);
       });
 
       window.netlifyIdentity.init();
