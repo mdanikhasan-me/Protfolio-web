@@ -34,7 +34,26 @@
       var gateStatus = document.getElementById("gateStatus");
       var enterPortal = document.getElementById("enterPortal");
       var started = false;
-      var hasIdentityToken = /(invite_token|confirmation_token|recovery_token|email_change_token)=/i.test(window.location.hash || "");
+      var authHashPattern = /(invite_token|confirmation_token|recovery_token|email_change_token)=/i;
+      var defaultCmsHash = "#/collections/posts";
+
+      function hasIdentityToken() {
+        return authHashPattern.test(window.location.hash || "");
+      }
+
+      function ensureCmsRoute() {
+        var hash = window.location.hash || "";
+        var normalizedHash = hash.replace(/^#/, "");
+        var hasCmsRoute = normalizedHash.indexOf("/") === 0;
+
+        if (!hash || hash === "#" || authHashPattern.test(hash) || !hasCmsRoute) {
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, "", window.location.pathname + window.location.search + defaultCmsHash);
+          } else {
+            window.location.hash = defaultCmsHash;
+          }
+        }
+      }
 
       function showGate(message) {
         gate.hidden = false;
@@ -53,6 +72,7 @@
       function startCMS() {
         if (started) return;
         started = true;
+        ensureCmsRoute();
         html.classList.add("admin-live");
         document.body.classList.add("admin-live");
         showLoader("Loading editor");
@@ -85,7 +105,7 @@
       window.netlifyIdentity.on("init", function (user) {
         if (user) {
           startCMS();
-        } else if (hasIdentityToken) {
+        } else if (hasIdentityToken()) {
           showLoader("Opening invite");
           window.netlifyIdentity.open();
         } else {
