@@ -178,15 +178,68 @@ function buildResponsiveImage(publicUrl, alt, className, attrs = '') {
   };
 }
 
+function minifyJs(code) {
+  return String(code || '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:"'\\])\/\/[^\n]*/g, '$1')
+    .replace(/\s*\n\s*/g, '\n')
+    .replace(/\n{2,}/g, '\n')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
+}
+
 function buildInlineBootScript() {
   const bootPath = path.join(publicDir, 'assets', 'js', 'boot.js');
   if (!fs.existsSync(bootPath)) return '';
-  const code = fs.readFileSync(bootPath, 'utf8')
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/\n+/g, ' ')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
+  const code = minifyJs(fs.readFileSync(bootPath, 'utf8')).replace(/\n/g, ' ');
   return `  <script>${code}</script>`;
+}
+
+function minifyDistJs() {
+  const jsDir = path.join(dist, 'assets', 'js');
+  if (!fs.existsSync(jsDir)) return;
+  for (const entry of fs.readdirSync(jsDir)) {
+    if (!entry.endsWith('.js')) continue;
+    const full = path.join(jsDir, entry);
+    const code = fs.readFileSync(full, 'utf8');
+    fs.writeFileSync(full, minifyJs(code));
+  }
+}
+
+function buildPreconnectLinks() {
+  const links = [];
+  const analytics = readYamlFile(analyticsFile);
+  const provider = String(analytics.provider || '').trim().toLowerCase();
+  const domain = String(analytics.domain || '').trim();
+  const scriptSrc = String(analytics.script_src || '').trim();
+
+  if (provider === 'plausible' && domain) {
+    const src = scriptSrc || 'https://plausible.io/js/script.js';
+    try {
+      const host = new URL(src, 'https://plausible.io').origin;
+      links.push(`  <link rel="preconnect" href="${escapeHtml(host)}" crossorigin>`);
+    } catch (e) {}
+  }
+
+  if (provider === 'goatcounter' && domain) {
+    links.push(`  <link rel="preconnect" href="https://gc.zgo.at" crossorigin>`);
+  }
+
+  return links.join('\n');
+}
+
+function buildPreloadBackground(meta) {
+  if (!meta.preloadHomeBackground) return '';
+  const avif = '/assets/bg/jungle-home.avif';
+  const webp = '/assets/bg/jungle-home.webp';
+  const lines = [];
+  if (localPublicAssetExists(avif)) {
+    lines.push(`  <link rel="preload" as="image" href="${avif}" type="image/avif">`);
+  }
+  if (localPublicAssetExists(webp)) {
+    lines.push(`  <link rel="preload" as="image" href="${webp}" type="image/webp">`);
+  }
+  return lines.join('\n');
 }
 
 function buildAnalyticsSnippet() {
@@ -1051,9 +1104,7 @@ function buildSeoHead(meta, buildV) {
     ? `  <meta name="google-site-verification" content="${escapeHtml(meta.googleVerification)}">`
     : '';
 
-  const preloadBg = meta.preloadHomeBackground
-    ? `  <link rel="preload" as="image" href="/assets/bg/jungle-home.avif" type="image/avif">`
-    : '';
+  const preloadBg = buildPreloadBackground(meta);
 
   const jsonLdBlock = meta.jsonLd
     ? `  <script type="application/ld+json">\n${serializeJsonForHtml(meta.jsonLd)}\n  </script>`
@@ -1081,6 +1132,7 @@ function buildSeoHead(meta, buildV) {
     .replace('{{OG_IMAGE_HEIGHT}}', String(ogImageMeta.height))
     .replace('{{OG_IMAGE_TYPE}}', ogImageMeta.type)
     .replace(/\{\{OG_IMAGE_ALT\}\}/g, escapeHtml(meta.ogImageAlt))
+    .replace('{{PRECONNECT}}\n', (buildPreconnectLinks() ? `${buildPreconnectLinks()}\n` : ''))
     .replace('{{PRELOAD_BG}}\n', preloadBg ? `${preloadBg}\n` : '')
     .replace('{{BOOT_INLINE}}', buildInlineBootScript())
     .replace('{{ANALYTICS_SNIPPET}}', buildAnalyticsSnippet())
@@ -1188,6 +1240,7 @@ function buildPostSeoHead(post, buildV) {
     .replace('{{OG_IMAGE_HEIGHT}}', String(ogImageMeta.height))
     .replace('{{OG_IMAGE_TYPE}}', ogImageMeta.type)
     .replace(/\{\{OG_IMAGE_ALT\}\}/g, escapeHtml(post.title))
+    .replace('{{PRECONNECT}}\n', (buildPreconnectLinks() ? `${buildPreconnectLinks()}\n` : ''))
     .replace('{{PRELOAD_BG}}\n', '')
     .replace('{{BOOT_INLINE}}', buildInlineBootScript())
     .replace('{{ANALYTICS_SNIPPET}}', buildAnalyticsSnippet())
@@ -1312,6 +1365,7 @@ function buildProjectSeoHead(project, buildV) {
     .replace('{{OG_IMAGE_HEIGHT}}', String(ogImageMeta.height))
     .replace('{{OG_IMAGE_TYPE}}', ogImageMeta.type)
     .replace(/\{\{OG_IMAGE_ALT\}\}/g, escapeHtml(`${project.title} preview`))
+    .replace('{{PRECONNECT}}\n', (buildPreconnectLinks() ? `${buildPreconnectLinks()}\n` : ''))
     .replace('{{PRELOAD_BG}}\n', '')
     .replace('{{BOOT_INLINE}}', buildInlineBootScript())
     .replace('{{ANALYTICS_SNIPPET}}', buildAnalyticsSnippet())
@@ -1803,5 +1857,6 @@ createProjectPages(projects, buildV);
 createFeed(posts);
 createSitemap(posts, projects);
 minifyDistCss();
+minifyDistJs();
 
 console.log(`Built ${posts.length} post(s) and ${projects.length} project(s) into dist/ [v=${buildV}]`);

@@ -7,7 +7,7 @@
   <link rel="canonical" href="{{CANONICAL_URL}}">
   <link rel="author" href="{{AUTHOR_URL}}">
 {{IDENTITY_LINKS}}
-  {{HREFLANG_LINKS}}
+{{HREFLANG_LINKS}}
 
   <meta property="og:type" content="{{OG_TYPE}}">
   <meta property="og:title" content="{{OG_TITLE}}">
@@ -31,6 +31,7 @@
   <meta name="twitter:image" content="{{OG_IMAGE}}">
   <meta name="twitter:image:alt" content="{{OG_IMAGE_ALT}}">
 
+{{PRECONNECT}}
 {{PRELOAD_BG}}
 {{BOOT_INLINE}}
   <link rel="preload" href="/assets/css/main.css?v={{BUILD_V}}" as="style">

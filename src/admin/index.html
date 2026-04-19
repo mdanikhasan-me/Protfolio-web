@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>SAWLPER Admin</title>
+  <link rel="preconnect" href="https://identity.netlify.com" crossorigin>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
   <link rel="stylesheet" href="./admin.css">
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
@@ -15,31 +17,45 @@
       var defaultCmsHash = "#/collections/posts";
       var validHashPattern = /^#\/(collections\/[A-Za-z0-9_-]+(?:\/.*)?|media(?:\/.*)?|workflow(?:\/.*)?|search(?:\/.*)?)$/i;
 
+      function currentHash() {
+        return window.location.hash || "";
+      }
+
+      function hasAuthToken() {
+        return authHashPattern.test(currentHash());
+      }
+
       function normalizeCmsHash() {
-        var hash = window.location.hash || "";
-        if (!hash || hash === "#" || authHashPattern.test(hash)) {
-          return;
+        var hash = currentHash();
+        if (!hash || hash === "#" || authHashPattern.test(hash)) return;
+        if (validHashPattern.test(hash)) return;
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, "", window.location.pathname + window.location.search + defaultCmsHash);
+        } else {
+          window.location.hash = defaultCmsHash;
         }
-        if (!validHashPattern.test(hash)) {
-          if (window.history && window.history.replaceState) {
-            window.history.replaceState(null, "", window.location.pathname + window.location.search + defaultCmsHash);
-          } else {
-            window.location.hash = defaultCmsHash;
-          }
-        }
+      }
+
+      function openWidgetForToken() {
+        if (!window.netlifyIdentity || typeof window.netlifyIdentity.open !== "function") return;
+        try { window.netlifyIdentity.open(); } catch (e) {}
       }
 
       if (window.netlifyIdentity) {
         window.netlifyIdentity.on("init", function (user) {
-          if (user && (!window.location.hash || window.location.hash === "#" || authHashPattern.test(window.location.hash || ""))) {
-            window.location.hash = defaultCmsHash;
-          } else {
-            normalizeCmsHash();
+          if (hasAuthToken()) {
+            openWidgetForToken();
+            return;
           }
+          if (user && (!currentHash() || currentHash() === "#")) {
+            window.location.hash = defaultCmsHash;
+            return;
+          }
+          normalizeCmsHash();
         });
 
         window.netlifyIdentity.on("login", function () {
-          if (!window.location.hash || window.location.hash === "#" || authHashPattern.test(window.location.hash || "")) {
+          if (!currentHash() || currentHash() === "#" || hasAuthToken()) {
             window.location.hash = defaultCmsHash;
           } else {
             normalizeCmsHash();
@@ -56,12 +72,10 @@
       }
 
       window.addEventListener("hashchange", function () {
-        if (!authHashPattern.test(window.location.hash || "")) {
-          normalizeCmsHash();
-        }
+        if (!hasAuthToken()) normalizeCmsHash();
       });
     })();
   </script>
-  <script src="https://unpkg.com/decap-cms@^3.8.3/dist/decap-cms.js"></script>
+  <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
 </body>
 </html>

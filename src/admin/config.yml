@@ -8,7 +8,6 @@ public_folder: "/uploads"
 site_url: "https://mdanikhasan.com"
 display_url: "https://mdanikhasan.com"
 logo_url: "/assets/icons/icon-192.png"
-publish_mode: simple
 locale: "en"
 
 slug:
