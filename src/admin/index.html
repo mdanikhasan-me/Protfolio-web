@@ -13,66 +13,9 @@
 <body>
   <script>
     (function () {
-      var authHashPattern = /(invite_token|confirmation_token|recovery_token|email_change_token)=/i;
-      var defaultCmsHash = "#/collections/posts";
-      var validHashPattern = /^#\/(collections\/[A-Za-z0-9_-]+(?:\/.*)?|media(?:\/.*)?|workflow(?:\/.*)?|search(?:\/.*)?)$/i;
-
-      function currentHash() {
-        return window.location.hash || "";
-      }
-
-      function hasAuthToken() {
-        return authHashPattern.test(currentHash());
-      }
-
-      function normalizeCmsHash() {
-        var hash = currentHash();
-        if (!hash || hash === "#" || authHashPattern.test(hash)) return;
-        if (validHashPattern.test(hash)) return;
-        if (window.history && window.history.replaceState) {
-          window.history.replaceState(null, "", window.location.pathname + window.location.search + defaultCmsHash);
-        } else {
-          window.location.hash = defaultCmsHash;
-        }
-      }
-
-      function openWidgetForToken() {
-        if (!window.netlifyIdentity || typeof window.netlifyIdentity.open !== "function") return;
-        try { window.netlifyIdentity.open(); } catch (e) {}
-      }
-
-      if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", function (user) {
-          if (hasAuthToken()) {
-            openWidgetForToken();
-            return;
-          }
-          if (user && (!currentHash() || currentHash() === "#")) {
-            window.location.hash = defaultCmsHash;
-            return;
-          }
-          normalizeCmsHash();
-        });
-
-        window.netlifyIdentity.on("login", function () {
-          if (!currentHash() || currentHash() === "#" || hasAuthToken()) {
-            window.location.hash = defaultCmsHash;
-          } else {
-            normalizeCmsHash();
-          }
-        });
-
-        window.netlifyIdentity.on("logout", function () {
-          window.location.href = "./";
-        });
-
-        window.netlifyIdentity.init();
-      } else {
-        normalizeCmsHash();
-      }
-
-      window.addEventListener("hashchange", function () {
-        if (!hasAuthToken()) normalizeCmsHash();
+      if (!window.netlifyIdentity) return;
+      window.netlifyIdentity.on("logout", function () {
+        window.location.href = "/";
       });
     })();
   </script>
