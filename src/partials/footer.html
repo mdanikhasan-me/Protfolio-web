@@ -3,3 +3,23 @@
     <p class="site-footer__legal">&#169; {{YEAR}} {{SITE_NAME}}. All rights reserved.</p>
   </div>
 </footer>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js" defer></script>
+<script>
+  (function () {
+    function bind() {
+      if (!window.netlifyIdentity) return;
+      window.netlifyIdentity.on("init", function (user) {
+        if (!user) {
+          window.netlifyIdentity.on("login", function () {
+            document.location.href = "/sawlper/";
+          });
+        }
+      });
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", bind);
+    } else {
+      bind();
+    }
+  })();
+</script>
