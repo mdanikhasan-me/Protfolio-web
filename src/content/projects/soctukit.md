@@ -7,7 +7,7 @@ description: SoctuKit is a Windows desktop automation tool for social media
 tools:
   - C#
   - WinUI 3
-  - .NET.8
+  - .NET.*8
 source_code: ""
 featured: true
 ---
