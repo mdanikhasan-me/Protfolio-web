@@ -1,12 +1,25 @@
 import { boundedProjectIndex } from '../lib/project-state';
+import { referenceMotionState } from '../lib/reference-motion-state';
+import Lenis from 'lenis';
 
 const clamp = (value: number, minimum = 0, maximum = 1) =>
   Math.min(maximum, Math.max(minimum, value));
+const smoothstep = (minimum: number, maximum: number, value: number) => {
+  const normalized = clamp((value - minimum) / Math.max(0.0001, maximum - minimum));
+  return normalized * normalized * (3 - 2 * normalized);
+};
 
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobileMotionQuery = matchMedia('(max-width: 820px), (hover: none) and (pointer: coarse)');
+const smoothScroller = reduceMotion
+  ? null
+  : new Lenis({
+      anchors: true,
+      lerp: 0.075,
+      smoothWheel: true,
+      wheelMultiplier: 0.66,
+    });
 
-const hero = document.querySelector<HTMLElement>('[data-v5-hero]');
 const meltSection = document.querySelector<HTMLElement>('[data-melt-section]');
 const meltDisplacement = meltSection?.querySelector<SVGFEDisplacementMapElement>(
   '[data-melt-displacement]',
@@ -20,21 +33,84 @@ const curveTitle = curveSection?.querySelector<HTMLElement>('[data-curve-title]'
 const curveDescription = curveSection?.querySelector<HTMLElement>('[data-curve-description]');
 const curveLink = curveSection?.querySelector<HTMLAnchorElement>('[data-curve-link]');
 const curveCount = curveSection?.querySelector<HTMLElement>('[data-curve-count]');
+const curveDetail = curveSection?.querySelector<HTMLElement>('.curve-work-detail');
 const previousButton = curveSection?.querySelector<HTMLButtonElement>('[data-curve-previous]');
 const nextButton = curveSection?.querySelector<HTMLButtonElement>('[data-curve-next]');
 
 let activeProject = -1;
-let animationFrame = 0;
+let projectSwapTimer = 0;
 let targetMelt = 0;
 let renderedMelt = 0;
 let targetCurveProgress = 0;
 let renderedCurveProgress = 0;
+let renderedCurveVelocity = 0;
 let lastMotionFrame = performance.now();
-let wheelGestureLocked = false;
-let wheelGestureTimer = 0;
-let touchStartX = 0;
-let touchStartY = 0;
-let touchStepCommitted = false;
+let lastMeltValue = '';
+let lastMeltScale = '';
+let lastMeltFrequency = '';
+let lastCurvePresence = '';
+let meltNearViewport = Boolean(meltSection);
+let curveNearViewport = Boolean(curveSection);
+
+type SectionBounds = {
+  top: number;
+  bottom: number;
+  height: number;
+};
+
+let meltDocumentTop = 0;
+let meltSectionHeight = 0;
+let curveDocumentTop = 0;
+let curveSectionHeight = 0;
+const curveViewportBounds: SectionBounds = { top: 0, bottom: 0, height: 0 };
+
+function measureMotionSections() {
+  const pageY = scrollY;
+  if (meltSection) {
+    const bounds = meltSection.getBoundingClientRect();
+    meltDocumentTop = pageY + bounds.top;
+    meltSectionHeight = bounds.height;
+    referenceMotionState.meltDocumentTop = meltDocumentTop;
+    referenceMotionState.meltBoundsHeight = meltSectionHeight;
+  }
+  if (curveSection) {
+    const bounds = curveSection.getBoundingClientRect();
+    curveDocumentTop = pageY + bounds.top;
+    curveSectionHeight = bounds.height;
+    referenceMotionState.curveDocumentTop = curveDocumentTop;
+    referenceMotionState.curveBoundsHeight = curveSectionHeight;
+  }
+}
+
+function readCurveBounds() {
+  curveViewportBounds.top = curveDocumentTop - scrollY;
+  curveViewportBounds.height = curveSectionHeight;
+  curveViewportBounds.bottom = curveViewportBounds.top + curveViewportBounds.height;
+  return curveViewportBounds;
+}
+
+measureMotionSections();
+
+const motionSectionResizeObserver =
+  'ResizeObserver' in window ? new ResizeObserver(measureMotionSections) : null;
+if (meltSection) motionSectionResizeObserver?.observe(meltSection);
+if (curveSection) motionSectionResizeObserver?.observe(curveSection);
+document.fonts.ready.then(measureMotionSections);
+
+const motionSectionObserver =
+  'IntersectionObserver' in window
+    ? new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.target === meltSection) meltNearViewport = entry.isIntersecting;
+            if (entry.target === curveSection) curveNearViewport = entry.isIntersecting;
+          });
+        },
+        { rootMargin: '100% 0px' },
+      )
+    : null;
+if (meltSection) motionSectionObserver?.observe(meltSection);
+if (curveSection) motionSectionObserver?.observe(curveSection);
 
 function usesStageRail() {
   return !reduceMotion;
@@ -42,7 +118,8 @@ function usesStageRail() {
 
 function syncCurveStage() {
   const enhanced = usesStageRail();
-  curveSection?.toggleAttribute('data-enhanced', enhanced);
+  if (curveSection) curveSection.dataset.enhanced = String(enhanced);
+  curveSection?.style.setProperty('--curve-items', String(curveCards.length));
   if (!enhanced) {
     curveCards.forEach((card) => {
       card.style.removeProperty('opacity');
@@ -51,54 +128,54 @@ function syncCurveStage() {
       card.style.removeProperty('--curve-x');
       card.style.removeProperty('--curve-y');
       card.style.removeProperty('--curve-rotate');
+      card.style.removeProperty('--curve-rotate-y');
+      card.style.removeProperty('--curve-z');
       card.style.removeProperty('--curve-scale');
     });
   }
 }
 
 function syncMotionTier() {
-  const mobileMotion = mobileMotionQuery.matches;
-  document.documentElement.dataset.motionTier = mobileMotion ? 'mobile' : 'full';
-  meltSection?.toggleAttribute('data-mobile-motion', mobileMotion);
-  curveSection?.toggleAttribute('data-mobile-motion', mobileMotion);
   syncCurveStage();
 }
 
-function updateHero() {
-  if (!hero || reduceMotion) return;
-  const rect = hero.getBoundingClientRect();
-  if (rect.bottom < 0 || rect.top > innerHeight) return;
-  const progress = clamp(-rect.top / Math.max(1, rect.height - innerHeight * 0.55));
-  hero.style.setProperty('--hero-progress', progress.toFixed(4));
-}
-
 function updateMelt() {
-  if (!meltSection || reduceMotion) return;
-  const rect = meltSection.getBoundingClientRect();
-  if (rect.bottom < -innerHeight * 0.25 || rect.top > innerHeight * 1.25) return;
-  const travel = Math.max(1, rect.height - innerHeight);
-  const progress = clamp(-rect.top / travel);
+  if (!meltSection || !meltNearViewport || reduceMotion) return;
+  const top = meltDocumentTop - scrollY;
+  const bottom = top + meltSectionHeight;
+  if (bottom < -innerHeight * 0.25 || top > innerHeight * 1.25) return;
+  const travel = Math.max(1, meltSectionHeight - innerHeight);
+  const progress = clamp(-top / travel);
   targetMelt = Math.sin(progress * Math.PI);
 }
 
 function renderMelt(band: number) {
   if (!meltSection) return;
   const mobileMotion = mobileMotionQuery.matches;
-  meltSection.style.setProperty('--melt', band.toFixed(4));
-  meltDisplacement?.setAttribute('scale', String(Math.round(band * (mobileMotion ? 20 : 32))));
-  meltTurbulence?.setAttribute(
-    'baseFrequency',
-    `${(0.006 + band * (mobileMotion ? 0.001 : 0.0015)).toFixed(4)} ${(
-      0.014 +
-      band * (mobileMotion ? 0.008 : 0.012)
-    ).toFixed(4)}`,
-  );
+  const meltValue = band.toFixed(4);
+  const displacementScale = String(Math.round(band * (mobileMotion ? 20 : 32)));
+  const turbulenceFrequency = `${(0.006 + band * (mobileMotion ? 0.001 : 0.0015)).toFixed(
+    4,
+  )} ${(0.014 + band * (mobileMotion ? 0.008 : 0.012)).toFixed(4)}`;
+  if (meltValue !== lastMeltValue) {
+    meltSection.style.setProperty('--melt', meltValue);
+    lastMeltValue = meltValue;
+  }
+  if (meltDisplacement && displacementScale !== lastMeltScale) {
+    meltDisplacement.setAttribute('scale', displacementScale);
+    lastMeltScale = displacementScale;
+  }
+  if (meltTurbulence && turbulenceFrequency !== lastMeltFrequency) {
+    meltTurbulence.setAttribute('baseFrequency', turbulenceFrequency);
+    lastMeltFrequency = turbulenceFrequency;
+  }
 }
 
 function setActiveProject(index: number) {
   if (!curveCards.length) return;
   const nextProject = Math.round(clamp(index, 0, curveCards.length - 1));
   if (nextProject === activeProject) return;
+  const previousProject = activeProject;
   activeProject = nextProject;
   const card = curveCards[activeProject];
   if (!card) return;
@@ -113,83 +190,134 @@ function setActiveProject(index: number) {
     }
   });
 
-  if (curveTitle) curveTitle.textContent = card.dataset.projectTitle ?? '';
-  if (curveDescription) curveDescription.textContent = card.dataset.projectDescription ?? '';
-  if (curveLink && card.dataset.projectRoute) curveLink.href = card.dataset.projectRoute;
-  if (curveCount) {
-    curveCount.textContent = `${String(activeProject + 1).padStart(2, '0')} / ${String(
-      curveCards.length,
-    ).padStart(2, '0')}`;
+  const updateMetadata = () => {
+    if (curveTitle) curveTitle.textContent = card.dataset.projectTitle ?? '';
+    if (curveDescription) curveDescription.textContent = card.dataset.projectDescription ?? '';
+    if (curveLink && card.dataset.projectRoute) curveLink.href = card.dataset.projectRoute;
+    if (curveCount) {
+      curveCount.textContent = `${String(activeProject + 1).padStart(2, '0')} / ${String(
+        curveCards.length,
+      ).padStart(2, '0')}`;
+    }
+  };
+  clearTimeout(projectSwapTimer);
+  if (previousProject < 0 || reduceMotion || !curveDetail) {
+    updateMetadata();
+  } else {
+    curveDetail.dataset.swapping = 'true';
+    projectSwapTimer = window.setTimeout(() => {
+      updateMetadata();
+      curveDetail.removeAttribute('data-swapping');
+    }, 120);
   }
   if (previousButton) previousButton.disabled = activeProject === 0;
   if (nextButton) nextButton.disabled = activeProject === curveCards.length - 1;
 }
 
-function renderCurve(progress: number) {
+function renderCurve(progress: number, measuredBounds?: SectionBounds) {
   if (!curveSection || !usesStageRail() || !curveCards.length) return;
+  const bounds = measuredBounds ?? readCurveBounds();
+  const entrance = clamp((innerHeight - bounds.top) / Math.max(1, innerHeight));
+  const exit = clamp(bounds.bottom / Math.max(1, innerHeight));
+  const sectionPresence = clamp(Math.min(entrance, exit));
+  const curvePresence = sectionPresence.toFixed(4);
+  if (curvePresence !== lastCurvePresence) {
+    curveSection.style.setProperty('--curve-presence', curvePresence);
+    lastCurvePresence = curvePresence;
+  }
+  referenceMotionState.curveVelocity = Math.round(renderedCurveVelocity * 100_000) / 100_000;
+
+  if (curveSection.dataset.webglGallery === 'true') return;
+
   const compactStage = mobileMotionQuery.matches;
-  const spread = Math.min(compactStage ? 300 : 520, innerWidth * (compactStage ? 0.72 : 0.34));
-  const rise = Math.min(compactStage ? 52 : 86, innerHeight * (compactStage ? 0.065 : 0.095));
+  const horizontalRadius = Math.min(
+    compactStage ? 440 : 1080,
+    innerWidth * (compactStage ? 0.74 : 0.57),
+  );
+  const verticalStep = Math.min(
+    compactStage ? 48 : 92,
+    innerHeight * (compactStage ? 0.055 : 0.085),
+  );
+  const depthRadius = Math.min(compactStage ? 120 : 270, innerWidth * (compactStage ? 0.2 : 0.145));
 
   curveCards.forEach((card, index) => {
     const offset = index - progress;
     const distance = Math.abs(offset);
-    const x = offset * spread;
-    const y = Math.min(compactStage ? 90 : 150, offset * offset * rise);
-    const rotation = clamp(offset * 5.5, -12, 12);
-    const scale = Math.max(compactStage ? 0.76 : 0.72, 1 - distance * 0.12);
-    const opacity = clamp(1 - Math.max(0, distance - 1.7) * 0.55, 0.18, 1);
+    const x = Math.sin(offset) * horizontalRadius;
+    const y = offset * verticalStep;
+    const z = (Math.cos(offset) - 1) * depthRadius;
+    const rotationY = clamp(offset * (180 / Math.PI) * 0.6, -86, 86);
+    const scale =
+      (compactStage ? 0.94 : 0.9) + (compactStage ? 0.12 : 0.2) * (1 - Math.min(1, distance));
+    const opacity = (1 - smoothstep(0.8, 2.5, distance)) * clamp(Math.min(entrance, exit));
 
     card.style.setProperty('--curve-x', `${x.toFixed(2)}px`);
     card.style.setProperty('--curve-y', `${y.toFixed(2)}px`);
-    card.style.setProperty('--curve-rotate', `${rotation.toFixed(2)}deg`);
+    card.style.setProperty('--curve-rotate', '0deg');
+    card.style.setProperty('--curve-rotate-y', `${rotationY.toFixed(3)}deg`);
+    card.style.setProperty('--curve-z', `${z.toFixed(2)}px`);
     card.style.setProperty('--curve-scale', scale.toFixed(3));
     card.style.opacity = opacity.toFixed(3);
     card.style.zIndex = String(100 - Math.round(distance * 10));
-    card.style.pointerEvents = distance <= 1.25 ? 'auto' : 'none';
+    card.style.pointerEvents = distance <= 0.58 && sectionPresence > 0.7 ? 'auto' : 'none';
   });
 }
 
+function updateCurveTarget(measuredBounds?: SectionBounds) {
+  if (!curveSection || !usesStageRail() || !curveCards.length) return;
+  const bounds = measuredBounds ?? readCurveBounds();
+  const travel = Math.max(1, bounds.height - innerHeight);
+  targetCurveProgress = clamp(-bounds.top / travel) * Math.max(0, curveCards.length - 1);
+}
+
 function updateAll(timestamp = performance.now()) {
-  animationFrame = 0;
   const deltaSeconds = Math.min(0.05, Math.max(1 / 240, (timestamp - lastMotionFrame) / 1_000));
   lastMotionFrame = timestamp;
-  updateHero();
   updateMelt();
+  const curveBounds =
+    curveSection && curveNearViewport && usesStageRail() && curveCards.length
+      ? readCurveBounds()
+      : undefined;
+  if (curveNearViewport) updateCurveTarget(curveBounds);
 
-  const meltBlend = 1 - Math.exp(-12 * deltaSeconds);
-  renderedMelt += (targetMelt - renderedMelt) * meltBlend;
-  if (Math.abs(targetMelt - renderedMelt) < 0.0005) renderedMelt = targetMelt;
-  renderMelt(renderedMelt);
+  if (meltNearViewport) {
+    const meltBlend = 1 - Math.exp(-12 * deltaSeconds);
+    renderedMelt += (targetMelt - renderedMelt) * meltBlend;
+    if (Math.abs(targetMelt - renderedMelt) < 0.0005) renderedMelt = targetMelt;
+    renderMelt(renderedMelt);
+  }
 
-  if (curveSection && usesStageRail() && curveCards.length) {
-    const curveBlend = 1 - Math.exp(-10.5 * deltaSeconds);
+  if (curveSection && curveNearViewport && usesStageRail() && curveCards.length) {
+    const previousProgress = renderedCurveProgress;
+    // Match the reference lerper: deliberate travel without project-to-project snapping.
+    const curveBlendRate = mobileMotionQuery.matches ? 4.2 : 5.4;
+    const curveBlend = 1 - Math.exp(-curveBlendRate * deltaSeconds);
     renderedCurveProgress += (targetCurveProgress - renderedCurveProgress) * curveBlend;
     if (Math.abs(targetCurveProgress - renderedCurveProgress) < 0.0005) {
       renderedCurveProgress = targetCurveProgress;
     }
-    renderCurve(renderedCurveProgress);
+    const instantaneousVelocity =
+      (renderedCurveProgress - previousProgress) / Math.max(deltaSeconds, 1 / 240);
+    renderedCurveVelocity +=
+      (instantaneousVelocity - renderedCurveVelocity) * (1 - Math.exp(-8 * deltaSeconds));
+    renderCurve(renderedCurveProgress, curveBounds);
+    setActiveProject(Math.round(renderedCurveProgress));
   }
-
-  if (
-    Math.abs(targetMelt - renderedMelt) > 0.0005 ||
-    Math.abs(targetCurveProgress - renderedCurveProgress) > 0.0005
-  ) {
-    animationFrame = requestAnimationFrame(updateAll);
-  }
-}
-
-function requestUpdate() {
-  if (!animationFrame) animationFrame = requestAnimationFrame(updateAll);
 }
 
 function selectProject(index: number) {
   if (!curveSection || curveCards.length < 2) return;
   const target = Math.round(clamp(index, 0, curveCards.length - 1));
   if (usesStageRail()) {
-    targetCurveProgress = target;
-    setActiveProject(target);
-    requestUpdate();
+    const sectionTop = curveDocumentTop;
+    const travel = Math.max(1, curveSectionHeight - innerHeight);
+    const denominator = Math.max(1, curveCards.length - 1);
+    const scrollTarget = sectionTop + (target / denominator) * travel;
+    if (smoothScroller) {
+      smoothScroller.scrollTo(scrollTarget, { duration: 1.55 });
+    } else {
+      scrollTo({ top: scrollTarget, behavior: reduceMotion ? 'auto' : 'smooth' });
+    }
     return;
   }
   curveCards[target]?.scrollIntoView({
@@ -201,34 +329,17 @@ function selectProject(index: number) {
 }
 
 function advanceProject(direction: -1 | 1) {
-  const current = usesStageRail() ? Math.round(targetCurveProgress) : Math.max(0, activeProject);
+  const current = Math.max(0, activeProject);
   const target = boundedProjectIndex(current, direction, curveCards.length);
   if (target === current) return false;
   selectProject(target);
   return true;
 }
 
-if (hero && !reduceMotion) {
-  hero.addEventListener(
-    'pointermove',
-    (event) => {
-      const rect = hero.getBoundingClientRect();
-      const x = clamp((event.clientX - rect.left) / rect.width, 0, 1) * 2 - 1;
-      const y = clamp((event.clientY - rect.top) / rect.height, 0, 1) * 2 - 1;
-      hero.style.setProperty('--pointer-x', x.toFixed(3));
-      hero.style.setProperty('--pointer-y', y.toFixed(3));
-    },
-    { passive: true },
-  );
-  hero.addEventListener('pointerleave', () => {
-    hero.style.setProperty('--pointer-x', '0');
-    hero.style.setProperty('--pointer-y', '0');
-  });
-}
-
 if (curveSection && curveCards.length) {
   syncCurveStage();
   setActiveProject(0);
+  renderCurve(renderedCurveProgress);
   if (!usesStageRail()) {
     const cardObserver = new IntersectionObserver(
       (entries) => {
@@ -254,89 +365,65 @@ if (curveSection && curveCards.length) {
       advanceProject(1);
     }
   });
-  curveSection.addEventListener(
-    'wheel',
-    (event) => {
-      if (!usesStageRail()) return;
-      const delta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
-      if (Math.abs(delta) < 2) return;
-      const direction = delta > 0 ? 1 : -1;
-      const current = Math.round(targetCurveProgress);
-      const target = boundedProjectIndex(current, direction, curveCards.length);
-      if (target === current) return;
-
-      event.preventDefault();
-      clearTimeout(wheelGestureTimer);
-      wheelGestureTimer = window.setTimeout(() => {
-        wheelGestureLocked = false;
-      }, 220);
-      if (wheelGestureLocked) return;
-
-      wheelGestureLocked = true;
-      advanceProject(direction);
-    },
-    { passive: false },
-  );
-  curveSection.addEventListener(
-    'touchstart',
-    (event) => {
-      const touch = event.touches[0];
-      if (!touch) return;
-      touchStartX = touch.clientX;
-      touchStartY = touch.clientY;
-      touchStepCommitted = false;
-    },
-    { passive: true },
-  );
-  curveSection.addEventListener(
-    'touchmove',
-    (event) => {
-      if (!usesStageRail()) return;
-      const touch = event.touches[0];
-      if (!touch) return;
-      const deltaX = touch.clientX - touchStartX;
-      const deltaY = touch.clientY - touchStartY;
-      if (Math.abs(deltaY) <= Math.abs(deltaX) || Math.abs(deltaY) < 4) return;
-      if (touchStepCommitted) {
-        event.preventDefault();
-        return;
-      }
-
-      const direction = deltaY < 0 ? 1 : -1;
-      const current = Math.round(targetCurveProgress);
-      if (boundedProjectIndex(current, direction, curveCards.length) === current) return;
-
-      event.preventDefault();
-      if (Math.abs(deltaY) >= 44) {
-        touchStepCommitted = true;
-        advanceProject(direction);
-      }
-    },
-    { passive: false },
-  );
-  const finishTouch = () => {
-    touchStepCommitted = false;
-  };
-  curveSection.addEventListener('touchend', finishTouch, { passive: true });
-  curveSection.addEventListener('touchcancel', finishTouch, { passive: true });
 }
 
-addEventListener('scroll', requestUpdate, { passive: true });
 addEventListener(
   'resize',
   () => {
+    measureMotionSections();
     syncMotionTier();
-    requestUpdate();
+    renderCurve(renderedCurveProgress);
   },
   { passive: true },
 );
 syncMotionTier();
-updateAll();
 
-document.querySelectorAll<HTMLDetailsElement>('.mobile-navigation').forEach((navigation) => {
-  navigation.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => {
-      navigation.open = false;
+let motionLoopRunning = true;
+let smoothScrollAnimationFrame = 0;
+const smoothScrollFrame = (time: number) => {
+  smoothScrollAnimationFrame = 0;
+  if (!motionLoopRunning) return;
+  smoothScroller?.raf(time);
+  if (meltNearViewport || curveNearViewport) {
+    updateAll(time);
+  } else {
+    lastMotionFrame = time;
+  }
+  smoothScrollAnimationFrame = requestAnimationFrame(smoothScrollFrame);
+};
+const startMotionLoop = () => {
+  if (!motionLoopRunning || smoothScrollAnimationFrame) return;
+  smoothScrollAnimationFrame = requestAnimationFrame(smoothScrollFrame);
+};
+startMotionLoop();
+
+addEventListener('pagehide', (event) => {
+  motionLoopRunning = false;
+  cancelAnimationFrame(smoothScrollAnimationFrame);
+  smoothScrollAnimationFrame = 0;
+  smoothScroller?.stop();
+  if (event.persisted) return;
+  clearTimeout(projectSwapTimer);
+  motionSectionObserver?.disconnect();
+  motionSectionResizeObserver?.disconnect();
+  smoothScroller?.destroy();
+});
+
+addEventListener('pageshow', (event) => {
+  if (!event.persisted) return;
+  measureMotionSections();
+  lastMotionFrame = performance.now();
+  motionLoopRunning = true;
+  smoothScroller?.start();
+  startMotionLoop();
+});
+
+document
+  .querySelectorAll<HTMLDetailsElement>('.mobile-navigation, .reference-mobile-menu')
+  .forEach((navigation) => {
+    navigation.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        navigation.open = false;
+      });
     });
   });
-});

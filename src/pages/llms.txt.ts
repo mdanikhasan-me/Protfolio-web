@@ -3,7 +3,7 @@ import { SITE } from '../config/site';
 
 const content = `# ${SITE.name}
 
-> MD Anik Hasan is a website and software developer in Dhaka, Bangladesh, and the solo founder of pre-launch ecommerce startup Boilabin.
+> MD Anik Hasan is a full-stack web and software developer in Dhaka, Bangladesh, and the founder of Boilabin, a Bangladesh-focused ecommerce marketplace he currently runs.
 
 ## Primary services
 
@@ -13,14 +13,14 @@ const content = `# ${SITE.name}
 
 ## Verified work
 
-- [Boilabin](${SITE.origin}/work/boilabin/): pre-launch ecommerce startup under active development.
-- [SoctuKit](${SITE.origin}/work/soctukit/): built native Windows product.
-- [UIU Discord Bot](${SITE.origin}/work/uiu-discord-bot/): built Python and Discord automation.
-- [Salty Potato AI](${SITE.origin}/lab/salty-potato-ai/): experimental language-model build log.
+- [Boilabin](${SITE.origin}/work/boilabin/): ecommerce marketplace founded, built, and currently run by MD Anik Hasan.
+- [SoctuKit](${SITE.origin}/work/soctukit/): native Windows social-media automation product.
+- [UIU Discord Bot](${SITE.origin}/work/uiu-discord-bot/): Python and Discord automation for UIU notices and university information.
+- [Salty Potato AI](${SITE.origin}/lab/salty-potato-ai/): in-development language-model system and desktop software.
 
 ## Boundaries
 
-Boilabin has no claimed public launch date, revenue, customers, sellers, funding, team, or partnerships. Salty Potato AI is experimental, not production-ready or a benchmark claim.
+Boilabin's private code, customer data, suppliers, and operational details are not published. Salty Potato AI is in development, not production-ready or a benchmark claim.
 `;
 
 export const GET: APIRoute = () =>

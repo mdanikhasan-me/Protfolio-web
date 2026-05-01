@@ -1,6 +1,7 @@
 ---
 import PageHero from '../components/PageHero.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../config/site';
 
 const requestedService = Astro.url.searchParams.get('service');
 const serviceLabel =
@@ -17,15 +18,15 @@ const serviceLabel =
 >
   <PageHero
     eyebrow="Project intake"
-    title="Tell me what needs to work when the build is finished."
-    intro={`Current enquiry path: ${serviceLabel}. A useful first brief can be short, but it should explain the goal, scope, timeline, and how to reach you.`}
+    title="Tell me what you’re building."
+    intro={`You’re asking about ${serviceLabel.toLowerCase()}. A useful first message can be short: explain the goal, what exists now, the rough scope, and any real deadline.`}
     workshop="Project Intake"
   />
 
   <section class="intake-guide" aria-labelledby="intake-title">
     <div>
-      <p class="eyebrow">Before you write</p>
-      <h2 id="intake-title">Five useful parts of a first brief</h2>
+      <p class="eyebrow">A useful first message</p>
+      <h2 id="intake-title">Five things that help me understand the project</h2>
     </div>
     <ol>
       <li>
@@ -42,33 +43,35 @@ const serviceLabel =
       </li>
       <li>
         <h3>The timeline</h3>
-        <p>Share a target or constraint. Do not invent urgency if the date is flexible.</p>
+        <p>
+          Share a real target or constraint. If the date is flexible, that is useful to know too.
+        </p>
       </li>
       <li>
         <h3>A contact route</h3>
-        <p>Include a professional way to reply. A budget range is optional, never required.</p>
+        <p>
+          Include the best way to reply. A budget range is helpful when you have one, but optional.
+        </p>
       </li>
     </ol>
   </section>
 
   <section class="plain-section">
     <p class="eyebrow">Service boundary</p>
-    <h2>Website and custom software work only.</h2>
+    <h2>I focus on websites and custom software.</h2>
     <p>
-      I do not offer mobile app development, game development services, AI consulting, investment,
-      business consulting, or marketing packages. If the project is outside the two service paths, I
-      will not disguise it as a fit.
+      My work is full-stack web development, desktop software, automation, and focused internal
+      tools. If the project sits outside those areas, I’ll say so instead of pretending it is a fit.
     </p>
   </section>
 
   <section class="plain-section">
     <p class="eyebrow">Contact handoff</p>
-    <h2>Use the verified route that is available now.</h2>
+    <h2>Send it directly.</h2>
     <p>
-      A direct email address is still being verified, so the site does not publish or submit
-      personal details to an unconfirmed destination. The
-      <a href="/contact/">contact page</a> provides a safe project-brief fallback and the verified public
-      GitHub route.
+      Email <a href={`mailto:${SITE.email}`}>{SITE.email}</a> with the goal, current situation, rough
+      scope, and timeline. You can also use the <a href={SITE.discord}>Discord profile</a> for a direct
+      conversation.
     </p>
   </section>
 </BaseLayout>

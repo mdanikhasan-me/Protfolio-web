@@ -13,6 +13,7 @@ interface Props {
   type?: 'website' | 'article';
   schema?: SchemaNode | SchemaNode[];
   bodyClass?: string;
+  hideHeader?: boolean;
 }
 
 const {
@@ -23,6 +24,7 @@ const {
   type = 'website',
   schema = [],
   bodyClass = '',
+  hideHeader = false,
 } = Astro.props;
 
 const canonical = new URL(canonicalPath, Astro.site);
@@ -83,7 +85,7 @@ const section = routeParts[0] ?? 'home';
   >
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="site-frame">
-      <SiteHeader />
+      {!hideHeader && <SiteHeader />}
       <main id="main-content" tabindex="-1" data-pagefind-body={!noindex ? true : undefined}>
         <slot />
       </main>

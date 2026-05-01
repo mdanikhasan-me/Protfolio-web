@@ -28,7 +28,7 @@ const projects = defineCollection({
   schema: z.object({
     ...common,
     route: z.string().startsWith('/'),
-    status: z.enum(['Built', 'Pre-launch', 'In development']),
+    status: z.enum(['Built', 'Active', 'Live', 'Currently running', 'In development']),
     role: z.string(),
     kind: z.enum(['Founder project', 'Native software', 'Automation', 'Technical experiment']),
     technologies: z.array(z.string()),

@@ -1,0 +1,989 @@
+.home-v5 {
+  --reference-ink: #020109;
+  --reference-paper: #f2f1ed;
+  --reference-line: rgb(238 244 255 / 18%);
+  --reference-copy: rgb(244 247 255 / 68%);
+  --reference-accent: #9afb00;
+  background: var(--reference-ink);
+  color: var(--reference-paper);
+}
+
+.home-v5 .site-header {
+  display: none;
+}
+
+.home-v5 main {
+  overflow: clip;
+}
+
+.reference-global-nav {
+  align-items: center;
+  color: #fff;
+  display: grid;
+  font-family: var(--mono);
+  font-size: clamp(0.59rem, 0.58vw, 0.75rem);
+  grid-template-columns: 1fr auto 1fr;
+  letter-spacing: 0.025em;
+  left: clamp(1.35rem, 2.25vw, 2.7rem);
+  mix-blend-mode: difference;
+  pointer-events: none;
+  position: fixed;
+  right: clamp(1.35rem, 4.8vw, 5.8rem);
+  top: clamp(1.65rem, 4vh, 3rem);
+  transition: color 260ms ease;
+  z-index: 1000;
+}
+
+.reference-global-nav a,
+.reference-global-nav summary {
+  pointer-events: auto;
+}
+
+.reference-mark {
+  align-items: center;
+  color: inherit;
+  display: inline-flex;
+  justify-self: start;
+  text-decoration: none;
+}
+
+.reference-mark strong {
+  align-items: center;
+  display: inline-flex;
+  line-height: 1;
+}
+
+.reference-mark svg {
+  fill: currentColor;
+  flex: 0 0 auto;
+  height: auto;
+  width: clamp(4rem, 4.2vw, 4.6rem);
+}
+
+.reference-nav {
+  align-items: center;
+  display: flex;
+  gap: clamp(1.75rem, 3.4vw, 3.6rem);
+  justify-content: center;
+}
+
+.reference-nav a,
+.reference-contact-pill {
+  color: inherit;
+  position: relative;
+  text-decoration: none;
+}
+
+.reference-nav a::after {
+  background: currentColor;
+  bottom: -0.45rem;
+  content: '';
+  height: 1px;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%) scaleX(0);
+  transition: transform 220ms ease;
+  width: 100%;
+}
+
+.reference-nav a:hover::after,
+.reference-nav a:focus-visible::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+.reference-contact-pill {
+  border: 1px solid rgb(255 255 255 / 42%);
+  border-radius: 999px;
+  justify-self: end;
+  padding: 0.72rem 1.25rem;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.reference-contact-pill:hover,
+.reference-contact-pill:focus-visible {
+  background: #fff;
+  border-color: #fff;
+  color: #05050a;
+}
+
+html[data-reference-surface='light'] .reference-global-nav {
+  color: var(--v5-red);
+  mix-blend-mode: normal;
+}
+
+html[data-reference-surface='light'] .reference-contact-pill {
+  border-color: color-mix(in srgb, var(--v5-red) 58%, transparent);
+}
+
+html[data-reference-surface='light'] .reference-contact-pill:hover,
+html[data-reference-surface='light'] .reference-contact-pill:focus-visible {
+  background: var(--v5-red);
+  border-color: var(--v5-red);
+  color: #fff;
+}
+
+.reference-mobile-menu {
+  display: none;
+}
+
+.reference-world {
+  background: var(--reference-ink);
+  color: #fff;
+  isolation: isolate;
+  min-height: 100svh;
+  position: relative;
+}
+
+.reference-world-scene {
+  height: 100svh;
+  inset: 0 0 auto;
+  overflow: hidden;
+  pointer-events: none;
+  position: sticky;
+  top: 0;
+  z-index: 0;
+}
+
+.reference-model {
+  height: 100%;
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+  transition: opacity 900ms cubic-bezier(0.22, 0.72, 0.18, 1);
+  width: 100%;
+  z-index: 1;
+}
+
+.reference-world[data-model-ready='true'] .reference-model {
+  opacity: 1;
+}
+
+.reference-boot {
+  align-items: center;
+  background: #020109;
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
+  inset: 0;
+  justify-items: center;
+  opacity: 1;
+  pointer-events: auto;
+  position: fixed;
+  transition:
+    opacity 780ms cubic-bezier(0.22, 0.75, 0.2, 1),
+    visibility 780ms step-end;
+  visibility: visible;
+  z-index: 120;
+}
+
+.reference-boot[data-ready='true'] {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.reference-boot::before {
+  background:
+    linear-gradient(rgb(255 255 255 / 7%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 7%) 1px, transparent 1px);
+  background-size: 7.5vw 7.5vw;
+  content: '';
+  inset: 0;
+  mask-image: radial-gradient(circle, #000 0 34%, transparent 74%);
+  opacity: 0.65;
+  position: absolute;
+}
+
+.reference-boot-status {
+  align-self: end;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.2rem;
+  text-transform: uppercase;
+}
+
+.reference-boot-progress {
+  border: 1px solid rgb(255 255 255 / 34%);
+  height: 2px;
+  overflow: hidden;
+  position: relative;
+  width: min(28rem, 52vw);
+}
+
+.reference-boot-progress::after {
+  animation: reference-load 2.8s cubic-bezier(0.12, 0.72, 0.15, 1) both;
+  background: #fff;
+  content: '';
+  inset: 0;
+  position: absolute;
+  transform: translateX(-100%);
+}
+
+.reference-boot-mark {
+  fill: none;
+  filter: drop-shadow(0 0 18px rgb(210 255 225 / 6%));
+  height: auto;
+  left: 50%;
+  max-height: 76vh;
+  overflow: visible;
+  position: absolute;
+  stroke: rgb(244 242 237 / 31%);
+  stroke-width: 0.82;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  vector-effect: non-scaling-stroke;
+  width: min(54rem, 58vw);
+}
+
+.reference-boot-mark path {
+  animation: reference-boot-draw 2.8s cubic-bezier(0.2, 0.72, 0.18, 1) 180ms forwards;
+  stroke-dasharray: 1450;
+  stroke-dashoffset: 1450;
+}
+
+.reference-boot-mark path:nth-child(2) {
+  animation-delay: 410ms;
+  stroke: rgb(244 242 237 / 20%);
+}
+
+.reference-boot-mark path:nth-child(3) {
+  animation-delay: 670ms;
+  stroke: rgb(244 242 237 / 12%);
+}
+
+.reference-boot-mark path:last-child {
+  animation-delay: 880ms;
+  animation-duration: 2.35s;
+  stroke: rgb(244 242 237 / 20%);
+  stroke-dasharray: 1260;
+  stroke-dashoffset: 1260;
+}
+
+.reference-boot p {
+  align-self: start;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  margin-top: 1.25rem;
+  text-transform: uppercase;
+}
+
+@keyframes reference-load {
+  0% {
+    transform: translateX(-100%);
+  }
+  78% {
+    transform: translateX(-14%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes reference-boot-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.reference-opening {
+  color: #fff;
+  height: 110svh;
+  margin-top: -100svh;
+  position: relative;
+  z-index: 4;
+}
+
+.reference-opening-stage {
+  height: 100svh;
+  inset: 0 0 auto;
+  position: sticky;
+  top: 0;
+}
+
+.reference-opening-ui {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  inset: 0;
+  letter-spacing: 0.025em;
+  pointer-events: none;
+  position: absolute;
+  z-index: 6;
+}
+
+.reference-opening-ui a,
+.reference-opening-ui button {
+  pointer-events: auto;
+}
+
+.reference-telemetry-right {
+  color: rgb(255 255 255 / 48%);
+  position: absolute;
+  right: var(--gutter);
+  top: clamp(7rem, 13vh, 10rem);
+  width: clamp(9.8rem, 12vw, 13rem);
+}
+
+.reference-telemetry-right > p {
+  border-left: 2px solid var(--reference-accent);
+  color: #fff;
+  letter-spacing: 0.07em;
+  margin: 0 0 0.8rem;
+  padding-left: 0.55rem;
+  text-transform: uppercase;
+}
+
+.reference-telemetry dl {
+  margin: 0;
+}
+
+.reference-telemetry dl > div {
+  border-top: 1px solid rgb(255 255 255 / 14%);
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 3.2rem 1fr;
+  padding-block: 0.42rem;
+}
+
+.reference-telemetry dt,
+.reference-telemetry dd {
+  margin: 0;
+}
+
+.reference-telemetry dd {
+  color: rgb(255 255 255 / 82%);
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reference-axis-gizmo {
+  background: transparent;
+  border: 0;
+  color: #fff;
+  cursor: grab;
+  display: block;
+  height: 4.1rem;
+  margin: 0.8rem 0 0.5rem auto;
+  padding: 0;
+  position: relative;
+  width: 4.1rem;
+}
+
+.reference-axis-gizmo:active {
+  cursor: grabbing;
+}
+
+.reference-axis-ring,
+.reference-axis-gizmo::before,
+.reference-axis-gizmo::after {
+  border: 1px solid rgb(255 255 255 / 48%);
+  border-radius: 50%;
+  content: '';
+  inset: 0.5rem;
+  position: absolute;
+}
+
+.reference-axis-gizmo::before {
+  transform: rotateX(66deg);
+}
+
+.reference-axis-gizmo::after {
+  transform: rotateY(66deg);
+}
+
+.reference-axis-ring {
+  transform: rotate(45deg) scaleY(0.55);
+}
+
+.reference-axis-gizmo i {
+  background: #fff;
+  border-radius: 50%;
+  height: 0.38rem;
+  left: calc(50% - 0.19rem);
+  position: absolute;
+  top: calc(50% - 0.19rem);
+  width: 0.38rem;
+}
+
+.reference-axis {
+  font-size: 0.45rem;
+  font-style: normal;
+  position: absolute;
+}
+
+.reference-axis-x {
+  color: #ff5048;
+  right: 0.15rem;
+  top: 50%;
+}
+
+.reference-axis-y {
+  color: #74ff7e;
+  left: 50%;
+  top: 0.05rem;
+}
+
+.reference-axis-z {
+  bottom: 0.08rem;
+  color: #5c8cff;
+  left: 0.28rem;
+}
+
+.reference-telemetry button:not(.reference-axis-gizmo) {
+  background: transparent;
+  border: 1px solid rgb(255 255 255 / 24%);
+  color: rgb(255 255 255 / 72%);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.04em;
+  padding: 0.48rem 0.65rem;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.reference-intro {
+  bottom: 5.2%;
+  left: 2.2%;
+  position: absolute;
+  width: clamp(12rem, 15vw, 18rem);
+}
+
+.reference-intro span {
+  color: rgb(255 255 255 / 48%);
+  display: block;
+  letter-spacing: 0.07em;
+  margin-bottom: 0.45rem;
+  text-transform: uppercase;
+}
+
+.reference-intro p {
+  font-family: var(--sans);
+  font-size: clamp(0.72rem, 0.72vw, 0.92rem);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.reference-feed {
+  bottom: 5.1%;
+  color: rgb(244 242 237 / 66%);
+  position: absolute;
+  right: 2.25%;
+  width: clamp(10rem, 14vw, 16rem);
+}
+
+.reference-feed span {
+  color: rgb(244 242 237 / 38%);
+  display: block;
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+}
+
+.reference-feed p {
+  border-top: 1px solid rgb(244 242 237 / 16%);
+  margin: 0;
+  padding: 0.4rem 0;
+}
+
+.reference-progress {
+  align-items: center;
+  bottom: 4.7%;
+  display: flex;
+  gap: 0.65rem;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.reference-progress i {
+  background: rgb(244 242 237 / 27%);
+  display: block;
+  height: 1px;
+  overflow: hidden;
+  width: clamp(4rem, 8vw, 9rem);
+}
+
+.reference-more-works {
+  bottom: 13.1%;
+  color: #fff;
+  position: absolute;
+  right: 4%;
+  text-decoration: none;
+}
+
+.reference-more-works::after {
+  background: currentColor;
+  content: '';
+  display: block;
+  height: 1px;
+  margin-top: 0.35rem;
+  transform-origin: left;
+  transition: transform 220ms ease;
+}
+
+.reference-more-works:hover::after {
+  transform: scaleX(0.3);
+}
+
+.reference-opening-copy {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.curve-work {
+  background: transparent;
+  color: #fff;
+  min-height: calc((var(--curve-items, 4) + 0.2) * 100lvh);
+  overflow: visible;
+  padding: 0;
+  position: relative;
+  z-index: 3;
+}
+
+.curve-work[data-enhanced='true'] {
+  height: calc((var(--curve-items, 4) + 0.2) * 100lvh);
+  min-height: calc((var(--curve-items, 4) + 0.2) * 100lvh);
+  padding: 0;
+}
+
+.curve-work-sticky,
+.curve-work[data-enhanced='true'] .curve-work-sticky {
+  height: 100svh;
+  inset: 0 0 auto;
+  min-height: 100svh;
+  overflow: hidden;
+  position: sticky;
+  top: 0;
+}
+
+.curve-work-header {
+  inset: clamp(7rem, 13vh, 10rem) var(--gutter) auto;
+  margin: 0;
+  position: absolute;
+  z-index: 8;
+}
+
+.curve-work-header p {
+  color: rgb(255 255 255 / 54%);
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.07em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.curve-work-header h2 {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.curve-track {
+  inset: 0;
+  list-style: none;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.curve-work[data-webgl-gallery='true'] .curve-card {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.curve-card {
+  aspect-ratio: 16 / 9;
+  background: #0b0a12;
+  border: 1px solid rgb(255 255 255 / 20%);
+  left: 50%;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  top: 49%;
+  transform: translate(-50%, -50%) perspective(70rem) rotateY(var(--curve-rotate-y, 0deg))
+    scale(var(--curve-scale, 1));
+  width: min(58rem, 54vw);
+}
+
+.curve-card[data-active='true'] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.curve-card a,
+.curve-card picture,
+.curve-card img {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.curve-card img {
+  object-fit: cover;
+}
+
+.curve-card-meta {
+  background: linear-gradient(180deg, transparent, rgb(0 0 0 / 84%));
+  bottom: 0;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: auto 1fr auto;
+  left: 0;
+  padding: 4rem 1rem 1rem;
+  position: absolute;
+  right: 0;
+}
+
+.curve-work-detail {
+  align-items: end;
+  bottom: clamp(2rem, 6.5vh, 5.5rem);
+  display: grid;
+  gap: clamp(1rem, 2vw, 2.5rem);
+  grid-template-columns: 4.2rem minmax(16rem, 31rem) auto;
+  left: 8vw;
+  margin: 0;
+  opacity: var(--curve-presence, 0);
+  position: absolute;
+  transition:
+    opacity 280ms ease,
+    transform 420ms cubic-bezier(0.22, 0.8, 0.2, 1);
+  width: min(62rem, 70vw);
+  z-index: 10;
+}
+
+.curve-work-detail[data-swapping='true'] {
+  opacity: 0;
+  transform: translateY(0.65rem);
+}
+
+.curve-work-detail > span,
+.curve-work-detail > a {
+  color: rgb(255 255 255 / 68%);
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.curve-work-detail h3 {
+  font-family: var(--display-alt);
+  font-size: clamp(1.55rem, 2vw, 2.15rem);
+  font-variation-settings:
+    'wdth' 78,
+    'wght' 650;
+  letter-spacing: -0.055em;
+  line-height: 0.92;
+  margin: 0 0 0.45rem;
+}
+
+.curve-work-detail p {
+  color: rgb(255 255 255 / 66%);
+  font-size: clamp(0.72rem, 0.88vw, 0.86rem);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.curve-work-detail > a {
+  border-bottom: 1px solid currentColor;
+  justify-self: end;
+  padding-bottom: 0.35rem;
+  text-decoration: none;
+}
+
+.curve-controls {
+  bottom: clamp(2rem, 6.5vh, 5.5rem);
+  display: flex;
+  gap: 0.35rem;
+  margin: 0;
+  position: absolute;
+  right: var(--gutter);
+  z-index: 12;
+}
+
+.curve-controls button {
+  align-items: center;
+  background: rgb(2 1 9 / 30%);
+  border: 1px solid rgb(255 255 255 / 34%);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: var(--mono);
+  height: 2.7rem;
+  justify-content: center;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+  width: 2.7rem;
+}
+
+.curve-controls button:hover {
+  background: #fff;
+  color: #020109;
+}
+
+.curve-controls button:disabled {
+  cursor: default;
+  opacity: 0.25;
+}
+
+.home-v5 .melt-chapter {
+  position: relative;
+  z-index: 8;
+}
+
+.home-v5 .melt-kicker {
+  display: grid;
+  gap: 0.65rem;
+  top: clamp(6.5rem, 12vh, 8.5rem);
+}
+
+.home-v5 .melt-kicker::before {
+  color: var(--v5-red);
+  content: '02';
+  font-family: var(--display-alt);
+  font-size: clamp(2.8rem, 4.8vw, 5.4rem);
+  font-variation-settings:
+    'wdth' 74,
+    'wght' 680;
+  letter-spacing: -0.075em;
+  line-height: 0.72;
+}
+
+@media (max-width: 820px), (hover: none) and (pointer: coarse) {
+  .reference-global-nav {
+    align-items: center;
+    grid-template-columns: 1fr auto;
+    padding: 0.9rem 1.1rem;
+    top: clamp(0.95rem, 2.2vh, 1.4rem);
+  }
+
+  .reference-nav,
+  .reference-contact-pill {
+    display: none;
+  }
+
+  .reference-mobile-menu {
+    align-self: center;
+    display: block;
+    justify-self: end;
+    pointer-events: auto;
+    position: relative;
+  }
+
+  .reference-mark {
+    align-self: center;
+  }
+
+  .reference-mobile-menu summary {
+    cursor: pointer;
+    height: 2.4rem;
+    list-style: none;
+    position: relative;
+    width: 2.4rem;
+    z-index: 2;
+  }
+
+  .reference-mobile-menu summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .reference-mobile-menu summary::before,
+  .reference-mobile-menu summary::after,
+  .reference-mobile-menu summary span {
+    background: currentColor;
+    content: '';
+    height: 1px;
+    left: 0.38rem;
+    position: absolute;
+    top: 50%;
+    transition: transform 180ms ease;
+    width: 1.65rem;
+  }
+
+  .reference-mobile-menu summary::before {
+    transform: translateY(-0.34rem);
+  }
+
+  .reference-mobile-menu summary::after {
+    transform: translateY(0.34rem);
+  }
+
+  .reference-mobile-menu[open] summary span {
+    transform: scaleX(0);
+  }
+
+  .reference-mobile-menu[open] summary::before {
+    transform: rotate(45deg);
+  }
+
+  .reference-mobile-menu[open] summary::after {
+    transform: rotate(-45deg);
+  }
+
+  .reference-mobile-menu > div {
+    background: #05040c;
+    color: #fff;
+    display: grid;
+    gap: 0;
+    min-height: 100svh;
+    padding: 6rem 1.25rem 2rem;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: min(88vw, 25rem);
+  }
+
+  .reference-mobile-menu > div a {
+    border-top: 1px solid rgb(255 255 255 / 18%);
+    color: inherit;
+    font-family: var(--display-alt);
+    font-size: clamp(1.5rem, 8vw, 2.8rem);
+    letter-spacing: -0.04em;
+    padding: 0.75rem 0;
+    text-decoration: none;
+  }
+
+  .reference-feed,
+  .reference-telemetry-right {
+    display: none;
+  }
+
+  .reference-intro {
+    bottom: 1.4rem;
+    left: 1.1rem;
+  }
+
+  .reference-more-works {
+    bottom: 1.4rem;
+    right: 1.1rem;
+  }
+
+  .curve-work-header {
+    left: 1.1rem;
+    right: 1.1rem;
+    top: 6rem;
+  }
+
+  .curve-work-detail {
+    bottom: 5rem;
+    gap: 0.8rem;
+    grid-template-columns: 2.8rem 1fr;
+    left: 1.1rem;
+    width: calc(100vw - 2.2rem);
+  }
+
+  .curve-work-detail > a {
+    display: none;
+  }
+
+  .curve-work-detail h3 {
+    font-size: clamp(1.6rem, 8vw, 2.8rem);
+  }
+
+  .curve-work-detail p {
+    display: none;
+  }
+
+  .curve-controls {
+    bottom: 1.2rem;
+    right: 1.1rem;
+  }
+
+  .curve-card {
+    width: 82vw;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .reference-more-works::after {
+    transition: none;
+  }
+
+  .reference-more-works:hover::after {
+    transform: none;
+  }
+
+  .curve-controls button {
+    transition: none;
+  }
+
+  .curve-controls button:hover {
+    background: rgb(2 1 9 / 30%);
+    color: #fff;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reference-model,
+  .reference-boot,
+  .curve-work-detail {
+    transition: none;
+  }
+
+  .reference-boot-progress::after {
+    animation-duration: 1ms;
+  }
+
+  .curve-work,
+  .curve-work[data-enhanced='true'] {
+    height: auto;
+    min-height: auto;
+    padding: 7rem 1rem 4rem;
+  }
+
+  .curve-work-sticky,
+  .curve-work[data-enhanced='true'] .curve-work-sticky {
+    height: auto;
+    min-height: auto;
+    overflow: visible;
+    position: relative;
+  }
+
+  .curve-track {
+    display: grid;
+    gap: 1rem;
+    position: relative;
+  }
+
+  .curve-work[data-webgl-gallery='true'] .curve-card,
+  .curve-card {
+    clip: auto;
+    clip-path: none;
+    height: auto;
+    left: auto;
+    opacity: 1;
+    pointer-events: auto;
+    position: relative;
+    top: auto;
+    transform: none;
+    white-space: normal;
+    width: 100%;
+  }
+
+  .curve-work-detail,
+  .curve-controls {
+    display: none;
+  }
+}

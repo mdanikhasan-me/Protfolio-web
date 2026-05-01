@@ -1,7 +1,10 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import WorkHolds from '../components/WorkHolds.astro';
+import { SITE } from '../config/site';
 import { websiteSchema } from '../lib/schema';
+import '../styles/reference-locked.css';
 
 const services = (await getCollection('services', ({ data }) => !data.draft))
   .filter((entry) => ['website-development', 'custom-software-development'].includes(entry.id))
@@ -23,194 +26,222 @@ const mediaBase: Record<string, string> = {
 };
 ---
 
-<BaseLayout bodyClass="home-page home-v5" schema={websiteSchema()}>
-  <section class="v5-hero" aria-labelledby="home-title" data-v5-hero>
-    <div class="v5-hero-grid" aria-hidden="true"></div>
-    <div class="v5-hero-plane v5-hero-plane-a" aria-hidden="true"></div>
-    <div class="v5-hero-plane v5-hero-plane-b" aria-hidden="true"></div>
-
-    <div class="v5-hero-meta">
-      <p>Dhaka / Bangladesh</p>
-      <p>Websites + custom software</p>
-      <p>Portfolio / 2026</p>
-    </div>
-
-    <h1 class="v5-hero-name" id="home-title">
-      <span>MD ANIK</span>
-      <span>HASAN</span>
-    </h1>
-
-    <a
-      class="v5-hero-project"
-      href={leadProject.data.route}
-      aria-label={`Open ${leadProject.data.title}`}
-    >
-      <picture>
-        <source media="(max-width: 720px)" srcset={`${mediaBase[leadProject.id]}-960.webp`} />
-        <img
-          src={`${mediaBase[leadProject.id]}-1600.webp`}
-          width="1600"
-          height="900"
-          alt={`${leadProject.data.title} project preview`}
-          fetchpriority="high"
-        />
-      </picture>
-      <span class="v5-hero-project-index">01 / Founder project</span>
-      <strong>{leadProject.data.title}</strong>
-      <span class="v5-hero-project-action"
-        >View case study <span aria-hidden="true">&nearr;</span></span
-      >
+<BaseLayout bodyClass="home-page home-v5" schema={websiteSchema()} hideHeader>
+  <link
+    slot="head"
+    rel="preload"
+    href="/media/identity/reference-a-desktop.glb?v=20260731-restored-broad-02"
+    as="fetch"
+    type="model/gltf-binary"
+    crossorigin="anonymous"
+  />
+  <nav class="reference-global-nav" aria-label="Primary navigation">
+    <a class="reference-mark" href="/" aria-label="MD Anik Hasan, home">
+      <strong>
+        <svg viewBox="0 0 787.842 209" aria-hidden="true">
+          <path
+            fill-rule="evenodd"
+            d="M0 207.884h43.617l4.407-7.607h141.084l4.408 7.607h43.617L118.541 2.282 0 207.884Zm64.691-36.464 53.901-93.47 53.9 93.47H64.691Z"
+          ></path>
+          <g transform="translate(238.794 207.884) scale(.299423 -.299423)">
+            <path
+              d="M87.965 0V686.661h138.389l340.486-373.925q9.687-8.913 23.243-24.426t27.626-31.443q14.069-15.93 23.269-27.852l6.852.035q-.591 18.834-1.452 42.977t-.861 41.413v373.221H786.68V0H650.465L308.996 377.438q-19.4 20.304-41.169 45.913t-34.186 39.79l-6.252-.034q.591-13.131 1.165-37.943t.574-55.108V0H87.965Z"
+            ></path>
+          </g>
+          <g transform="translate(476.005 207.884) scale(.299423 -.299423)">
+            <path d="M87.965 0v686.661h147.258V0H87.965Z"></path>
+          </g>
+          <g transform="translate(548.098 207.884) scale(.299423 -.299423)">
+            <path
+              d="M87.965 0v686.661h147.258V340.174l372.025 346.487h187.788L493.368 403.904 800.688 0H617.466L387.978 309.854 235.223 182.985V0H87.965Z"
+            ></path>
+          </g>
+        </svg>
+      </strong>
     </a>
+    <span class="reference-nav">
+      <a href="/writing/">Writing</a>
+      <a href="/work/">Works</a>
+      <a href="/about/">About</a>
+      <a href="/services/">Services</a>
+    </span>
+    <a class="reference-contact-pill" href="/contact/">
+      Contact <span aria-hidden="true">&nearr;</span>
+    </a>
+    <details class="reference-mobile-menu">
+      <summary aria-label="Open navigation"><span aria-hidden="true"></span></summary>
+      <div>
+        <a href="/work/">Works</a>
+        <a href="/writing/">Writing</a>
+        <a href="/about/">About</a>
+        <a href="/services/">Services</a>
+        <a href="/contact/">Contact</a>
+        <a href={`mailto:${SITE.email}`}>Email</a>
+        <a href={SITE.discord} rel="me">Discord</a>
+      </div>
+    </details>
+  </nav>
 
-    <div class="v5-hero-intro">
-      <p>
-        I build focused websites and custom software, then stay with the difficult parts until the
-        result works as one product.
-      </p>
-      <a href="#selected-work">Move through the work</a>
-    </div>
-
-    <nav class="v5-hero-routes" aria-label="Primary service routes">
-      {
-        services.map((service, index) => (
-          <a href={`/services/${service.id}/`}>
-            <span>{String(index + 1).padStart(2, '0')}</span>
-            <strong>{service.data.title}</strong>
-          </a>
-        ))
-      }
-    </nav>
-
-    <div class="v5-hero-axis" aria-hidden="true">
-      <span>Scroll</span>
-      <i></i>
-    </div>
-  </section>
-
-  <section class="melt-chapter" aria-labelledby="melt-title" data-melt-section>
-    <h2 class="sr-only" id="melt-title">Work that holds when the difficult parts arrive</h2>
-    <div class="melt-sticky">
-      <p class="melt-kicker">The useful part starts after the first impression.</p>
-      <svg
-        class="melt-type"
-        viewBox="0 0 1600 700"
-        role="img"
-        aria-label="Work that holds"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        <defs>
-          <filter id="type-melt" x="-12%" y="-12%" width="124%" height="150%">
-            <feTurbulence
-              data-melt-turbulence
-              type="fractalNoise"
-              baseFrequency="0.006 0.018"
-              numOctaves="2"
-              seed="19"
-              result="noise"></feTurbulence>
-            <feDisplacementMap
-              data-melt-displacement
-              in="SourceGraphic"
-              in2="noise"
-              scale="0"
-              xChannelSelector="R"
-              yChannelSelector="B"></feDisplacementMap>
-          </filter>
-        </defs>
-        <g class="melt-type-clean" aria-hidden="true">
-          <text x="210" y="270" textLength="1180" lengthAdjust="spacingAndGlyphs">WORK</text>
-          <text x="210" y="555" textLength="1180" lengthAdjust="spacingAndGlyphs">HOLDS</text>
-        </g>
-        <g class="melt-type-fluid" filter="url(#type-melt)" aria-hidden="true">
-          <text x="210" y="270" textLength="1180" lengthAdjust="spacingAndGlyphs">WORK</text>
-          <text x="210" y="555" textLength="1180" lengthAdjust="spacingAndGlyphs">HOLDS</text>
-        </g>
+  <div class="reference-world" data-reference-world>
+    <div class="reference-boot" data-reference-boot aria-hidden="true" style="display: none">
+      <span class="reference-boot-status">Assembling the identity chamber</span>
+      <i class="reference-boot-progress"></i>
+      <svg class="reference-boot-mark" viewBox="0 0 420 360" aria-hidden="true">
+        <path d="M24 180H396"></path>
+        <path d="M210 28V332"></path>
+        <path d="M70 252H350"></path>
+        <path d="M42 300H378"></path>
       </svg>
-      <div class="melt-caption">
-        <p>
-          The interface can move, bend, and change state. The evidence underneath still has to be
-          direct, readable, and true.
-        </p>
-        <span>Scroll-bound type study / original implementation</span>
-      </div>
+      <p>Pointer field and optical surface calibration</p>
     </div>
-  </section>
 
-  <section
-    class="curve-work"
-    id="selected-work"
-    aria-labelledby="selected-work-title"
-    aria-describedby="selected-work-instructions"
-    data-curve-work
-    tabindex="0"
-  >
-    <div class="curve-work-sticky">
-      <header class="curve-work-header">
-        <p id="selected-work-instructions">Selected work / drag the room with scroll</p>
-        <h2 id="selected-work-title">Projects on one continuous curve.</h2>
-      </header>
+    <div class="reference-world-scene" aria-hidden="true">
+      <canvas class="reference-model" data-reference-canvas aria-hidden="true"></canvas>
+    </div>
 
-      <ol class="curve-track" data-curve-track>
-        {
-          projects.map((project, index) => (
-            <li
-              class="curve-card"
-              data-curve-card
-              data-project-index={index}
-              data-project-title={project.data.title}
-              data-project-description={project.data.description}
-              data-project-route={project.data.route}
-              data-project-tone={project.id}
+    <section class="reference-opening" aria-labelledby="home-title" data-reference-opening>
+      <div class="reference-opening-stage">
+        <div class="reference-opening-ui">
+          <div class="reference-telemetry reference-telemetry-right">
+            <p>Identity assembly / A-01</p>
+            <dl>
+              <div><dt>STATE</dt><dd data-reference-state>REST</dd></div>
+              <div class="reference-quaternion">
+                <dt>QUAT</dt><dd data-reference-fold>0.00 0.00 0.00 1.00</dd>
+              </div>
+              <div><dt>FORM</dt><dd>01 shell</dd></div>
+              <div><dt>ORIGIN</dt><dd>23.8103 / 90.4125 / BD</dd></div>
+            </dl>
+            <button
+              class="reference-axis-gizmo"
+              type="button"
+              data-reference-gizmo
+              aria-label="Drag to rotate the identity sculpture"
             >
-              <a href={project.data.route}>
-                <picture>
-                  <source media="(max-width: 720px)" srcset={`${mediaBase[project.id]}-960.webp`} />
-                  <img
-                    src={`${mediaBase[project.id]}-1600.webp`}
-                    width="1600"
-                    height="900"
-                    alt={`${project.data.title} project preview`}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                  />
-                </picture>
-                <span class="curve-card-meta">
-                  <small>{String(index + 1).padStart(2, '0')}</small>
-                  <strong>{project.data.title}</strong>
-                  <small>{project.data.status}</small>
-                </span>
-              </a>
-            </li>
-          ))
-        }
-      </ol>
+              <span class="reference-axis-ring"></span>
+              <span class="reference-axis reference-axis-x">X</span>
+              <span class="reference-axis reference-axis-y">Y</span>
+              <span class="reference-axis reference-axis-z">Z</span>
+              <i></i>
+            </button>
+            <button type="button" data-reference-reset>Reset quaternion</button>
+          </div>
 
-      <div class="curve-work-detail" aria-live="polite">
-        <span data-curve-count>01 / {String(projects.length).padStart(2, '0')}</span>
-        <div>
-          <h3 data-curve-title>{leadProject.data.title}</h3>
-          <p data-curve-description>{leadProject.data.description}</p>
+          <div class="reference-intro">
+            <span>Full-stack web + software developer</span>
+            <p>I build web and software products, including Boilabin, the marketplace I run.</p>
+          </div>
+
+          <div class="reference-feed" aria-hidden="true">
+            <span>Currently</span>
+            <p>Founder / Boilabin</p>
+            <p>Portfolio system / 2026</p>
+          </div>
+
+          <div class="reference-progress" aria-hidden="true">
+            <span>Move</span>
+            <i></i>
+            <span>Rest</span>
+          </div>
+
+          <a class="reference-more-works" href="#selected-work" data-reference-more>
+            More works <span aria-hidden="true">&nearr;</span>
+          </a>
         </div>
-        <a data-curve-link href={leadProject.data.route}
-          >Open project <span aria-hidden="true">&nearr;</span></a
-        >
-      </div>
 
-      <div class="curve-controls" aria-label="Project controls">
-        <button type="button" data-curve-previous aria-label="Previous project">&larr;</button>
-        <button type="button" data-curve-next aria-label="Next project">&rarr;</button>
+        <div class="reference-opening-copy">
+          <p>Move the pointer to disturb the identity sculpture. It settles back to rest.</p>
+          <h1 id="home-title">MD Anik Hasan — full-stack web and software developer in Dhaka.</h1>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+
+    <section
+      class="curve-work"
+      id="selected-work"
+      aria-labelledby="selected-work-title"
+      aria-describedby="selected-work-instructions"
+      data-curve-work
+      tabindex="0"
+    >
+      <div class="curve-work-sticky">
+        <header class="curve-work-header">
+          <p id="selected-work-instructions">Works / wheel, swipe, or use arrow keys</p>
+          <h2 id="selected-work-title">Selected work</h2>
+        </header>
+
+        <ol class="curve-track" data-curve-track>
+          {
+            projects.map((project, index) => (
+              <li
+                class="curve-card"
+                data-curve-card
+                data-project-index={index}
+                data-project-title={project.data.title}
+                data-project-description={project.data.description}
+                data-project-route={project.data.route}
+                data-project-tone={project.id}
+                data-project-status={project.data.status}
+                data-project-media={`${mediaBase[project.id]}-1600.webp`}
+              >
+                <a href={project.data.route}>
+                  <picture>
+                    <source
+                      media="(max-width: 720px)"
+                      srcset={`${mediaBase[project.id]}-960.webp`}
+                    />
+                    <img
+                      src={`${mediaBase[project.id]}-1600.webp`}
+                      width="1600"
+                      height="900"
+                      alt={`${project.data.title} project preview`}
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
+                    />
+                  </picture>
+                  <span class="curve-card-meta">
+                    <small>{String(index + 1).padStart(2, '0')}</small>
+                    <strong>{project.data.title}</strong>
+                    <small>{project.data.status}</small>
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+
+        <div class="curve-work-detail" aria-live="polite">
+          <span data-curve-count>01 / {String(projects.length).padStart(2, '0')}</span>
+          <div>
+            <h3 data-curve-title>{leadProject.data.title}</h3>
+            <p data-curve-description>{leadProject.data.description}</p>
+          </div>
+          <a data-curve-link href={leadProject.data.route}
+            >Open project <span aria-hidden="true">&nearr;</span></a
+          >
+        </div>
+
+        <div class="curve-controls" aria-label="Project controls">
+          <button type="button" data-curve-previous aria-label="Previous project">&larr;</button>
+          <button type="button" data-curve-next aria-label="Next project">&rarr;</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <WorkHolds />
 
   <section class="evidence-chapter" aria-labelledby="evidence-title">
     <div class="evidence-index" aria-hidden="true">03</div>
     <div class="evidence-heading">
-      <p>What remains when the motion stops</p>
-      <h2 id="evidence-title">Clear boundaries. Real work. No invented outcomes.</h2>
+      <p>The parts behind the interface matter too</p>
+      <h2 id="evidence-title">I build the whole product, not just the first impression.</h2>
     </div>
     <div class="evidence-copy">
       <p>
-        Boilabin is the founder project. SoctuKit, the UIU Discord Bot, and Salty Potato AI expose
-        different parts of how I think, build, test, and explain.
+        I’m Anik, a Computer Science and Engineering student at United International University.
+        Most of my time outside class goes into Boilabin and the other web and software products
+        shown here.
       </p>
       <a href="/work/">Open the complete work index</a>
     </div>
@@ -219,7 +250,7 @@ const mediaBase: Record<string, string> = {
   <section class="route-ledger" aria-labelledby="route-ledger-title">
     <h2 class="sr-only" id="route-ledger-title">Services and stories</h2>
     <div class="route-ledger-label">
-      <p>Two ways to work together</p>
+      <p>Two kinds of work land on my desk</p>
       <span>04 / Services</span>
     </div>
     <ol>
@@ -259,20 +290,24 @@ const mediaBase: Record<string, string> = {
 
   <section class="home-contact" aria-labelledby="home-contact-title">
     <div class="home-contact-sticky">
-      <p class="home-contact-kicker">Have a real constraint?</p>
+      <p class="home-contact-kicker">Have a project in mind?</p>
 
       <div class="home-contact-type">
         <h2 class="home-contact-title" id="home-contact-title">
-          <span>Bring me</span>
-          <span>the situation.</span>
+          <span>Send me</span>
+          <span>a message.</span>
         </h2>
       </div>
 
-      <a href="/contact/">Start a project <span aria-hidden="true">&nearr;</span></a>
+      <div class="home-contact-routes">
+        <a href={`mailto:${SITE.email}`}>{SITE.email} <span aria-hidden="true">&nearr;</span></a>
+        <a href={SITE.discord} rel="me">Discord <span aria-hidden="true">&nearr;</span></a>
+      </div>
     </div>
   </section>
 
   <script>
+    import '../scripts/reference-opening-locked';
     import '../scripts/home-state';
   </script>
 </BaseLayout>

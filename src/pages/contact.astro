@@ -1,68 +1,69 @@
 ---
 import PageHero from '../components/PageHero.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../config/site';
 ---
 
 <BaseLayout
-  title="Contact MD Anik Hasan | Start a Website or Software Project"
-  description="Contact routes for website development, custom software, open-source collaboration, Boilabin seller interest, and professional enquiries."
+  title="Contact MD Anik Hasan | Website and Software Projects"
+  description="Contact MD Anik Hasan about a website, web application, custom software project, or a technical collaboration."
 >
   <PageHero
-    eyebrow="Start a build"
-    title="Choose the conversation before choosing the channel."
-    intro="Paid work, open-source collaboration, and Boilabin seller interest have different contexts. Keeping them separate makes the first message easier to understand."
-    workshop="Start a Build"
+    eyebrow="Contact"
+    title="Have a project in mind? Send me a message."
+    intro="Tell me what you’re building and include the details that actually matter. If you’re a developer and simply want to talk shop, that’s welcome too."
+    workshop="Contact"
   />
 
   <section class="contact-routes" aria-labelledby="contact-routes-title">
-    <h2 id="contact-routes-title">Contact routes</h2>
+    <h2 id="contact-routes-title">What would you like to talk about?</h2>
     <ol>
       <li>
         <p class="list-index">01</p>
         <div>
-          <h3><a href="/hire/?service=website">Website development</a></h3>
-          <p>For business, ecommerce, product, startup, portfolio, or focused web work.</p>
+          <h3><a href="/hire/?service=website">A website or web application</a></h3>
+          <p>Business sites, ecommerce, dashboards, internal tools, and full-stack web products.</p>
         </div>
       </li>
       <li>
         <p class="list-index">02</p>
         <div>
           <h3><a href="/hire/?service=software">Custom software</a></h3>
-          <p>For desktop software, internal tools, automation, prototypes, or business systems.</p>
+          <p>Desktop tools, automation, integrations, and focused internal systems.</p>
         </div>
       </li>
       <li>
         <p class="list-index">03</p>
         <div>
           <h3><a href="/open-source/">Open-source collaboration</a></h3>
-          <p>For a repository, issue, or practical technical contribution with clear context.</p>
+          <p>
+            A repository, issue, or practical technical contribution with enough context to start.
+          </p>
         </div>
       </li>
       <li>
         <p class="list-index">04</p>
         <div>
           <h3><a href="/boilabin/seller-interest/">Boilabin seller interest</a></h3>
-          <p>For the planned, invitation-only future seller programme—not software enquiries.</p>
+          <p>Questions about the planned invitation-only seller programme for selected brands.</p>
         </div>
       </li>
     </ol>
   </section>
 
   <section class="contact-fallback" aria-labelledby="fallback-title">
-    <p class="eyebrow">Verified fallback</p>
-    <h2 id="fallback-title">The direct email address is not published yet.</h2>
+    <p class="eyebrow">Send a message</p>
+    <h2 id="fallback-title">Email is the easiest place to start.</h2>
     <p>
-      I will not guess or reuse an unverified contact address. Until the final professional email is
-      supplied, you can prepare a project brief through this site and use my verified public GitHub
-      profile for a professional contact route.
+      Include the goal, the current situation, and any timeline or technical constraint I should
+      know about. Discord is available when a direct conversation is more practical.
     </p>
     <p>
-      <a class="action action-primary" href="https://github.com/mdanikhasan-dev"
-        >Open GitHub profile</a
-      >
+      <a class="action action-primary" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      <a class="action" href={SITE.discord} rel="me">Open Discord profile</a>
     </p>
     <p class="privacy-note">
-      This site currently sends no form data, stores no enquiry, and runs no analytics.
+      This site does not send form data, store enquiries, or run analytics.
     </p>
   </section>
 </BaseLayout>

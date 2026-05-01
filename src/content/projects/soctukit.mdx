@@ -1,11 +1,11 @@
 ---
 title: SoctuKit
 description:
-  A native Windows software case study covering the verified C#, .NET 8, WinUI 3, XAML, testing,
-  credential storage, and installation work.
+  A Windows social-media automation app for user-directed likes, comments, replies, and scheduled or
+  automatic posts.
 workshop: Native Product Bay
 route: /work/soctukit/
-status: Built
+status: Active
 role: Builder
 kind: Native software
 technologies:
@@ -23,47 +23,30 @@ schemaType: SoftwareApplication
 operatingSystem: Windows
 order: 2
 draft: false
-updatedAt: 2026-07-27
+updatedAt: 2026-08-02
 ---
 
-## A finished native Windows product
+## Social automation that follows the user's direction
 
-SoctuKit is my clearest public proof for native Windows and custom software work. It was built and
-publicly presented as an installed Windows product rather than a browser interface or an unfinished
-code sample.
+SoctuKit is a Windows desktop app for managing social-media work from one place. The user decides
+what should happen; the app can then help carry out that plan through likes, comments, replies, and
+scheduled or automatic posts around a chosen topic.
 
-The known implementation uses C#, .NET 8, WinUI 3, Windows App SDK, XAML, MVVM, and
-Microsoft.Extensions.Hosting. Tests use xUnit and FluentAssertions. Distribution uses Inno Setup,
-and local token storage uses Windows Credential Manager.
+I built it because most automation tools make the automated part obvious. The output feels shallow,
+repetitive, or disconnected from what the user actually wanted to say. SoctuKit is built around a
+more useful standard: automation should save the repetitive work without taking control away from
+the person using it.
 
-## Why the surrounding product work matters
+## A Windows product, not a browser mock-up
 
-Desktop software is more than the code behind a window. Installation, local state, credentials,
-interface feedback, and testable behavior all affect whether the software feels dependable.
+The app is built in C# and .NET 8 with WinUI 3, the Windows App SDK, XAML, and MVVM. It brings
+account connection, activity visibility, drafting, publishing, and automation into a native desktop
+workspace.
 
-Windows Credential Manager is a concrete example. A local token should not be treated as ordinary
-copy in a configuration file. Using the operating system's credential facility creates a clearer
-security boundary for the installed application.
-
-An installer is another part of the product. It turns a development build into something that can be
-placed on a machine through an intentional release path.
-
-## Architecture choices visible in public
-
-MVVM separates presentation concerns from application behavior. XAML defines the native interface,
-while hosting infrastructure provides a structured place for services and application lifetime work.
-Tests around important behavior provide a repeatable signal while the product changes.
-
-This case study stays within publicly known facts. The release repository is public, but it does not
-contain the source code. I do not infer adoption, customer numbers, or commercial success from the
-existence of a release.
-
-## What SoctuKit proves
-
-SoctuKit proves that I have taken a native Windows product through interface implementation, local
-credential storage, testing, and installation. It supports a specific claim about Windows software;
-it is not evidence for every desktop platform or every possible integration.
+The surrounding product work matters too. OAuth tokens are stored in Windows Credential Manager,
+important behavior is covered by tests, and the app ships through a proper Windows installer. Those
+details are not the headline feature, but they are part of what makes desktop software dependable.
 
 [View the public release repository](https://github.com/mdanikhasan-dev/Soctukit)
 
-[Discuss a native Windows project](/hire/?service=software)
+[Discuss a Windows software project](/hire/?service=software)

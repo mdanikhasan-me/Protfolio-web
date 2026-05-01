@@ -10,17 +10,17 @@ const services = (await getCollection('services', ({ data }) => !data.draft)).so
 
 <BaseLayout
   title="Website and Software Development Services | MD Anik Hasan"
-  description="Website development and custom software development from MD Anik Hasan in Dhaka, Bangladesh, with focused native Windows capability."
+  description="Full-stack website development and custom software from MD Anik Hasan, including web apps, ecommerce, dashboards, automation, and native Windows tools."
 >
   <PageHero
-    eyebrow="Commission desk"
-    title="Two services, one careful build process."
-    intro="I take on website development and custom software projects. Native Windows work is the strongest specific software capability I can currently prove in public."
-    workshop="Commission Desk"
+    eyebrow="Services"
+    title="Two kinds of work, handled from front to back."
+    intro="I build full-stack websites and web applications, and I make custom software for work that does not fit comfortably inside a browser."
+    workshop="Project Services"
   />
 
   <section class="collection-list" aria-labelledby="service-list-title">
-    <h2 id="service-list-title">Choose the problem you need to solve</h2>
+    <h2 id="service-list-title">What do you need to build?</h2>
     <ol>
       {
         services.map((service) => (
@@ -40,11 +40,11 @@ const services = (await getCollection('services', ({ data }) => !data.draft)).so
   </section>
 
   <section class="plain-section">
-    <p class="eyebrow">Not the right category?</p>
-    <h2>Start with the workflow.</h2>
+    <p class="eyebrow">Not sure which one fits?</p>
+    <h2>Start with what needs to work.</h2>
     <p>
-      If you are unsure whether the work is a website or custom software project, describe the goal
-      and current process. I will keep the response inside the services I actually offer.
+      Describe what you are building, who it is for, and what the finished product needs to do. I
+      can help work out whether that belongs on the web or in a focused software tool.
     </p>
   </section>
 </BaseLayout>

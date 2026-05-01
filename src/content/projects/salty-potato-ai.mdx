@@ -1,8 +1,8 @@
 ---
 title: Salty Potato AI
 description:
-  An honest technical build log for an experimental decoder-only language model, tokenizer, data
-  pipeline, training, checkpoints, inference, and desktop software.
+  A language model I am building from the ground up, including its tokenizer, data pipeline,
+  training, checkpoints, inference, and desktop app.
 workshop: Research Bench
 route: /lab/salty-potato-ai/
 status: In development
@@ -18,42 +18,28 @@ technologies:
 featured: true
 order: 4
 draft: false
-updatedAt: 2026-07-27
+updatedAt: 2026-08-02
 ---
 
-## Learning the system from the inside
+## Building the whole path, not just calling an API
 
-Salty Potato AI is a long-running experimental decoder-only language model that I am building from
-scratch. The work includes its own tokenizer, data pipeline, training process, checkpoint
-management, inference work, and desktop software around the model.
+Salty Potato AI is a language model I am building from the ground up. The project includes its own
+tokenizer, training data and data pipeline, decoder-only model work, training runs, checkpoint
+management, inference, and a desktop app for interacting with the system.
 
-I started it to understand language models through implementation. Calling a hosted model can be
-useful, but it does not force the same questions about tokenization, data shape, training state,
-saved checkpoints, or what inference needs to reproduce.
+I started it because I wanted to understand how the pieces fit together when there is nowhere to
+hide behind a hosted model. Tokenization affects the data. The data affects training. Saved
+checkpoints have to be valid and reproducible before inference can be trusted. The desktop app has
+to report what actually happened instead of guessing.
 
-## What “from scratch” means here
+## Still in progress, honestly
 
-It means I am working through the model-facing system instead of treating a remote API as the model.
-The tokenizer, data path, training loop, checkpoint lifecycle, and inference behavior are part of
-the experiment.
+This is an active technical experiment, not a finished production model. Training runs produce
+checkpoints that can be used for inference, but I do not present the project as state-of-the-art, a
+ChatGPT competitor, or novel research.
 
-It does not mean every low-level numerical primitive is rewritten without libraries, and it is not a
-claim of novel research. The useful part is the practical understanding that comes from connecting
-these pieces and seeing where they fail.
-
-## Why the surrounding software is part of the experiment
-
-Training, saved checkpoints, and inference need a clear path through the surrounding software. The
-desktop application is part of that learning process: it gives the experiment an interface and makes
-the different stages concrete instead of leaving them as unrelated scripts.
-
-## Current boundary
-
-Salty Potato AI is experimental and under development. I do not present it as state-of-the-art,
-production-ready, a ChatGPT competitor, or a reason to call myself an AI engineer or researcher. I
-do not publish an unverified parameter count, benchmark, or release date.
-
-The project is here as a technical build log and proof of how I learn difficult systems: make the
-parts concrete, test the boundaries, and keep improving the product around them.
+That unfinished status is part of the point. The project is a record of learning the system by
+building it, finding the weak spots, and improving each part instead of making a five-minute demo
+look more complete than it is.
 
 [Read why I am building a language model from scratch](/writing/why-build-a-language-model-from-scratch/)

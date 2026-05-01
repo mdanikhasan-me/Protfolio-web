@@ -1,8 +1,8 @@
 ---
 title: UIU Discord Bot
 description:
-  A Python automation case study for retrieving UIU notices, preventing duplicates, posting updates,
-  and serving useful university information in Discord.
+  Pulls new UIU notices into Discord automatically so students do not have to keep checking the
+  university notice board by hand.
 workshop: Automation Station
 route: /work/uiu-discord-bot/
 status: Built
@@ -13,43 +13,34 @@ technologies:
   - discord.py
   - Notice scraping
   - Discord slash commands
-publicRepository: https://github.com/mdanikhasan-dev/UIU-Discord_Bot
+publicRepository: https://github.com/mdanikhasan-me/UIU-Discord_Bot
 featured: true
 schemaType: SoftwareApplication
 order: 3
 draft: false
-updatedAt: 2026-07-27
+updatedAt: 2026-08-02
 ---
 
-## A practical community tool
+## University notices without the daily portal check
 
-The UIU Discord Bot was built for United International University communities. Its job is practical:
-bring useful university information into the place where a community is already talking.
+UIU publishes notices on its public notice board, and students should not have to keep checking it
+by hand. The UIU Discord Bot checks for new notices on a schedule and can post unseen ones into a
+chosen Discord channel automatically.
 
-The bot retrieves UIU notices, can post new notices automatically, provides academic calendar
-information, and includes server utilities and slash commands. It uses Python and `discord.py`, with
-notice scraping and duplicate prevention.
+It keeps a local history so the same notice is not posted twice, and it sends unseen notices in
+order. The bot also provides academic calendar information and a small set of useful server
+commands.
 
-## The important behavior
+## Built for a real community
 
-Retrieving a notice is only the first step. An automated notice flow also has to avoid posting the
-same item repeatedly. Duplicate prevention is therefore part of the product behavior, not a small
-implementation detail.
+The project is written in Python with `discord.py`. It combines notice retrieval, duplicate
+prevention, scheduled background checks, Discord commands, and local configuration in one practical
+tool.
 
-The Discord integration gives people direct commands and can place new information into a server
-without asking everyone to repeatedly check a separate source. The usefulness comes from reducing a
-repeated task while keeping the result understandable.
+It is independent software, not an official UIU service. It does not sign in to UCAM or ask students
+for their university password. That boundary is important: the bot should reduce a repetitive task
+without pretending to replace the university's official systems.
 
-## What the project proves
+[View the public repository](https://github.com/mdanikhasan-me/UIU-Discord_Bot)
 
-This project is evidence of Python work, scraping, Discord integration, automation, and attention to
-a real community need. It is not presented with invented usage statistics or claims about how many
-servers depend on it.
-
-It also shows a different product shape from SoctuKit. One is an installed native Windows
-application; the other coordinates an external source and a community platform. Both need clear
-success conditions and visible handling for repeated work.
-
-[View the public repository](https://github.com/mdanikhasan-dev/UIU-Discord_Bot)
-
-[Discuss an automation or software project](/hire/?service=software)
+[Discuss an automation project](/hire/?service=software)

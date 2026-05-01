@@ -1,6 +1,7 @@
 ---
 import PageHero from '../components/PageHero.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../config/site';
 ---
 
 <BaseLayout
@@ -45,8 +46,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     <h2>Contact</h2>
     <p>
-      A verified privacy contact email has not yet been supplied, so this policy does not publish a
-      guessed address. The <a href="/contact/">contact page</a> records the current professional fallback.
+      Privacy questions can be sent to
+      <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. The <a href="/contact/">contact page</a>
+      lists the currently published communication routes.
     </p>
 
     <p><small>Effective date: 27 July 2026.</small></p>

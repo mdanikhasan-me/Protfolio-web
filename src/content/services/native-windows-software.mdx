@@ -1,14 +1,14 @@
 ---
 title: Native Windows Software
 description:
-  Focused native Windows application development using the publicly demonstrated C#, .NET 8, WinUI
-  3, XAML, packaging, and credential-storage workflow.
+  Native Windows applications built with C#, .NET, WinUI 3, XAML, and the installation and local
+  system work that turns code into a usable desktop product.
 workshop: Native Systems Bay
 eyebrow: Native Windows software
 seoTitle: Native Windows Software Development | MD Anik Hasan
 intro:
-  I build native Windows software where a desktop application, local operating-system integration,
-  and a deliberate installation experience fit the problem.
+  I build native Windows software when a project needs a focused desktop experience, local system
+  integration, or behavior that does not belong in a browser.
 focus:
   - C# and .NET 8
   - WinUI 3 and XAML
@@ -18,38 +18,26 @@ featuredProof:
   - SoctuKit
 order: 3
 draft: false
-updatedAt: 2026-07-27
+updatedAt: 2026-08-02
 ---
 
-## The capability I can prove
+## When a real desktop app is the better fit
 
-My public evidence for native Windows work is [SoctuKit](/work/soctukit/), a built Windows product.
-Its known implementation includes C#, .NET 8, WinUI 3, Windows App SDK, XAML, MVVM,
-Microsoft.Extensions.Hosting, xUnit, FluentAssertions, Inno Setup, and Windows Credential Manager
-for local token storage.
+A native Windows application makes sense when the software needs to live naturally on the desktop,
+work with local operating-system features, store credentials safely, or provide an installed
+experience without depending on a browser tab.
 
-That is the boundary of the claim. I do not attach invented adoption, customer numbers, or
-commercial results to the project, and its public release repository does not contain the source
-code.
+The choice still depends on the job. Before committing to native software, I look at distribution,
+updates, integrations, offline behavior, security, and the people who will use it.
 
-## What native can be good at
+## The capability I can show
 
-A native Windows application can make sense when a tool needs to feel at home on the desktop, work
-closely with local operating-system facilities, store credentials through Windows rather than
-exposing them in a file, or provide a focused installed experience without living in a browser tab.
+[SoctuKit](/work/soctukit/) is my clearest public example. It is built with C#, .NET 8, WinUI 3,
+Windows App SDK, XAML, and MVVM. The product also includes tests, Windows Credential Manager
+storage, and an Inno Setup installer.
 
-The right choice still depends on the job. I do not recommend native technology only because it is
-interesting. We should compare distribution, update needs, integrations, offline behavior, security,
-and the people who will use the tool.
+That surrounding work matters. A useful desktop release needs clear application state, dependable
+error feedback, safe local storage, installation, and a way to know whether an operation actually
+succeeded.
 
-## Product work around the code
-
-The visible window is only one part of desktop software. A useful release also needs clear
-application state, keyboard behavior, error feedback, safe local storage, installation, tests around
-important logic, and a way to understand whether an operation actually succeeded.
-
-For a native Windows enquiry, include the Windows versions in scope, whether the tool must work
-offline, what it connects to, what it stores locally, how it should be installed, and who will
-maintain or update it.
-
-[Discuss native Windows software](/hire/?service=software)
+[Discuss a Windows software project](/hire/?service=software)

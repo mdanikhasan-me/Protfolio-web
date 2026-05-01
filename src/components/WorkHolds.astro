@@ -1,0 +1,47 @@
+<section class="melt-chapter" aria-labelledby="melt-title" data-melt-section>
+  <h2 class="sr-only" id="melt-title">Work that holds when the difficult parts arrive</h2>
+  <div class="melt-sticky">
+    <p class="melt-kicker">The useful part starts after the first impression.</p>
+    <svg
+      class="melt-type"
+      viewBox="0 0 1600 700"
+      role="img"
+      aria-label="Work that holds"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <defs>
+        <filter id="type-melt" x="-12%" y="-12%" width="124%" height="150%">
+          <feTurbulence
+            data-melt-turbulence
+            type="fractalNoise"
+            baseFrequency="0.006 0.018"
+            numOctaves="2"
+            seed="19"
+            result="noise"></feTurbulence>
+          <feDisplacementMap
+            data-melt-displacement
+            in="SourceGraphic"
+            in2="noise"
+            scale="0"
+            xChannelSelector="R"
+            yChannelSelector="B"></feDisplacementMap>
+        </filter>
+      </defs>
+      <g class="melt-type-clean" aria-hidden="true">
+        <text x="210" y="270" textLength="1180" lengthAdjust="spacingAndGlyphs">WORK</text>
+        <text x="210" y="555" textLength="1180" lengthAdjust="spacingAndGlyphs">HOLDS</text>
+      </g>
+      <g class="melt-type-fluid" filter="url(#type-melt)" aria-hidden="true">
+        <text x="210" y="270" textLength="1180" lengthAdjust="spacingAndGlyphs">WORK</text>
+        <text x="210" y="555" textLength="1180" lengthAdjust="spacingAndGlyphs">HOLDS</text>
+      </g>
+    </svg>
+    <div class="melt-caption">
+      <p>
+        The interface can move, bend, and change state. The evidence underneath still has to be
+        direct, readable, and true.
+      </p>
+      <span>Scroll-bound type study / original implementation</span>
+    </div>
+  </div>
+</section>

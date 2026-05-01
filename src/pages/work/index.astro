@@ -10,17 +10,17 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft)).so
 
 <BaseLayout
   title="Selected Software and Website Projects | MD Anik Hasan"
-  description="Verified project work by MD Anik Hasan: Boilabin, SoctuKit, UIU Discord Bot, and the experimental Salty Potato AI build log."
+  description="Boilabin, SoctuKit, UIU Discord Bot, and Salty Potato AI: selected web, desktop, automation, and language-model work by MD Anik Hasan."
 >
   <PageHero
-    eyebrow="Build archive"
-    title="Finished products, active work, and one honest experiment."
-    intro="This archive separates what is built, what is pre-launch, and what remains experimental. Each case study stays inside facts I can support."
-    workshop="Build Archive"
+    eyebrow="Selected work"
+    title="A few things I’ve built and continue to work on."
+    intro="Some are products I run, some are focused tools, and one is an experiment still very much in progress. Each page explains what the project actually does."
+    workshop="Project Archive"
   />
 
   <section class="collection-list" aria-labelledby="project-list-title">
-    <h2 id="project-list-title">Verified builds</h2>
+    <h2 id="project-list-title">Selected projects</h2>
     <ol>
       {
         projects.map((project) => (
