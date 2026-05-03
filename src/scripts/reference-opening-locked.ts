@@ -1127,12 +1127,13 @@ async function startReferenceWorld(
   wall.matrixAutoUpdate = false;
   baseScene.add(wall);
 
+  const heroWordBaseOpacity = 0.06;
   const heroWordPromise = Promise.resolve().then(() => {
     const heroWordMaterial = new THREE.MeshBasicMaterial({
       map: createWordTexture(wordTextureWidth),
       transparent: true,
       alphaTest: 0.012,
-      opacity: 1,
+      opacity: heroWordBaseOpacity,
       depthTest: false,
       depthWrite: false,
       toneMapped: false,
@@ -1386,7 +1387,7 @@ async function startReferenceWorld(
     const galleryEntrance = Math.min(1, galleryProgress * 2);
     const galleryExit = Math.min(1, galleryVisuals.length + 1 - galleryProgress);
     const galleryVelocity = referenceMotionState.curveVelocity;
-    const heroWordOpacity = 1 - heroExit;
+    const heroWordOpacity = heroWordBaseOpacity * (1 - heroExit);
     if (heroWordMaterial.opacity !== heroWordOpacity) heroWordMaterial.opacity = heroWordOpacity;
     const heroWordVisible = heroWordOpacity > 0;
     if (heroWord.visible !== heroWordVisible) heroWord.visible = heroWordVisible;
