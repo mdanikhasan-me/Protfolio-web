@@ -617,11 +617,48 @@ const galleryFragmentShader = `
   }
 `;
 
+const bloomBrightFragmentShader = `
+  precision highp float;
+  varying vec2 vUv;
+  uniform sampler2D uScene;
+  uniform float uThreshold;
+
+  void main() {
+    vec3 color = texture2D(uScene, vUv).rgb;
+    vec3 bright = max(color - vec3(uThreshold), vec3(0.0));
+    gl_FragColor = vec4(color * bright, 1.0);
+  }
+`;
+
+const bloomBlurFragmentShader = `
+  precision highp float;
+  varying vec2 vUv;
+  uniform sampler2D uInput;
+  uniform vec2 uResolution;
+  uniform vec2 uDirection;
+
+  void main() {
+    const float weight0 = 0.2129735046;
+    const float weight1 = 0.2046226940;
+    const float weight2 = 0.1888905537;
+    vec2 pixel = uDirection / uResolution;
+    vec3 sum = texture2D(uInput, vUv).rgb * weight0;
+    sum += texture2D(uInput, vUv + pixel * 2.0).rgb * weight1;
+    sum += texture2D(uInput, vUv - pixel * 2.0).rgb * weight1;
+    sum += texture2D(uInput, vUv + pixel * 4.0).rgb * weight2;
+    sum += texture2D(uInput, vUv - pixel * 4.0).rgb * weight2;
+    gl_FragColor = vec4(sum, 1.0);
+  }
+`;
+
 const compositeFragmentShader = `
   precision highp float;
   varying vec2 vUv;
   uniform sampler2D uScene;
   uniform sampler2D uFluid;
+  uniform sampler2D uBloomTexture0;
+  uniform sampler2D uBloomTexture1;
+  uniform sampler2D uBloomTexture2;
   uniform vec2 uResolution;
   uniform float uTime;
   uniform float uReveal;
@@ -629,15 +666,6 @@ const compositeFragmentShader = `
 
   float hash21(vec2 value) {
     return fract(sin(dot(value, vec2(127.1, 311.7))) * 43758.5453123);
-  }
-
-  vec3 bloomSample(vec2 uv, vec2 pixel) {
-    vec3 result = vec3(0.0);
-    result += texture2D(uScene, uv + vec2( pixel.x, 0.0)).rgb;
-    result += texture2D(uScene, uv + vec2(-pixel.x, 0.0)).rgb;
-    result += texture2D(uScene, uv + vec2(0.0,  pixel.y)).rgb;
-    result += texture2D(uScene, uv + vec2(0.0, -pixel.y)).rgb;
-    return result * 0.25;
   }
 
   vec3 fxaa(vec2 uv, out vec3 center) {
@@ -725,12 +753,13 @@ const compositeFragmentShader = `
     }
     #endif
 
-    vec2 pixel = 1.0 / uResolution;
-    vec3 bloomSmall = max(bloomSample(warpedUv, pixel * 1.5) - 0.62, 0.0);
-    vec3 bloomMedium = max(bloomSample(warpedUv, pixel * 4.5) - 0.68, 0.0);
-    vec3 bloomLarge = max(bloomSample(warpedUv, pixel * 10.5) - 0.72, 0.0);
+    vec3 bloomQuarter = texture2D(uBloomTexture0, warpedUv).rgb;
+    vec3 bloomEighth = texture2D(uBloomTexture1, warpedUv).rgb;
+    vec3 bloomSixteenth = texture2D(uBloomTexture2, warpedUv).rgb;
     float bloomGain = mix(1.0, 0.42, galleryProtect);
-    color += (bloomSmall * 0.16 + bloomMedium * 0.11 + bloomLarge * 0.08) * bloomGain;
+    color +=
+      (bloomQuarter * 0.075 + bloomEighth * 0.15 + bloomSixteenth * 0.225) * bloomGain;
+    color *= mix(1.3, 1.08, galleryProtect);
 
     vec3 smokeTint = mix(vec3(0.12, 0.22, 0.34), vec3(0.20, 0.10, 0.34), vUv.y);
     color = mix(color, color * 1.035 + smokeTint * 0.095, smoke * 0.74);
@@ -1259,12 +1288,60 @@ async function startReferenceWorld(
   postScene.matrixAutoUpdate = false;
   const postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   postCamera.matrixAutoUpdate = false;
+  const postGeometry = new THREE.PlaneGeometry(2, 2);
+  postGeometry.deleteAttribute('normal');
   const fluid = pointerEffectsEnabled
     ? new (await import('./reference-fluid')).ReferenceFluid(renderer)
     : null;
+  const bloomTargetOptions: THREE.RenderTargetOptions = {
+    type: THREE.HalfFloatType,
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.LinearFilter,
+    depthBuffer: false,
+  };
+  const bloomScales = [4, 8, 16] as const;
+  const bloomBrightTarget = new THREE.WebGLRenderTarget(1, 1, bloomTargetOptions);
+  const bloomVerticalTargets = bloomScales.map(
+    () => new THREE.WebGLRenderTarget(1, 1, bloomTargetOptions),
+  );
+  const bloomHorizontalTargets = bloomScales.map(
+    () => new THREE.WebGLRenderTarget(1, 1, bloomTargetOptions),
+  );
+  const bloomScene = new THREE.Scene();
+  bloomScene.matrixAutoUpdate = false;
+  const bloomBrightUniforms = {
+    uScene: { value: sceneTarget.texture },
+    uThreshold: { value: 0.9 },
+  };
+  const bloomBrightMaterial = new THREE.ShaderMaterial({
+    uniforms: bloomBrightUniforms,
+    vertexShader: fullScreenVertexShader,
+    fragmentShader: bloomBrightFragmentShader,
+    depthTest: false,
+    depthWrite: false,
+  });
+  const bloomBlurUniforms = {
+    uInput: { value: bloomBrightTarget.texture },
+    uResolution: { value: new THREE.Vector2(1, 1) },
+    uDirection: { value: new THREE.Vector2(0, 1) },
+  };
+  const bloomBlurMaterial = new THREE.ShaderMaterial({
+    uniforms: bloomBlurUniforms,
+    vertexShader: fullScreenVertexShader,
+    fragmentShader: bloomBlurFragmentShader,
+    depthTest: false,
+    depthWrite: false,
+  });
+  const bloomQuad = new THREE.Mesh(postGeometry, bloomBrightMaterial);
+  bloomQuad.frustumCulled = false;
+  bloomQuad.matrixAutoUpdate = false;
+  bloomScene.add(bloomQuad);
   const compositeUniforms = {
     uScene: { value: sceneTarget.texture },
     uFluid: { value: fluid?.texture ?? sceneTarget.texture },
+    uBloomTexture0: { value: bloomHorizontalTargets[0]!.texture },
+    uBloomTexture1: { value: bloomHorizontalTargets[1]!.texture },
+    uBloomTexture2: { value: bloomHorizontalTargets[2]!.texture },
     uResolution: { value: new THREE.Vector2(1, 1) },
     uTime: { value: 0 },
     uReveal: { value: reducedMotion ? 1 : 0 },
@@ -1281,8 +1358,6 @@ async function startReferenceWorld(
     depthTest: false,
     depthWrite: false,
   });
-  const postGeometry = new THREE.PlaneGeometry(2, 2);
-  postGeometry.deleteAttribute('normal');
   const postQuad = new THREE.Mesh(postGeometry, compositeMaterial);
   postQuad.frustumCulled = false;
   postQuad.matrixAutoUpdate = false;
@@ -1452,11 +1527,49 @@ async function startReferenceWorld(
     const renderHeight = Math.max(1, outputCanvas.height);
     sceneTarget.setSize(renderWidth, renderHeight);
     backgroundTarget.setSize(renderWidth, renderHeight);
+    bloomBrightTarget.setSize(renderWidth, renderHeight);
+    bloomScales.forEach((scale, index) => {
+      const bloomWidth = Math.max(1, Math.ceil(renderWidth / scale));
+      const bloomHeight = Math.max(1, Math.ceil(renderHeight / scale));
+      bloomVerticalTargets[index]!.setSize(bloomWidth, bloomHeight);
+      bloomHorizontalTargets[index]!.setSize(bloomWidth, bloomHeight);
+    });
     renderer.initRenderTarget(sceneTarget);
     renderer.initRenderTarget(backgroundTarget);
+    renderer.initRenderTarget(bloomBrightTarget);
+    bloomVerticalTargets.forEach((target) => renderer.initRenderTarget(target));
+    bloomHorizontalTargets.forEach((target) => renderer.initRenderTarget(target));
     glassUniforms.uResolution.value.set(renderWidth, renderHeight);
     compositeUniforms.uResolution.value.set(renderWidth, renderHeight);
     fluid?.resize(width, height);
+  };
+
+  const renderReferenceBloom = () => {
+    bloomQuad.material = bloomBrightMaterial;
+    renderer.setRenderTarget(bloomBrightTarget);
+    renderer.clear(true, false, false);
+    renderer.render(bloomScene, postCamera);
+
+    let inputTexture = bloomBrightTarget.texture;
+    bloomScales.forEach((_scale, index) => {
+      const verticalTarget = bloomVerticalTargets[index]!;
+      const horizontalTarget = bloomHorizontalTargets[index]!;
+      bloomQuad.material = bloomBlurMaterial;
+      bloomBlurUniforms.uInput.value = inputTexture;
+      bloomBlurUniforms.uResolution.value.set(verticalTarget.width, verticalTarget.height);
+      bloomBlurUniforms.uDirection.value.set(0, 1);
+      renderer.setRenderTarget(verticalTarget);
+      renderer.clear(true, false, false);
+      renderer.render(bloomScene, postCamera);
+
+      bloomBlurUniforms.uInput.value = verticalTarget.texture;
+      bloomBlurUniforms.uResolution.value.set(horizontalTarget.width, horizontalTarget.height);
+      bloomBlurUniforms.uDirection.value.set(1, 0);
+      renderer.setRenderTarget(horizontalTarget);
+      renderer.clear(true, false, false);
+      renderer.render(bloomScene, postCamera);
+      inputTexture = horizontalTarget.texture;
+    });
   };
 
   const requestResize = () => {
@@ -1680,6 +1793,7 @@ async function startReferenceWorld(
     renderer.setRenderTarget(sceneTarget);
     renderer.render(identityScene, camera);
     if (galleryHasVisibleVisual) renderer.render(galleryScene, camera);
+    renderReferenceBloom();
     renderer.setRenderTarget(null);
     renderer.render(postScene, postCamera);
 
@@ -1767,6 +1881,9 @@ async function startReferenceWorld(
     fluid?.dispose();
     sceneTarget.dispose();
     backgroundTarget.dispose();
+    bloomBrightTarget.dispose();
+    bloomVerticalTargets.forEach((target) => target.dispose());
+    bloomHorizontalTargets.forEach((target) => target.dispose());
     wall.geometry.dispose();
     wallMaterial.dispose();
     heroWord.geometry.dispose();
@@ -1783,6 +1900,8 @@ async function startReferenceWorld(
       visual.texture.dispose();
     });
     postQuad.geometry.dispose();
+    bloomBrightMaterial.dispose();
+    bloomBlurMaterial.dispose();
     compositeMaterial.dispose();
     renderer.dispose();
     removeEventListener('pagehide', onPageHide);
