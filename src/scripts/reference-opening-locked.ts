@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { referenceMotionState } from '../lib/reference-motion-state';
+import { createReferenceBackgroundSystem } from './reference-background-system';
 
 const clamp = (value: number, minimum = 0, maximum = 1) =>
   Math.min(maximum, Math.max(minimum, value));
@@ -655,6 +656,7 @@ const compositeFragmentShader = `
   precision highp float;
   varying vec2 vUv;
   uniform sampler2D uScene;
+  uniform sampler2D uIdentity;
   uniform sampler2D uFluid;
   uniform sampler2D uBloomTexture0;
   uniform sampler2D uBloomTexture1;
@@ -760,6 +762,33 @@ const compositeFragmentShader = `
     color +=
       (bloomQuarter * 0.075 + bloomEighth * 0.15 + bloomSixteenth * 0.225) * bloomGain;
     color *= mix(1.3, 1.08, galleryProtect);
+
+    vec4 identityLayer = texture2D(uIdentity, warpedUv);
+    float identityMask = smoothstep(0.04, 0.96, identityLayer.a) * (1.0 - galleryProtect);
+    vec2 identityPixel = 1.0 / uResolution;
+    float identityNeighbour = max(
+      max(
+        texture2D(uIdentity, warpedUv + vec2(identityPixel.x, 0.0)).a,
+        texture2D(uIdentity, warpedUv - vec2(identityPixel.x, 0.0)).a
+      ),
+      max(
+        texture2D(uIdentity, warpedUv + vec2(0.0, identityPixel.y)).a,
+        texture2D(uIdentity, warpedUv - vec2(0.0, identityPixel.y)).a
+      )
+    );
+    float identityEdge = clamp(identityNeighbour - identityLayer.a, 0.0, 1.0) * (1.0 - galleryProtect);
+    float identityLuma = dot(identityLayer.rgb, vec3(0.2126, 0.7152, 0.0722));
+    vec3 identitySilver = mix(
+      identityLayer.rgb,
+      vec3(identityLuma) * vec3(0.92, 1.00, 1.13),
+      0.32
+    );
+    vec3 readableIdentity = identitySilver * 1.23 + vec3(0.024, 0.034, 0.060);
+    color = mix(color, max(color, readableIdentity), identityMask * 0.48);
+    float darkIdentity = (1.0 - smoothstep(0.06, 0.30, identityLuma)) * identityMask;
+    float rightSideSupport = mix(0.64, 1.0, smoothstep(0.46, 0.84, vUv.x));
+    color += vec3(0.034, 0.048, 0.084) * darkIdentity * rightSideSupport;
+    color += vec3(0.065, 0.094, 0.17) * identityEdge * 0.52;
 
     vec3 smokeTint = mix(vec3(0.12, 0.22, 0.34), vec3(0.20, 0.10, 0.34), vUv.y);
     color = mix(color, color * 1.035 + smokeTint * 0.095, smoke * 0.74);
@@ -1154,9 +1183,13 @@ async function startReferenceWorld(
   const wall = new THREE.Mesh(createCurvedWallGeometry(), wallMaterial);
   wall.frustumCulled = false;
   wall.matrixAutoUpdate = false;
+  wall.visible = false;
   baseScene.add(wall);
 
-  const heroWordBaseOpacity = 0.06;
+  const openingBackground = createReferenceBackgroundSystem(renderer);
+  baseScene.add(openingBackground.group);
+
+  const heroWordBaseOpacity = 0;
   const heroWordPromise = Promise.resolve().then(() => {
     const heroWordMaterial = new THREE.MeshBasicMaterial({
       map: createWordTexture(wordTextureWidth),
@@ -1195,6 +1228,12 @@ async function startReferenceWorld(
     magFilter: THREE.LinearFilter,
     depthBuffer: true,
     depthTexture: backgroundDepthTexture,
+  });
+  const identityTarget = new THREE.WebGLRenderTarget(1, 1, {
+    type: THREE.HalfFloatType,
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.LinearFilter,
+    depthBuffer: false,
   });
 
   const materialNoiseTexture = createMaterialNoiseTexture();
@@ -1338,6 +1377,7 @@ async function startReferenceWorld(
   bloomScene.add(bloomQuad);
   const compositeUniforms = {
     uScene: { value: sceneTarget.texture },
+    uIdentity: { value: identityTarget.texture },
     uFluid: { value: fluid?.texture ?? sceneTarget.texture },
     uBloomTexture0: { value: bloomHorizontalTargets[0]!.texture },
     uBloomTexture1: { value: bloomHorizontalTargets[1]!.texture },
@@ -1384,6 +1424,10 @@ async function startReferenceWorld(
   let revealStart = performance.now();
   let animationFrame = 0;
   let lastFrame = performance.now();
+  const backgroundTimeParam = import.meta.env.DEV
+    ? new URLSearchParams(window.location.search).get('__backgroundTime')
+    : null;
+  const backgroundTimeOverride = backgroundTimeParam === null ? null : Number(backgroundTimeParam);
   let currentGalleryProgress = 0;
   let renderedGalleryProgress = 0;
   let renderedProjectPalette = 0;
@@ -1516,8 +1560,11 @@ async function startReferenceWorld(
     camera.aspect = width / height;
     camera.fov = width <= 820 ? 50 : 41;
     camera.updateProjectionMatrix();
+    openingBackground.resize(camera, width, height, pixelRatio);
+    const desktopIdentityFit = clamp(Math.min(width / 1280, height / 820), 0.90, 1);
     responsiveIdentityScale =
-      identityBaseScale * (width <= 820 ? clamp(camera.aspect / 0.74, 0.62, 0.94) : 1);
+      identityBaseScale *
+      (width <= 820 ? clamp(camera.aspect / 0.74, 0.62, 0.94) : desktopIdentityFit);
     responsiveWordScale = width <= 820 ? clamp(camera.aspect * 0.74, 0.34, 0.72) : 1;
     heroWord.scale.setScalar(responsiveWordScale);
     heroWord.updateMatrix();
@@ -1527,6 +1574,7 @@ async function startReferenceWorld(
     const renderHeight = Math.max(1, outputCanvas.height);
     sceneTarget.setSize(renderWidth, renderHeight);
     backgroundTarget.setSize(renderWidth, renderHeight);
+    identityTarget.setSize(renderWidth, renderHeight);
     bloomBrightTarget.setSize(renderWidth, renderHeight);
     bloomScales.forEach((scale, index) => {
       const bloomWidth = Math.max(1, Math.ceil(renderWidth / scale));
@@ -1536,6 +1584,7 @@ async function startReferenceWorld(
     });
     renderer.initRenderTarget(sceneTarget);
     renderer.initRenderTarget(backgroundTarget);
+    renderer.initRenderTarget(identityTarget);
     renderer.initRenderTarget(bloomBrightTarget);
     bloomVerticalTargets.forEach((target) => renderer.initRenderTarget(target));
     bloomHorizontalTargets.forEach((target) => renderer.initRenderTarget(target));
@@ -1775,6 +1824,16 @@ async function startReferenceWorld(
       fluid.step(deltaSeconds);
       compositeUniforms.uFluid.value = fluid.texture;
     }
+    const openingBackgroundActive = renderedGalleryPresence < 0.02;
+    openingBackground.group.visible = openingBackgroundActive;
+    wall.visible = !openingBackgroundActive;
+    if (openingBackgroundActive) {
+      const backgroundElapsed =
+        backgroundTimeOverride !== null && Number.isFinite(backgroundTimeOverride)
+          ? backgroundTimeOverride
+          : elapsed;
+      openingBackground.update(backgroundElapsed, fluid?.texture ?? null);
+    }
     const reveal = reducedMotion ? 1 : clamp((time - revealStart) / 2600);
     compositeUniforms.uReveal.value = smoothstep(0, 1, reveal);
 
@@ -1790,6 +1849,11 @@ async function startReferenceWorld(
       renderer.setRenderTarget(backgroundTarget);
       renderer.render(galleryScene, camera);
     }
+    renderer.setRenderTarget(identityTarget);
+    renderer.setClearColor(0x000000, 0);
+    renderer.clear(true, false, false);
+    renderer.render(identityScene, camera);
+    renderer.setClearColor(0x020109, 1);
     renderer.setRenderTarget(sceneTarget);
     renderer.render(identityScene, camera);
     if (galleryHasVisibleVisual) renderer.render(galleryScene, camera);
@@ -1881,9 +1945,12 @@ async function startReferenceWorld(
     fluid?.dispose();
     sceneTarget.dispose();
     backgroundTarget.dispose();
+    identityTarget.dispose();
     bloomBrightTarget.dispose();
     bloomVerticalTargets.forEach((target) => target.dispose());
     bloomHorizontalTargets.forEach((target) => target.dispose());
+    baseScene.remove(openingBackground.group);
+    openingBackground.dispose();
     wall.geometry.dispose();
     wallMaterial.dispose();
     heroWord.geometry.dispose();
