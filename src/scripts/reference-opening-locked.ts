@@ -764,7 +764,7 @@ const compositeFragmentShader = `
     color *= mix(1.3, 1.08, galleryProtect);
 
     vec4 identityLayer = texture2D(uIdentity, warpedUv);
-    float identityMask = smoothstep(0.04, 0.96, identityLayer.a) * (1.0 - galleryProtect);
+    float identityMask = smoothstep(0.008, 0.24, identityLayer.a) * (1.0 - galleryProtect);
     vec2 identityPixel = 1.0 / uResolution;
     float identityNeighbour = max(
       max(
@@ -777,18 +777,35 @@ const compositeFragmentShader = `
       )
     );
     float identityEdge = clamp(identityNeighbour - identityLayer.a, 0.0, 1.0) * (1.0 - galleryProtect);
-    float identityLuma = dot(identityLayer.rgb, vec3(0.2126, 0.7152, 0.0722));
-    vec3 identitySilver = mix(
-      identityLayer.rgb,
-      vec3(identityLuma) * vec3(0.92, 1.00, 1.13),
-      0.32
+    vec3 identitySource = clamp(
+      identityLayer.rgb / max(identityLayer.a, 0.045),
+      vec3(0.0),
+      vec3(1.35)
     );
-    vec3 readableIdentity = identitySilver * 1.23 + vec3(0.024, 0.034, 0.060);
-    color = mix(color, max(color, readableIdentity), identityMask * 0.48);
+    float identityLuma = dot(identitySource, vec3(0.2126, 0.7152, 0.0722));
+    vec3 identitySilver = mix(
+      identitySource,
+      vec3(identityLuma) * vec3(0.90, 1.00, 1.15),
+      0.28
+    );
+    float identityResponse = smoothstep(0.025, 0.78, identityLuma);
+    vec3 environmentalSilver = mix(
+      vec3(0.055, 0.12, 0.28),
+      vec3(0.075, 0.20, 0.19),
+      smoothstep(0.46, 0.84, vUv.x)
+    );
+    vec3 readableIdentity = mix(
+      vec3(0.085, 0.13, 0.22),
+      identitySilver * 1.48 + vec3(0.055, 0.075, 0.12),
+      0.34 + identityResponse * 0.66
+    );
+    readableIdentity += environmentalSilver * (0.16 + identityResponse * 0.12);
+    float identityDensity = mix(0.70, 0.86, identityResponse);
+    color = mix(color, max(readableIdentity, color * 0.42), identityMask * identityDensity);
     float darkIdentity = (1.0 - smoothstep(0.06, 0.30, identityLuma)) * identityMask;
     float rightSideSupport = mix(0.64, 1.0, smoothstep(0.46, 0.84, vUv.x));
-    color += vec3(0.034, 0.048, 0.084) * darkIdentity * rightSideSupport;
-    color += vec3(0.065, 0.094, 0.17) * identityEdge * 0.52;
+    color += vec3(0.026, 0.044, 0.086) * darkIdentity * rightSideSupport;
+    color += vec3(0.072, 0.11, 0.20) * identityEdge * 0.58;
 
     vec3 smokeTint = mix(vec3(0.12, 0.22, 0.34), vec3(0.20, 0.10, 0.34), vUv.y);
     color = mix(color, color * 1.035 + smokeTint * 0.095, smoke * 0.74);
