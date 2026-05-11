@@ -320,6 +320,7 @@ const tileFragmentShader = /* glsl */ `
 
     const float WORDMARK_ASPECT = 787.842 / 209.0;
     vec2 logoUv = vGlobalUv;
+    float logo = 0.0;
     if (uSymbolMode < 0.5) {
       logoUv -= 0.5;
       logoUv.y *= WORDMARK_ASPECT;
@@ -327,6 +328,7 @@ const tileFragmentShader = /* glsl */ `
       vec2 tileUv = logoUv * 2.0;
       tileUv.x += sin(floor(tileUv.y) * 3.0 + uTime) * 0.1;
       logoUv = fract(tileUv) * 1.3;
+      logo = texture2D(uWordmark, logoUv).a;
     } else if (uSymbolMode < 1.5) {
       logoUv -= 0.5;
       logoUv.y *= WORDMARK_ASPECT;
@@ -336,24 +338,21 @@ const tileFragmentShader = /* glsl */ `
       tileUv.x += uTime * 0.05 * sign(floor(tileUv.y));
       logoUv = fract(tileUv);
       if (abs(floor(tileUv.y)) < 0.5) logoUv = vec2(0.0);
+      logo = texture2D(uWordmark, logoUv).a;
     } else {
-      logoUv = vUv - 0.5;
-      logoUv.x /= WORDMARK_ASPECT;
-      logoUv += 0.5;
+      logoUv = vUv;
       logoUv.y -= uTime * 0.5 * vInstanceId.x;
       logoUv.y = fract(logoUv.y);
       logoUv -= 0.5;
       logoUv *= 1.3 + vInstanceId.z * 5.0;
       logoUv += 0.5;
-      logoUv.x -= 0.38;
-      if (
-        logoUv.x > 0.23 || logoUv.x < 0.0 ||
-        logoUv.y > 1.0 || logoUv.y < 0.0 ||
-        vInstanceId.y < 0.0
-      ) logoUv = vec2(0.0);
+      logo = texture2D(uSymbol, logoUv).a;
+      if (vInstanceId.y < 0.0) logo = 0.0;
     }
-    float logo = texture2D(uWordmark, logoUv).a;
-    float logoWeight = smoothstep(0.10, 0.86, logo) * step(0.0, logoUv.y) * step(logoUv.y, 1.0);
+    float logoBounds =
+      step(0.0, logoUv.x) * step(logoUv.x, 1.0) *
+      step(0.0, logoUv.y) * step(logoUv.y, 1.0);
+    float logoWeight = smoothstep(0.10, 0.86, logo) * logoBounds;
     displayColor += vec3(logoWeight * 0.28 * (1.0 - vBlackout));
 
     vec2 dotUv = fract(vGlobalUv * 414.0) - 0.5;
