@@ -1206,7 +1206,7 @@ async function startReferenceWorld(
   const openingBackground = createReferenceBackgroundSystem(renderer);
   baseScene.add(openingBackground.group);
 
-  const heroWordBaseOpacity = 0;
+  const heroWordBaseOpacity = phoneClassPointer ? 0.78 : 0;
   const heroWordPromise = Promise.resolve().then(() => {
     const heroWordMaterial = new THREE.MeshBasicMaterial({
       map: createWordTexture(wordTextureWidth),
@@ -1582,7 +1582,7 @@ async function startReferenceWorld(
     responsiveIdentityScale =
       identityBaseScale *
       (width <= 820 ? clamp(camera.aspect / 0.74, 0.62, 0.94) : desktopIdentityFit);
-    responsiveWordScale = width <= 820 ? clamp(camera.aspect * 0.74, 0.34, 0.72) : 1;
+    responsiveWordScale = width <= 820 ? clamp(camera.aspect * 1.28, 0.52, 0.64) : 1;
     heroWord.scale.setScalar(responsiveWordScale);
     heroWord.updateMatrix();
     galleryGroup.scale.setScalar(width <= 820 ? 0.54 : 0.6);
