@@ -1841,16 +1841,13 @@ async function startReferenceWorld(
       fluid.step(deltaSeconds);
       compositeUniforms.uFluid.value = fluid.texture;
     }
-    const openingBackgroundActive = renderedGalleryPresence < 0.02;
-    openingBackground.group.visible = openingBackgroundActive;
-    wall.visible = !openingBackgroundActive;
-    if (openingBackgroundActive) {
-      const backgroundElapsed =
-        backgroundTimeOverride !== null && Number.isFinite(backgroundTimeOverride)
-          ? backgroundTimeOverride
-          : elapsed;
-      openingBackground.update(backgroundElapsed, fluid?.texture ?? null);
-    }
+    openingBackground.group.visible = true;
+    wall.visible = false;
+    const backgroundElapsed =
+      backgroundTimeOverride !== null && Number.isFinite(backgroundTimeOverride)
+        ? backgroundTimeOverride
+        : elapsed;
+    openingBackground.update(backgroundElapsed, fluid?.texture ?? null);
     const reveal = reducedMotion ? 1 : clamp((time - revealStart) / 2600);
     compositeUniforms.uReveal.value = smoothstep(0, 1, reveal);
 
