@@ -764,7 +764,10 @@ const compositeFragmentShader = `
     color *= mix(1.3, 1.08, galleryProtect);
 
     vec4 identityLayer = texture2D(uIdentity, warpedUv);
-    float identityMask = smoothstep(0.008, 0.24, identityLayer.a) * (1.0 - galleryProtect);
+    // Keep a restrained part of the authored metallic treatment in the gallery. The previous
+    // all-or-nothing cutoff exposed the raw rainbow layer as soon as projects appeared.
+    float identityTreatment = mix(1.0, 0.26, galleryProtect);
+    float identityMask = smoothstep(0.008, 0.24, identityLayer.a) * identityTreatment;
     vec2 identityPixel = 1.0 / uResolution;
     float identityNeighbour = max(
       max(
@@ -776,7 +779,8 @@ const compositeFragmentShader = `
         texture2D(uIdentity, warpedUv - vec2(0.0, identityPixel.y)).a
       )
     );
-    float identityEdge = clamp(identityNeighbour - identityLayer.a, 0.0, 1.0) * (1.0 - galleryProtect);
+    float identityEdge =
+      clamp(identityNeighbour - identityLayer.a, 0.0, 1.0) * mix(1.0, 0.18, galleryProtect);
     vec3 identitySource = clamp(
       identityLayer.rgb / max(identityLayer.a, 0.045),
       vec3(0.0),
@@ -787,6 +791,11 @@ const compositeFragmentShader = `
       identitySource,
       vec3(identityLuma) * vec3(0.90, 1.00, 1.15),
       0.28
+    );
+    identitySilver = mix(
+      identitySilver,
+      vec3(identityLuma) * vec3(0.82, 0.96, 1.12),
+      galleryProtect * 0.32
     );
     float identityResponse = smoothstep(0.025, 0.78, identityLuma);
     vec3 environmentalSilver = mix(
@@ -1847,7 +1856,12 @@ async function startReferenceWorld(
       backgroundTimeOverride !== null && Number.isFinite(backgroundTimeOverride)
         ? backgroundTimeOverride
         : elapsed;
-    openingBackground.update(backgroundElapsed, fluid?.texture ?? null);
+    openingBackground.update(
+      backgroundElapsed,
+      fluid?.texture ?? null,
+      renderedGalleryPresence,
+      renderedGalleryProgress,
+    );
     const reveal = reducedMotion ? 1 : clamp((time - revealStart) / 2600);
     compositeUniforms.uReveal.value = smoothstep(0, 1, reveal);
 

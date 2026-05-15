@@ -4,7 +4,12 @@ type PatternIndex = 0 | 1 | 2;
 
 export interface ReferenceBackgroundSystem {
   group: THREE.Group;
-  update: (elapsed: number, fluidTexture: THREE.Texture | null) => void;
+  update: (
+    elapsed: number,
+    fluidTexture: THREE.Texture | null,
+    galleryPresence?: number,
+    projectProgress?: number,
+  ) => void;
   resize: (camera: THREE.PerspectiveCamera, width: number, height: number, pixelRatio: number) => void;
   dispose: () => void;
 }
@@ -311,12 +316,52 @@ const tileFragmentShader = /* glsl */ `
   uniform sampler2D uWordmark;
   uniform sampler2D uFluid;
   uniform float uDisplayGain;
+  uniform float uGallery;
+  uniform float uProject;
+
+  vec3 projectPaletteLeft(float index) {
+    if (index < 0.5) return vec3(0.50, 0.11, 0.055);
+    if (index < 1.5) return vec3(0.15, 0.20, 0.52);
+    if (index < 2.5) return vec3(0.09, 0.43, 0.38);
+    return vec3(0.64, 0.27, 0.055);
+  }
+
+  vec3 projectPaletteRight(float index) {
+    if (index < 0.5) return vec3(0.34, 0.11, 0.46);
+    if (index < 1.5) return vec3(0.06, 0.38, 0.52);
+    if (index < 2.5) return vec3(0.39, 0.42, 0.10);
+    return vec3(0.10, 0.28, 0.52);
+  }
 
   void main() {
     vec3 currentPattern = texture2D(uPatternCurrent, vScreenUv).rgb;
     vec3 nextPattern = texture2D(uPatternNext, vScreenUv).rgb;
     vec3 displayColor = mix(currentPattern, nextPattern, vPatternMix);
     displayColor *= 1.0 - vBlackout;
+
+    float projectIndex = clamp(uProject, 0.0, 3.0);
+    float projectBase = floor(projectIndex);
+    float projectBlend = smoothstep(0.18, 0.82, fract(projectIndex));
+    vec3 projectLeft = mix(
+      projectPaletteLeft(projectBase),
+      projectPaletteLeft(min(projectBase + 1.0, 3.0)),
+      projectBlend
+    );
+    vec3 projectRight = mix(
+      projectPaletteRight(projectBase),
+      projectPaletteRight(min(projectBase + 1.0, 3.0)),
+      projectBlend
+    );
+    vec3 projectTint = mix(
+      projectLeft,
+      projectRight,
+      smoothstep(0.06, 0.94, vGlobalUv.x)
+    );
+    float displayLuma = dot(displayColor, vec3(0.2126, 0.7152, 0.0722));
+    vec3 projectColor = projectTint * (0.24 + displayLuma * 1.28);
+    projectColor = mix(projectColor, displayColor * 1.10, 0.20);
+    projectColor *= 1.0 - vBlackout;
+    displayColor = mix(displayColor, projectColor, uGallery * 0.84);
 
     const float WORDMARK_ASPECT = 787.842 / 209.0;
     vec2 logoUv = vGlobalUv;
@@ -353,7 +398,8 @@ const tileFragmentShader = /* glsl */ `
       step(0.0, logoUv.x) * step(logoUv.x, 1.0) *
       step(0.0, logoUv.y) * step(logoUv.y, 1.0);
     float logoWeight = smoothstep(0.10, 0.86, logo) * logoBounds;
-    displayColor += vec3(logoWeight * 0.28 * (1.0 - vBlackout));
+    float galleryLogoScale = mix(1.0, 0.30, uGallery);
+    displayColor += vec3(logoWeight * 0.28 * galleryLogoScale * (1.0 - vBlackout));
 
     vec2 dotUv = fract(vGlobalUv * 414.0) - 0.5;
     float dotMask = smoothstep(0.50, 0.20, length(dotUv));
@@ -365,6 +411,7 @@ const tileFragmentShader = /* glsl */ `
     vec2 fluidVelocity = texture2D(uFluid, clamp(vGlobalUv, 0.0, 1.0)).xy;
     float fluidEnergy = clamp(length(fluidVelocity) * 3.2, 0.0, 1.0);
     vec3 sideColor = vec3(0.02, 0.08, 0.12) + fluidEnergy * vec3(0.18, 0.62, 0.82);
+    sideColor = mix(sideColor, projectTint * 0.32, uGallery);
     vec3 color = mix(sideColor, displayColor, vFrontFace);
     color *= uDisplayGain;
     gl_FragColor = vec4(color, 1.0);
@@ -727,6 +774,8 @@ export function createReferenceBackgroundSystem(
     uWordmark: { value: wordmarkTexture },
     uFluid: { value: blackTexture as THREE.Texture },
     uDisplayGain: { value: patternGains[2] as number },
+    uGallery: { value: 0 },
+    uProject: { value: 0 },
   };
   const tileMaterial = new THREE.ShaderMaterial({
     uniforms: tileUniforms,
@@ -830,10 +879,17 @@ export function createReferenceBackgroundSystem(
     renderer.setRenderTarget(previousTarget);
   };
 
-  const update = (elapsed: number, fluidTexture: THREE.Texture | null) => {
+  const update = (
+    elapsed: number,
+    fluidTexture: THREE.Texture | null,
+    galleryPresence = 0,
+    projectProgress = 0,
+  ) => {
     renderProceduralTargets(elapsed);
     tileUniforms.uTime.value = elapsed;
     tileUniforms.uFluid.value = fluidTexture ?? blackTexture;
+    tileUniforms.uGallery.value = THREE.MathUtils.clamp(galleryPresence, 0, 1);
+    tileUniforms.uProject.value = THREE.MathUtils.clamp(projectProgress, 0, 3);
 
     let step = introSequence[introStep];
     while (step && elapsed >= step.at) {
