@@ -327,10 +327,10 @@ const tileFragmentShader = /* glsl */ `
   }
 
   vec3 projectPaletteRight(float index) {
-    if (index < 0.5) return vec3(0.34, 0.11, 0.46);
-    if (index < 1.5) return vec3(0.06, 0.38, 0.52);
-    if (index < 2.5) return vec3(0.39, 0.42, 0.10);
-    return vec3(0.10, 0.28, 0.52);
+    if (index < 0.5) return vec3(0.07, 0.34, 0.40);
+    if (index < 1.5) return vec3(0.05, 0.38, 0.55);
+    if (index < 2.5) return vec3(0.48, 0.38, 0.07);
+    return vec3(0.08, 0.34, 0.48);
   }
 
   void main() {
@@ -352,16 +352,20 @@ const tileFragmentShader = /* glsl */ `
       projectPaletteRight(min(projectBase + 1.0, 3.0)),
       projectBlend
     );
+    float spatialPaletteMix = smoothstep(0.06, 0.94, vGlobalUv.x);
+    float tilePaletteMix = fract(
+      sin(dot(vInstanceId.xy, vec2(12.9898, 78.233))) * 43758.5453
+    );
     vec3 projectTint = mix(
       projectLeft,
       projectRight,
-      smoothstep(0.06, 0.94, vGlobalUv.x)
+      mix(spatialPaletteMix, tilePaletteMix, 0.28)
     );
     float displayLuma = dot(displayColor, vec3(0.2126, 0.7152, 0.0722));
-    vec3 projectColor = projectTint * (0.24 + displayLuma * 1.28);
-    projectColor = mix(projectColor, displayColor * 1.10, 0.20);
+    vec3 projectColor = projectTint * (0.32 + displayLuma * 1.48);
+    projectColor = mix(projectColor, displayColor * 1.10, 0.18);
     projectColor *= 1.0 - vBlackout;
-    displayColor = mix(displayColor, projectColor, uGallery * 0.84);
+    displayColor = mix(displayColor, projectColor, uGallery * 0.88);
 
     const float WORDMARK_ASPECT = 787.842 / 209.0;
     vec2 logoUv = vGlobalUv;
