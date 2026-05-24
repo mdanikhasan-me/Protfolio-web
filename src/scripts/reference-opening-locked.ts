@@ -790,7 +790,7 @@ const compositeFragmentShader = `
     vec3 identitySilver = mix(
       identitySource,
       vec3(identityLuma) * vec3(0.90, 1.00, 1.15),
-      0.28
+      0.14
     );
     identitySilver = mix(
       identitySilver,
@@ -803,13 +803,12 @@ const compositeFragmentShader = `
       vec3(0.075, 0.20, 0.19),
       smoothstep(0.46, 0.84, vUv.x)
     );
-    vec3 readableIdentity = mix(
-      vec3(0.085, 0.13, 0.22),
-      identitySilver * 1.48 + vec3(0.055, 0.075, 0.12),
-      0.34 + identityResponse * 0.66
+    vec3 readableIdentity = max(
+      vec3(0.12, 0.16, 0.22),
+      identitySilver * (1.95 + identityResponse * 0.65) + vec3(0.07, 0.09, 0.13)
     );
-    readableIdentity += environmentalSilver * (0.16 + identityResponse * 0.12);
-    float identityDensity = mix(0.70, 0.86, identityResponse);
+    readableIdentity += environmentalSilver * (0.08 + identityResponse * 0.08);
+    float identityDensity = mix(0.90, 0.98, identityResponse);
     color = mix(color, max(readableIdentity, color * 0.42), identityMask * identityDensity);
     float darkIdentity = (1.0 - smoothstep(0.06, 0.30, identityLuma)) * identityMask;
     float rightSideSupport = mix(0.64, 1.0, smoothstep(0.46, 0.84, vUv.x));
