@@ -337,7 +337,12 @@ const tileFragmentShader = /* glsl */ `
     vec3 currentPattern = texture2D(uPatternCurrent, vScreenUv).rgb;
     vec3 nextPattern = texture2D(uPatternNext, vScreenUv).rgb;
     vec3 displayColor = mix(currentPattern, nextPattern, vPatternMix);
-    displayColor *= 1.0 - vBlackout;
+    float tilePaletteMix = fract(
+      sin(dot(vInstanceId.xy, vec2(12.9898, 78.233))) * 43758.5453
+    );
+    float stableProjectBlackout = step(0.84, tilePaletteMix);
+    float effectiveBlackout = mix(vBlackout, stableProjectBlackout, uGallery);
+    displayColor *= 1.0 - effectiveBlackout;
 
     float projectIndex = clamp(uProject, 0.0, 3.0);
     float projectBase = floor(projectIndex);
@@ -353,19 +358,18 @@ const tileFragmentShader = /* glsl */ `
       projectBlend
     );
     float spatialPaletteMix = smoothstep(0.06, 0.94, vGlobalUv.x);
-    float tilePaletteMix = fract(
-      sin(dot(vInstanceId.xy, vec2(12.9898, 78.233))) * 43758.5453
-    );
     vec3 projectTint = mix(
       projectLeft,
       projectRight,
       mix(spatialPaletteMix, tilePaletteMix, 0.28)
     );
-    float displayLuma = dot(displayColor, vec3(0.2126, 0.7152, 0.0722));
-    vec3 projectColor = projectTint * (0.32 + displayLuma * 1.48);
-    projectColor = mix(projectColor, displayColor * 1.10, 0.18);
-    projectColor *= 1.0 - vBlackout;
-    displayColor = mix(displayColor, projectColor, uGallery * 0.88);
+    float stablePanelLight = 0.64 + tilePaletteMix * 0.30 + spatialPaletteMix * 0.08;
+    vec3 projectColor = projectTint * stablePanelLight;
+    projectColor = mix(projectColor, displayColor * 1.04, 0.04);
+    float projectLuma = dot(projectColor, vec3(0.2126, 0.7152, 0.0722));
+    projectColor = mix(vec3(projectLuma), projectColor, 1.45) * 1.22;
+    projectColor *= 1.0 - effectiveBlackout;
+    displayColor = mix(displayColor, projectColor, uGallery * 0.98);
 
     const float WORDMARK_ASPECT = 787.842 / 209.0;
     vec2 logoUv = vGlobalUv;
@@ -402,8 +406,15 @@ const tileFragmentShader = /* glsl */ `
       step(0.0, logoUv.x) * step(logoUv.x, 1.0) *
       step(0.0, logoUv.y) * step(logoUv.y, 1.0);
     float logoWeight = smoothstep(0.10, 0.86, logo) * logoBounds;
+    vec2 galleryLogoUv = (vUv - 0.5) * 1.35 + 0.5;
+    float galleryLogoBounds =
+      step(0.0, galleryLogoUv.x) * step(galleryLogoUv.x, 1.0) *
+      step(0.0, galleryLogoUv.y) * step(galleryLogoUv.y, 1.0);
+    float galleryLogoWeight =
+      smoothstep(0.10, 0.86, texture2D(uSymbol, galleryLogoUv).a) * galleryLogoBounds;
+    logoWeight = mix(logoWeight, galleryLogoWeight, uGallery);
     float galleryLogoScale = mix(1.0, 0.30, uGallery);
-    displayColor += vec3(logoWeight * 0.28 * galleryLogoScale * (1.0 - vBlackout));
+    displayColor += vec3(logoWeight * 0.28 * galleryLogoScale * (1.0 - effectiveBlackout));
 
     vec2 dotUv = fract(vGlobalUv * 414.0) - 0.5;
     float dotMask = smoothstep(0.50, 0.20, length(dotUv));
