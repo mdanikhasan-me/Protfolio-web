@@ -766,7 +766,7 @@ const compositeFragmentShader = `
     vec4 identityLayer = texture2D(uIdentity, warpedUv);
     // Keep a restrained part of the authored metallic treatment in the gallery. The previous
     // all-or-nothing cutoff exposed the raw rainbow layer as soon as projects appeared.
-    float identityTreatment = mix(1.0, 0.26, galleryProtect);
+    float identityTreatment = mix(1.0, 0.16, galleryProtect);
     float identityMask = smoothstep(0.008, 0.24, identityLayer.a) * identityTreatment;
     vec2 identityPixel = 1.0 / uResolution;
     float identityNeighbour = max(
@@ -808,6 +808,8 @@ const compositeFragmentShader = `
       identitySilver * (1.95 + identityResponse * 0.65) + vec3(0.07, 0.09, 0.13)
     );
     readableIdentity += environmentalSilver * (0.08 + identityResponse * 0.08);
+    vec3 galleryResponsiveIdentity = mix(readableIdentity * 0.55, color * 1.18, 0.62);
+    readableIdentity = mix(readableIdentity, galleryResponsiveIdentity, galleryProtect);
     float identityDensity = mix(0.90, 0.98, identityResponse);
     color = mix(color, max(readableIdentity, color * 0.42), identityMask * identityDensity);
     float darkIdentity = (1.0 - smoothstep(0.06, 0.30, identityLuma)) * identityMask;
