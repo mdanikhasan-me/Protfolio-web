@@ -183,10 +183,15 @@ const violetPatternFragmentShader = /* glsl */ `
       vec3(0.698, 0.929, 1.0),
       smoothstep(0.50, 0.90, noise.a)
     );
+    vec3 earlyBlueField = mix(
+      vec3(0.025, 0.10, 0.42),
+      vec3(0.06, 0.32, 0.68),
+      smoothstep(0.42, 0.90, noise.a)
+    );
     vec3 color = coolField;
     color = mix(color, vec3(0.992, 0.373, 0.047), smoothstep(0.50, 1.0, noise.g));
     float earlyCool = 1.0 - smoothstep(20.0, 23.5, uTime);
-    color = mix(color, coolField, earlyCool * 0.82);
+    color = mix(color, earlyBlueField, earlyCool * 0.94);
     float latePhase = smoothstep(22.0, 30.0, uTime);
     float warmLeft = latePhase * smoothstep(0.68, 0.05, vUv.x) * smoothstep(0.02, 0.78, vUv.y);
     float neutralUpper = latePhase * smoothstep(0.54, 0.96, vUv.y) * smoothstep(0.94, 0.18, vUv.x);
