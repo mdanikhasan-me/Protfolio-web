@@ -1216,10 +1216,11 @@ async function startReferenceWorld(
   const openingBackground = createReferenceBackgroundSystem(renderer);
   baseScene.add(openingBackground.group);
 
-  const heroWordBaseOpacity = phoneClassPointer ? 0.78 : 0.1;
+  const heroWordBaseOpacity = phoneClassPointer ? 0.78 : 1;
   const heroWordPromise = Promise.resolve().then(() => {
     const heroWordMaterial = new THREE.MeshBasicMaterial({
       map: createWordTexture(wordTextureWidth),
+      color: phoneClassPointer ? 0xffffff : 0x424854,
       transparent: true,
       alphaTest: 0.012,
       opacity: heroWordBaseOpacity,
