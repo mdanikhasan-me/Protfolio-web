@@ -473,7 +473,7 @@ const gridFragmentShader = /* glsl */ `
     float horizontal = 1.0 - smoothstep(0.0, antialias.y, distanceToLine.y);
     float line = max(vertical, horizontal);
     float edgeFade = smoothstep(0.58, 0.08, length(vUv - 0.5));
-    gl_FragColor = vec4(vec3(0.48, 0.58, 0.64), line * 0.12 * edgeFade);
+    gl_FragColor = vec4(vec3(0.48, 0.58, 0.64), line * 0.24 * edgeFade);
   }
 `;
 
