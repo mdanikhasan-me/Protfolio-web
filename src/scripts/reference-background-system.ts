@@ -150,6 +150,14 @@ const colorPatternFragmentShader = /* glsl */ `
       vec3(0.18, 0.22, 0.20) * (0.72 + noise.r * 0.28),
       neutralUpper * 0.26
     );
+    float warmPhase = smoothstep(12.5, 15.0, uTime);
+    float warmLeft = smoothstep(0.72, 0.12, vUv.x);
+    vec3 warmField = mix(
+      vec3(0.42, 0.08, 0.16),
+      vec3(0.74, 0.12, 0.045),
+      smoothstep(13.5, 15.0, uTime)
+    ) * (0.62 + noise.r * 0.38);
+    color = mix(color, warmField, warmPhase * warmLeft * 0.78);
     gl_FragColor = vec4(color, 1.0);
   }
 `;
