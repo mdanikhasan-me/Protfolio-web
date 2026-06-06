@@ -1220,7 +1220,7 @@ async function startReferenceWorld(
   const heroWordPromise = Promise.resolve().then(() => {
     const heroWordMaterial = new THREE.MeshBasicMaterial({
       map: createWordTexture(wordTextureWidth),
-      color: phoneClassPointer ? 0xffffff : 0x424854,
+      color: phoneClassPointer ? 0xffffff : 0xb8bcc6,
       transparent: true,
       alphaTest: 0.012,
       opacity: heroWordBaseOpacity,
