@@ -290,18 +290,40 @@ const mediaBase: Record<string, string> = {
 
   <section class="home-contact" aria-labelledby="home-contact-title">
     <div class="home-contact-sticky">
-      <p class="home-contact-kicker">Have a project in mind?</p>
+      <div class="home-contact-stage">
+        <div class="home-contact-copy">
+          <p class="home-contact-kicker">Have a project in mind?</p>
+          <span class="home-contact-kicker-rule" aria-hidden="true"></span>
+          <h2 class="home-contact-title" id="home-contact-title">
+            <span>Send me</span>
+            <span>a message<span class="home-contact-period">.</span></span>
+          </h2>
+        </div>
 
-      <div class="home-contact-type">
-        <h2 class="home-contact-title" id="home-contact-title">
-          <span>Send me</span>
-          <span>a message.</span>
-        </h2>
+        <figure class="home-contact-visual" aria-hidden="true">
+          <video
+            data-contact-video
+            data-src="/media/contact/working-contact-loop.webm"
+            poster="/media/contact/working-contact-poster.webp"
+            width="960"
+            height="960"
+            muted
+            loop
+            playsinline
+            preload="none"
+          ></video>
+        </figure>
       </div>
 
       <div class="home-contact-routes">
-        <a href={`mailto:${SITE.email}`}>{SITE.email} <span aria-hidden="true">&nearr;</span></a>
-        <a href={SITE.discord} rel="me">Discord <span aria-hidden="true">&nearr;</span></a>
+        <a href={`mailto:${SITE.email}`}>
+          <span>{SITE.email}</span>
+          <strong>Send email <span aria-hidden="true">&nearr;</span></strong>
+        </a>
+        <a href={SITE.discord} rel="me">
+          <span>Discord</span>
+          <strong>Open chat <span aria-hidden="true">&nearr;</span></strong>
+        </a>
       </div>
     </div>
   </section>
@@ -309,5 +331,41 @@ const mediaBase: Record<string, string> = {
   <script>
     import '../scripts/reference-opening-locked';
     import '../scripts/home-state';
+
+    const contactVideo = document.querySelector<HTMLVideoElement>('[data-contact-video]');
+    if (contactVideo) {
+      const contactReduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+      let contactVideoLoaded = false;
+
+      const loadContactVideo = () => {
+        if (contactVideoLoaded || contactReduceMotion.matches) return;
+        const source = contactVideo.dataset.src;
+        if (!source) return;
+        contactVideoLoaded = true;
+        contactVideo.src = source;
+        contactVideo.load();
+      };
+
+      if ('IntersectionObserver' in window && !contactReduceMotion.matches) {
+        const contactVideoObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                loadContactVideo();
+                void contactVideo.play().catch(() => undefined);
+              } else {
+                contactVideo.pause();
+              }
+            });
+          },
+          { rootMargin: '320px 0px', threshold: 0.01 },
+        );
+        contactVideoObserver.observe(contactVideo);
+        addEventListener('pagehide', () => contactVideoObserver.disconnect(), { once: true });
+      } else if (!contactReduceMotion.matches) {
+        loadContactVideo();
+        void contactVideo.play().catch(() => undefined);
+      }
+    }
   </script>
 </BaseLayout>
