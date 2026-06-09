@@ -401,7 +401,7 @@ const tileFragmentShader = /* glsl */ `
       logoUv *= 1.1;
       logoUv += 0.5;
       vec2 tileUv = logoUv;
-      tileUv.x += uTime * 0.05 * sign(floor(tileUv.y));
+      tileUv.x += uTime * 0.05;
       logoUv = fract(tileUv);
       if (abs(floor(tileUv.y)) < 0.5) logoUv = vec2(0.0);
       logo = texture2D(uWordmark, logoUv).a;
@@ -867,18 +867,19 @@ export function createReferenceBackgroundSystem(
   let nextUvShiftAt = 0.4;
   let introStep = 0;
   const introSequence = [
-    { at: 2.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30, symbol: 0 },
-    { at: 5.2, pattern: 0 as PatternIndex, transition: 0, duration: 0.0, symbol: 1 },
-    { at: 15.5, pattern: 2 as PatternIndex, transition: 1, duration: 0.30, symbol: 1 },
-    { at: 26.0, pattern: 2 as PatternIndex, transition: 0, duration: 0.0, symbol: 2 },
+    { at: 2.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 5.2, pattern: 0 as PatternIndex, transition: 0, duration: 0.0 },
+    { at: 15.5, pattern: 2 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 26.0, pattern: 2 as PatternIndex, transition: 0, duration: 0.0 },
   ];
+  const motifCycleStart = 5.2;
+  const motifHoldDuration = 4.0;
 
   const beginPatternChange = (
     elapsed: number,
     pattern: PatternIndex,
     transition: number,
     duration: number,
-    symbolMode: number,
   ) => {
     currentPattern = nextPattern;
     nextPattern = pattern;
@@ -886,7 +887,6 @@ export function createReferenceBackgroundSystem(
     tileUniforms.uPatternNext.value = patternTargets[nextPattern].texture;
     tileUniforms.uPatternMix.value = duration === 0 ? 1 : 0;
     tileUniforms.uTransitionType.value = transition;
-    tileUniforms.uSymbolMode.value = symbolMode;
     tileUniforms.uDisplayGain.value = patternGains[pattern];
     transitionStart = elapsed;
     transitionDuration = duration;
@@ -921,9 +921,15 @@ export function createReferenceBackgroundSystem(
 
     let step = introSequence[introStep];
     while (step && elapsed >= step.at) {
-      beginPatternChange(step.at, step.pattern, step.transition, step.duration, step.symbol);
+      beginPatternChange(step.at, step.pattern, step.transition, step.duration);
       introStep += 1;
       step = introSequence[introStep];
+    }
+
+    const motifStep = Math.floor(Math.max(0, elapsed - motifCycleStart) / motifHoldDuration);
+    const symbolMode = elapsed < motifCycleStart ? 0 : motifStep % 2 === 0 ? 2 : 1;
+    if (tileUniforms.uSymbolMode.value !== symbolMode) {
+      tileUniforms.uSymbolMode.value = symbolMode;
     }
 
     if (transitionDuration > 0) {
