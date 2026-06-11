@@ -441,7 +441,7 @@ const tileFragmentShader = /* glsl */ `
     vec3 sideColor = vec3(0.02, 0.08, 0.12) + fluidEnergy * vec3(0.18, 0.62, 0.82);
     sideColor = mix(sideColor, projectTint * 0.32, uGallery);
     vec3 color = mix(sideColor, displayColor, vFrontFace);
-    color *= uDisplayGain;
+    color *= mix(uDisplayGain, 0.50, uGallery);
     gl_FragColor = vec4(color, 1.0);
   }
 `;
@@ -717,7 +717,7 @@ const patternParams = [
   { blackout: 0.22, uvShift: 0.32, uvIntervalMin: 0.10, uvIntervalRange: 5.0 },
 ] as const;
 
-const patternGains = [0.50, 0.50, 0.50] as const;
+const patternGains = [1.15, 1.15, 1.15] as const;
 
 export function createReferenceBackgroundSystem(
   renderer: THREE.WebGLRenderer,
