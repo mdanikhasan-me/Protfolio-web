@@ -866,12 +866,72 @@ export function createReferenceBackgroundSystem(
   let nextBlackoutAt = 0.8;
   let nextUvShiftAt = 0.4;
   let introStep = 0;
-  const introSequence = [
+  const openingPatternSequence = [
     { at: 2.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 5.2, pattern: 0 as PatternIndex, transition: 0, duration: 0.0 },
-    { at: 15.5, pattern: 2 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 26.0, pattern: 2 as PatternIndex, transition: 0, duration: 0.0 },
+    { at: 5.8, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 12.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 16.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 17.8, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 19.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 20.8, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 24.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 30.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 33.8, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 35.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 44.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 46.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 47.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 48.8, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 50.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 51.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 52.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 53.8, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 56.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 58.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 61.8, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 63.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 64.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 67.8, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 72.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 73.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 74.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 76.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 80.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 82.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 85.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 87.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 92.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 94.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 97.8, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 99.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 101.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 109.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 111.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 119.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 123.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 129.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 131.8, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 133.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 135.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 139.8, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 143.8, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
   ];
+  const ambientPatternCycle = [
+    { duration: 6.0, pattern: 2 as PatternIndex },
+    { duration: 3.0, pattern: 1 as PatternIndex },
+    { duration: 5.0, pattern: 0 as PatternIndex },
+    { duration: 2.0, pattern: 1 as PatternIndex },
+    { duration: 7.0, pattern: 2 as PatternIndex },
+    { duration: 3.0, pattern: 1 as PatternIndex },
+    { duration: 5.0, pattern: 0 as PatternIndex },
+    { duration: 2.0, pattern: 1 as PatternIndex },
+  ] as const;
+  const ambientCycleStart = 144.0;
+  const ambientCycleDuration = ambientPatternCycle.reduce(
+    (duration, segment) => duration + segment.duration,
+    0,
+  );
+  let ambientSegment = -1;
   const motifCycleStart = 5.2;
   const motifHoldDuration = 4.0;
 
@@ -919,11 +979,29 @@ export function createReferenceBackgroundSystem(
     tileUniforms.uGallery.value = THREE.MathUtils.clamp(galleryPresence, 0, 1);
     tileUniforms.uProject.value = THREE.MathUtils.clamp(projectProgress, 0, 3);
 
-    let step = introSequence[introStep];
+    let step = openingPatternSequence[introStep];
     while (step && elapsed >= step.at) {
       beginPatternChange(step.at, step.pattern, step.transition, step.duration);
       introStep += 1;
-      step = introSequence[introStep];
+      step = openingPatternSequence[introStep];
+    }
+
+    if (elapsed >= ambientCycleStart) {
+      const cycleElapsed = (elapsed - ambientCycleStart) % ambientCycleDuration;
+      let segmentElapsed = 0;
+      let nextAmbientSegment = 0;
+      for (let index = 0; index < ambientPatternCycle.length; index += 1) {
+        segmentElapsed += ambientPatternCycle[index]?.duration ?? 0;
+        if (cycleElapsed < segmentElapsed) {
+          nextAmbientSegment = index;
+          break;
+        }
+      }
+      if (ambientSegment !== nextAmbientSegment) {
+        ambientSegment = nextAmbientSegment;
+        const segment = ambientPatternCycle[ambientSegment] ?? ambientPatternCycle[0];
+        beginPatternChange(elapsed, segment.pattern, 1, segment.pattern === 1 ? 0.30 : 0.34);
+      }
     }
 
     const motifStep = Math.floor(Math.max(0, elapsed - motifCycleStart) / motifHoldDuration);
