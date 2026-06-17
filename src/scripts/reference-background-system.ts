@@ -2,6 +2,14 @@ import * as THREE from 'three';
 
 type PatternIndex = 0 | 1 | 2;
 
+type OpeningPatternStep = {
+  at: number;
+  pattern: PatternIndex;
+  transition: number;
+  duration: number;
+  palette?: number;
+};
+
 export interface ReferenceBackgroundSystem {
   group: THREE.Group;
   update: (
@@ -129,35 +137,36 @@ const colorPatternFragmentShader = /* glsl */ `
   varying vec2 vUv;
   uniform sampler2D uNoise;
   uniform float uTime;
+  uniform float uPaletteMode;
 
   void main() {
     vec4 noise = texture2D(uNoise, vUv);
-    vec3 color = vec3(
-      smoothstep(0.5, 1.0, noise.r),
-      smoothstep(0.2, 1.0, noise.g),
-      smoothstep(0.0, 1.0, noise.b)
-    );
-    color *= vec3(0.60, 0.80, 1.20);
-    vec3 blueField = vec3(0.03, 0.20, 0.72) * (0.46 + noise.b * 0.54);
-    vec3 oliveField = vec3(0.14, 0.78, 0.06) * (0.64 + noise.g * 0.36);
-    float blueLeft = smoothstep(0.74, 0.04, vUv.x) * 0.44;
-    float oliveRight = smoothstep(0.38, 0.90, vUv.x) * 0.76;
-    float neutralUpper = smoothstep(0.60, 0.96, vUv.y) * smoothstep(0.94, 0.14, vUv.x);
-    color = mix(color, blueField, blueLeft);
-    color = mix(color, oliveField, oliveRight);
-    color = mix(
-      color,
-      vec3(0.18, 0.22, 0.20) * (0.72 + noise.r * 0.28),
-      neutralUpper * 0.26
-    );
-    float warmPhase = smoothstep(12.5, 15.0, uTime);
-    float warmLeft = smoothstep(0.72, 0.12, vUv.x);
-    vec3 warmField = mix(
-      vec3(0.42, 0.08, 0.16),
-      vec3(0.74, 0.12, 0.045),
-      smoothstep(13.5, 15.0, uTime)
-    ) * (0.62 + noise.r * 0.38);
-    color = mix(color, warmField, warmPhase * warmLeft * 0.78);
+    vec3 leftColor = vec3(0.035, 0.30, 0.62);
+    vec3 rightColor = vec3(0.035, 0.46, 0.16);
+    vec3 upperColor = vec3(0.18, 0.24, 0.28);
+    float upperStrength = 0.18;
+    if (uPaletteMode > 0.5 && uPaletteMode < 1.5) {
+      leftColor = vec3(0.028, 0.16, 0.60);
+      rightColor = vec3(0.035, 0.48, 0.54);
+      upperColor = vec3(0.22, 0.28, 0.38);
+    } else if (uPaletteMode >= 1.5 && uPaletteMode < 2.5) {
+      leftColor = vec3(0.46, 0.075, 0.15);
+      rightColor = vec3(0.19, 0.085, 0.54);
+      upperColor = vec3(0.30, 0.25, 0.36);
+    } else if (uPaletteMode >= 2.5) {
+      leftColor = vec3(0.055, 0.18, 0.58);
+      rightColor = vec3(0.035, 0.46, 0.18);
+      upperColor = vec3(0.48, 0.075, 0.30);
+      upperStrength = 0.48;
+    }
+    float horizontalMix = smoothstep(0.08, 0.92, vUv.x + (noise.a - 0.5) * 0.10);
+    float signal = 0.54 + noise.b * 0.28 + noise.r * 0.10;
+    float pulse = 0.94 + sin(uTime * 0.16 + noise.a * 3.14159) * 0.06;
+    vec3 color = mix(leftColor, rightColor, horizontalMix) * signal * pulse;
+    float upperField = smoothstep(0.46, 0.96, vUv.y) * (upperStrength + noise.g * 0.12);
+    color = mix(color, upperColor * (0.58 + noise.r * 0.24), upperField);
+    float highlight = smoothstep(0.74, 0.98, noise.a) * 0.16;
+    color = mix(color, color * 1.36 + vec3(0.035, 0.055, 0.075), highlight);
     gl_FragColor = vec4(color, 1.0);
   }
 `;
@@ -182,37 +191,34 @@ const violetPatternFragmentShader = /* glsl */ `
   varying vec2 vUv;
   uniform sampler2D uNoise;
   uniform float uTime;
+  uniform float uPaletteMode;
 
   void main() {
     vec4 noise = texture2D(uNoise, vUv);
-    vec3 violetBase = vec3(0.345, 0.098, 0.992) * vec3(0.60, 0.60, 1.0);
-    vec3 coolField = mix(
-      violetBase,
-      vec3(0.698, 0.929, 1.0),
-      smoothstep(0.50, 0.90, noise.a)
-    );
-    vec3 earlyBlueField = mix(
-      vec3(0.025, 0.10, 0.42),
-      vec3(0.06, 0.32, 0.68),
-      smoothstep(0.42, 0.90, noise.a)
-    );
-    vec3 color = coolField;
-    color = mix(color, vec3(0.992, 0.373, 0.047), smoothstep(0.50, 1.0, noise.g));
-    float earlyCool = 1.0 - smoothstep(20.0, 23.5, uTime);
-    color = mix(color, earlyBlueField, earlyCool * 0.94);
-    float latePhase = smoothstep(22.0, 30.0, uTime);
-    float warmLeft = latePhase * smoothstep(0.68, 0.05, vUv.x) * smoothstep(0.02, 0.78, vUv.y);
-    float neutralUpper = latePhase * smoothstep(0.54, 0.96, vUv.y) * smoothstep(0.94, 0.18, vUv.x);
-    color = mix(
-      color,
-      vec3(0.992, 0.373, 0.047) * (0.54 + noise.r * 0.32),
-      warmLeft * (0.48 + noise.b * 0.22)
-    );
-    color = mix(
-      color,
-      vec3(0.20, 0.22, 0.30) * (0.68 + noise.b * 0.28),
-      neutralUpper * (0.38 + noise.r * 0.16)
-    );
+    vec3 leftColor = vec3(0.025, 0.14, 0.50);
+    vec3 rightColor = vec3(0.27, 0.075, 0.62);
+    vec3 upperColor = vec3(0.15, 0.19, 0.30);
+    if (uPaletteMode > 0.5 && uPaletteMode < 1.5) {
+      leftColor = vec3(0.21, 0.085, 0.50);
+      rightColor = vec3(0.31, 0.36, 0.46);
+      upperColor = vec3(0.25, 0.28, 0.35);
+    } else if (uPaletteMode >= 1.5 && uPaletteMode < 2.5) {
+      leftColor = vec3(0.46, 0.075, 0.15);
+      rightColor = vec3(0.19, 0.085, 0.54);
+      upperColor = vec3(0.31, 0.22, 0.34);
+    } else if (uPaletteMode >= 2.5) {
+      leftColor = vec3(0.16, 0.075, 0.54);
+      rightColor = vec3(0.58, 0.12, 0.055);
+      upperColor = vec3(0.28, 0.22, 0.36);
+    }
+    float horizontalMix = smoothstep(0.06, 0.94, vUv.x + (noise.g - 0.5) * 0.12);
+    float signal = 0.50 + noise.b * 0.26 + noise.a * 0.10;
+    float pulse = 0.94 + sin(uTime * 0.14 + noise.r * 3.14159) * 0.06;
+    vec3 color = mix(leftColor, rightColor, horizontalMix) * signal * pulse;
+    float upperField = smoothstep(0.56, 0.96, vUv.y) * (0.18 + noise.r * 0.14);
+    color = mix(color, upperColor * (0.58 + noise.b * 0.25), upperField);
+    float coolHighlight = smoothstep(0.78, 0.98, noise.a) * 0.18;
+    color = mix(color, color * 1.30 + vec3(0.035, 0.050, 0.085), coolHighlight);
     gl_FragColor = vec4(color, 1.0);
   }
 `;
@@ -753,27 +759,36 @@ export function createReferenceBackgroundSystem(
     depthTest: false,
     depthWrite: false,
   });
-  const patternUniforms = {
+  const colorPatternUniforms = {
     uNoise: { value: noiseTarget.texture },
     uTime: { value: 0 },
+    uPaletteMode: { value: 0 },
+  };
+  const binaryPatternUniforms = {
+    uNoise: { value: noiseTarget.texture },
+  };
+  const violetPatternUniforms = {
+    uNoise: { value: noiseTarget.texture },
+    uTime: { value: 0 },
+    uPaletteMode: { value: 0 },
   };
   const patternMaterials = [
     new THREE.ShaderMaterial({
-      uniforms: patternUniforms,
+      uniforms: colorPatternUniforms,
       vertexShader: fullScreenVertexShader,
       fragmentShader: colorPatternFragmentShader,
       depthTest: false,
       depthWrite: false,
     }),
     new THREE.ShaderMaterial({
-      uniforms: patternUniforms,
+      uniforms: binaryPatternUniforms,
       vertexShader: fullScreenVertexShader,
       fragmentShader: binaryPatternFragmentShader,
       depthTest: false,
       depthWrite: false,
     }),
     new THREE.ShaderMaterial({
-      uniforms: patternUniforms,
+      uniforms: violetPatternUniforms,
       vertexShader: fullScreenVertexShader,
       fragmentShader: violetPatternFragmentShader,
       depthTest: false,
@@ -866,65 +881,89 @@ export function createReferenceBackgroundSystem(
   let nextBlackoutAt = 0.8;
   let nextUvShiftAt = 0.4;
   let introStep = 0;
-  const openingPatternSequence = [
+  const openingPatternSequence: OpeningPatternStep[] = [
     { at: 2.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 5.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 12.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 16.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 17.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 5.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
+    { at: 12.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
+    { at: 17.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 18.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
     { at: 19.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 20.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 24.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 30.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 34.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 20.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
+    { at: 25.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 29.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
+    { at: 31.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 34.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
     { at: 35.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 38.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 38.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
+    { at: 40.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 41.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
+    { at: 42.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
+    { at: 43.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
     { at: 44.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 46.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 47.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 48.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 46.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 48.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 49.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
     { at: 50.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 51.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 52.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 53.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 56.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 58.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 61.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 63.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 64.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 67.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 52.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
+    { at: 53.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 54.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 55.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 57.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 59.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 61.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
+    { at: 62.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
+    { at: 63.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 64.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
+    { at: 65.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 67.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
+    { at: 69.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
     { at: 72.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 73.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 74.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 76.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 74.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 75.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 76.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
+    { at: 77.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 78.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
     { at: 80.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 82.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 82.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
+    { at: 83.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 84.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
     { at: 85.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 87.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 88.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
     { at: 92.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 94.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 97.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 99.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 101.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 109.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 111.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 119.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 123.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 129.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 131.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 95.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
+    { at: 96.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 97.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 98.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
+    { at: 100.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 101.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 102.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 103.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
+    { at: 108.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 110.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 111.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 112.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
+    { at: 114.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 119.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
+    { at: 120.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 123.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
+    { at: 124.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 126.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
+    { at: 130.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 132.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
     { at: 133.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 135.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
-    { at: 139.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 143.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34 },
+    { at: 136.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
+    { at: 137.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
+    { at: 140.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
+    { at: 143.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
   ];
   const ambientPatternCycle = [
-    { duration: 6.0, pattern: 2 as PatternIndex },
+    { duration: 6.0, pattern: 2 as PatternIndex, palette: 3 },
     { duration: 3.0, pattern: 1 as PatternIndex },
-    { duration: 5.0, pattern: 0 as PatternIndex },
+    { duration: 5.0, pattern: 0 as PatternIndex, palette: 0 },
     { duration: 2.0, pattern: 1 as PatternIndex },
-    { duration: 7.0, pattern: 2 as PatternIndex },
+    { duration: 7.0, pattern: 2 as PatternIndex, palette: 1 },
     { duration: 3.0, pattern: 1 as PatternIndex },
-    { duration: 5.0, pattern: 0 as PatternIndex },
+    { duration: 5.0, pattern: 0 as PatternIndex, palette: 1 },
     { duration: 2.0, pattern: 1 as PatternIndex },
   ] as const;
   const ambientCycleStart = 144.0;
@@ -941,7 +980,13 @@ export function createReferenceBackgroundSystem(
     pattern: PatternIndex,
     transition: number,
     duration: number,
+    paletteMode = 0,
   ) => {
+    if (pattern === 0) {
+      colorPatternUniforms.uPaletteMode.value = paletteMode;
+    } else if (pattern === 2) {
+      violetPatternUniforms.uPaletteMode.value = paletteMode;
+    }
     currentPattern = nextPattern;
     nextPattern = pattern;
     tileUniforms.uPatternCurrent.value = patternTargets[currentPattern].texture;
@@ -956,7 +1001,8 @@ export function createReferenceBackgroundSystem(
   const renderProceduralTargets = (elapsed: number) => {
     const previousTarget = renderer.getRenderTarget();
     noiseUniforms.uTime.value = elapsed;
-    patternUniforms.uTime.value = elapsed;
+    colorPatternUniforms.uTime.value = elapsed;
+    violetPatternUniforms.uTime.value = elapsed;
     proceduralMesh.material = noiseMaterial;
     renderer.setRenderTarget(noiseTarget);
     renderer.render(proceduralScene, proceduralCamera);
@@ -982,7 +1028,7 @@ export function createReferenceBackgroundSystem(
 
     let step = openingPatternSequence[introStep];
     while (step && elapsed >= step.at) {
-      beginPatternChange(step.at, step.pattern, step.transition, step.duration);
+      beginPatternChange(step.at, step.pattern, step.transition, step.duration, step.palette ?? 0);
       introStep += 1;
       step = openingPatternSequence[introStep];
     }
@@ -1001,7 +1047,13 @@ export function createReferenceBackgroundSystem(
       if (ambientSegment !== nextAmbientSegment) {
         ambientSegment = nextAmbientSegment;
         const segment = ambientPatternCycle[ambientSegment] ?? ambientPatternCycle[0];
-        beginPatternChange(elapsed, segment.pattern, 1, segment.pattern === 1 ? 0.30 : 0.34);
+        beginPatternChange(
+          elapsed,
+          segment.pattern,
+          1,
+          segment.pattern === 1 ? 0.30 : 0.34,
+          'palette' in segment ? segment.palette : 0,
+        );
       }
     }
 
