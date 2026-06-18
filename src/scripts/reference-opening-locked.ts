@@ -797,6 +797,7 @@ const compositeFragmentShader = `
       vec3(identityLuma) * vec3(0.82, 0.96, 1.12),
       galleryProtect * 0.32
     );
+    identitySilver *= 0.72;
     float identityResponse = smoothstep(0.025, 0.78, identityLuma);
     vec3 environmentalSilver = mix(
       vec3(0.055, 0.12, 0.28),
@@ -804,18 +805,18 @@ const compositeFragmentShader = `
       smoothstep(0.46, 0.84, vUv.x)
     );
     vec3 readableIdentity = max(
-      vec3(0.12, 0.16, 0.22),
-      identitySilver * (1.95 + identityResponse * 0.65) + vec3(0.07, 0.09, 0.13)
+      vec3(0.06, 0.08, 0.12),
+      identitySilver * (1.15 + identityResponse * 0.32) + vec3(0.030, 0.045, 0.072)
     );
-    readableIdentity += environmentalSilver * (0.08 + identityResponse * 0.08);
+    readableIdentity += environmentalSilver * (0.14 + identityResponse * 0.10);
     vec3 galleryResponsiveIdentity = mix(readableIdentity * 0.55, color * 1.18, 0.62);
     readableIdentity = mix(readableIdentity, galleryResponsiveIdentity, galleryProtect);
-    float identityDensity = mix(0.90, 0.98, identityResponse);
-    color = mix(color, max(readableIdentity, color * 0.42), identityMask * identityDensity);
+    float identityDensity = mix(0.88, 0.96, identityResponse);
+    color = mix(color, max(readableIdentity, color * 0.32), identityMask * identityDensity);
     float darkIdentity = (1.0 - smoothstep(0.06, 0.30, identityLuma)) * identityMask;
     float rightSideSupport = mix(0.64, 1.0, smoothstep(0.46, 0.84, vUv.x));
     color += vec3(0.026, 0.044, 0.086) * darkIdentity * rightSideSupport;
-    color += vec3(0.072, 0.11, 0.20) * identityEdge * 0.58;
+    color += vec3(0.048, 0.074, 0.135) * identityEdge * 0.44;
 
     vec3 smokeTint = mix(vec3(0.12, 0.22, 0.34), vec3(0.20, 0.10, 0.34), vUv.y);
     color = mix(color, color * 1.035 + smokeTint * 0.095, smoke * 0.74);
