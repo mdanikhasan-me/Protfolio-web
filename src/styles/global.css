@@ -1386,23 +1386,19 @@ h3 {
   z-index: 2;
 }
 
-.home-contact-visual::before {
-  border-right: 1px solid rgba(199, 209, 218, 0.16);
-  border-top: 1px solid rgba(199, 209, 218, 0.16);
-  clip-path: polygon(24% 0, 100% 0, 100% 100%, 0 100%, 0 18%);
-  content: '';
-  inset: 7% 0 6% 2%;
-  pointer-events: none;
-  position: absolute;
-}
-
-.home-contact-visual video {
+.home-contact-motion,
+.home-contact-motion img {
   display: block;
   height: 100%;
-  mix-blend-mode: screen;
   object-fit: contain;
+  pointer-events: none;
   position: relative;
+  user-select: none;
+  -webkit-user-drag: none;
   width: 100%;
+}
+
+.home-contact-motion {
   z-index: 1;
 }
 
@@ -1636,10 +1632,6 @@ h3 {
     max-width: 30rem;
     transform: none;
     width: min(91vw, 54vh);
-  }
-
-  .home-contact-visual::before {
-    inset: 10% 0 7% 4%;
   }
 
   .home-contact-routes a {

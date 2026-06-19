@@ -301,17 +301,22 @@ const mediaBase: Record<string, string> = {
         </div>
 
         <figure class="home-contact-visual" aria-hidden="true">
-          <video
-            data-contact-video
-            data-src="/media/contact/working-contact-loop.webm"
-            poster="/media/contact/working-contact-poster.webp"
-            width="960"
-            height="960"
-            muted
-            loop
-            playsinline
-            preload="none"
-          ></video>
+          <picture class="home-contact-motion">
+            <source
+              media="(prefers-reduced-motion: reduce)"
+              srcset="/media/contact/working-contact-poster.webp"
+            />
+            <img
+              src="/media/contact/working-contact-loop.webp"
+              width="800"
+              height="800"
+              alt=""
+              loading="lazy"
+              decoding="async"
+              fetchpriority="low"
+              draggable="false"
+            />
+          </picture>
         </figure>
       </div>
 
@@ -331,41 +336,5 @@ const mediaBase: Record<string, string> = {
   <script>
     import '../scripts/reference-opening-locked';
     import '../scripts/home-state';
-
-    const contactVideo = document.querySelector<HTMLVideoElement>('[data-contact-video]');
-    if (contactVideo) {
-      const contactReduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
-      let contactVideoLoaded = false;
-
-      const loadContactVideo = () => {
-        if (contactVideoLoaded || contactReduceMotion.matches) return;
-        const source = contactVideo.dataset.src;
-        if (!source) return;
-        contactVideoLoaded = true;
-        contactVideo.src = source;
-        contactVideo.load();
-      };
-
-      if ('IntersectionObserver' in window && !contactReduceMotion.matches) {
-        const contactVideoObserver = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                loadContactVideo();
-                void contactVideo.play().catch(() => undefined);
-              } else {
-                contactVideo.pause();
-              }
-            });
-          },
-          { rootMargin: '320px 0px', threshold: 0.01 },
-        );
-        contactVideoObserver.observe(contactVideo);
-        addEventListener('pagehide', () => contactVideoObserver.disconnect(), { once: true });
-      } else if (!contactReduceMotion.matches) {
-        loadContactVideo();
-        void contactVideo.play().catch(() => undefined);
-      }
-    }
   </script>
 </BaseLayout>
