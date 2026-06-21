@@ -541,7 +541,7 @@ function createSeededRandom(seed: number) {
   };
 }
 
-function createQuadtreeGeometry(seed: number) {
+function createQuadtreeGeometry(seed: number, densityOffset = 0) {
   const random = createSeededRandom(seed);
   const source = new THREE.BoxGeometry(1, 1, 0.006, 4, 4, 1);
   const geometry = new THREE.InstancedBufferGeometry();
@@ -557,7 +557,8 @@ function createQuadtreeGeometry(seed: number) {
 
   const subdivide = (centerX: number, centerY: number, depth: number) => {
     const size = 1 / 2 ** depth;
-    const terminal = (depth > 2 && random() < 0.5) || depth > 3;
+    const terminal =
+      (depth > 2 + densityOffset && random() < 0.5) || depth > 3 + densityOffset;
     if (terminal) {
       positions.push(centerX, centerY, 0);
       scales.push(size, size);
@@ -828,12 +829,11 @@ export function createReferenceBackgroundSystem(
     depthTest: true,
     depthWrite: true,
   });
-  const quadtreeGeometries = [
-    createQuadtreeGeometry(0x1a2b3c4d),
-    createQuadtreeGeometry(0x2b3c4d5e),
-    createQuadtreeGeometry(0x3c4d5e6f),
-    createQuadtreeGeometry(0x4d5e6f70),
-  ] as const;
+  const quadtreeSeeds = [0x1a2b3c4d, 0x2b3c4d5e, 0x3c4d5e6f, 0x4d5e6f70] as const;
+  const quadtreeGeometries = quadtreeSeeds.map((seed) => createQuadtreeGeometry(seed));
+  const mobileQuadtreeGeometries = quadtreeSeeds.map((seed) =>
+    createQuadtreeGeometry(seed, 1),
+  );
   const tileMesh = new THREE.Mesh(quadtreeGeometries[0], tileMaterial);
   tileMesh.name = 'quadtree-display';
   tileMesh.frustumCulled = false;
@@ -881,6 +881,7 @@ export function createReferenceBackgroundSystem(
   let nextBlackoutAt = 0.8;
   let nextUvShiftAt = 0.4;
   let introStep = 0;
+  let mobileDenseLayout = false;
   const openingPatternSequence: OpeningPatternStep[] = [
     { at: 2.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
     { at: 5.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
@@ -1074,7 +1075,10 @@ export function createReferenceBackgroundSystem(
 
     if (elapsed >= nextLayoutAt) {
       layoutIndex = (layoutIndex + 1 + Math.floor(random() * 3)) % quadtreeGeometries.length;
-      tileMesh.geometry = quadtreeGeometries[layoutIndex] ?? quadtreeGeometries[0];
+      const activeGeometries = mobileDenseLayout
+        ? mobileQuadtreeGeometries
+        : quadtreeGeometries;
+      tileMesh.geometry = activeGeometries[layoutIndex] ?? activeGeometries[0]!;
       nextLayoutAt = elapsed + 4;
     }
 
@@ -1104,6 +1108,10 @@ export function createReferenceBackgroundSystem(
     const scale = Math.max(frustumWidth, frustumHeight);
     scaleUniform.value.set(scale, scale);
 
+    mobileDenseLayout = width <= 820;
+    const activeGeometries = mobileDenseLayout ? mobileQuadtreeGeometries : quadtreeGeometries;
+    tileMesh.geometry = activeGeometries[layoutIndex] ?? activeGeometries[0]!;
+
     noiseUniforms.uScreenAspectRatio.value = width / height;
     const colorWidth = Math.max(384, Math.min(1024, Math.round(width * pixelRatio * 0.30)));
     const colorHeight = Math.max(216, Math.min(576, Math.round(height * pixelRatio * 0.30)));
@@ -1117,6 +1125,7 @@ export function createReferenceBackgroundSystem(
   const dispose = () => {
     group.remove(tileMesh, gridMesh, crossMesh);
     quadtreeGeometries.forEach((geometry) => geometry.dispose());
+    mobileQuadtreeGeometries.forEach((geometry) => geometry.dispose());
     tileMaterial.dispose();
     gridGeometry.dispose();
     gridMaterial.dispose();
