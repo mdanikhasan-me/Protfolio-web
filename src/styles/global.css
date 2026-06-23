@@ -826,8 +826,10 @@ h3 {
 
 .melt-type {
   color: var(--v5-black);
+  justify-self: end;
+  margin-inline-end: clamp(1.5rem, 4vw, 5rem);
   overflow: visible;
-  width: 100%;
+  width: min(78vw, 98rem);
 }
 
 .melt-type text {
@@ -1446,6 +1448,12 @@ h3 {
   .home-contact {
     scroll-snap-align: none;
     scroll-snap-stop: normal;
+  }
+
+  .melt-type {
+    justify-self: stretch;
+    margin-inline-end: 0;
+    width: 100%;
   }
 
   .melt-type-fluid {
