@@ -1556,7 +1556,10 @@ async function startReferenceWorld(
     galleryVisuals.forEach((visual, index) => {
       const offset = index + 1 - galleryProgress;
       const distance = Math.abs(offset);
-      const visibility = (1 - smoothstep(0.8, 2.5, distance)) * galleryEntrance * galleryExit;
+      // Keep the selected plane and the two planes crossing at mid-swipe fully readable, then
+      // clear settled side planes quickly. The earlier 0.8-2.5 range left a one-step neighbour at
+      // roughly 96% opacity, so dark project artwork became a pair of black slabs at the edges.
+      const visibility = (1 - smoothstep(0.55, 1.45, distance)) * galleryEntrance * galleryExit;
       visual.mesh.visible = visibility > 0.002;
       galleryHasVisibleVisual ||= visual.mesh.visible;
       visual.mesh.position.set(Math.sin(offset) * 11, -offset, Math.cos(offset) * 5 - 6);
