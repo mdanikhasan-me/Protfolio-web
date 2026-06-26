@@ -339,17 +339,18 @@ const tileFragmentShader = /* glsl */ `
   uniform float uProject;
 
   vec3 projectPaletteLeft(float index) {
-    if (index < 0.5) return vec3(0.50, 0.11, 0.055);
-    if (index < 1.5) return vec3(0.15, 0.20, 0.52);
-    if (index < 2.5) return vec3(0.09, 0.43, 0.38);
-    return vec3(0.64, 0.27, 0.055);
+    // Project order: Boilabin, SoctuKit, UIU Bot, Salty Potato AI.
+    if (index < 0.5) return vec3(0.38, 0.24, 0.15);
+    if (index < 1.5) return vec3(0.08, 0.10, 0.15);
+    if (index < 2.5) return vec3(0.06, 0.20, 0.48);
+    return vec3(0.38, 0.16, 0.045);
   }
 
   vec3 projectPaletteRight(float index) {
-    if (index < 0.5) return vec3(0.07, 0.34, 0.40);
-    if (index < 1.5) return vec3(0.05, 0.38, 0.55);
-    if (index < 2.5) return vec3(0.48, 0.38, 0.07);
-    return vec3(0.08, 0.34, 0.48);
+    if (index < 0.5) return vec3(0.04, 0.24, 0.56);
+    if (index < 1.5) return vec3(0.06, 0.24, 0.58);
+    if (index < 2.5) return vec3(0.42, 0.22, 0.055);
+    return vec3(0.045, 0.20, 0.50);
   }
 
   void main() {
