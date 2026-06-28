@@ -381,11 +381,11 @@ const tileFragmentShader = /* glsl */ `
     vec3 projectTint = mix(
       projectLeft,
       projectRight,
-      mix(spatialPaletteMix, tilePaletteMix, 0.28)
+      mix(spatialPaletteMix, tilePaletteMix, 0.10)
     );
-    float stablePanelLight = 0.64 + tilePaletteMix * 0.30 + spatialPaletteMix * 0.08;
+    float stablePanelLight = 0.70 + tilePaletteMix * 0.14 + spatialPaletteMix * 0.10;
     vec3 projectColor = projectTint * stablePanelLight;
-    projectColor = mix(projectColor, displayColor * 1.04, 0.04);
+    projectColor = mix(projectColor, displayColor * 1.04, 0.01);
     float projectLuma = dot(projectColor, vec3(0.2126, 0.7152, 0.0722));
     projectColor = mix(vec3(projectLuma), projectColor, 1.45) * 1.22;
     projectColor *= 1.0 - effectiveBlackout;
