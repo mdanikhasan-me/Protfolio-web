@@ -543,7 +543,7 @@ html[data-reference-surface='light'] .reference-contact-pill:focus-visible {
 .curve-work {
   background: transparent;
   color: #fff;
-  min-height: calc((var(--curve-items, 4) + 1.8) * 100lvh);
+  min-height: calc((var(--curve-items, 4) + 2.6) * 100lvh);
   overflow: visible;
   padding: 0;
   position: relative;
@@ -551,8 +551,8 @@ html[data-reference-surface='light'] .reference-contact-pill:focus-visible {
 }
 
 .curve-work[data-enhanced='true'] {
-  height: calc((var(--curve-items, 4) + 1.8) * 100lvh);
-  min-height: calc((var(--curve-items, 4) + 1.8) * 100lvh);
+  height: calc((var(--curve-items, 4) + 2.6) * 100lvh);
+  min-height: calc((var(--curve-items, 4) + 2.6) * 100lvh);
   padding: 0;
 }
 
