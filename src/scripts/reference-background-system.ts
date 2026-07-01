@@ -1022,7 +1022,11 @@ export function createReferenceBackgroundSystem(
     galleryPresence = 0,
     projectProgress = 0,
   ) => {
-    renderProceduralTargets(elapsed);
+    // Once the project rail fully owns the chamber, its authored project palette replaces the
+    // opening patterns. Freeze those four offscreen targets instead of shading millions of pixels
+    // that only contribute a one-percent residual texture in the gallery branch. They resume
+    // during gallery exit, before the opening display becomes visible again.
+    if (galleryPresence < 0.98) renderProceduralTargets(elapsed);
     tileUniforms.uTime.value = elapsed;
     tileUniforms.uFluid.value = fluidTexture ?? blackTexture;
     tileUniforms.uGallery.value = THREE.MathUtils.clamp(galleryPresence, 0, 1);
