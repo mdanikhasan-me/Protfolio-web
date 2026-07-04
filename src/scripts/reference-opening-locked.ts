@@ -1459,7 +1459,6 @@ async function startReferenceWorld(
   const backgroundTimeOverride = backgroundTimeParam === null ? null : Number(backgroundTimeParam);
   let currentGalleryProgress = 0;
   let renderedGalleryProgress = 0;
-  let renderedProjectPalette = 0;
   let currentGalleryPresence = 0;
   let renderedGalleryPresence = 0;
   let galleryHasVisibleVisual = false;
@@ -1520,14 +1519,11 @@ async function startReferenceWorld(
     const blend = 1 - Math.exp(-blendRate * deltaSeconds);
     renderedGalleryProgress += (currentGalleryProgress - renderedGalleryProgress) * blend;
     renderedGalleryPresence += (currentGalleryPresence - renderedGalleryPresence) * blend;
-    const activeProjectPalette = Math.round(renderedGalleryProgress);
-    const paletteBlend = 1 - Math.exp(-20 * deltaSeconds);
-    renderedProjectPalette += (activeProjectPalette - renderedProjectPalette) * paletteBlend;
-    if (Math.abs(activeProjectPalette - renderedProjectPalette) < 0.001) {
-      renderedProjectPalette = activeProjectPalette;
-    }
     wallUniforms.uGallery.value = renderedGalleryPresence;
-    wallUniforms.uProject.value = renderedProjectPalette;
+    // Keep the chamber attached to the same continuously eased project position as the card rail.
+    // A separately rounded, faster palette state made the wall jump projects before the selected
+    // plane had settled, which read as an unrelated flash during scroll and touch transitions.
+    wallUniforms.uProject.value = renderedGalleryProgress;
     compositeUniforms.uGallery.value = renderedGalleryPresence;
     const heroExit = smoothstep(0.04, 0.3, renderedGalleryPresence);
     const galleryReveal = smoothstep(0.72, 1.0, renderedGalleryPresence);
