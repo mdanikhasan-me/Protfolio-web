@@ -1603,7 +1603,13 @@ async function startReferenceWorld(
     sceneTarget.setSize(renderWidth, renderHeight);
     backgroundTarget.setSize(renderWidth, renderHeight);
     identityTarget.setSize(renderWidth, renderHeight);
-    bloomBrightTarget.setSize(renderWidth, renderHeight);
+    // The first retained bloom level is quarter-resolution. Threshold directly into that
+    // footprint instead of paying for a full-resolution intermediate that is immediately
+    // downsampled by the first blur pass.
+    bloomBrightTarget.setSize(
+      Math.max(1, Math.ceil(renderWidth / bloomScales[0])),
+      Math.max(1, Math.ceil(renderHeight / bloomScales[0])),
+    );
     bloomScales.forEach((scale, index) => {
       const bloomWidth = Math.max(1, Math.ceil(renderWidth / scale));
       const bloomHeight = Math.max(1, Math.ceil(renderHeight / scale));
