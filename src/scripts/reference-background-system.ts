@@ -360,7 +360,10 @@ const tileFragmentShader = /* glsl */ `
     float tilePaletteMix = fract(
       sin(dot(vInstanceId.xy, vec2(12.9898, 78.233))) * 43758.5453
     );
-    float stableProjectBlackout = step(0.84, tilePaletteMix);
+    // Retain a sparse set of stable dark panels for depth without letting the gallery inherit
+    // the broad black slabs visible in the earlier recording. tilePaletteMix is seeded per panel,
+    // so this remains spatially stable while reducing the expected blackout share from 16% to 8%.
+    float stableProjectBlackout = step(0.92, tilePaletteMix);
     float effectiveBlackout = mix(vBlackout, stableProjectBlackout, uGallery);
     displayColor *= 1.0 - effectiveBlackout;
 
