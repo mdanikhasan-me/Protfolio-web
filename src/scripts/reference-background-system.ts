@@ -160,7 +160,10 @@ const colorPatternFragmentShader = /* glsl */ `
       upperStrength = 0.48;
     }
     float horizontalMix = smoothstep(0.08, 0.92, vUv.x + (noise.a - 0.5) * 0.10);
-    float signal = 0.54 + noise.b * 0.28 + noise.r * 0.10;
+    // Keep most of the chamber near-black while preserving isolated high-energy color pockets.
+    // The earlier high linear floor made every tile read as an equally lit color block.
+    float signal =
+      0.16 + pow(noise.b, 2.2) * 0.54 + pow(noise.r, 3.0) * 0.12;
     float pulse = 0.94 + sin(uTime * 0.16 + noise.a * 3.14159) * 0.06;
     vec3 color = mix(leftColor, rightColor, horizontalMix) * signal * pulse;
     float upperField = smoothstep(0.46, 0.96, vUv.y) * (upperStrength + noise.g * 0.12);
@@ -179,9 +182,9 @@ const binaryPatternFragmentShader = /* glsl */ `
 
   void main() {
     vec4 noise = texture2D(uNoise, vUv);
-    float binary = step(0.5, fract(noise.a * 9.0));
-    float soft = smoothstep(0.42, 0.62, noise.g) * 0.18;
-    gl_FragColor = vec4(vec3(binary * 0.88 + soft), 1.0);
+    float binary = step(0.74, fract(noise.a * 9.0));
+    float soft = smoothstep(0.48, 0.72, noise.g) * 0.12;
+    gl_FragColor = vec4(vec3(binary * 0.78 + soft), 1.0);
   }
 `;
 
@@ -212,7 +215,10 @@ const violetPatternFragmentShader = /* glsl */ `
       upperColor = vec3(0.28, 0.22, 0.36);
     }
     float horizontalMix = smoothstep(0.06, 0.94, vUv.x + (noise.g - 0.5) * 0.12);
-    float signal = 0.50 + noise.b * 0.26 + noise.a * 0.10;
+    // Match the colored display's deep floor/high-peak distribution so violet chapters breathe
+    // instead of holding a uniform magenta wash across the entire curved wall.
+    float signal =
+      0.14 + pow(noise.b, 2.1) * 0.58 + pow(noise.a, 3.0) * 0.10;
     float pulse = 0.94 + sin(uTime * 0.14 + noise.r * 3.14159) * 0.06;
     vec3 color = mix(leftColor, rightColor, horizontalMix) * signal * pulse;
     float upperField = smoothstep(0.56, 0.96, vUv.y) * (0.18 + noise.r * 0.14);
