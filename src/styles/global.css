@@ -826,10 +826,10 @@ h3 {
 
 .melt-type {
   color: var(--v5-black);
-  justify-self: end;
-  margin-inline-end: clamp(1.5rem, 4vw, 5rem);
+  justify-self: center;
+  margin-inline: 0;
   overflow: visible;
-  width: min(78vw, 98rem);
+  width: min(70vw, 88rem);
 }
 
 .melt-type text {
