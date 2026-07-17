@@ -444,13 +444,13 @@ const glassFragmentShader = `
     vec3 viewNormal = normalize(vViewNormal);
     if (!gl_FrontFacing) viewNormal *= -1.0;
     vec3 viewDirection = normalize(vViewPosition);
-    vec4 firstNoise = texture2D(uNoise, vUv * 5.4);
+    vec4 firstNoise = texture2D(uNoise, vUv * 9.0);
     vec4 secondNoise = texture2D(
       uNoise,
-      vUv * 2.15 + (firstNoise.xy - 0.5) * 0.72
+      vUv + (firstNoise.xy - 0.5) * 2.0
     );
-    float roughness = smoothstep(0.3, 0.82, secondNoise.y) * 0.075;
-    float refractPower = 0.072;
+    float roughness = smoothstep(0.3, 0.8, secondNoise.y) * 0.10;
+    float refractPower = 0.10;
     vec2 refractNormal = viewNormal.xy * (1.0 - viewNormal.z * 0.7);
     vec3 refractedColor = vec3(0.0);
     float sineB = sin(firstNoise.b * 6.2831853);
@@ -462,22 +462,22 @@ const glassFragmentShader = `
 
     for (int index = 0; index < 8; index++) {
       float sampleIndex = float(index);
-      float slide = 0.0035 + firstNoise.r * 0.006 + sampleIndex * 0.00055;
+      float slide = 0.005 + firstNoise.r * 0.004 + sampleIndex * 0.00043;
       vec2 roughnessDirection =
-        (secondNoise.xy - 0.5) * roughness * 0.18 +
-        vec2(sineB, cosineG) * roughness * 0.018;
+        (secondNoise.xy - 0.5) * roughness * 0.30 +
+        vec2(sineB, cosineG) * roughness * 0.028;
       vec2 uvR = clamp(
         roughnessDirection + screenUv - refractNormal * (refractPower + slide),
         0.001,
         0.999
       );
       vec2 uvG = clamp(
-        roughnessDirection + screenUv - refractNormal * (refractPower + slide * 1.55),
+        roughnessDirection + screenUv - refractNormal * (refractPower + slide * 2.0),
         0.001,
         0.999
       );
       vec2 uvB = clamp(
-        roughnessDirection + screenUv - refractNormal * (refractPower + slide * 2.35),
+        roughnessDirection + screenUv - refractNormal * (refractPower + slide * 4.0),
         0.001,
         0.999
       );
