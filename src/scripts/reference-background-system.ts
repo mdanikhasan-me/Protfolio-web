@@ -141,35 +141,12 @@ const colorPatternFragmentShader = /* glsl */ `
 
   void main() {
     vec4 noise = texture2D(uNoise, vUv);
-    vec3 leftColor = vec3(0.035, 0.30, 0.62);
-    vec3 rightColor = vec3(0.035, 0.46, 0.16);
-    vec3 upperColor = vec3(0.18, 0.24, 0.28);
-    float upperStrength = 0.18;
-    if (uPaletteMode > 0.5 && uPaletteMode < 1.5) {
-      leftColor = vec3(0.028, 0.16, 0.60);
-      rightColor = vec3(0.035, 0.48, 0.54);
-      upperColor = vec3(0.22, 0.28, 0.38);
-    } else if (uPaletteMode >= 1.5 && uPaletteMode < 2.5) {
-      leftColor = vec3(0.46, 0.075, 0.15);
-      rightColor = vec3(0.19, 0.085, 0.54);
-      upperColor = vec3(0.30, 0.25, 0.36);
-    } else if (uPaletteMode >= 2.5) {
-      leftColor = vec3(0.055, 0.18, 0.58);
-      rightColor = vec3(0.035, 0.46, 0.18);
-      upperColor = vec3(0.48, 0.075, 0.30);
-      upperStrength = 0.48;
-    }
-    float horizontalMix = smoothstep(0.08, 0.92, vUv.x + (noise.a - 0.5) * 0.10);
-    // Keep most of the chamber near-black while preserving isolated high-energy color pockets.
-    // The earlier high linear floor made every tile read as an equally lit color block.
-    float signal =
-      0.16 + pow(noise.b, 2.2) * 0.54 + pow(noise.r, 3.0) * 0.12;
-    float pulse = 0.94 + sin(uTime * 0.16 + noise.a * 3.14159) * 0.06;
-    vec3 color = mix(leftColor, rightColor, horizontalMix) * signal * pulse;
-    float upperField = smoothstep(0.46, 0.96, vUv.y) * (upperStrength + noise.g * 0.12);
-    color = mix(color, upperColor * (0.58 + noise.r * 0.24), upperField);
-    float highlight = smoothstep(0.74, 0.98, noise.a) * 0.16;
-    color = mix(color, color * 1.36 + vec3(0.035, 0.055, 0.075), highlight);
+    vec3 color = vec3(
+      smoothstep(0.5, 1.0, noise.r),
+      smoothstep(0.2, 1.0, noise.g),
+      smoothstep(0.0, 1.0, noise.b)
+    );
+    color *= vec3(0.60, 0.80, 1.20);
     gl_FragColor = vec4(color, 1.0);
   }
 `;
@@ -182,9 +159,8 @@ const binaryPatternFragmentShader = /* glsl */ `
 
   void main() {
     vec4 noise = texture2D(uNoise, vUv);
-    float binary = step(0.74, fract(noise.a * 9.0));
-    float soft = smoothstep(0.48, 0.72, noise.g) * 0.12;
-    gl_FragColor = vec4(vec3(binary * 0.78 + soft), 1.0);
+    float binary = step(0.5, fract(noise.a * 9.0));
+    gl_FragColor = vec4(vec3(binary), 1.0);
   }
 `;
 
@@ -198,33 +174,17 @@ const violetPatternFragmentShader = /* glsl */ `
 
   void main() {
     vec4 noise = texture2D(uNoise, vUv);
-    vec3 leftColor = vec3(0.025, 0.14, 0.50);
-    vec3 rightColor = vec3(0.27, 0.075, 0.62);
-    vec3 upperColor = vec3(0.15, 0.19, 0.30);
-    if (uPaletteMode > 0.5 && uPaletteMode < 1.5) {
-      leftColor = vec3(0.21, 0.085, 0.50);
-      rightColor = vec3(0.31, 0.36, 0.46);
-      upperColor = vec3(0.25, 0.28, 0.35);
-    } else if (uPaletteMode >= 1.5 && uPaletteMode < 2.5) {
-      leftColor = vec3(0.46, 0.075, 0.15);
-      rightColor = vec3(0.19, 0.085, 0.54);
-      upperColor = vec3(0.31, 0.22, 0.34);
-    } else if (uPaletteMode >= 2.5) {
-      leftColor = vec3(0.16, 0.075, 0.54);
-      rightColor = vec3(0.58, 0.12, 0.055);
-      upperColor = vec3(0.28, 0.22, 0.36);
-    }
-    float horizontalMix = smoothstep(0.06, 0.94, vUv.x + (noise.g - 0.5) * 0.12);
-    // Match the colored display's deep floor/high-peak distribution so violet chapters breathe
-    // instead of holding a uniform magenta wash across the entire curved wall.
-    float signal =
-      0.14 + pow(noise.b, 2.1) * 0.58 + pow(noise.a, 3.0) * 0.10;
-    float pulse = 0.94 + sin(uTime * 0.14 + noise.r * 3.14159) * 0.06;
-    vec3 color = mix(leftColor, rightColor, horizontalMix) * signal * pulse;
-    float upperField = smoothstep(0.56, 0.96, vUv.y) * (0.18 + noise.r * 0.14);
-    color = mix(color, upperColor * (0.58 + noise.b * 0.25), upperField);
-    float coolHighlight = smoothstep(0.78, 0.98, noise.a) * 0.18;
-    color = mix(color, color * 1.30 + vec3(0.035, 0.050, 0.085), coolHighlight);
+    vec3 color = vec3(0.3451, 0.0980, 0.9922) * vec3(0.60, 0.60, 1.0);
+    color = mix(
+      color,
+      vec3(0.6980, 0.9294, 1.0),
+      smoothstep(0.5, 0.9, noise.a)
+    );
+    color = mix(
+      color,
+      vec3(0.9922, 0.3725, 0.0471),
+      smoothstep(0.5, 1.0, noise.g)
+    );
     gl_FragColor = vec4(color, 1.0);
   }
 `;
@@ -443,18 +403,18 @@ const tileFragmentShader = /* glsl */ `
       smoothstep(0.10, 0.86, texture2D(uSymbol, galleryLogoUv).a) * galleryLogoBounds;
     logoWeight = mix(logoWeight, galleryLogoWeight, uGallery);
     float galleryLogoScale = mix(1.0, 0.30, uGallery);
-    displayColor += vec3(logoWeight * 0.28 * galleryLogoScale * (1.0 - effectiveBlackout));
+    displayColor += vec3(logoWeight * 0.20 * galleryLogoScale * (1.0 - effectiveBlackout));
 
     vec2 dotUv = fract(vGlobalUv * 414.0) - 0.5;
     float dotMask = smoothstep(0.50, 0.20, length(dotUv));
-    displayColor *= mix(dotMask, 1.0, 0.62) * 0.90;
+    displayColor *= mix(dotMask, 1.0, 0.60) * 0.90;
 
-    float chamberFade = smoothstep(0.58, 0.04, length(vGlobalUv - 0.5));
+    float chamberFade = smoothstep(0.55, 0.05, length(vGlobalUv - 0.5));
     displayColor *= chamberFade;
 
     vec2 fluidVelocity = texture2D(uFluid, clamp(vGlobalUv, 0.0, 1.0)).xy;
     float fluidEnergy = clamp(length(fluidVelocity) * 3.2, 0.0, 1.0);
-    vec3 sideColor = vec3(0.02, 0.08, 0.12) + fluidEnergy * vec3(0.18, 0.62, 0.82);
+    vec3 sideColor = vec3(fluidEnergy * 0.18);
     sideColor = mix(sideColor, projectTint * 0.32, uGallery);
     vec3 color = mix(sideColor, displayColor, vFrontFace);
     color *= mix(uDisplayGain, 0.50, uGallery);
@@ -729,12 +689,12 @@ function createPatternTarget(width = 512, height = 288) {
 }
 
 const patternParams = [
-  { blackout: 0, uvShift: 0, uvIntervalMin: 1.0, uvIntervalRange: 0 },
-  { blackout: 0.44, uvShift: 0.50, uvIntervalMin: 0.10, uvIntervalRange: 5.0 },
-  { blackout: 0.22, uvShift: 0.32, uvIntervalMin: 0.10, uvIntervalRange: 5.0 },
+  { blackout: 0, blackoutRange: 0, uvShift: 0, uvIntervalMin: 0.2, uvIntervalRange: 0.5 },
+  { blackout: 0, blackoutRange: 0.5, uvShift: 0.50, uvIntervalMin: 0.10, uvIntervalRange: 5.0 },
+  { blackout: 0, blackoutRange: 0.5, uvShift: 0.50, uvIntervalMin: 0.10, uvIntervalRange: 5.0 },
 ] as const;
 
-const patternGains = [1.15, 1.15, 1.15] as const;
+const patternGains = [0.50, 0.50, 0.50] as const;
 
 export function createReferenceBackgroundSystem(
   renderer: THREE.WebGLRenderer,
@@ -1098,13 +1058,13 @@ export function createReferenceBackgroundSystem(
 
     const params = patternParams[nextPattern];
     if (elapsed >= nextBlackoutAt) {
-      tileUniforms.uBlackoutRate.value = params.blackout * (0.75 + random() * 0.15);
+      tileUniforms.uBlackoutRate.value = params.blackout + random() * params.blackoutRange;
       tileUniforms.uBlackoutSeed.value = random();
       nextBlackoutAt = elapsed + 1;
     }
     if (elapsed >= nextUvShiftAt) {
       tileUniforms.uUvShiftRate.value = params.uvShift;
-      tileUniforms.uUvShiftPower.value = params.uvShift > 0 ? random() * 0.75 : 0;
+      tileUniforms.uUvShiftPower.value = params.uvShift > 0 ? random() : 0;
       tileUniforms.uUvShiftSeed.value = random();
       nextUvShiftAt = elapsed + params.uvIntervalMin + params.uvIntervalRange * random();
     }
