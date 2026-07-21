@@ -977,11 +977,16 @@ export function createReferenceBackgroundSystem(
     proceduralMesh.material = noiseMaterial;
     renderer.setRenderTarget(noiseTarget);
     renderer.render(proceduralScene, proceduralCamera);
-    patternMaterials.forEach((material, index) => {
-      proceduralMesh.material = material;
-      renderer.setRenderTarget(patternTargets[index as PatternIndex]);
+
+    const renderPattern = (index: PatternIndex) => {
+      proceduralMesh.material = patternMaterials[index];
+      renderer.setRenderTarget(patternTargets[index]);
       renderer.render(proceduralScene, proceduralCamera);
-    });
+    };
+    renderPattern(nextPattern);
+    if (currentPattern !== nextPattern && tileUniforms.uPatternMix.value < 1) {
+      renderPattern(currentPattern);
+    }
     renderer.setRenderTarget(previousTarget);
   };
 
@@ -991,11 +996,6 @@ export function createReferenceBackgroundSystem(
     galleryPresence = 0,
     projectProgress = 0,
   ) => {
-    // Once the project rail fully owns the chamber, its authored project palette replaces the
-    // opening patterns. Freeze those four offscreen targets instead of shading millions of pixels
-    // that only contribute a one-percent residual texture in the gallery branch. They resume
-    // during gallery exit, before the opening display becomes visible again.
-    if (galleryPresence < 0.98) renderProceduralTargets(elapsed);
     tileUniforms.uTime.value = elapsed;
     tileUniforms.uFluid.value = fluidTexture ?? blackTexture;
     tileUniforms.uGallery.value = THREE.MathUtils.clamp(galleryPresence, 0, 1);
@@ -1068,6 +1068,10 @@ export function createReferenceBackgroundSystem(
       tileUniforms.uUvShiftSeed.value = random();
       nextUvShiftAt = elapsed + params.uvIntervalMin + params.uvIntervalRange * random();
     }
+
+    // Shade only the visible procedural pattern, plus its predecessor during the brief transition.
+    // Once the project rail fully owns the chamber, both it and the shared noise target freeze.
+    if (galleryPresence < 0.98) renderProceduralTargets(elapsed);
   };
 
   const resize = (
