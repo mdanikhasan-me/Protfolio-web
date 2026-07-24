@@ -1437,14 +1437,9 @@ async function startReferenceWorld(
   const targetQuaternion = new THREE.Quaternion();
   const deltaQuaternion = new THREE.Quaternion();
   const deltaEuler = new THREE.Euler();
-  const hoverEuler = new THREE.Euler();
-  const hoverQuaternion = new THREE.Quaternion();
   const targetCamera = new THREE.Vector3();
   const pointer = new THREE.Vector2();
   const previousPointer = new THREE.Vector2();
-  const hoverPointerTarget = new THREE.Vector2();
-  const hoverPointerCurrent = new THREE.Vector2();
-  const hoverPointerVelocity = new THREE.Vector2();
   const pointerNdc = new THREE.Vector2();
   const raycaster = new THREE.Raycaster();
   const appliedInteractionQuaternion = interactionQuaternion.clone();
@@ -1453,6 +1448,7 @@ async function startReferenceWorld(
   let pointerOverIdentity = false;
   let hoveredGalleryVisual: GalleryVisual | null = null;
   let lastPointerTime = performance.now();
+  let lastMotionTime = -1000;
   let pointerEnergy = 0;
   let revealStart = performance.now();
   let animationFrame = 0;
@@ -1674,13 +1670,8 @@ async function startReferenceWorld(
     if (!worldInView || coarsePointer) return;
     const now = performance.now();
     pointer.set(event.clientX, event.clientY);
-    const normalizedX = (event.clientX / Math.max(1, canvasWidth)) * 2 - 1;
-    const normalizedY = -((event.clientY / Math.max(1, canvasHeight)) * 2 - 1);
     if (!pointerInitialized) {
       previousPointer.copy(pointer);
-      hoverPointerTarget.set(normalizedX, normalizedY);
-      hoverPointerCurrent.copy(hoverPointerTarget);
-      hoverPointerVelocity.set(0, 0);
       pointerInitialized = true;
       lastPointerTime = now;
       return;
@@ -1688,8 +1679,10 @@ async function startReferenceWorld(
     const deltaTime = Math.max(8, now - lastPointerTime);
     const deltaX = pointer.x - previousPointer.x;
     const deltaY = pointer.y - previousPointer.y;
-    hoverPointerTarget.set(normalizedX, normalizedY);
-    hoverPointerVelocity.copy(hoverPointerTarget).sub(hoverPointerCurrent);
+    const speed = Math.hypot(deltaX, deltaY) / deltaTime;
+    const normalizedX = (event.clientX / Math.max(1, canvasWidth)) * 2 - 1;
+    const normalizedY = -((event.clientY / Math.max(1, canvasHeight)) * 2 - 1);
+    const wasPointerOverIdentity = pointerOverIdentity;
     pointerNdc.set(normalizedX, normalizedY);
     identity.updateWorldMatrix(true, true);
     raycaster.setFromCamera(pointerNdc, camera);
@@ -1708,24 +1701,17 @@ async function startReferenceWorld(
       });
     }
 
-    if (pointerEffectsEnabled && renderedGalleryPresence < 0.55) {
-      const radialInfluence = Math.max(0, 1 - Math.hypot(normalizedX, normalizedY) * 1.5);
-      if (radialInfluence > 0) {
-        const worksRotation = smoothstep(0.18, 0.55, renderedGalleryPresence);
-        const hoverMultiplier = THREE.MathUtils.lerp(1, 0.2, worksRotation);
-        const impulse = 0.01 * radialInfluence * hoverMultiplier;
-        hoverEuler.set(
-          clamp(
-            hoverEuler.x - hoverPointerVelocity.y * impulse * (1 - worksRotation * 0.7),
-            -0.32,
-            0.32,
-          ),
-          clamp(hoverEuler.y + hoverPointerVelocity.x * impulse, -0.38, 0.38),
-          0,
-        );
-        const intensity = clamp(hoverPointerVelocity.length() * radialInfluence * 4, 0, 1);
-        pointerEnergy = Math.max(pointerEnergy, intensity);
-      }
+    if (pointerEffectsEnabled && pointerOverIdentity && wasPointerOverIdentity && speed > 0.08) {
+      const intensity = clamp(Math.pow(speed, 1.18) * 0.78, 0, 1);
+      deltaEuler.set(
+        clamp((deltaY / Math.max(1, canvasHeight)) * 6.6, -1.82, 1.82),
+        clamp((deltaX / Math.max(1, canvasWidth)) * 7.2, -2.1, 2.1),
+        clamp(((deltaX - deltaY) / Math.max(1, canvasWidth)) * 1.55, -0.46, 0.46),
+      );
+      deltaQuaternion.setFromEuler(deltaEuler);
+      targetQuaternion.premultiply(deltaQuaternion).normalize();
+      lastMotionTime = now;
+      pointerEnergy = Math.max(pointerEnergy, intensity);
     }
 
     previousPointer.copy(pointer);
@@ -1755,8 +1741,6 @@ async function startReferenceWorld(
   const resetOrientation = () => {
     targetQuaternion.identity();
     interactionQuaternion.identity();
-    hoverEuler.set(0, 0, 0);
-    hoverQuaternion.identity();
     pointerEnergy = 0;
   };
   const beginGizmoDrag = (event: PointerEvent) => {
@@ -1773,6 +1757,7 @@ async function startReferenceWorld(
     deltaQuaternion.setFromEuler(deltaEuler);
     targetQuaternion.premultiply(deltaQuaternion).normalize();
     gizmoPointer.set(event.clientX, event.clientY);
+    lastMotionTime = performance.now();
   };
   const releaseGizmo = (event: PointerEvent) => {
     if (!gizmoDragging) return;
@@ -1833,7 +1818,6 @@ async function startReferenceWorld(
     updateProjectScene(deltaSeconds);
 
     if (!coarsePointer) {
-      hoverPointerCurrent.lerp(hoverPointerTarget, 1 - Math.exp(-10 * deltaSeconds));
       const pointerX = pointerOverIdentity ? (pointer.x / Math.max(1, canvasWidth)) * 2 - 1 : 0;
       const pointerY = pointerOverIdentity ? -((pointer.y / Math.max(1, canvasHeight)) * 2 - 1) : 0;
       targetCamera.set(pointerX * 0.5, 0.1 + pointerY * 0.5, 10);
@@ -1843,27 +1827,9 @@ async function startReferenceWorld(
         camera.updateMatrix();
       }
 
-      const hoverDecay = Math.exp(-deltaSeconds);
-      hoverEuler.x *= hoverDecay;
-      hoverEuler.y *= hoverDecay;
-      if (Math.abs(hoverEuler.x) < 0.000001) hoverEuler.x = 0;
-      if (Math.abs(hoverEuler.y) < 0.000001) hoverEuler.y = 0;
-      if (!gizmoDragging && (hoverEuler.x !== 0 || hoverEuler.y !== 0)) {
-        hoverQuaternion.setFromEuler(hoverEuler);
-        targetQuaternion.premultiply(hoverQuaternion).normalize();
-      }
-
-      const openingReturnForce = 2;
-      const returnForce = THREE.MathUtils.lerp(
-        openingReturnForce,
-        0.1,
-        smoothstep(0.18, 0.55, renderedGalleryPresence),
-      );
-      if (!gizmoDragging) {
-        targetQuaternion.slerp(
-          identityQuaternion,
-          1 - Math.exp(-returnForce * deltaSeconds),
-        );
+      const idle = time - lastMotionTime > 72;
+      if (idle) {
+        targetQuaternion.slerp(identityQuaternion, 1 - Math.exp(-3.2 * deltaSeconds));
       }
       interactionQuaternion.slerp(targetQuaternion, 1 - Math.exp(-9 * deltaSeconds));
       pointerEnergy *= Math.pow(0.91, deltaSeconds * 60);
