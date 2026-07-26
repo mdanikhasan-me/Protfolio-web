@@ -850,8 +850,11 @@ export function createReferenceBackgroundSystem(
   let nextLayoutAt = 4;
   let nextBlackoutAt = 0.8;
   let nextUvShiftAt = 0.4;
-  let introStep = 0;
+  let patternStep = 0;
+  let nextPatternAt = 2.6;
   let mobileDenseLayout = false;
+  const patternTimingRandom = createSeededRandom(0x7a11ce26);
+  const referenceTransitionDurations = [0, 0.3, 3] as const;
   const openingPatternSequence: OpeningPatternStep[] = [
     { at: 2.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
     { at: 5.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
@@ -927,22 +930,6 @@ export function createReferenceBackgroundSystem(
     { at: 140.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
     { at: 143.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
   ];
-  const ambientPatternCycle = [
-    { duration: 6.0, pattern: 2 as PatternIndex, palette: 3 },
-    { duration: 3.0, pattern: 1 as PatternIndex },
-    { duration: 5.0, pattern: 0 as PatternIndex, palette: 0 },
-    { duration: 2.0, pattern: 1 as PatternIndex },
-    { duration: 7.0, pattern: 2 as PatternIndex, palette: 1 },
-    { duration: 3.0, pattern: 1 as PatternIndex },
-    { duration: 5.0, pattern: 0 as PatternIndex, palette: 1 },
-    { duration: 2.0, pattern: 1 as PatternIndex },
-  ] as const;
-  const ambientCycleStart = 144.0;
-  const ambientCycleDuration = ambientPatternCycle.reduce(
-    (duration, segment) => duration + segment.duration,
-    0,
-  );
-  let ambientSegment = -1;
   const motifCycleStart = 5.2;
   const motifHoldDuration = 4.0;
 
@@ -1001,35 +988,18 @@ export function createReferenceBackgroundSystem(
     tileUniforms.uGallery.value = THREE.MathUtils.clamp(galleryPresence, 0, 1);
     tileUniforms.uProject.value = THREE.MathUtils.clamp(projectProgress, 0, 3);
 
-    let step = openingPatternSequence[introStep];
-    while (step && elapsed >= step.at) {
-      beginPatternChange(step.at, step.pattern, step.transition, step.duration, step.palette ?? 0);
-      introStep += 1;
-      step = openingPatternSequence[introStep];
-    }
-
-    if (elapsed >= ambientCycleStart) {
-      const cycleElapsed = (elapsed - ambientCycleStart) % ambientCycleDuration;
-      let segmentElapsed = 0;
-      let nextAmbientSegment = 0;
-      for (let index = 0; index < ambientPatternCycle.length; index += 1) {
-        segmentElapsed += ambientPatternCycle[index]?.duration ?? 0;
-        if (cycleElapsed < segmentElapsed) {
-          nextAmbientSegment = index;
-          break;
-        }
+    while (elapsed >= nextPatternAt) {
+      const changeAt = nextPatternAt;
+      let step = openingPatternSequence[patternStep % openingPatternSequence.length]!;
+      patternStep += 1;
+      while (step.pattern === nextPattern) {
+        step = openingPatternSequence[patternStep % openingPatternSequence.length]!;
+        patternStep += 1;
       }
-      if (ambientSegment !== nextAmbientSegment) {
-        ambientSegment = nextAmbientSegment;
-        const segment = ambientPatternCycle[ambientSegment] ?? ambientPatternCycle[0];
-        beginPatternChange(
-          elapsed,
-          segment.pattern,
-          1,
-          segment.pattern === 1 ? 0.30 : 0.34,
-          'palette' in segment ? segment.palette : 0,
-        );
-      }
+      const transition = Math.floor(patternTimingRandom() * 3);
+      const duration = referenceTransitionDurations[transition] ?? 0;
+      beginPatternChange(changeAt, step.pattern, transition, duration, step.palette ?? 0);
+      nextPatternAt = changeAt + 1 + duration + patternTimingRandom();
     }
 
     const motifStep = Math.floor(Math.max(0, elapsed - motifCycleStart) / motifHoldDuration);
