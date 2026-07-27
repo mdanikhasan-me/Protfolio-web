@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" role="img" aria-labelledby="board-title board-desc">
+  <title id="board-title">KINETIC LEDGER — SIGNATURE-SYSTEM CONTACT SHEET</title>
+  <desc id="board-desc">The signature earns its place in eight functional roles; it is not a decorative hero prop.</desc>
+  <defs>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="microShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="10" flood-color="#000" flood-opacity=".25"/>
+    </filter>
+    <pattern id="microGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" fill="none" stroke="#171721" stroke-opacity=".055" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="fade" x1="0" x2="1">
+      <stop offset="0" stop-color="#2447FF"/>
+      <stop offset=".48" stop-color="#5B2A86"/>
+      <stop offset="1" stop-color="#FF5C35"/>
+    </linearGradient>
+    
+  </defs>
+  <style>
+    .kicker,.folio,.label,.micro,.state { font-family: "IBM Plex Mono", "Cascadia Mono", monospace; letter-spacing: .12em; }
+    .title,.display,.word { font-family: "Arial Narrow", "Inter Tight", Arial, sans-serif; font-weight: 760; }
+    .kicker { font-size: 19px; fill: #2447FF; }
+    .folio { font-size: 14px; fill: #716F7B; }
+    .title { font-size: 54px; fill: #171721; letter-spacing: -.035em; }
+    .subtitle { font: 22px Arial, sans-serif; fill: #716F7B; }
+    .label { font-size: 13px; fill: #171721; }
+    .micro { font-size: 11px; fill: #716F7B; }
+    .state { font-size: 14px; fill: #171721; }
+    .display { fill: #171721; letter-spacing: -.07em; }
+  </style>
+  <rect width="1920" height="1080" fill="#F4F0E8"/>
+  <rect width="1920" height="1080" fill="url(#microGrid)"/>
+  
+    <text x="72" y="68" class="kicker">KINETIC LEDGER · CHECKPOINT 2</text>
+    <text x="72" y="130" class="title">SIGNATURE-SYSTEM CONTACT SHEET</text>
+    <text x="72" y="168" class="subtitle">The signature earns its place in eight functional roles; it is not a decorative hero prop.</text>
+    <text x="1848" y="68" text-anchor="end" class="folio">CONCEPT STUDY / NOT PUBLIC COPY</text>
+  
+  
+      <g>
+        <text x="72" y="250" class="label">01 / IDENTITY MEASURE</text>
+        <rect x="72" y="272" width="420" height="322" rx="14" fill="#171721" fill-opacity=".03" stroke="#171721" stroke-opacity=".18"/>
+        
+    <g>
+      <path d="M 88 319.2 H 154.64000000000001 Q 196.64000000000001 321.2 238.64000000000001 319.2 H 476" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 88 344.4 H 154.64000000000001 Q 196.64000000000001 342.4 238.64000000000001 344.4 H 476" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 369.6 H 154.64000000000001 Q 196.64000000000001 371.6 238.64000000000001 369.6 H 476" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 394.8 H 154.64000000000001 Q 196.64000000000001 392.8 238.64000000000001 394.8 H 476" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 88 420 H 154.64000000000001 Q 196.64000000000001 422 238.64000000000001 420 H 476" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 445.2 H 154.64000000000001 Q 196.64000000000001 443.2 238.64000000000001 445.2 H 476" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 470.4 H 154.64000000000001 Q 196.64000000000001 472.4 238.64000000000001 470.4 H 476" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/><path d="M 88 495.6 H 154.64000000000001 Q 196.64000000000001 493.6 238.64000000000001 495.6 H 476" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 520.8 H 154.64000000000001 Q 196.64000000000001 522.8 238.64000000000001 520.8 H 476" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/>
+      <text x="100" y="452.76" class="display" font-size="70" opacity=".93">ANIK</text>
+      <rect x="193.64000000000001" y="300" width="6" height="240" fill="#2447FF"/>
+      <text x="210.64000000000001" y="316" class="micro">PRESSURE 00</text>
+    </g>
+        <text x="88" y="576" class="micro">same law · materially different job</text>
+      </g>
+      <g>
+        <text x="524" y="250" class="label">02 / NAVIGATION RAIL</text>
+        <rect x="524" y="272" width="420" height="322" rx="14" fill="#171721" fill-opacity=".03" stroke="#171721" stroke-opacity=".18"/>
+        
+    <g>
+      <path d="M 540 319.2 H 649.3199999999999 Q 691.3199999999999 321.2 733.3199999999999 319.2 H 928" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 540 344.4 H 649.3199999999999 Q 691.3199999999999 342.4 733.3199999999999 344.4 H 928" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 540 369.6 H 649.3199999999999 Q 691.3199999999999 371.6 733.3199999999999 369.6 H 928" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 540 394.8 H 649.3199999999999 Q 691.3199999999999 392.8 733.3199999999999 394.8 H 928" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 540 420 H 649.3199999999999 Q 691.3199999999999 422 733.3199999999999 420 H 928" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 540 445.2 H 649.3199999999999 Q 691.3199999999999 443.2 733.3199999999999 445.2 H 928" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 540 470.4 H 649.3199999999999 Q 691.3199999999999 472.4 733.3199999999999 470.4 H 928" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/><path d="M 540 495.6 H 649.3199999999999 Q 691.3199999999999 493.6 733.3199999999999 495.6 H 928" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 540 520.8 H 649.3199999999999 Q 691.3199999999999 522.8 733.3199999999999 520.8 H 928" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/>
+      <text x="552" y="452.76" class="display" font-size="70" opacity=".93">WORK</text>
+      <rect x="688.3199999999999" y="300" width="6" height="240" fill="#FF5C35"/>
+      <text x="705.3199999999999" y="316" class="micro">PRESSURE 01</text>
+    </g>
+        <text x="540" y="576" class="micro">same law · materially different job</text>
+      </g>
+      <g>
+        <text x="976" y="250" class="label">03 / MEDIA BAND</text>
+        <rect x="976" y="272" width="420" height="322" rx="14" fill="#171721" fill-opacity=".03" stroke="#171721" stroke-opacity=".18"/>
+        
+    <g>
+      <path d="M 992 319.2 H 1229.3600000000001 Q 1271.3600000000001 331.152 1313.3600000000001 319.2 H 1380" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 992 344.4 H 1229.3600000000001 Q 1271.3600000000001 330.936 1313.3600000000001 344.4 H 1380" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 992 369.6 H 1229.3600000000001 Q 1271.3600000000001 384.576 1313.3600000000001 369.6 H 1380" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 992 394.8 H 1229.3600000000001 Q 1271.3600000000001 378.312 1313.3600000000001 394.8 H 1380" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 992 420 H 1229.3600000000001 Q 1271.3600000000001 438 1313.3600000000001 420 H 1380" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 992 445.2 H 1229.3600000000001 Q 1271.3600000000001 428.712 1313.3600000000001 445.2 H 1380" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 992 470.4 H 1229.3600000000001 Q 1271.3600000000001 485.376 1313.3600000000001 470.4 H 1380" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/><path d="M 992 495.6 H 1229.3600000000001 Q 1271.3600000000001 482.136 1313.3600000000001 495.6 H 1380" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 992 520.8 H 1229.3600000000001 Q 1271.3600000000001 532.752 1313.3600000000001 520.8 H 1380" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/>
+      <text x="1004" y="452.76" class="display" font-size="70" opacity=".93">ANIK</text>
+      <rect x="1268.3600000000001" y="300" width="6" height="240" fill="#2447FF"/>
+      <rect x="1201.52" y="357" width="151.32" height="120.96" fill="#2447FF" opacity=".16"/><text x="1277.18" y="420" text-anchor="middle" class="micro">[PROJECT IMAGE — PENDING]</text>
+    </g>
+        <text x="992" y="576" class="micro">same law · materially different job</text>
+      </g>
+      <g>
+        <text x="1428" y="250" class="label">04 / CHAPTER SEAM</text>
+        <rect x="1428" y="272" width="420" height="322" rx="14" fill="#171721" fill-opacity=".03" stroke="#171721" stroke-opacity=".18"/>
+        
+    <g>
+      <path d="M 1444 319.2 H 1596 Q 1638 331.152 1680 319.2 H 1832" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 1444 344.4 H 1596 Q 1638 330.936 1680 344.4 H 1832" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1444 369.6 H 1596 Q 1638 384.576 1680 369.6 H 1832" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1444 394.8 H 1596 Q 1638 378.312 1680 394.8 H 1832" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 1444 420 H 1596 Q 1638 438 1680 420 H 1832" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1444 445.2 H 1596 Q 1638 428.712 1680 445.2 H 1832" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1444 470.4 H 1596 Q 1638 485.376 1680 470.4 H 1832" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/><path d="M 1444 495.6 H 1596 Q 1638 482.136 1680 495.6 H 1832" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1444 520.8 H 1596 Q 1638 532.752 1680 520.8 H 1832" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/>
+      <text x="1456" y="452.76" class="display" font-size="70" opacity=".93">BUILD</text>
+      <rect x="1635" y="300" width="6" height="240" fill="#5B2A86"/>
+      <text x="1652" y="316" class="micro">PRESSURE 02</text>
+    </g>
+        <text x="1444" y="576" class="micro">same law · materially different job</text>
+      </g>
+      <g>
+        <text x="72" y="642" class="label">05 / SELECTION PRESSURE</text>
+        <rect x="72" y="664" width="420" height="322" rx="14" fill="#171721" fill-opacity=".03" stroke="#171721" stroke-opacity=".18"/>
+        
+    <g>
+      <path d="M 88 711.2 H 325.36 Q 367.36 723.152 409.36 711.2 H 476" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 88 736.4 H 325.36 Q 367.36 722.9359999999999 409.36 736.4 H 476" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 761.6 H 325.36 Q 367.36 776.576 409.36 761.6 H 476" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 786.8 H 325.36 Q 367.36 770.312 409.36 786.8 H 476" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 88 812 H 325.36 Q 367.36 830 409.36 812 H 476" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 837.2 H 325.36 Q 367.36 820.7120000000001 409.36 837.2 H 476" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 862.4 H 325.36 Q 367.36 877.376 409.36 862.4 H 476" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/><path d="M 88 887.6 H 325.36 Q 367.36 874.136 409.36 887.6 H 476" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 912.8 H 325.36 Q 367.36 924.752 409.36 912.8 H 476" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/>
+      <text x="100" y="844.76" class="display" font-size="70" opacity=".93">ANIK</text>
+      <rect x="364.36" y="692" width="6" height="240" fill="#2447FF"/>
+      <rect x="297.52" y="749" width="151.32" height="120.96" fill="#2447FF" opacity=".16"/><text x="373.18" y="812" text-anchor="middle" class="micro">[PROJECT IMAGE — PENDING]</text>
+    </g>
+        <text x="88" y="968" class="micro">same law · materially different job</text>
+      </g>
+      <g>
+        <text x="524" y="642" class="label">06 / PROGRESS BASELINE</text>
+        <rect x="524" y="664" width="420" height="322" rx="14" fill="#171721" fill-opacity=".03" stroke="#171721" stroke-opacity=".18"/>
+        
+    <g>
+      <path d="M 540 711.2 H 649.3199999999999 Q 691.3199999999999 713.2 733.3199999999999 711.2 H 928" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 540 736.4 H 649.3199999999999 Q 691.3199999999999 734.4 733.3199999999999 736.4 H 928" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 540 761.6 H 649.3199999999999 Q 691.3199999999999 763.6 733.3199999999999 761.6 H 928" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 540 786.8 H 649.3199999999999 Q 691.3199999999999 784.8 733.3199999999999 786.8 H 928" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 540 812 H 649.3199999999999 Q 691.3199999999999 814 733.3199999999999 812 H 928" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 540 837.2 H 649.3199999999999 Q 691.3199999999999 835.2 733.3199999999999 837.2 H 928" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 540 862.4 H 649.3199999999999 Q 691.3199999999999 864.4 733.3199999999999 862.4 H 928" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/><path d="M 540 887.6 H 649.3199999999999 Q 691.3199999999999 885.6 733.3199999999999 887.6 H 928" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 540 912.8 H 649.3199999999999 Q 691.3199999999999 914.8 733.3199999999999 912.8 H 928" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/>
+      <text x="552" y="844.76" class="display" font-size="70" opacity=".93">WORK</text>
+      <rect x="688.3199999999999" y="692" width="6" height="240" fill="#FF5C35"/>
+      <text x="705.3199999999999" y="708" class="micro">PRESSURE 01</text>
+    </g>
+        <text x="540" y="968" class="micro">same law · materially different job</text>
+      </g>
+      <g>
+        <text x="976" y="642" class="label">07 / CONTENT REGISTER</text>
+        <rect x="976" y="664" width="420" height="322" rx="14" fill="#171721" fill-opacity=".03" stroke="#171721" stroke-opacity=".18"/>
+        
+    <g>
+      <path d="M 992 711.2 H 1058.64 Q 1100.64 723.152 1142.64 711.2 H 1380" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 992 736.4 H 1058.64 Q 1100.64 722.9359999999999 1142.64 736.4 H 1380" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 992 761.6 H 1058.64 Q 1100.64 776.576 1142.64 761.6 H 1380" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 992 786.8 H 1058.64 Q 1100.64 770.312 1142.64 786.8 H 1380" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 992 812 H 1058.64 Q 1100.64 830 1142.64 812 H 1380" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 992 837.2 H 1058.64 Q 1100.64 820.7120000000001 1142.64 837.2 H 1380" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 992 862.4 H 1058.64 Q 1100.64 877.376 1142.64 862.4 H 1380" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/><path d="M 992 887.6 H 1058.64 Q 1100.64 874.136 1142.64 887.6 H 1380" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 992 912.8 H 1058.64 Q 1100.64 924.752 1142.64 912.8 H 1380" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/>
+      <text x="1004" y="844.76" class="display" font-size="70" opacity=".93">WORK</text>
+      <rect x="1097.64" y="692" width="6" height="240" fill="#FF5C35"/>
+      <rect x="1201.52" y="749" width="151.32" height="120.96" fill="#2447FF" opacity=".16"/><text x="1277.18" y="812" text-anchor="middle" class="micro">[PROJECT IMAGE — PENDING]</text>
+    </g>
+        <text x="992" y="968" class="micro">same law · materially different job</text>
+      </g>
+      <g>
+        <text x="1428" y="642" class="label">08 / RETURN RHYTHM</text>
+        <rect x="1428" y="664" width="420" height="322" rx="14" fill="#171721" fill-opacity=".03" stroke="#171721" stroke-opacity=".18"/>
+        
+    <g>
+      <path d="M 1444 711.2 H 1596 Q 1638 713.2 1680 711.2 H 1832" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 1444 736.4 H 1596 Q 1638 734.4 1680 736.4 H 1832" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1444 761.6 H 1596 Q 1638 763.6 1680 761.6 H 1832" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1444 786.8 H 1596 Q 1638 784.8 1680 786.8 H 1832" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 1444 812 H 1596 Q 1638 814 1680 812 H 1832" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1444 837.2 H 1596 Q 1638 835.2 1680 837.2 H 1832" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1444 862.4 H 1596 Q 1638 864.4 1680 862.4 H 1832" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/><path d="M 1444 887.6 H 1596 Q 1638 885.6 1680 887.6 H 1832" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1444 912.8 H 1596 Q 1638 914.8 1680 912.8 H 1832" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/>
+      <text x="1456" y="844.76" class="display" font-size="70" opacity=".93">PROOF</text>
+      <rect x="1635" y="692" width="6" height="240" fill="#F2B632"/>
+      <text x="1652" y="708" class="micro">PRESSURE 07</text>
+    </g>
+        <text x="1444" y="968" class="micro">same law · materially different job</text>
+      </g>
+</svg>

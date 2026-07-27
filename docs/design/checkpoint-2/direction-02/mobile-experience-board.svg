@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" role="img" aria-labelledby="board-title board-desc">
+  <title id="board-title">KINETIC LEDGER — MOBILE EXPERIENCE BOARD</title>
+  <desc id="board-desc">Eight 390×844 intent studies showing hierarchy, touch reach, and a real mobile composition.</desc>
+  <defs>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="microShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="10" flood-color="#000" flood-opacity=".25"/>
+    </filter>
+    <pattern id="microGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" fill="none" stroke="#171721" stroke-opacity=".055" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="fade" x1="0" x2="1">
+      <stop offset="0" stop-color="#2447FF"/>
+      <stop offset=".48" stop-color="#5B2A86"/>
+      <stop offset="1" stop-color="#FF5C35"/>
+    </linearGradient>
+    
+  </defs>
+  <style>
+    .kicker,.folio,.label,.micro,.state { font-family: "IBM Plex Mono", "Cascadia Mono", monospace; letter-spacing: .12em; }
+    .title,.display,.word { font-family: "Arial Narrow", "Inter Tight", Arial, sans-serif; font-weight: 760; }
+    .kicker { font-size: 19px; fill: #2447FF; }
+    .folio { font-size: 14px; fill: #716F7B; }
+    .title { font-size: 54px; fill: #171721; letter-spacing: -.035em; }
+    .subtitle { font: 22px Arial, sans-serif; fill: #716F7B; }
+    .label { font-size: 13px; fill: #171721; }
+    .micro { font-size: 11px; fill: #716F7B; }
+    .state { font-size: 14px; fill: #171721; }
+    .display { fill: #171721; letter-spacing: -.07em; }
+  </style>
+  <rect width="1920" height="1080" fill="#F4F0E8"/>
+  <rect width="1920" height="1080" fill="url(#microGrid)"/>
+  
+    <text x="72" y="68" class="kicker">KINETIC LEDGER · CHECKPOINT 2</text>
+    <text x="72" y="130" class="title">MOBILE EXPERIENCE BOARD</text>
+    <text x="72" y="168" class="subtitle">Eight 390×844 intent studies showing hierarchy, touch reach, and a real mobile composition.</text>
+    <text x="1848" y="68" text-anchor="end" class="folio">CONCEPT STUDY / NOT PUBLIC COPY</text>
+  
+  
+      <g filter="url(#microShadow)">
+        <rect x="72" y="280" width="194" height="548" rx="38" fill="#F4F0E8" stroke="#171721" stroke-opacity=".4" stroke-width="2"/>
+        <rect x="85" y="296" width="168" height="516" rx="28" fill="#F4F0E8" stroke="#171721" stroke-opacity=".08"/>
+        <rect x="142" y="289" width="54" height="7" rx="4" fill="#171721" opacity=".22"/>
+        
+    <g>
+      <path d="M 93 398 H 93.56 Q 135.56 400 177.56 398 H 245" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 93 446 H 93.56 Q 135.56 444 177.56 446 H 245" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 93 494 H 93.56 Q 135.56 496 177.56 494 H 245" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 93 542 H 93.56 Q 135.56 540 177.56 542 H 245" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 93 590 H 93.56 Q 135.56 592 177.56 590 H 245" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 93 638 H 93.56 Q 135.56 636 177.56 638 H 245" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 93 686 H 93.56 Q 135.56 688 177.56 686 H 245" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="105" y="591.9200000000001" class="display" font-size="42" opacity=".93">ANIK</text>
+      <rect x="132.56" y="356" width="6" height="372" fill="#2447FF"/>
+      <text x="149.56" y="372" class="micro">PRESSURE 00</text>
+    </g>
+        <text x="94" y="766" class="label">01 / FIRST VIEWPORT</text>
+        <text x="94" y="792" class="micro">thumb path · active</text>
+      </g>
+      <g filter="url(#microShadow)">
+        <rect x="292" y="280" width="194" height="548" rx="38" fill="#F4F0E8" stroke="#171721" stroke-opacity=".4" stroke-width="2"/>
+        <rect x="305" y="296" width="168" height="516" rx="28" fill="#F4F0E8" stroke="#171721" stroke-opacity=".08"/>
+        <rect x="362" y="289" width="54" height="7" rx="4" fill="#171721" opacity=".22"/>
+        
+    <g>
+      <path d="M 313 398 H 330.28 Q 372.28 400 414.28 398 H 465" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 313 446 H 330.28 Q 372.28 444 414.28 446 H 465" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 313 494 H 330.28 Q 372.28 496 414.28 494 H 465" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 313 542 H 330.28 Q 372.28 540 414.28 542 H 465" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 313 590 H 330.28 Q 372.28 592 414.28 590 H 465" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 313 638 H 330.28 Q 372.28 636 414.28 638 H 465" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 313 686 H 330.28 Q 372.28 688 414.28 686 H 465" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="325" y="591.9200000000001" class="display" font-size="42" opacity=".93">WORK</text>
+      <rect x="369.28" y="356" width="6" height="372" fill="#FF5C35"/>
+      <text x="386.28" y="372" class="micro">PRESSURE 01</text>
+    </g>
+        <text x="314" y="766" class="label">02 / NAVIGATION</text>
+        <text x="314" y="792" class="micro">thumb path · settled</text>
+      </g>
+      <g filter="url(#microShadow)">
+        <rect x="512" y="280" width="194" height="548" rx="38" fill="#F4F0E8" stroke="#171721" stroke-opacity=".4" stroke-width="2"/>
+        <rect x="525" y="296" width="168" height="516" rx="28" fill="#F4F0E8" stroke="#171721" stroke-opacity=".08"/>
+        <rect x="582" y="289" width="54" height="7" rx="4" fill="#171721" opacity=".22"/>
+        
+    <g>
+      <path d="M 533 398 H 567 Q 609 407.36 651 398 H 685" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 533 446 H 567 Q 609 433.76 651 446 H 685" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 533 494 H 567 Q 609 509.12 651 494 H 685" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 533 542 H 567 Q 609 524 651 542 H 685" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 533 590 H 567 Q 609 605.12 651 590 H 685" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 533 638 H 567 Q 609 625.76 651 638 H 685" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 533 686 H 567 Q 609 695.36 651 686 H 685" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="545" y="591.9200000000001" class="display" font-size="42" opacity=".93">BUILD</text>
+      <rect x="606" y="356" width="6" height="372" fill="#5B2A86"/>
+      <text x="623" y="372" class="micro">PRESSURE 02</text>
+    </g>
+        <text x="534" y="766" class="label">03 / SIMPLIFIED TRANSFORM</text>
+        <text x="534" y="792" class="micro">thumb path · active</text>
+      </g>
+      <g filter="url(#microShadow)">
+        <rect x="732" y="280" width="194" height="548" rx="38" fill="#F4F0E8" stroke="#171721" stroke-opacity=".4" stroke-width="2"/>
+        <rect x="745" y="296" width="168" height="516" rx="28" fill="#F4F0E8" stroke="#171721" stroke-opacity=".08"/>
+        <rect x="802" y="289" width="54" height="7" rx="4" fill="#171721" opacity=".22"/>
+        
+    <g>
+      <path d="M 753 398 H 820.44 Q 862.44 407.36 904.44 398 H 905" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 753 446 H 820.44 Q 862.44 433.76 904.44 446 H 905" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 753 494 H 820.44 Q 862.44 509.12 904.44 494 H 905" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 753 542 H 820.44 Q 862.44 524 904.44 542 H 905" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 753 590 H 820.44 Q 862.44 605.12 904.44 590 H 905" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 753 638 H 820.44 Q 862.44 625.76 904.44 638 H 905" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 753 686 H 820.44 Q 862.44 695.36 904.44 686 H 905" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="765" y="591.9200000000001" class="display" font-size="42" opacity=".93">ANIK</text>
+      <rect x="859.44" y="356" width="6" height="372" fill="#2447FF"/>
+      <rect x="835.08" y="446" width="59.28" height="184.32" fill="#2447FF" opacity=".16"/><text x="864.72" y="542" text-anchor="middle" class="micro">[PROJECT IMAGE — PENDING]</text>
+    </g>
+        <text x="754" y="766" class="label">04 / PROJECT ENTRY</text>
+        <text x="754" y="792" class="micro">thumb path · settled</text>
+      </g>
+      <g filter="url(#microShadow)">
+        <rect x="952" y="280" width="194" height="548" rx="38" fill="#F4F0E8" stroke="#171721" stroke-opacity=".4" stroke-width="2"/>
+        <rect x="965" y="296" width="168" height="516" rx="28" fill="#F4F0E8" stroke="#171721" stroke-opacity=".08"/>
+        <rect x="1022" y="289" width="54" height="7" rx="4" fill="#171721" opacity=".22"/>
+        
+    <g>
+      <path d="M 973 398 H 1040.44 Q 1082.44 407.36 1124.44 398 H 1125" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 973 446 H 1040.44 Q 1082.44 433.76 1124.44 446 H 1125" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 973 494 H 1040.44 Q 1082.44 509.12 1124.44 494 H 1125" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 973 542 H 1040.44 Q 1082.44 524 1124.44 542 H 1125" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 973 590 H 1040.44 Q 1082.44 605.12 1124.44 590 H 1125" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 973 638 H 1040.44 Q 1082.44 625.76 1124.44 638 H 1125" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 973 686 H 1040.44 Q 1082.44 695.36 1124.44 686 H 1125" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="985" y="591.9200000000001" class="display" font-size="42" opacity=".93">ANIK</text>
+      <rect x="1079.44" y="356" width="6" height="372" fill="#2447FF"/>
+      <rect x="1055.08" y="446" width="59.28" height="184.32" fill="#2447FF" opacity=".16"/><text x="1084.72" y="542" text-anchor="middle" class="micro">[PROJECT IMAGE — PENDING]</text>
+    </g>
+        <text x="974" y="766" class="label">05 / REDUCED DENSITY</text>
+        <text x="974" y="792" class="micro">thumb path · active</text>
+      </g>
+      <g filter="url(#microShadow)">
+        <rect x="1172" y="280" width="194" height="548" rx="38" fill="#F4F0E8" stroke="#171721" stroke-opacity=".4" stroke-width="2"/>
+        <rect x="1185" y="296" width="168" height="516" rx="28" fill="#F4F0E8" stroke="#171721" stroke-opacity=".08"/>
+        <rect x="1242" y="289" width="54" height="7" rx="4" fill="#171721" opacity=".22"/>
+        
+    <g>
+      <path d="M 1193 398 H 1193.56 Q 1235.56 407.36 1277.56 398 H 1345" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 1193 446 H 1193.56 Q 1235.56 433.76 1277.56 446 H 1345" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1193 494 H 1193.56 Q 1235.56 509.12 1277.56 494 H 1345" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1193 542 H 1193.56 Q 1235.56 524 1277.56 542 H 1345" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 1193 590 H 1193.56 Q 1235.56 605.12 1277.56 590 H 1345" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1193 638 H 1193.56 Q 1235.56 625.76 1277.56 638 H 1345" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1193 686 H 1193.56 Q 1235.56 695.36 1277.56 686 H 1345" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="1205" y="591.9200000000001" class="display" font-size="42" opacity=".93">WORK</text>
+      <rect x="1232.56" y="356" width="6" height="372" fill="#FF5C35"/>
+      <rect x="1275.08" y="446" width="59.28" height="184.32" fill="#2447FF" opacity=".16"/><text x="1304.72" y="542" text-anchor="middle" class="micro">[PROJECT IMAGE — PENDING]</text>
+    </g>
+        <text x="1194" y="766" class="label">06 / IDENTITY / NO 3D</text>
+        <text x="1194" y="792" class="micro">thumb path · settled</text>
+      </g>
+      <g filter="url(#microShadow)">
+        <rect x="1392" y="280" width="194" height="548" rx="38" fill="#F4F0E8" stroke="#171721" stroke-opacity=".4" stroke-width="2"/>
+        <rect x="1405" y="296" width="168" height="516" rx="28" fill="#F4F0E8" stroke="#171721" stroke-opacity=".08"/>
+        <rect x="1462" y="289" width="54" height="7" rx="4" fill="#171721" opacity=".22"/>
+        
+    <g>
+      <path d="M 1413 398 H 1430.28 Q 1472.28 400 1514.28 398 H 1565" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 1413 446 H 1430.28 Q 1472.28 444 1514.28 446 H 1565" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1413 494 H 1430.28 Q 1472.28 496 1514.28 494 H 1565" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1413 542 H 1430.28 Q 1472.28 540 1514.28 542 H 1565" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 1413 590 H 1430.28 Q 1472.28 592 1514.28 590 H 1565" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1413 638 H 1430.28 Q 1472.28 636 1514.28 638 H 1565" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1413 686 H 1430.28 Q 1472.28 688 1514.28 686 H 1565" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="1425" y="591.9200000000001" class="display" font-size="42" opacity=".93">BUILD</text>
+      <rect x="1469.28" y="356" width="6" height="372" fill="#5B2A86"/>
+      <text x="1486.28" y="372" class="micro">PRESSURE 06</text>
+    </g>
+        <text x="1414" y="766" class="label">07 / REDUCED MOTION</text>
+        <text x="1414" y="792" class="micro">thumb path · active</text>
+      </g>
+      <g filter="url(#microShadow)">
+        <rect x="1612" y="280" width="194" height="548" rx="38" fill="#F4F0E8" stroke="#171721" stroke-opacity=".4" stroke-width="2"/>
+        <rect x="1625" y="296" width="168" height="516" rx="28" fill="#F4F0E8" stroke="#171721" stroke-opacity=".08"/>
+        <rect x="1682" y="289" width="54" height="7" rx="4" fill="#171721" opacity=".22"/>
+        
+    <g>
+      <path d="M 1633 398 H 1667 Q 1709 400 1751 398 H 1785" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 1633 446 H 1667 Q 1709 444 1751 446 H 1785" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1633 494 H 1667 Q 1709 496 1751 494 H 1785" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1633 542 H 1667 Q 1709 540 1751 542 H 1785" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 1633 590 H 1667 Q 1709 592 1751 590 H 1785" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1633 638 H 1667 Q 1709 636 1751 638 H 1785" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1633 686 H 1667 Q 1709 688 1751 686 H 1785" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="1645" y="591.9200000000001" class="display" font-size="42" opacity=".93">PROOF</text>
+      <rect x="1706" y="356" width="6" height="372" fill="#F2B632"/>
+      <text x="1723" y="372" class="micro">PRESSURE 07</text>
+    </g>
+        <text x="1634" y="766" class="label">08 / NO-WEBGL</text>
+        <text x="1634" y="792" class="micro">thumb path · settled</text>
+      </g>
+    <path d="M72 900H1848" stroke="#171721" stroke-opacity=".18"/>
+    <text x="72" y="946" class="label">MOBILE RULE</text>
+    <text x="250" y="946" class="subtitle">The governing system reflows; it is not a cropped desktop scene.</text>
+    <text x="72" y="995" class="micro">Minimum hit targets 44px · no hover dependency · lower density · reduced motion is a first-class state</text>
+</svg>

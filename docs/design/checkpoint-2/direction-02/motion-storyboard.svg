@@ -1,0 +1,225 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" role="img" aria-labelledby="board-title board-desc">
+  <title id="board-title">KINETIC LEDGER — MOTION STORYBOARD</title>
+  <desc id="board-desc">Fourteen authored frames for the arrival-to-project-focus transition; timing semantics live beside this board.</desc>
+  <defs>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="microShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="10" flood-color="#000" flood-opacity=".25"/>
+    </filter>
+    <pattern id="microGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" fill="none" stroke="#171721" stroke-opacity=".055" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="fade" x1="0" x2="1">
+      <stop offset="0" stop-color="#2447FF"/>
+      <stop offset=".48" stop-color="#5B2A86"/>
+      <stop offset="1" stop-color="#FF5C35"/>
+    </linearGradient>
+    
+  </defs>
+  <style>
+    .kicker,.folio,.label,.micro,.state { font-family: "IBM Plex Mono", "Cascadia Mono", monospace; letter-spacing: .12em; }
+    .title,.display,.word { font-family: "Arial Narrow", "Inter Tight", Arial, sans-serif; font-weight: 760; }
+    .kicker { font-size: 19px; fill: #2447FF; }
+    .folio { font-size: 14px; fill: #716F7B; }
+    .title { font-size: 54px; fill: #171721; letter-spacing: -.035em; }
+    .subtitle { font: 22px Arial, sans-serif; fill: #716F7B; }
+    .label { font-size: 13px; fill: #171721; }
+    .micro { font-size: 11px; fill: #716F7B; }
+    .state { font-size: 14px; fill: #171721; }
+    .display { fill: #171721; letter-spacing: -.07em; }
+  </style>
+  <rect width="1920" height="1080" fill="#F4F0E8"/>
+  <rect width="1920" height="1080" fill="url(#microGrid)"/>
+  
+    <text x="72" y="68" class="kicker">KINETIC LEDGER · CHECKPOINT 2</text>
+    <text x="72" y="130" class="title">MOTION STORYBOARD</text>
+    <text x="72" y="168" class="subtitle">Fourteen authored frames for the arrival-to-project-focus transition; timing semantics live beside this board.</text>
+    <text x="1848" y="68" text-anchor="end" class="folio">CONCEPT STUDY / NOT PUBLIC COPY</text>
+  
+  
+      <g>
+        <rect x="72" y="255" width="238" height="292" rx="12" fill="#171721" fill-opacity=".028" stroke="#171721" stroke-opacity=".16"/>
+        <rect x="82" y="265" width="218" height="216" rx="8" fill="#F4F0E8"/>
+        
+    <g>
+      <path d="M 88 296.5 H 103.68 Q 145.68 298.5 187.68 296.5 H 294" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 88 322 H 103.68 Q 145.68 320 187.68 322 H 294" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 347.5 H 103.68 Q 145.68 349.5 187.68 347.5 H 294" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 373 H 103.68 Q 145.68 371 187.68 373 H 294" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 88 398.5 H 103.68 Q 145.68 400.5 187.68 398.5 H 294" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 424 H 103.68 Q 145.68 422 187.68 424 H 294" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 449.5 H 103.68 Q 145.68 451.5 187.68 449.5 H 294" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="100" y="399.52" class="display" font-size="42" opacity=".93">ANIK</text>
+      <rect x="142.68" y="277" width="6" height="192" fill="#2447FF"/>
+      <text x="159.68" y="293" class="micro">PRESSURE 00</text>
+    </g>
+        <text x="84" y="507" class="label">F01 · 0%</text>
+        <text x="84" y="530" class="micro">orient / anchor held</text>
+      </g>
+      <g>
+        <rect x="334" y="255" width="238" height="292" rx="12" fill="#171721" fill-opacity=".028" stroke="#171721" stroke-opacity=".16"/>
+        <rect x="344" y="265" width="218" height="216" rx="8" fill="#F4F0E8"/>
+        
+    <g>
+      <path d="M 350 296.5 H 365.68 Q 407.68 298.5 449.68 296.5 H 556" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 350 322 H 365.68 Q 407.68 320 449.68 322 H 556" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 350 347.5 H 365.68 Q 407.68 349.5 449.68 347.5 H 556" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 350 373 H 365.68 Q 407.68 371 449.68 373 H 556" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 350 398.5 H 365.68 Q 407.68 400.5 449.68 398.5 H 556" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 350 424 H 365.68 Q 407.68 422 449.68 424 H 556" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 350 449.5 H 365.68 Q 407.68 451.5 449.68 449.5 H 556" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="362" y="399.52" class="display" font-size="42" opacity=".93">ANIK</text>
+      <rect x="404.68" y="277" width="6" height="192" fill="#2447FF"/>
+      <text x="421.68" y="293" class="micro">PRESSURE 00</text>
+    </g>
+        <text x="346" y="507" class="label">F02 · 8%</text>
+        <text x="346" y="530" class="micro">orient / anchor held</text>
+      </g>
+      <g>
+        <rect x="596" y="255" width="238" height="292" rx="12" fill="#171721" fill-opacity=".028" stroke="#171721" stroke-opacity=".16"/>
+        <rect x="606" y="265" width="218" height="216" rx="8" fill="#F4F0E8"/>
+        
+    <g>
+      <path d="M 612 296.5 H 650.34 Q 692.34 298.5 734.34 296.5 H 818" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 612 322 H 650.34 Q 692.34 320 734.34 322 H 818" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 612 347.5 H 650.34 Q 692.34 349.5 734.34 347.5 H 818" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 612 373 H 650.34 Q 692.34 371 734.34 373 H 818" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 612 398.5 H 650.34 Q 692.34 400.5 734.34 398.5 H 818" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 612 424 H 650.34 Q 692.34 422 734.34 424 H 818" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 612 449.5 H 650.34 Q 692.34 451.5 734.34 449.5 H 818" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="624" y="399.52" class="display" font-size="42" opacity=".93">WORK</text>
+      <rect x="689.34" y="277" width="6" height="192" fill="#FF5C35"/>
+      <text x="706.34" y="293" class="micro">PRESSURE 01</text>
+    </g>
+        <text x="608" y="507" class="label">F03 · 15%</text>
+        <text x="608" y="530" class="micro">orient / anchor held</text>
+      </g>
+      <g>
+        <rect x="858" y="255" width="238" height="292" rx="12" fill="#171721" fill-opacity=".028" stroke="#171721" stroke-opacity=".16"/>
+        <rect x="868" y="265" width="218" height="216" rx="8" fill="#F4F0E8"/>
+        
+    <g>
+      <path d="M 874 296.5 H 912.34 Q 954.34 298.5 996.34 296.5 H 1080" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 874 322 H 912.34 Q 954.34 320 996.34 322 H 1080" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 874 347.5 H 912.34 Q 954.34 349.5 996.34 347.5 H 1080" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 874 373 H 912.34 Q 954.34 371 996.34 373 H 1080" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 874 398.5 H 912.34 Q 954.34 400.5 996.34 398.5 H 1080" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 874 424 H 912.34 Q 954.34 422 996.34 424 H 1080" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 874 449.5 H 912.34 Q 954.34 451.5 996.34 449.5 H 1080" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="886" y="399.52" class="display" font-size="42" opacity=".93">WORK</text>
+      <rect x="951.34" y="277" width="6" height="192" fill="#FF5C35"/>
+      <text x="968.34" y="293" class="micro">PRESSURE 01</text>
+    </g>
+        <text x="870" y="507" class="label">F04 · 23%</text>
+        <text x="870" y="530" class="micro">orient / anchor held</text>
+      </g>
+      <g>
+        <rect x="1120" y="255" width="238" height="292" rx="12" fill="#171721" fill-opacity=".028" stroke="#171721" stroke-opacity=".16"/>
+        <rect x="1130" y="265" width="218" height="216" rx="8" fill="#F4F0E8"/>
+        
+    <g>
+      <path d="M 1136 296.5 H 1197 Q 1239 309.91 1281 296.5 H 1342" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 1136 322 H 1197 Q 1239 307.06 1281 322 H 1342" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1136 347.5 H 1197 Q 1239 363.97 1281 347.5 H 1342" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1136 373 H 1197 Q 1239 355 1281 373 H 1342" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 1136 398.5 H 1197 Q 1239 414.97 1281 398.5 H 1342" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1136 424 H 1197 Q 1239 409.06 1281 424 H 1342" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1136 449.5 H 1197 Q 1239 462.91 1281 449.5 H 1342" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="1148" y="399.52" class="display" font-size="42" opacity=".93">BUILD</text>
+      <rect x="1236" y="277" width="6" height="192" fill="#5B2A86"/>
+      <text x="1253" y="293" class="micro">PRESSURE 02</text>
+    </g>
+        <text x="1132" y="507" class="label">F05 · 31%</text>
+        <text x="1132" y="530" class="micro">transform / anchor held</text>
+      </g>
+      <g>
+        <rect x="1382" y="255" width="238" height="292" rx="12" fill="#171721" fill-opacity=".028" stroke="#171721" stroke-opacity=".16"/>
+        <rect x="1392" y="265" width="218" height="216" rx="8" fill="#F4F0E8"/>
+        
+    <g>
+      <path d="M 1398 296.5 H 1459 Q 1501 309.91 1543 296.5 H 1604" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 1398 322 H 1459 Q 1501 307.06 1543 322 H 1604" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1398 347.5 H 1459 Q 1501 363.97 1543 347.5 H 1604" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1398 373 H 1459 Q 1501 355 1543 373 H 1604" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 1398 398.5 H 1459 Q 1501 414.97 1543 398.5 H 1604" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1398 424 H 1459 Q 1501 409.06 1543 424 H 1604" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1398 449.5 H 1459 Q 1501 462.91 1543 449.5 H 1604" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="1410" y="399.52" class="display" font-size="42" opacity=".93">BUILD</text>
+      <rect x="1498" y="277" width="6" height="192" fill="#5B2A86"/>
+      <text x="1515" y="293" class="micro">PRESSURE 02</text>
+    </g>
+        <text x="1394" y="507" class="label">F06 · 38%</text>
+        <text x="1394" y="530" class="micro">transform / anchor held</text>
+      </g>
+      <g>
+        <rect x="1644" y="255" width="238" height="292" rx="12" fill="#171721" fill-opacity=".028" stroke="#171721" stroke-opacity=".16"/>
+        <rect x="1654" y="265" width="218" height="216" rx="8" fill="#F4F0E8"/>
+        
+    <g>
+      <path d="M 1660 296.5 H 1743.66 Q 1785.66 309.91 1827.66 296.5 H 1866" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 1660 322 H 1743.66 Q 1785.66 307.06 1827.66 322 H 1866" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1660 347.5 H 1743.66 Q 1785.66 363.97 1827.66 347.5 H 1866" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1660 373 H 1743.66 Q 1785.66 355 1827.66 373 H 1866" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 1660 398.5 H 1743.66 Q 1785.66 414.97 1827.66 398.5 H 1866" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1660 424 H 1743.66 Q 1785.66 409.06 1827.66 424 H 1866" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1660 449.5 H 1743.66 Q 1785.66 462.91 1827.66 449.5 H 1866" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="1672" y="399.52" class="display" font-size="42" opacity=".93">PROOF</text>
+      <rect x="1782.66" y="277" width="6" height="192" fill="#F2B632"/>
+      <text x="1799.66" y="293" class="micro">PRESSURE 03</text>
+    </g>
+        <text x="1656" y="507" class="label">F07 · 46%</text>
+        <text x="1656" y="530" class="micro">transform / anchor held</text>
+      </g>
+      <g>
+        <rect x="72" y="589" width="238" height="292" rx="12" fill="#171721" fill-opacity=".028" stroke="#171721" stroke-opacity=".16"/>
+        <rect x="82" y="599" width="218" height="216" rx="8" fill="#F4F0E8"/>
+        
+    <g>
+      <path d="M 88 630.5 H 171.66000000000003 Q 213.66000000000003 643.91 255.66000000000003 630.5 H 294" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 88 656 H 171.66000000000003 Q 213.66000000000003 641.06 255.66000000000003 656 H 294" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 681.5 H 171.66000000000003 Q 213.66000000000003 697.97 255.66000000000003 681.5 H 294" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 707 H 171.66000000000003 Q 213.66000000000003 689 255.66000000000003 707 H 294" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 88 732.5 H 171.66000000000003 Q 213.66000000000003 748.97 255.66000000000003 732.5 H 294" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 758 H 171.66000000000003 Q 213.66000000000003 743.06 255.66000000000003 758 H 294" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 88 783.5 H 171.66000000000003 Q 213.66000000000003 796.91 255.66000000000003 783.5 H 294" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="100" y="733.52" class="display" font-size="42" opacity=".93">PROOF</text>
+      <rect x="210.66000000000003" y="611" width="6" height="192" fill="#F2B632"/>
+      <text x="227.66000000000003" y="627" class="micro">PRESSURE 03</text>
+    </g>
+        <text x="84" y="841" class="label">F08 · 54%</text>
+        <text x="84" y="864" class="micro">transform / anchor held</text>
+      </g>
+      <g>
+        <rect x="334" y="589" width="238" height="292" rx="12" fill="#171721" fill-opacity=".028" stroke="#171721" stroke-opacity=".16"/>
+        <rect x="344" y="599" width="218" height="216" rx="8" fill="#F4F0E8"/>
+        
+    <g>
+      <path d="M 350 630.5 H 456.32 Q 498.32 643.91 540.3199999999999 630.5 H 556" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 350 656 H 456.32 Q 498.32 641.06 540.3199999999999 656 H 556" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 350 681.5 H 456.32 Q 498.32 697.97 540.3199999999999 681.5 H 556" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 350 707 H 456.32 Q 498.32 689 540.3199999999999 707 H 556" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 350 732.5 H 456.32 Q 498.32 748.97 540.3199999999999 732.5 H 556" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 350 758 H 456.32 Q 498.32 743.06 540.3199999999999 758 H 556" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 350 783.5 H 456.32 Q 498.32 796.91 540.3199999999999 783.5 H 556" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="362" y="733.52" class="display" font-size="42" opacity=".93">ANIK</text>
+      <rect x="495.32" y="611" width="6" height="192" fill="#2447FF"/>
+      <rect x="461.24" y="656" width="80.34" height="97.92" fill="#2447FF" opacity=".16"/><text x="501.40999999999997" y="707" text-anchor="middle" class="micro">[PROJECT IMAGE — PENDING]</text>
+    </g>
+        <text x="346" y="841" class="label">F09 · 62%</text>
+        <text x="346" y="864" class="micro">transform / anchor held</text>
+      </g>
+      <g>
+        <rect x="596" y="589" width="238" height="292" rx="12" fill="#171721" fill-opacity=".028" stroke="#171721" stroke-opacity=".16"/>
+        <rect x="606" y="599" width="218" height="216" rx="8" fill="#F4F0E8"/>
+        
+    <g>
+      <path d="M 612 630.5 H 718.3199999999999 Q 760.3199999999999 643.91 802.3199999999999 630.5 H 818" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 612 656 H 718.3199999999999 Q 760.3199999999999 641.06 802.3199999999999 656 H 818" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 612 681.5 H 718.3199999999999 Q 760.3199999999999 697.97 802.3199999999999 681.5 H 818" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 612 707 H 718.3199999999999 Q 760.3199999999999 689 802.3199999999999 707 H 818" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 612 732.5 H 718.3199999999999 Q 760.3199999999999 748.97 802.3199999999999 732.5 H 818" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 612 758 H 718.3199999999999 Q 760.3199999999999 743.06 802.3199999999999 758 H 818" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 612 783.5 H 718.3199999999999 Q 760.3199999999999 796.91 802.3199999999999 783.5 H 818" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="624" y="733.52" class="display" font-size="42" opacity=".93">ANIK</text>
+      <rect x="757.3199999999999" y="611" width="6" height="192" fill="#2447FF"/>
+      <rect x="723.24" y="656" width="80.34" height="97.92" fill="#2447FF" opacity=".16"/><text x="763.41" y="707" text-anchor="middle" class="micro">[PROJECT IMAGE — PENDING]</text>
+    </g>
+        <text x="608" y="841" class="label">F10 · 69%</text>
+        <text x="608" y="864" class="micro">transform / anchor held</text>
+      </g>
+      <g>
+        <rect x="858" y="589" width="238" height="292" rx="12" fill="#171721" fill-opacity=".028" stroke="#171721" stroke-opacity=".16"/>
+        <rect x="868" y="599" width="218" height="216" rx="8" fill="#F4F0E8"/>
+        
+    <g>
+      <path d="M 874 630.5 H 889.6800000000001 Q 931.6800000000001 643.91 973.6800000000001 630.5 H 1080" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 874 656 H 889.6800000000001 Q 931.6800000000001 641.06 973.6800000000001 656 H 1080" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 874 681.5 H 889.6800000000001 Q 931.6800000000001 697.97 973.6800000000001 681.5 H 1080" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 874 707 H 889.6800000000001 Q 931.6800000000001 689 973.6800000000001 707 H 1080" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 874 732.5 H 889.6800000000001 Q 931.6800000000001 748.97 973.6800000000001 732.5 H 1080" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 874 758 H 889.6800000000001 Q 931.6800000000001 743.06 973.6800000000001 758 H 1080" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 874 783.5 H 889.6800000000001 Q 931.6800000000001 796.91 973.6800000000001 783.5 H 1080" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="886" y="733.52" class="display" font-size="42" opacity=".93">WORK</text>
+      <rect x="928.6800000000001" y="611" width="6" height="192" fill="#FF5C35"/>
+      <rect x="985.24" y="656" width="80.34" height="97.92" fill="#2447FF" opacity=".16"/><text x="1025.41" y="707" text-anchor="middle" class="micro">[PROJECT IMAGE — PENDING]</text>
+    </g>
+        <text x="870" y="841" class="label">F11 · 77%</text>
+        <text x="870" y="864" class="micro">settle / anchor held</text>
+      </g>
+      <g>
+        <rect x="1120" y="589" width="238" height="292" rx="12" fill="#171721" fill-opacity=".028" stroke="#171721" stroke-opacity=".16"/>
+        <rect x="1130" y="599" width="218" height="216" rx="8" fill="#F4F0E8"/>
+        
+    <g>
+      <path d="M 1136 630.5 H 1151.68 Q 1193.68 643.91 1235.68 630.5 H 1342" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 1136 656 H 1151.68 Q 1193.68 641.06 1235.68 656 H 1342" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1136 681.5 H 1151.68 Q 1193.68 697.97 1235.68 681.5 H 1342" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1136 707 H 1151.68 Q 1193.68 689 1235.68 707 H 1342" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 1136 732.5 H 1151.68 Q 1193.68 748.97 1235.68 732.5 H 1342" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1136 758 H 1151.68 Q 1193.68 743.06 1235.68 758 H 1342" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1136 783.5 H 1151.68 Q 1193.68 796.91 1235.68 783.5 H 1342" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="1148" y="733.52" class="display" font-size="42" opacity=".93">WORK</text>
+      <rect x="1190.68" y="611" width="6" height="192" fill="#FF5C35"/>
+      <rect x="1247.24" y="656" width="80.34" height="97.92" fill="#2447FF" opacity=".16"/><text x="1287.41" y="707" text-anchor="middle" class="micro">[PROJECT IMAGE — PENDING]</text>
+    </g>
+        <text x="1132" y="841" class="label">F12 · 85%</text>
+        <text x="1132" y="864" class="micro">settle / anchor held</text>
+      </g>
+      <g>
+        <rect x="1382" y="589" width="238" height="292" rx="12" fill="#171721" fill-opacity=".028" stroke="#171721" stroke-opacity=".16"/>
+        <rect x="1392" y="599" width="218" height="216" rx="8" fill="#F4F0E8"/>
+        
+    <g>
+      <path d="M 1398 630.5 H 1436.34 Q 1478.34 632.5 1520.34 630.5 H 1604" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 1398 656 H 1436.34 Q 1478.34 654 1520.34 656 H 1604" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1398 681.5 H 1436.34 Q 1478.34 683.5 1520.34 681.5 H 1604" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1398 707 H 1436.34 Q 1478.34 705 1520.34 707 H 1604" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 1398 732.5 H 1436.34 Q 1478.34 734.5 1520.34 732.5 H 1604" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1398 758 H 1436.34 Q 1478.34 756 1520.34 758 H 1604" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1398 783.5 H 1436.34 Q 1478.34 785.5 1520.34 783.5 H 1604" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="1410" y="733.52" class="display" font-size="42" opacity=".93">BUILD</text>
+      <rect x="1475.34" y="611" width="6" height="192" fill="#5B2A86"/>
+      <text x="1492.34" y="627" class="micro">PRESSURE 06</text>
+    </g>
+        <text x="1394" y="841" class="label">F13 · 92%</text>
+        <text x="1394" y="864" class="micro">settle / anchor held</text>
+      </g>
+      <g>
+        <rect x="1644" y="589" width="238" height="292" rx="12" fill="#171721" fill-opacity=".028" stroke="#171721" stroke-opacity=".16"/>
+        <rect x="1654" y="599" width="218" height="216" rx="8" fill="#F4F0E8"/>
+        
+    <g>
+      <path d="M 1660 630.5 H 1698.34 Q 1740.34 632.5 1782.34 630.5 H 1866" fill="none" stroke="#2447FF" stroke-opacity="0.92" stroke-width="3"/><path d="M 1660 656 H 1698.34 Q 1740.34 654 1782.34 656 H 1866" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1660 681.5 H 1698.34 Q 1740.34 683.5 1782.34 681.5 H 1866" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1660 707 H 1698.34 Q 1740.34 705 1782.34 707 H 1866" fill="none" stroke="#F2B632" stroke-opacity="0.92" stroke-width="3"/><path d="M 1660 732.5 H 1698.34 Q 1740.34 734.5 1782.34 732.5 H 1866" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1660 758 H 1698.34 Q 1740.34 756 1782.34 758 H 1866" fill="none" stroke="#171721" stroke-opacity="0.19" stroke-width="1"/><path d="M 1660 783.5 H 1698.34 Q 1740.34 785.5 1782.34 783.5 H 1866" fill="none" stroke="#5B2A86" stroke-opacity="0.92" stroke-width="3"/>
+      <text x="1672" y="733.52" class="display" font-size="42" opacity=".93">BUILD</text>
+      <rect x="1737.34" y="611" width="6" height="192" fill="#5B2A86"/>
+      <text x="1754.34" y="627" class="micro">PRESSURE 06</text>
+    </g>
+        <text x="1656" y="841" class="label">F14 · 100%</text>
+        <text x="1656" y="864" class="micro">settle / anchor held</text>
+      </g>
+</svg>
