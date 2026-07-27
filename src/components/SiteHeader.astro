@@ -10,22 +10,59 @@ function isCurrent(href: string) {
 ---
 
 <header class="site-header">
-  <a class="site-mark" href="/" aria-label={`${SITE.name}, home`}>
-    <span aria-hidden="true">AH</span>
-    <span>{SITE.name}</span>
-  </a>
+  <div class="header-main">
+    <a class="site-mark" href="/" aria-label={`${SITE.name}, home`}>
+      <span class="mark-pixels" aria-hidden="true">AH</span>
+      <span class="mark-copy">
+        <strong>{SITE.name}</strong>
+        <small>From pixels to systems</small>
+      </span>
+    </a>
 
-  <nav aria-label="Primary navigation">
-    <ul>
-      {
-        PRIMARY_NAVIGATION.map((item) => (
-          <li>
-            <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
-              {item.label}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-  </nav>
+    <nav class="desktop-navigation" aria-label="Primary navigation">
+      <ul>
+        {
+          PRIMARY_NAVIGATION.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header-actions">
+      <a href="/search/" aria-current={isCurrent('/search/') ? 'page' : undefined}>Search</a>
+      <a class="header-hire" href="/hire/" aria-current={isCurrent('/hire/') ? 'page' : undefined}>
+        Start a build
+      </a>
+    </div>
+
+    <details class="mobile-navigation">
+      <summary>Menu</summary>
+      <nav aria-label="Mobile navigation">
+        <ul>
+          {
+            PRIMARY_NAVIGATION.map((item) => (
+              <li>
+                <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+          <li><a href="/search/">Search</a></li>
+          <li><a href="/contact/">Contact</a></li>
+        </ul>
+      </nav>
+    </details>
+  </div>
+
+  <div class="header-gauge" aria-hidden="true">
+    <span>MBW / 2026</span>
+    <span class="gauge-line"></span>
+    <span>Dhaka · 23.8103° N</span>
+  </div>
 </header>

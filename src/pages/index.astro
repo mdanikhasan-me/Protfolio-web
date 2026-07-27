@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import ProductEngine from '../components/ProductEngine.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { websiteSchema } from '../lib/schema';
 
@@ -32,14 +33,7 @@ const articles = (await getCollection('articles', ({ data }) => !data.draft))
         <a class="text-link" href="/work/">View work</a>
       </div>
     </div>
-    <div
-      class="portrait-reserve"
-      role="img"
-      aria-label="Abstract builder silhouette; no facial likeness"
-    >
-      <span class="portrait-label">Portrait source awaiting approval</span>
-      <span class="portrait-block" aria-hidden="true"></span>
-    </div>
+    <ProductEngine />
   </section>
 
   <section class="home-services" aria-labelledby="home-services-title">

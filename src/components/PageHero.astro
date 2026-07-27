@@ -10,7 +10,7 @@ interface Props {
 const { eyebrow, title, intro, workshop, meta = [] } = Astro.props;
 ---
 
-<header class="page-hero">
+<header class="page-hero" data-workshop={workshop}>
   <div>
     <p class="eyebrow">{eyebrow}</p>
     <h1>{title}</h1>
@@ -27,5 +27,10 @@ const { eyebrow, title, intro, workshop, meta = [] } = Astro.props;
         </ul>
       )
     }
+  </div>
+  <div class="hero-gauge" aria-hidden="true">
+    <span>ASSEMBLY / {workshop ?? 'PUBLIC PAGE'}</span>
+    <span></span>
+    <span>READY</span>
   </div>
 </header>

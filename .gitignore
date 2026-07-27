@@ -32,3 +32,4 @@ playwright-report/
 test-results/
 lighthouse-reports/
 .pagefind-cache/
+artifacts/

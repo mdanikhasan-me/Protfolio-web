@@ -7,6 +7,8 @@
     "node": ">=22.22.3"
   },
   "scripts": {
+    "assets:brand": "node scripts/generate-brand-assets.mjs",
+    "visual:capture": "node scripts/capture-local.mjs",
     "dev": "astro dev",
     "build": "npm run check && astro build && pagefind --site dist",
     "build:astro": "astro build",
@@ -30,13 +32,16 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@axe-core/playwright": "^4.12.1",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.62.0",
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^10.8.0",
     "eslint-plugin-astro": "^1.7.0",
     "pagefind": "^1.5.2",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
+    "sharp": "^0.35.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.65.0",
     "vitest": "^4.1.10"

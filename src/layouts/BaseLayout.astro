@@ -36,6 +36,8 @@ const personSchema = {
   sameAs: [SITE.github],
 };
 const schemaNodes = [personSchema, ...(Array.isArray(schema) ? schema : [schema])];
+const routeParts = canonicalPath.split('/').filter(Boolean);
+const section = routeParts[0] ?? 'home';
 ---
 
 <!doctype html>
@@ -45,9 +47,12 @@ const schemaNodes = [personSchema, ...(Array.isArray(schema) ? schema : [schema]
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#f0eadb" />
+    <meta name="theme-color" content="#eee7d5" />
     <meta name="color-scheme" content="light" />
     <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow'} />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/icon-48.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="canonical" href={canonical} />
     <meta property="og:type" content={type} />
@@ -69,7 +74,7 @@ const schemaNodes = [personSchema, ...(Array.isArray(schema) ? schema : [schema]
     <script is:inline type="application/ld+json" set:html={JSON.stringify(schemaNodes)} />
     <slot name="head" />
   </head>
-  <body data-pagefind-ignore={noindex ? 'all' : undefined}>
+  <body data-section={section} data-pagefind-ignore={noindex ? 'all' : undefined}>
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="site-frame">
       <SiteHeader />

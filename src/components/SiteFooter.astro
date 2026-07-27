@@ -5,16 +5,29 @@ const year = new Date().getUTCFullYear();
 ---
 
 <footer class="site-footer">
-  <p>
-    <strong>{SITE.name}</strong><br />
-    Website and software development from {SITE.location}.
-  </p>
-  <nav aria-label="Footer navigation">
-    <a href="/now/">Now</a>
-    <a href="/open-source/">Open source</a>
-    <a href="/resume/">Résumé</a>
-    <a href="/contact/">Contact</a>
-    <a href="/privacy/">Privacy</a>
-  </nav>
-  <p class="fine-print">© {year} {SITE.name}. Built as a static, crawlable site.</p>
+  <div class="footer-statement">
+    <p class="eyebrow">Workshop record</p>
+    <p>
+      Pixels <span aria-hidden="true">→</span> systems <span aria-hidden="true">→</span> finished products.
+    </p>
+  </div>
+  <div class="footer-details">
+    <p>
+      <strong>{SITE.name}</strong><br />
+      Website and software development from {SITE.location}.
+    </p>
+    <nav aria-label="Footer navigation">
+      <a href="/now/">Now</a>
+      <a href="/open-source/">Open source</a>
+      <a href="/resume/">Résumé</a>
+      <a href="/contact/">Contact</a>
+      <a href="/privacy/">Privacy</a>
+    </nav>
+  </div>
+  <div class="footer-gauge" aria-hidden="true">
+    <span>BUILD / {year}</span>
+    <span></span>
+    <span>STATIC · ACCESSIBLE · CRAWLABLE</span>
+  </div>
+  <p class="fine-print">© {year} {SITE.name}. No analytics or advertising trackers.</p>
 </footer>
