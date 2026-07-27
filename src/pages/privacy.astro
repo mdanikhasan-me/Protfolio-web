@@ -1,0 +1,54 @@
+---
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Privacy | MD Anik Hasan"
+  description="Privacy information for mdanikhasan.com, including the current no-analytics, no-form-submission state and future disclosure requirements."
+>
+  <PageHero
+    eyebrow="Privacy record"
+    title="Collect less, explain it clearly."
+    intro="This site currently works without analytics, advertising trackers, accounts, cookies, or a form-submission backend."
+    workshop="Privacy Record"
+  />
+
+  <article class="prose standalone">
+    <h2>Current data handling</h2>
+    <p>
+      The public site does not currently submit, store, or process enquiry or seller-interest form
+      data. It does not use analytics or advertising scripts. Search runs against a static index in
+      the visitor’s browser.
+    </p>
+
+    <h2>External links</h2>
+    <p>
+      Links to GitHub and other future verified profiles take you to another service. That service
+      applies its own privacy policy and may collect information according to its settings.
+    </p>
+
+    <h2>If forms are enabled later</h2>
+    <p>
+      Before a contact or seller-interest endpoint is enabled, this page must identify what is
+      collected, why it is needed, where it is sent, how long it is retained, and how a person can
+      request deletion. Server-side validation, abuse protection, and rate limiting must be
+      configured at the same time.
+    </p>
+
+    <h2>If analytics are enabled later</h2>
+    <p>
+      No tracking will be added silently. Any future analytics choice must be privacy-respecting,
+      documented here, and configured so that no optional tracking runs before the visitor’s
+      decision where consent is required.
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+      A verified privacy contact email has not yet been supplied, so this policy does not publish a
+      guessed address. The <a href="/contact/">contact page</a> records the current professional fallback.
+    </p>
+
+    <p><small>Effective date: 27 July 2026.</small></p>
+  </article>
+</BaseLayout>

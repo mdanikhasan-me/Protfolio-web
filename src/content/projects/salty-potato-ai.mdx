@@ -1,0 +1,59 @@
+---
+title: Salty Potato AI
+description:
+  An honest technical build log for an experimental decoder-only language model, tokenizer, data
+  pipeline, training, checkpoints, inference, and desktop software.
+workshop: Research Bench
+route: /lab/salty-potato-ai/
+status: In development
+role: Builder and learner
+kind: Technical experiment
+technologies:
+  - Decoder-only language model
+  - Custom tokenizer
+  - Data pipeline
+  - Training and checkpoint management
+  - Inference
+  - Desktop software
+featured: true
+order: 4
+draft: false
+updatedAt: 2026-07-27
+---
+
+## Learning the system from the inside
+
+Salty Potato AI is a long-running experimental decoder-only language model that I am building from
+scratch. The work includes its own tokenizer, data pipeline, training process, checkpoint
+management, inference work, and desktop software around the model.
+
+I started it to understand language models through implementation. Calling a hosted model can be
+useful, but it does not force the same questions about tokenization, data shape, training state,
+saved checkpoints, or what inference needs to reproduce.
+
+## What “from scratch” means here
+
+It means I am working through the model-facing system instead of treating a remote API as the model.
+The tokenizer, data path, training loop, checkpoint lifecycle, and inference behavior are part of
+the experiment.
+
+It does not mean every low-level numerical primitive is rewritten without libraries, and it is not a
+claim of novel research. The useful part is the practical understanding that comes from connecting
+these pieces and seeing where they fail.
+
+## Why the surrounding software is part of the experiment
+
+Training, saved checkpoints, and inference need a clear path through the surrounding software. The
+desktop application is part of that learning process: it gives the experiment an interface and makes
+the different stages concrete instead of leaving them as unrelated scripts.
+
+## Current boundary
+
+Salty Potato AI is experimental and under development. I do not present it as state-of-the-art,
+production-ready, a ChatGPT competitor, or a reason to call myself an AI engineer or researcher. I
+do not publish an unverified parameter count, benchmark, or release date.
+
+The project is here as a technical build log and proof of how I learn difficult systems: make the
+parts concrete, test the boundaries, and keep improving the product around them.
+
+[Read why I am building a language model from scratch](/writing/why-build-a-language-model-from-scratch/)

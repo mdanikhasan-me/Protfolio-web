@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content';
+import PageHero from '../../components/PageHero.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const articles = (await getCollection('articles', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
+);
+
+const formatter = new Intl.DateTimeFormat('en', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+<BaseLayout
+  title="Writing and Technical Field Notes | MD Anik Hasan"
+  description="First-hand notes from MD Anik Hasan about building software, native Windows products, practical automation, Boilabin, and language models from scratch."
+>
+  <PageHero
+    eyebrow="Field notes"
+    title="Notes from work I can explain first-hand."
+    intro="I write about the parts I have built, the decisions I can discuss, and the limits that keep a case study honest. Draft outlines stay private until they contain something useful."
+    workshop="Field Notes"
+  />
+
+  <section class="collection-list" aria-labelledby="article-list-title">
+    <h2 id="article-list-title">Published notes</h2>
+    <ol>
+      {
+        articles.map((article, index) => (
+          <li>
+            <p class="list-index">{String(index + 1).padStart(2, '0')}</p>
+            <div>
+              <p class="workshop-label">
+                <time datetime={article.data.publishedAt.toISOString()}>
+                  {formatter.format(article.data.publishedAt)}
+                </time>
+              </p>
+              <h3>
+                <a href={`/writing/${article.id}/`}>{article.data.title}</a>
+              </h3>
+              <p>{article.data.description}</p>
+              <p class="list-meta">{article.data.topics.join(' · ')}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <p class="feed-link"><a href="/rss.xml">Subscribe with RSS</a></p>
+</BaseLayout>

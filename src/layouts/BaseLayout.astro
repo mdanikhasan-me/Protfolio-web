@@ -2,6 +2,7 @@
 import SiteFooter from '../components/SiteFooter.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import { SITE } from '../config/site';
+import type { SchemaNode } from '../lib/schema';
 import '../styles/global.css';
 
 interface Props {
@@ -9,6 +10,8 @@ interface Props {
   description?: string;
   canonicalPath?: string;
   noindex?: boolean;
+  type?: 'website' | 'article';
+  schema?: SchemaNode | SchemaNode[];
 }
 
 const {
@@ -16,6 +19,8 @@ const {
   description = SITE.description,
   canonicalPath = Astro.url.pathname,
   noindex = false,
+  type = 'website',
+  schema = [],
 } = Astro.props;
 
 const canonical = new URL(canonicalPath, Astro.site);
@@ -30,6 +35,7 @@ const personSchema = {
   },
   sameAs: [SITE.github],
 };
+const schemaNodes = [personSchema, ...(Array.isArray(schema) ? schema : [schema])];
 ---
 
 <!doctype html>
@@ -42,7 +48,17 @@ const personSchema = {
     <meta name="theme-color" content="#f0eadb" />
     <meta name="color-scheme" content="light" />
     <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow'} />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="canonical" href={canonical} />
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
     <link
       rel="alternate"
       type="application/rss+xml"
@@ -50,13 +66,14 @@ const personSchema = {
       href="/rss.xml"
     />
     <title>{title}</title>
-    <script is:inline type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(schemaNodes)} />
+    <slot name="head" />
   </head>
-  <body>
+  <body data-pagefind-ignore={noindex ? 'all' : undefined}>
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="site-frame">
       <SiteHeader />
-      <main id="main-content" tabindex="-1">
+      <main id="main-content" tabindex="-1" data-pagefind-body={!noindex ? true : undefined}>
         <slot />
       </main>
       <SiteFooter />

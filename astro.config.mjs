@@ -7,7 +7,15 @@ export default defineConfig({
   site: 'https://mdanikhasan.com',
   output: 'static',
   trailingSlash: 'always',
-  integrations: [mdx(), sitemap()],
+  integrations: [
+    mdx(),
+    sitemap({
+      filter: (page) => {
+        const pathname = new globalThis.URL(page).pathname;
+        return !['/404/', '/search/'].includes(pathname);
+      },
+    }),
+  ],
   markdown: {
     syntaxHighlight: 'prism',
   },

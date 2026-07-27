@@ -1,0 +1,61 @@
+---
+title: Why I’m building a language model from scratch
+description:
+  A first-hand note on learning tokenization, training, checkpoints, and inference by implementing
+  the connected language-model system.
+publishedAt: 2026-07-27
+updatedAt: 2026-07-27
+topics:
+  - AI from scratch
+  - Practical learning
+  - Salty Potato AI
+relatedProject: salty-potato-ai
+draft: false
+---
+
+Using a language-model API and building a language model answer different questions.
+
+An API can help me add a capability to a product. It does not make me decide how text becomes
+tokens, how examples move through a data pipeline, what training state must be saved, or what
+inference needs in order to load a checkpoint and produce a result.
+
+That is why I am building Salty Potato AI.
+
+## The project is a connected system
+
+The model is only one part of the work. My experiment includes a tokenizer, data preparation,
+training, checkpoint management, inference, and desktop software around the model.
+
+Each boundary creates a question I cannot avoid by reading a summary:
+
+- Does the tokenizer represent the data the way I think it does?
+- Can the training process save enough state to continue honestly?
+- Does inference load the intended checkpoint?
+- Can the surrounding software explain what is happening without pretending the model is more
+  capable than it is?
+
+Implementation turns those questions into things I can inspect.
+
+## “From scratch” is not a marketing claim
+
+I use the phrase to distinguish this work from calling a hosted model through an API. It does not
+mean I rewrote every numerical operation without libraries, and it does not mean the project
+contains new AI research.
+
+The project is experimental. I am not calling it state-of-the-art, production-ready, or a ChatGPT
+competitor. I also do not publish a parameter count, benchmark, or release date without evidence.
+
+Those limits make the build log more useful. I can focus on what I actually learned and what the
+system actually does.
+
+## The part I value most
+
+When a difficult system stops being one large mysterious object, I can reason about the parts. A
+tokenizer can be tested separately from training. A checkpoint can be treated as a specific saved
+artifact. The desktop software can show accurate state instead of guessing what happened in a worker
+process.
+
+That way of learning carries into ordinary software work. Break the claim into observable pieces,
+build the complete path, and verify the result that matters.
+
+[See the Salty Potato AI build log](/lab/salty-potato-ai/)

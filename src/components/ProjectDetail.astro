@@ -1,0 +1,85 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { breadcrumbSchema, softwareApplicationSchema } from '../lib/schema';
+import Breadcrumbs from './Breadcrumbs.astro';
+import PageHero from './PageHero.astro';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const parent = project.data.route.startsWith('/lab/')
+  ? { label: 'Lab', href: '/lab/salty-potato-ai/' }
+  : { label: 'Work', href: '/work/' };
+const breadcrumbs = [{ label: 'Home', href: '/' }, parent, { label: project.data.title }];
+const seoTitles: Record<string, string> = {
+  boilabin: 'Building Boilabin | Ecommerce Startup Case Study',
+  soctukit: 'SoctuKit | Native Windows Software Case Study',
+  'uiu-discord-bot': 'UIU Discord Bot | Python Automation Case Study',
+  'salty-potato-ai': 'Building Salty Potato AI From Scratch',
+};
+const schemas = [breadcrumbSchema(breadcrumbs)];
+
+if (project.data.schemaType === 'SoftwareApplication') {
+  schemas.push(
+    softwareApplicationSchema({
+      name: project.data.title,
+      description: project.data.description,
+      route: project.data.route,
+      ...(project.data.operatingSystem ? { operatingSystem: project.data.operatingSystem } : {}),
+    }),
+  );
+}
+---
+
+<BaseLayout
+  title={seoTitles[project.id] ?? `${project.data.title} | MD Anik Hasan`}
+  description={project.data.description}
+  canonicalPath={project.data.route}
+  schema={schemas}
+>
+  <Breadcrumbs items={breadcrumbs} />
+  <PageHero
+    eyebrow={project.data.kind}
+    title={project.data.title}
+    intro={project.data.description}
+    workshop={project.data.workshop}
+    meta={[project.data.status, project.data.role]}
+  />
+
+  <div class="content-layout">
+    <aside class="content-rail" aria-label="Project details">
+      <div>
+        <p class="rail-label">Status</p>
+        <p>{project.data.status}</p>
+      </div>
+      <div>
+        <p class="rail-label">Role</p>
+        <p>{project.data.role}</p>
+      </div>
+      {
+        project.data.technologies.length > 0 && (
+          <div>
+            <p class="rail-label">Verified public details</p>
+            <ul>
+              {project.data.technologies.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+      {
+        project.data.publicRepository && (
+          <a href={project.data.publicRepository}>Public repository</a>
+        )
+      }
+    </aside>
+    <article class="prose">
+      <Content />
+    </article>
+  </div>
+</BaseLayout>

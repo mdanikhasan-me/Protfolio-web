@@ -1,29 +1,165 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { websiteSchema } from '../lib/schema';
+
+const services = (await getCollection('services', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const projects = (await getCollection('projects', ({ data }) => !data.draft && data.featured)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const notes = (await getCollection('notes', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const articles = (await getCollection('articles', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf())
+  .slice(0, 2);
 ---
 
-<BaseLayout>
-  <section class="plain-hero" aria-labelledby="home-title">
-    <p class="eyebrow">MD Anik Hasan · Dhaka, Bangladesh</p>
-    <h1 id="home-title">I build websites and custom software. I’m also building Boilabin.</h1>
-    <p class="lede">
-      I’m an independent software builder and CSE student. I take on focused website and software
-      projects, with public proof in native Windows software and practical automation.
-    </p>
-    <div class="actions" aria-label="Start a project">
-      <a class="action action-primary" href="/hire/?service=website">Discuss a website</a>
-      <a class="action" href="/hire/?service=software">Discuss custom software</a>
-      <a class="text-link" href="/work/">View work</a>
+<BaseLayout schema={websiteSchema()}>
+  <section class="home-hero" aria-labelledby="home-title">
+    <div class="home-hero-copy">
+      <p class="eyebrow">MD Anik Hasan · Dhaka, Bangladesh</p>
+      <h1 id="home-title">I build websites and custom software. I’m also building Boilabin.</h1>
+      <p class="lede">
+        I’m an independent software builder and CSE student. I take on focused website and software
+        projects, with public proof in native Windows software and practical automation.
+      </p>
+      <div class="actions" aria-label="Start a project">
+        <a class="action action-primary" href="/hire/?service=website">Discuss a website</a>
+        <a class="action" href="/hire/?service=software">Discuss custom software</a>
+        <a class="text-link" href="/work/">View work</a>
+      </div>
+    </div>
+    <div
+      class="portrait-reserve"
+      role="img"
+      aria-label="Abstract builder silhouette; no facial likeness"
+    >
+      <span class="portrait-label">Portrait source awaiting approval</span>
+      <span class="portrait-block" aria-hidden="true"></span>
     </div>
   </section>
 
-  <section class="plain-section" aria-labelledby="foundation-title">
-    <p class="eyebrow">Clean-room foundation</p>
-    <h2 id="foundation-title">A clear service path before the workshop comes to life.</h2>
+  <section class="home-services" aria-labelledby="home-services-title">
+    <header>
+      <p class="eyebrow">Commission desk</p>
+      <h2 id="home-services-title">Two ways I can help.</h2>
+    </header>
+    <div>
+      {
+        services.slice(0, 2).map((service) => (
+          <article>
+            <p class="workshop-label">{service.data.workshop}</p>
+            <h3>
+              <a href={`/services/${service.id}/`}>{service.data.title}</a>
+            </h3>
+            <p>{service.data.intro}</p>
+            <p>
+              <a href={`/services/${service.id}/`}>See process and fit</a>
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="home-work" aria-labelledby="home-work-title">
+    <header>
+      <p class="eyebrow">Build archive</p>
+      <h2 id="home-work-title">Proof with its real status attached.</h2>
+      <p>Built, pre-launch, and experimental work should not sound the same.</p>
+    </header>
+    <ol>
+      {
+        projects.map((project) => (
+          <li>
+            <p class="list-index">{String(project.data.order).padStart(2, '0')}</p>
+            <div>
+              <p class="workshop-label">
+                {project.data.status} · {project.data.workshop}
+              </p>
+              <h3>
+                <a href={project.data.route}>{project.data.title}</a>
+              </h3>
+              <p>{project.data.description}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="home-now" aria-labelledby="home-now-title">
+    <div>
+      <p class="eyebrow">Current queue</p>
+      <h2 id="home-now-title">What is on the bench now.</h2>
+      <p><a href="/now/">Read the dated update</a></p>
+    </div>
+    <ol>
+      {
+        notes.map((note) => (
+          <li>
+            <span>{note.data.status}</span>
+            <strong>{note.data.title}</strong>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="home-writing" aria-labelledby="home-writing-title">
+    <header>
+      <p class="eyebrow">Field notes</p>
+      <h2 id="home-writing-title">First-hand, or not published yet.</h2>
+    </header>
+    <div>
+      {
+        articles.map((article) => (
+          <article>
+            <p class="workshop-label">{article.data.topics.join(' · ')}</p>
+            <h3>
+              <a href={`/writing/${article.id}/`}>{article.data.title}</a>
+            </h3>
+            <p>{article.data.description}</p>
+          </article>
+        ))
+      }
+    </div>
+    <p><a href="/writing/">Browse all writing</a></p>
+  </section>
+
+  <section class="plain-section">
+    <p class="eyebrow">Contribution board</p>
+    <h2>Open to useful open-source work.</h2>
     <p>
-      This first milestone establishes semantic HTML, verified facts, static rendering, strict
-      TypeScript, and a provider-neutral build. The complete workshop system and substantive routes
-      are added in the next milestones.
+      I am open to contributing where I can learn the system and provide concrete work, especially
+      around practical software, native Windows, automation, and first-principles AI learning. <a
+        href="/open-source/">See the collaboration boundary.</a
+      >
     </p>
+  </section>
+
+  <section class="plain-section">
+    <p class="eyebrow">Builder profile</p>
+    <h2>I choose the tool after I understand the product.</h2>
+    <p>
+      Boilabin, native software, university automation, and Salty Potato AI look different, but the
+      working behavior is the same: understand the difficult parts, build the connected system, and
+      care about the finish. <a href="/about/">More about how I work.</a>
+    </p>
+  </section>
+
+  <section class="home-contact" aria-labelledby="home-contact-title">
+    <p class="eyebrow">Start a build</p>
+    <h2 id="home-contact-title">Have a website or software problem with a clear result?</h2>
+    <p>
+      Tell me the goal, current situation, rough scope, and timeline. A budget range is optional.
+    </p>
+    <div class="actions">
+      <a class="action action-primary" href="/hire/?service=website">Discuss a website</a>
+      <a class="action" href="/hire/?service=software">Discuss software</a>
+    </div>
   </section>
 </BaseLayout>

@@ -1,0 +1,47 @@
+---
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Search | MD Anik Hasan"
+  description="Search MD Anik Hasan's services, project case studies, writing, and public build notes."
+  noindex={true}
+>
+  <PageHero
+    eyebrow="Static index"
+    title="Search the build archive."
+    intro="Search services, case studies, writing, and public notes. The small search module loads only on this page and queries a static index."
+  />
+
+  <section class="search-panel" aria-labelledby="search-title">
+    <h2 id="search-title">Search</h2>
+    <form id="site-search" role="search">
+      <label for="search-query">Words or project name</label>
+      <div>
+        <input
+          id="search-query"
+          name="q"
+          type="search"
+          autocomplete="off"
+          placeholder="Try SoctuKit or website development"
+        />
+        <button type="submit">Search</button>
+      </div>
+    </form>
+    <p id="search-status" class="search-status" role="status" aria-live="polite">
+      Enter a term to search the production index.
+    </p>
+    <ol id="search-results" class="search-results"></ol>
+    <noscript>
+      <p>
+        Search needs a small script. You can still browse <a href="/work/">work</a>,
+        <a href="/services/">services</a>, and <a href="/writing/">writing</a> through ordinary links.
+      </p>
+    </noscript>
+  </section>
+
+  <script>
+    import '../scripts/search';
+  </script>
+</BaseLayout>

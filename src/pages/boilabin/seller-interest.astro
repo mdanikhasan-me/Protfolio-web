@@ -1,0 +1,73 @@
+---
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import PageHero from '../../components/PageHero.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { breadcrumbSchema } from '../../lib/schema';
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Boilabin', href: '/work/boilabin/' },
+  { label: 'Seller interest' },
+];
+---
+
+<BaseLayout
+  title="Boilabin Seller Interest | Planned Invitation-Only Programme"
+  description="An honest explanation of Boilabin's planned invitation-only seller direction for selected emerging brands in Bangladesh. General onboarding is not open."
+  schema={breadcrumbSchema(breadcrumbs)}
+>
+  <Breadcrumbs items={breadcrumbs} />
+  <PageHero
+    eyebrow="Partner intake"
+    title="The seller programme is planned. General onboarding is not open."
+    intro="Boilabin intends to consider selected emerging brands only after the platform has earned trust and a useful customer audience. An expression of interest cannot promise acceptance."
+    workshop="Partner Intake"
+  />
+
+  <section class="plain-section">
+    <p class="eyebrow">The sequence matters</p>
+    <h2>Build trust first. Invite selected brands later.</h2>
+    <div>
+      <p>
+        Boilabin is beginning as a curated ecommerce retailer. The current priority is control over
+        product selection, presentation, platform quality, and the customer experience.
+      </p>
+      <p>
+        A future invitation-only programme is intended for promising new and emerging brands with
+        genuinely good products and good branding. It is a commercial model: selected brands gain a
+        platform and customer reach, while Boilabin profits from the commerce it enables. It is not
+        charity, startup investment, or unrestricted marketplace registration.
+      </p>
+    </div>
+  </section>
+
+  <section class="seller-criteria" aria-labelledby="seller-criteria-title">
+    <h2 id="seller-criteria-title">What a future conversation would need</h2>
+    <ul>
+      <li>
+        <h3>A real product</h3>
+        <p>A clear description of what the brand makes or sells, without invented claims.</p>
+      </li>
+      <li>
+        <h3>Strong presentation</h3>
+        <p>
+          Product media and branding good enough to represent both the brand and platform carefully.
+        </p>
+      </li>
+      <li>
+        <h3>Operational readiness</h3>
+        <p>Enough practical information to discuss supply and fulfilment privately if invited.</p>
+      </li>
+    </ul>
+  </section>
+
+  <section class="plain-section">
+    <p class="eyebrow">Interest collection</p>
+    <h2>No seller data is being collected yet.</h2>
+    <p>
+      The final destination and privacy handling for seller interest are not configured, so this
+      page does not send brand details to an unverified endpoint. When an official Boilabin intake
+      opens, that platform should become the canonical destination.
+    </p>
+  </section>
+</BaseLayout>

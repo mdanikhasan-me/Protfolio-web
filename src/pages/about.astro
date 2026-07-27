@@ -1,0 +1,92 @@
+---
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { profilePageSchema } from '../lib/schema';
+---
+
+<BaseLayout
+  title="About MD Anik Hasan | Builder and Founder of Boilabin"
+  description="MD Anik Hasan is a CSE student and independent software builder in Dhaka, building Boilabin and learning difficult systems through practical work."
+  schema={profilePageSchema()}
+>
+  <PageHero
+    eyebrow="Builder profile"
+    title="I learn difficult systems by making the parts real."
+    intro="I’m MD Anik Hasan, a Computer Science and Engineering student at United International University and an independent builder in Dhaka. My main entrepreneurial focus is Boilabin."
+    workshop="Builder Profile"
+  />
+
+  <div class="content-layout">
+    <aside class="content-rail" aria-label="Profile summary">
+      <div>
+        <p class="rail-label">Based in</p>
+        <p>Dhaka, Bangladesh</p>
+      </div>
+      <div>
+        <p class="rail-label">Studying</p>
+        <p>Computer Science and Engineering at UIU</p>
+      </div>
+      <div>
+        <p class="rail-label">Available for</p>
+        <p>Website and custom software development</p>
+      </div>
+    </aside>
+
+    <article class="prose">
+      <h2>The work that connects everything</h2>
+      <p>
+        I like understanding a system from the inside, building it myself, and turning the result
+        into a product that feels finished. That behavior appears in three different directions.
+      </p>
+      <p>
+        Boilabin is the entrepreneurial direction. I am responsible for the product, platform
+        experience, visual direction, systems, and launch preparation as its solo founder. It is
+        pre-launch, so I keep private architecture and operations private instead of filling the
+        gaps with public claims.
+      </p>
+      <p>
+        Software is the practical engineering direction. SoctuKit is public proof of native Windows
+        work. The UIU Discord Bot is proof of Python automation and integration for a real
+        university community. I also take on website development where structure, interface quality,
+        performance, and search foundations have to work together.
+      </p>
+      <p>
+        Salty Potato AI is the learning direction: an experimental decoder-only language model,
+        tokenizer, data pipeline, training process, checkpoint work, inference, and desktop
+        software. I am building it to understand language models through implementation, not to
+        claim a research title or compete with production systems.
+      </p>
+
+      <h2>How I choose tools</h2>
+      <p>
+        Python is where I currently have the strongest practical confidence. I have also worked with
+        C, C++, Java, TypeScript, and the C#, .NET, WinUI 3, and XAML stack visible in SoctuKit.
+      </p>
+      <p>
+        I do not want one framework to become my identity. The useful question is what the product
+        needs, which tools are stable enough for it, and what I can verify at the end.
+      </p>
+
+      <h2>A future creative direction</h2>
+      <p>
+        Pixel-art and indie games are a serious future direction for me. I am interested in the way
+        programming, systems, art, music, narrative, and interaction meet in one medium.
+      </p>
+      <p>
+        That is an intention, not a current professional title. I do not offer game development as a
+        service and I do not present a completed game portfolio that does not exist.
+      </p>
+
+      <h2>Working together</h2>
+      <p>
+        I can be hired for website development and custom software development. I am also open to
+        useful open-source contributions and technical collaboration where I can learn and provide
+        concrete work.
+      </p>
+      <p>
+        <a href="/hire/">Describe a paid project</a> or
+        <a href="/open-source/">read the open-source boundary</a>.
+      </p>
+    </article>
+  </div>
+</BaseLayout>

@@ -1,0 +1,95 @@
+---
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Résumé | MD Anik Hasan"
+  description="Semantic HTML résumé for MD Anik Hasan, including current focus, education, verified projects, services, and public technical skills."
+>
+  <PageHero
+    eyebrow="Build record"
+    title="Résumé"
+    intro="A printable record of what I am building, what I can prove publicly, and the two services I offer. It avoids skill bars and inflated proficiency labels."
+    workshop="Build Record"
+  />
+
+  <article class="resume-sheet">
+    <header>
+      <h2>MD Anik Hasan</h2>
+      <p>Website and software developer · Solo founder of Boilabin</p>
+      <p>Dhaka, Bangladesh · <a href="https://mdanikhasan.com">mdanikhasan.com</a></p>
+    </header>
+
+    <section aria-labelledby="resume-summary">
+      <h3 id="resume-summary">Summary</h3>
+      <p>
+        Computer Science and Engineering student and independent software builder. Building Boilabin
+        as a pre-launch ecommerce startup for Bangladesh. Available for website development and
+        custom software development, with public proof in native Windows software and Python
+        automation.
+      </p>
+    </section>
+
+    <section aria-labelledby="resume-current">
+      <h3 id="resume-current">Current work</h3>
+      <dl>
+        <div>
+          <dt>Boilabin</dt>
+          <dd>Solo founder and builder · Pre-launch ecommerce startup under active development.</dd>
+        </div>
+        <div>
+          <dt>Salty Potato AI</dt>
+          <dd>
+            Experimental decoder-only language model, tokenizer, data pipeline, training,
+            checkpoints, inference, and desktop software.
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <section aria-labelledby="resume-projects">
+      <h3 id="resume-projects">Selected built projects</h3>
+      <dl>
+        <div>
+          <dt><a href="/work/soctukit/">SoctuKit</a></dt>
+          <dd>
+            Native Windows product using C#, .NET 8, WinUI 3, Windows App SDK, XAML, MVVM,
+            Microsoft.Extensions.Hosting, xUnit, FluentAssertions, Inno Setup, and Windows
+            Credential Manager.
+          </dd>
+        </div>
+        <div>
+          <dt><a href="/work/uiu-discord-bot/">UIU Discord Bot</a></dt>
+          <dd>
+            Python and discord.py automation for UIU notices, duplicate prevention, automatic
+            posting, academic calendar information, server utilities, and slash commands.
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <section aria-labelledby="resume-services">
+      <h3 id="resume-services">Services</h3>
+      <ul>
+        <li>Website development</li>
+        <li>Custom software development, including focused native Windows work</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="resume-tools">
+      <h3 id="resume-tools">Languages and verified technology</h3>
+      <p>
+        Python is my strongest current practical confidence. I have also worked with C, C++, Java,
+        TypeScript, C#, .NET, WinUI 3, and XAML.
+      </p>
+    </section>
+
+    <section aria-labelledby="resume-education">
+      <h3 id="resume-education">Education</h3>
+      <p>
+        Computer Science and Engineering, United International University (UIU), Dhaka, Bangladesh.
+      </p>
+    </section>
+  </article>
+</BaseLayout>

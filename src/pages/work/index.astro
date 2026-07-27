@@ -1,0 +1,46 @@
+---
+import { getCollection } from 'astro:content';
+import PageHero from '../../components/PageHero.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const projects = (await getCollection('projects', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<BaseLayout
+  title="Selected Software and Website Projects | MD Anik Hasan"
+  description="Verified project work by MD Anik Hasan: Boilabin, SoctuKit, UIU Discord Bot, and the experimental Salty Potato AI build log."
+>
+  <PageHero
+    eyebrow="Build archive"
+    title="Finished products, active work, and one honest experiment."
+    intro="This archive separates what is built, what is pre-launch, and what remains experimental. Each case study stays inside facts I can support."
+    workshop="Build Archive"
+  />
+
+  <section class="collection-list" aria-labelledby="project-list-title">
+    <h2 id="project-list-title">Verified builds</h2>
+    <ol>
+      {
+        projects.map((project) => (
+          <li>
+            <p class="list-index">{String(project.data.order).padStart(2, '0')}</p>
+            <div>
+              <p class="workshop-label">
+                {project.data.workshop} · {project.data.status}
+              </p>
+              <h3>
+                <a href={project.data.route}>{project.data.title}</a>
+              </h3>
+              <p>{project.data.description}</p>
+              <p class="list-meta">
+                {project.data.kind} · {project.data.role}
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+</BaseLayout>

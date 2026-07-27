@@ -1,0 +1,52 @@
+---
+import { getCollection, render } from 'astro:content';
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const notes = (await getCollection('notes', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const renderedNotes = await Promise.all(
+  notes.map(async (note) => ({ note, Content: (await render(note)).Content })),
+);
+const formatter = new Intl.DateTimeFormat('en', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+const latest = notes[0]?.data.date ?? new Date('2026-07-27T00:00:00Z');
+---
+
+<BaseLayout
+  title="Now | What MD Anik Hasan Is Building"
+  description="A dated, concise view of MD Anik Hasan's current work: Boilabin, Salty Potato AI, and the portfolio rebuild."
+>
+  <PageHero
+    eyebrow="Current queue"
+    title="What I’m building and learning now."
+    intro={`A concise public queue, last updated ${formatter.format(latest)}. It avoids private launch detail and changes only when the work changes.`}
+    workshop="Current Queue"
+  />
+
+  <section class="now-list" aria-labelledby="now-list-title">
+    <h2 id="now-list-title">On the bench</h2>
+    {
+      renderedNotes.map(({ note, Content }) => (
+        <article>
+          <div class="now-marker">
+            <span>{String(note.data.order).padStart(2, '0')}</span>
+            <span>{note.data.status}</span>
+          </div>
+          <div>
+            <h3>{note.data.title}</h3>
+            <p class="now-summary">{note.data.summary}</p>
+            <div class="prose compact">
+              <Content />
+            </div>
+          </div>
+        </article>
+      ))
+    }
+  </section>
+</BaseLayout>

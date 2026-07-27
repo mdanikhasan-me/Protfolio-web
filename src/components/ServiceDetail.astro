@@ -1,0 +1,58 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { breadcrumbSchema, serviceSchema } from '../lib/schema';
+import Breadcrumbs from './Breadcrumbs.astro';
+import PageHero from './PageHero.astro';
+
+interface Props {
+  service: CollectionEntry<'services'>;
+}
+
+const { service } = Astro.props;
+const { Content } = await render(service);
+const route = `/services/${service.id}/`;
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Services', href: '/services/' },
+  { label: service.data.title },
+];
+---
+
+<BaseLayout
+  title={service.data.seoTitle}
+  description={service.data.description}
+  canonicalPath={route}
+  schema={[
+    breadcrumbSchema(breadcrumbs),
+    serviceSchema(service.data.title, service.data.description, route),
+  ]}
+>
+  <Breadcrumbs items={breadcrumbs} />
+  <PageHero
+    eyebrow={service.data.eyebrow}
+    title={service.data.title}
+    intro={service.data.intro}
+    workshop={service.data.workshop}
+  />
+
+  <div class="content-layout">
+    <aside class="content-rail" aria-label="Service overview">
+      <div>
+        <p class="rail-label">Useful for</p>
+        <ul>
+          {service.data.focus.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+      <div>
+        <p class="rail-label">Related proof</p>
+        <ul>
+          {service.data.featuredProof.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+    </aside>
+    <article class="prose">
+      <Content />
+    </article>
+  </div>
+</BaseLayout>

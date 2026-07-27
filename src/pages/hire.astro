@@ -1,0 +1,74 @@
+---
+import PageHero from '../components/PageHero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const requestedService = Astro.url.searchParams.get('service');
+const serviceLabel =
+  requestedService === 'website'
+    ? 'Website development'
+    : requestedService === 'software'
+      ? 'Custom software'
+      : 'Website or custom software';
+---
+
+<BaseLayout
+  title="Hire MD Anik Hasan for Website or Software Development"
+  description="Prepare a useful project enquiry for website development or custom software work with MD Anik Hasan in Bangladesh or remotely."
+>
+  <PageHero
+    eyebrow="Project intake"
+    title="Tell me what needs to work when the build is finished."
+    intro={`Current enquiry path: ${serviceLabel}. A useful first brief can be short, but it should explain the goal, scope, timeline, and how to reach you.`}
+    workshop="Project Intake"
+  />
+
+  <section class="intake-guide" aria-labelledby="intake-title">
+    <div>
+      <p class="eyebrow">Before you write</p>
+      <h2 id="intake-title">Five useful parts of a first brief</h2>
+    </div>
+    <ol>
+      <li>
+        <h3>The goal</h3>
+        <p>What should the website or software help a person or business complete?</p>
+      </li>
+      <li>
+        <h3>The current situation</h3>
+        <p>Describe the existing site, repeated workflow, manual process, or missing tool.</p>
+      </li>
+      <li>
+        <h3>The rough scope</h3>
+        <p>List important pages, features, inputs, outputs, integrations, and privacy needs.</p>
+      </li>
+      <li>
+        <h3>The timeline</h3>
+        <p>Share a target or constraint. Do not invent urgency if the date is flexible.</p>
+      </li>
+      <li>
+        <h3>A contact route</h3>
+        <p>Include a professional way to reply. A budget range is optional, never required.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="plain-section">
+    <p class="eyebrow">Service boundary</p>
+    <h2>Website and custom software work only.</h2>
+    <p>
+      I do not offer mobile app development, game development services, AI consulting, investment,
+      business consulting, or marketing packages. If the project is outside the two service paths, I
+      will not disguise it as a fit.
+    </p>
+  </section>
+
+  <section class="plain-section">
+    <p class="eyebrow">Contact handoff</p>
+    <h2>Use the verified route that is available now.</h2>
+    <p>
+      A direct email address is still being verified, so the site does not publish or submit
+      personal details to an unconfirmed destination. The
+      <a href="/contact/">contact page</a> provides a safe project-brief fallback and the verified public
+      GitHub route.
+    </p>
+  </section>
+</BaseLayout>

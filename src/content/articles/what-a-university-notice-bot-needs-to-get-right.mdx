@@ -1,0 +1,48 @@
+---
+title: What a university notice bot needs to get right
+description:
+  A practical note about retrieving UIU notices, preventing duplicates, and placing useful
+  information inside a Discord community.
+publishedAt: 2026-07-27
+updatedAt: 2026-07-27
+topics:
+  - Python automation
+  - Discord bots
+  - UIU
+relatedProject: uiu-discord-bot
+draft: false
+---
+
+A notice bot is useful only if it reduces work without creating a new source of noise.
+
+The UIU Discord Bot retrieves notices from United International University, can post new notices
+automatically, provides academic calendar information, and includes server utilities and slash
+commands. It uses Python and `discord.py`.
+
+## Retrieval is not the whole feature
+
+It is easy to describe the project as scraping notices and sending them to Discord. The more
+important behavior is deciding whether a notice is actually new.
+
+Without duplicate prevention, an automated path can repeatedly publish the same information. The
+integration may technically be running while the community experience gets worse. Duplicate
+prevention is therefore part of the successful outcome, not a polish task.
+
+## Put the information where it is useful
+
+University communities already use Discord to ask questions and share updates. Commands and
+automatic notice posts make academic information available in that context instead of asking every
+person to repeat the same checking process elsewhere.
+
+The bot also exposes academic calendar information and server utilities. Those features fit the same
+principle: reduce a small repeated task in a place the community already understands.
+
+## Keep the claim proportional to the evidence
+
+The project proves practical Python work, notice retrieval, duplicate prevention, Discord
+integration, slash commands, and community-focused automation.
+
+I do not attach invented server counts, user numbers, or adoption metrics to it. The useful case
+study is the problem and the behavior I can verify.
+
+[Read the UIU Discord Bot case study](/work/uiu-discord-bot/)
