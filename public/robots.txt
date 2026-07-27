@@ -1,5 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /sawlper/
-
-Sitemap: https://mdanikhasan.com/sitemap.xml
