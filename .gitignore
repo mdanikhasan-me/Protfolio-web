@@ -38,6 +38,7 @@ test-results/
 lighthouse-reports/
 .pagefind-cache/
 artifacts/
+public/hinode/review/
 
 # local tooling local concept work, caches, renders, captures, and backups
 .local-validation/

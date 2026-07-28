@@ -36,6 +36,16 @@ const resumeButton = root.querySelector<HTMLButtonElement>('[data-resume-drive]'
 const speedOutput = root.querySelector<HTMLElement>('[data-speed]');
 const gearOutput = root.querySelector<HTMLElement>('[data-gear]');
 const statusOutput = root.querySelector<HTMLElement>('[data-drive-status]');
+const debugPanel = root.querySelector<HTMLElement>('[data-debug-metrics]');
+const debugFps = root.querySelector<HTMLElement>('[data-debug-fps]');
+const debugCalls = root.querySelector<HTMLElement>('[data-debug-calls]');
+const debugTriangles = root.querySelector<HTMLElement>('[data-debug-triangles]');
+const debugRoad = root.querySelector<HTMLElement>('[data-debug-road]');
+const debugPosition = root.querySelector<HTMLElement>('[data-debug-position]');
+const debugCollisions = root.querySelector<HTMLElement>('[data-debug-collisions]');
+const debugEnabled = new URLSearchParams(location.search).get('debug') === '1';
+
+if (debugPanel) debugPanel.hidden = !debugEnabled;
 
 const quality = resolveQuality(location.search);
 root.dataset.quality = quality.name;
@@ -48,15 +58,15 @@ const renderer = new WebGLRenderer({
 renderer.setPixelRatio(Math.min(devicePixelRatio, quality.pixelRatio));
 renderer.outputColorSpace = SRGBColorSpace;
 renderer.toneMapping = ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.06;
+renderer.toneMappingExposure = 1.22;
 renderer.shadowMap.enabled = quality.headlightShadows;
 
 const scene = new Scene();
 scene.background = new Color(0x030916);
 const camera = new PerspectiveCamera(55, 1, 0.1, 180);
 const chaseCamera = new ChaseCamera();
-scene.add(new HemisphereLight(0x829dc2, 0x09080c, 1.3));
-const moon = new DirectionalLight(0xaac5ed, 1.55);
+scene.add(new HemisphereLight(0x829dc2, 0x09080c, 1.55));
+const moon = new DirectionalLight(0xaac5ed, 1.8);
 moon.position.set(-12, 20, -8);
 scene.add(moon);
 
@@ -145,6 +155,13 @@ const resize = () => {
 };
 
 const updateMetrics = (now: number) => {
+  root.dataset.speedKph = String(speedKph(vehicle));
+  root.dataset.vehicleX = vehicle.x.toFixed(3);
+  root.dataset.vehicleZ = vehicle.z.toFixed(3);
+  root.dataset.vehicleYaw = vehicle.yaw.toFixed(4);
+  root.dataset.collisions = String(vehicle.collisions);
+  root.dataset.road = nearestRoad(vehicle).corridor.id;
+  root.dataset.grip = String(lastStep.gripPercent);
   fpsFrames += 1;
   const elapsed = now - fpsWindowStart;
   if (elapsed < 500) return;
@@ -156,12 +173,15 @@ const updateMetrics = (now: number) => {
   root.dataset.triangles = String(renderer.info.render.triangles);
   root.dataset.textures = String(renderer.info.memory.textures);
   root.dataset.geometries = String(renderer.info.memory.geometries);
-  root.dataset.speedKph = String(speedKph(vehicle));
-  root.dataset.vehicleX = vehicle.x.toFixed(3);
-  root.dataset.vehicleZ = vehicle.z.toFixed(3);
-  root.dataset.collisions = String(vehicle.collisions);
-  root.dataset.road = nearestRoad(vehicle).corridor.id;
-  root.dataset.grip = String(lastStep.gripPercent);
+  if (debugEnabled) {
+    if (debugFps) debugFps.textContent = root.dataset.fps;
+    if (debugCalls) debugCalls.textContent = root.dataset.drawCalls;
+    if (debugTriangles) debugTriangles.textContent = root.dataset.triangles;
+    if (debugRoad) debugRoad.textContent = root.dataset.road;
+    if (debugPosition)
+      debugPosition.textContent = `${root.dataset.vehicleX}, ${root.dataset.vehicleZ}`;
+    if (debugCollisions) debugCollisions.textContent = root.dataset.collisions;
+  }
 };
 
 const frame = (now: number) => {

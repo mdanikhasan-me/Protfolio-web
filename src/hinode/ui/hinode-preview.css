@@ -250,6 +250,37 @@ button {
   font-size: 0.72rem;
 }
 
+.hinode-debug {
+  position: absolute;
+  z-index: 3;
+  top: 4rem;
+  left: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.3rem 1rem;
+  min-width: 17rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgba(191, 211, 237, 0.28);
+  border-radius: 3px;
+  color: #9eacc0;
+  background: rgba(3, 8, 17, 0.84);
+  font:
+    650 0.68rem/1.45 ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace;
+  backdrop-filter: blur(10px);
+}
+
+.hinode-debug[hidden] {
+  display: none;
+}
+
+.hinode-debug strong {
+  color: #f4f7fb;
+  font-weight: 780;
+}
+
 .hinode-controls {
   position: absolute;
   z-index: 3;

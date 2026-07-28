@@ -11,6 +11,8 @@ import argparse
 import json
 import math
 import sys
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import bpy
@@ -35,7 +37,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--mode",
-        choices=("roads", "buildings", "props", "car", "master"),
+        choices=("roads", "buildings", "props", "car", "master", "review"),
         default="master",
     )
     return parser.parse_args(args)
@@ -355,6 +357,12 @@ def setup_world() -> dict[str, bpy.types.Material]:
         "brown": material("MAT_Wood_Brown", (0.27, 0.11, 0.05), roughness=0.8),
         "green": material("MAT_Muted_Green", (0.12, 0.24, 0.16), roughness=0.8),
         "red": material("MAT_Restrained_Red", (0.44, 0.045, 0.028), roughness=0.67),
+        "brick": material("MAT_Aged_Brick", (0.29, 0.075, 0.045), roughness=0.9),
+        "plaster": material("MAT_Warm_Plaster", (0.40, 0.35, 0.27), roughness=0.88),
+        "bluegray": material("MAT_Blue_Gray", (0.11, 0.18, 0.23), roughness=0.82),
+        "tile": material("MAT_Roof_Tile", (0.065, 0.085, 0.105), roughness=0.86),
+        "paper": material("MAT_Paper_Warm", (0.72, 0.58, 0.36), roughness=0.82),
+        "black": material("MAT_Matte_Black", (0.018, 0.022, 0.026), roughness=0.76),
         "metal": material("MAT_Dark_Metal", (0.11, 0.125, 0.14), roughness=0.38, metallic=0.72),
         "marking": material("MAT_Road_Marking", (0.82, 0.77, 0.56), roughness=0.75),
         "water": material("MAT_Canal_Water", (0.015, 0.11, 0.18), roughness=0.22, metallic=0.1),
@@ -467,6 +475,16 @@ def build_roads(materials: dict[str, bpy.types.Material]) -> dict[str, object]:
     )
     for side, suffix in ((-1, "North"), (1, "South")):
         edge_strip(
+            f"ENV_Alley_Curb_{suffix}",
+            alley,
+            ALLEY_WIDTH + 0.64,
+            0.14,
+            side,
+            0.09,
+            materials["concrete"],
+            roads,
+        )
+        edge_strip(
             f"ENV_Secondary_Shoulder_{suffix}",
             secondary,
             SECONDARY_WIDTH,
@@ -484,6 +502,16 @@ def build_roads(materials: dict[str, bpy.types.Material]) -> dict[str, object]:
             side,
             7.46,
             materials["metal"],
+            structures,
+        )
+        edge_strip(
+            f"ENV_Flyover_Girder_{suffix}",
+            flyover,
+            FLYOVER_WIDTH + 0.36,
+            0.34,
+            side,
+            6.56,
+            materials["concrete_dark"],
             structures,
         )
     road_mesh(
@@ -543,33 +571,63 @@ def build_roads(materials: dict[str, bpy.types.Material]) -> dict[str, object]:
         bevel=0.0,
     )
 
-    # Flyover supports stay clear of the lower driving line.
-    for index, z in enumerate((-18.0, 14.0), start=1):
-        x = 15.0 + (z + 18.0) * 0.11
+    # Three authored pier frames give the flyover a believable structural rhythm.
+    for index, path_index in enumerate((8, 23, 36), start=1):
+        x, z = flyover[path_index]
+        nx, nz = path_normal(flyover, path_index)
         for side in (-1, 1):
             box(
                 f"ENV_Flyover_Support_{index}_{side:+d}",
-                x + side * 2.3,
+                x + nx * side * 2.55,
                 0.0,
-                z,
-                0.75,
+                z + nz * side * 2.55,
+                0.68,
                 6.85,
-                0.75,
-                materials["concrete"],
+                0.82,
+                materials["concrete_dark"],
                 structures,
-                bevel=0.08,
+                bevel=0.10,
             )
         box(
             f"ENV_Flyover_Crossbeam_{index}",
             x,
             6.2,
             z,
-            6.0,
+            6.4,
             0.65,
             0.9,
             materials["concrete"],
             structures,
             bevel=0.08,
+            yaw=-math.atan2(nz, nx),
+        )
+        box(
+            f"ENV_Flyover_PierCap_{index}",
+            x,
+            6.72,
+            z,
+            7.25,
+            0.28,
+            1.15,
+            materials["metal"],
+            structures,
+            bevel=0.045,
+            yaw=-math.atan2(nz, nx),
+        )
+
+    for index, path_index in enumerate((5, 14, 23, 32), start=1):
+        x, z = flyover[path_index]
+        box(
+            f"ENV_Flyover_ExpansionJoint_{index}",
+            x,
+            7.055,
+            z,
+            FLYOVER_WIDTH - 0.32,
+            0.025,
+            0.10,
+            materials["metal"],
+            structures,
+            bevel=0.0,
         )
 
     # Short canal/drainage edge.
@@ -698,8 +756,9 @@ def build_building(
     materials: dict[str, bpy.types.Material],
     target: bpy.types.Collection,
     variant: int,
+    facade: str,
 ) -> None:
-    base_height = min(3.4, height * 0.48)
+    base_height = min(3.25, height * 0.44)
     box(
         f"{name}_Ground",
         x,
@@ -710,11 +769,11 @@ def build_building(
         depth,
         base_mat,
         target,
-        bevel=0.10,
+        bevel=0.08,
     )
     if height > base_height:
-        upper_width = width * (0.92 if variant % 2 else 0.96)
-        upper_depth = depth * (0.91 if variant % 3 else 0.96)
+        upper_width = width * (0.91 if variant % 2 else 0.95)
+        upper_depth = depth * (0.92 if variant % 3 else 0.96)
         box(
             f"{name}_Upper",
             x + (0.12 if variant % 2 else -0.1),
@@ -725,168 +784,345 @@ def build_building(
             upper_depth,
             accent_mat,
             target,
-            bevel=0.08,
+            bevel=0.06,
         )
-    roof(
-        f"{name}_Roof",
-        x,
-        height,
-        z,
-        width * 1.04,
-        depth * 1.04,
-        0.75 + 0.12 * (variant % 3),
-        materials["navy"] if variant % 2 else materials["concrete_dark"],
-        target,
-    )
 
-    # Layered street-facing frontage, using original fictional graphic panels.
-    front_z = z - depth * 0.5 - 0.045
-    box(
-        f"{name}_Shopfront",
-        x,
-        0.45,
-        front_z,
-        width * 0.72,
-        1.75,
-        0.08,
-        materials["brown"],
-        target,
-        bevel=0.025,
+    if variant % 3:
+        roof(
+            f"{name}_Roof",
+            x,
+            height,
+            z,
+            width * 1.08,
+            depth * 1.08,
+            0.62 + 0.12 * (variant % 3),
+            materials["tile"],
+            target,
+        )
+    else:
+        for suffix, px, pz, pw, pd in (
+            ("N", x, z - depth * 0.5, width, 0.16),
+            ("S", x, z + depth * 0.5, width, 0.16),
+            ("W", x - width * 0.5, z, 0.16, depth),
+            ("E", x + width * 0.5, z, 0.16, depth),
+        ):
+            box(
+                f"{name}_Parapet_{suffix}",
+                px,
+                height,
+                pz,
+                pw,
+                0.42,
+                pd,
+                materials["tile"],
+                target,
+                bevel=0.025,
+            )
+
+    normals = {"x+": (1.0, 0.0), "x-": (-1.0, 0.0), "z+": (0.0, 1.0), "z-": (0.0, -1.0)}
+    nx, nz = normals[facade]
+    tx, tz = -nz, nx
+    face_half = width * 0.5 if nx else depth * 0.5
+    face_span = depth if nx else width
+
+    def facade_box(
+        suffix: str,
+        along: float,
+        base_y: float,
+        span: float,
+        feature_height: float,
+        normal_depth: float,
+        feature_mat: bpy.types.Material,
+        *,
+        projection: float = 0.0,
+        bevel: float = 0.02,
+    ) -> bpy.types.Object:
+        center_x = x + nx * (face_half + projection) + tx * along
+        center_z = z + nz * (face_half + projection) + tz * along
+        feature_width = normal_depth if nx else span
+        feature_depth = span if nx else normal_depth
+        return box(
+            f"{name}_{suffix}",
+            center_x,
+            base_y,
+            center_z,
+            feature_width,
+            feature_height,
+            feature_depth,
+            feature_mat,
+            target,
+            bevel=bevel,
+        )
+
+    # Deep shopfront recess, framed glazing, shutters and an authored entrance.
+    facade_box(
+        "Shop_Recess",
+        0.0,
+        0.18,
+        face_span * 0.78,
+        1.78,
+        0.10,
+        materials["black"],
+        projection=0.055,
     )
-    box(
-        f"{name}_Awning",
-        x,
-        2.25,
-        front_z - 0.35,
-        width * 0.64,
-        0.14,
+    for division in (-0.28, 0.0, 0.28):
+        facade_box(
+            f"Shop_Mullion_{division:+.2f}",
+            division * face_span,
+            0.22,
+            0.055,
+            1.70,
+            0.07,
+            materials["metal"],
+            projection=0.12,
+            bevel=0.008,
+        )
+    facade_box(
+        "Shop_Warm_Glass",
+        face_span * 0.13,
+        0.34,
+        face_span * 0.40,
+        1.38,
+        0.045,
+        materials["warm"],
+        projection=0.13,
+        bevel=0.012,
+    )
+    facade_box(
+        "Entrance_Door",
+        -face_span * 0.25,
+        0.20,
+        face_span * 0.18,
+        1.72,
+        0.065,
+        materials["brown"],
+        projection=0.13,
+        bevel=0.015,
+    )
+    facade_box(
+        "Awning",
+        0.0,
+        2.08,
+        face_span * 0.72,
+        0.16,
         0.72,
         accent_mat,
-        target,
-        bevel=0.03,
+        projection=0.34,
+        bevel=0.025,
     )
-    window_count = 2 if width < 8.0 else 3
-    for column in range(window_count):
-        window_x = x + (column - (window_count - 1) / 2) * (width * 0.65 / window_count)
-        box(
-            f"{name}_Window_{column + 1}",
-            window_x,
-            min(height - 1.2, 4.4),
-            front_z - 0.055,
-            max(0.8, width * 0.42 / window_count),
-            1.1,
-            0.06,
-            materials["warm"],
-            target,
-            bevel=0.02,
+    for stripe in (-0.25, 0.0, 0.25):
+        facade_box(
+            f"Awning_Stripe_{stripe:+.2f}",
+            stripe * face_span,
+            2.065,
+            face_span * 0.055,
+            0.18,
+            0.74,
+            materials["paper"],
+            projection=0.35,
+            bevel=0.008,
         )
-    box(
-        f"{name}_Sign",
-        x - width * 0.34,
-        2.65,
-        front_z - 0.13,
+
+    window_y = min(height - 1.65, 4.05)
+    for window_index, along in enumerate((-face_span * 0.23, face_span * 0.23), start=1):
+        facade_box(
+            f"Window_Frame_{window_index}",
+            along,
+            window_y,
+            face_span * 0.31,
+            1.18,
+            0.09,
+            materials["metal"],
+            projection=0.07,
+        )
+        facade_box(
+            f"Window_Light_{window_index}",
+            along,
+            window_y + 0.08,
+            face_span * 0.25,
+            0.94,
+            0.045,
+            materials["warm"] if (variant + window_index) % 3 else materials["glass"],
+            projection=0.13,
+            bevel=0.01,
+        )
+        facade_box(
+            f"Window_Crossbar_{window_index}",
+            along,
+            window_y + 0.52,
+            face_span * 0.27,
+            0.045,
+            0.06,
+            materials["metal"],
+            projection=0.15,
+            bevel=0.005,
+        )
+
+    # Sparse vertical signboards carry fictional geometric glyphs instead of copied branding.
+    sign_along = -face_span * 0.38
+    sign_material = materials["amber"] if variant % 2 else materials["cool"]
+    facade_box(
+        "Vertical_Sign",
+        sign_along,
+        2.55,
         0.58,
-        1.45,
-        0.10,
-        materials["amber"] if variant % 2 else materials["cool"],
-        target,
-        bevel=0.035,
+        1.72,
+        0.13,
+        sign_material,
+        projection=0.24,
+        bevel=0.025,
     )
-    box(
-        f"{name}_ACUnit",
-        x + width * 0.32,
-        min(height - 1.0, 4.9),
-        front_z - 0.18,
-        0.72,
-        0.52,
+    for glyph_index, glyph_y in enumerate((2.82, 3.24, 3.66), start=1):
+        facade_box(
+            f"Sign_Glyph_{glyph_index}",
+            sign_along,
+            glyph_y,
+            0.31 if glyph_index != 2 else 0.19,
+            0.08,
+            0.035,
+            materials["paper"],
+            projection=0.33,
+            bevel=0.006,
+        )
+
+    ac_along = face_span * 0.37
+    facade_box(
+        "AC_Unit",
+        ac_along,
+        min(height - 1.35, 4.75),
+        0.78,
+        0.58,
         0.32,
         materials["concrete"],
+        projection=0.18,
+        bevel=0.035,
+    )
+    facade_box(
+        "AC_Grille",
+        ac_along,
+        min(height - 1.21, 4.89),
+        0.48,
+        0.28,
+        0.035,
+        materials["metal"],
+        projection=0.36,
+        bevel=0.01,
+    )
+
+    if variant % 2 == 0:
+        facade_box(
+            "Balcony_Slab",
+            0.0,
+            min(height - 2.6, 5.25),
+            face_span * 0.70,
+            0.13,
+            0.72,
+            materials["concrete_dark"],
+            projection=0.35,
+            bevel=0.025,
+        )
+        rail_y = min(height - 2.42, 5.43)
+        facade_box(
+            "Balcony_Rail_Top",
+            0.0,
+            rail_y + 0.74,
+            face_span * 0.66,
+            0.055,
+            0.055,
+            materials["metal"],
+            projection=0.72,
+            bevel=0.008,
+        )
+        for rail_index, rail_along in enumerate((-0.28, 0.0, 0.28), start=1):
+            facade_box(
+                f"Balcony_Rail_{rail_index}",
+                rail_along * face_span,
+                rail_y,
+                0.055,
+                0.78,
+                0.055,
+                materials["metal"],
+                projection=0.72,
+                bevel=0.008,
+            )
+    else:
+        for curtain_index in (-1, 0, 1):
+            facade_box(
+                f"Noren_{curtain_index:+d}",
+                curtain_index * face_span * 0.105,
+                1.35,
+                face_span * 0.18,
+                0.64,
+                0.035,
+                materials["red"],
+                projection=0.22,
+                bevel=0.008,
+            )
+
+    # Street-wall utilities and rooftop silhouettes keep the modules inhabited.
+    facade_box(
+        "Rain_Pipe",
+        face_span * 0.46,
+        0.12,
+        0.08,
+        min(height - 0.3, 5.8),
+        0.08,
+        materials["metal"],
+        projection=0.09,
+        bevel=0.01,
+    )
+    cylinder(
+        f"{name}_Roof_Tank",
+        x + width * 0.22,
+        height + 0.52,
+        z + depth * 0.12,
+        0.38,
+        0.72,
+        materials["bluegray"],
+        target,
+        vertices=12,
+    )
+    box(
+        f"{name}_Roof_Vent",
+        x - width * 0.23,
+        height,
+        z - depth * 0.16,
+        0.42,
+        0.55,
+        0.42,
+        materials["metal"],
         target,
         bevel=0.035,
     )
-
-    # The alley modules expose their layered shopfronts toward the driveable corridor, not only
-    # toward the module's local front. This keeps the road view inhabited while preserving clearance.
-    if variant <= 4:
-        road_side = 1 if x < -24.0 else -1
-        side_x = x + road_side * (width * 0.5 + 0.045)
-        box(
-            f"{name}_AlleySidefront",
-            side_x,
-            0.4,
-            z,
-            0.08,
-            1.85,
-            depth * 0.72,
-            materials["brown"],
-            target,
-            bevel=0.02,
-        )
-        box(
-            f"{name}_AlleyAwning",
-            side_x + road_side * 0.25,
-            2.3,
-            z,
-            0.72,
-            0.14,
-            depth * 0.62,
-            accent_mat,
-            target,
-            bevel=0.03,
-        )
-        for row, window_z in enumerate((z - depth * 0.22, z + depth * 0.22), start=1):
-            box(
-                f"{name}_AlleyWindow_{row}",
-                side_x + road_side * 0.055,
-                min(height - 1.25, 4.25),
-                window_z,
-                0.06,
-                1.08,
-                max(0.72, depth * 0.23),
-                materials["warm"],
-                target,
-                bevel=0.02,
-            )
-        box(
-            f"{name}_AlleySign",
-            side_x + road_side * 0.12,
-            2.65,
-            z - depth * 0.3,
-            0.10,
-            1.42,
-            0.56,
-            materials["amber"] if variant % 2 else materials["cool"],
-            target,
-            bevel=0.025,
-        )
-        for curtain_index in (-1, 0, 1):
-            box(
-                f"{name}_Curtain_{curtain_index:+d}",
-                side_x + road_side * 0.28,
-                1.52,
-                z + curtain_index * depth * 0.16,
-                0.035,
-                0.72,
-                depth * 0.12,
-                materials["red"],
-                target,
-                bevel=0.015,
-            )
+    box(
+        f"{name}_Level_Trim",
+        x,
+        base_height - 0.12,
+        z,
+        width * 1.015,
+        0.14,
+        depth * 1.015,
+        materials["concrete_dark"],
+        target,
+        bevel=0.02,
+    )
 
 
 def build_buildings(materials: dict[str, bpy.types.Material]) -> None:
     target = collection("BLD_MODULAR")
     placements = [
-        ("BLD_AlleyShop_01", -31.0, 19.0, 8.0, 9.0, 7.4, "cream", "red"),
-        ("BLD_MixedUse_02", -18.8, 19.0, 8.4, 9.2, 9.2, "concrete", "navy"),
-        ("BLD_AlleyShop_03", -30.0, 6.0, 7.0, 7.4, 6.8, "brown", "cream"),
-        ("BLD_Apartment_04", -17.0, 7.8, 7.4, 7.4, 10.8, "concrete_dark", "green"),
-        ("BLD_MixedUse_05", 2.0, -8.0, 10.0, 6.8, 8.6, "cream", "navy"),
-        ("BLD_SecondaryShop_06", 7.0, 6.4, 9.0, 6.0, 7.4, "brown", "red"),
-        ("BLD_Apartment_07", 26.0, -12.2, 10.0, 7.0, 11.4, "concrete", "green"),
-        ("BLD_CanalShop_08", 28.0, 6.4, 9.0, 5.6, 7.8, "navy", "cream"),
+        ("BLD_AlleyShop_01", -30.0, 23.0, 5.6, 7.0, 7.6, "cream", "red", "x+"),
+        ("BLD_MixedUse_02", -18.8, 22.8, 5.7, 7.2, 9.4, "plaster", "bluegray", "x-"),
+        ("BLD_AlleyShop_03", -30.0, 15.2, 5.8, 7.2, 8.5, "brown", "green", "x+"),
+        ("BLD_MixedUse_04", -18.6, 14.7, 5.9, 7.3, 7.4, "concrete_dark", "red", "x-"),
+        ("BLD_CornerShop_05", -27.0, 7.1, 6.3, 6.1, 9.8, "plaster", "navy", "x+"),
+        ("BLD_CurveHouse_06", -18.9, 8.7, 6.3, 6.3, 8.3, "brick", "bluegray", "z-"),
+        ("BLD_JunctionShop_07", -11.5, 5.7, 6.7, 6.0, 10.5, "concrete", "green", "z-"),
+        ("BLD_SecondaryShop_08", 4.0, -6.0, 9.0, 6.1, 8.4, "cream", "navy", "z+"),
     ]
-    for index, (name, x, z, width, depth, height, base, accent) in enumerate(placements, start=1):
+    for index, (name, x, z, width, depth, height, base, accent, facade) in enumerate(
+        placements, start=1
+    ):
         build_building(
             name,
             x,
@@ -899,6 +1135,7 @@ def build_buildings(materials: dict[str, bpy.types.Material]) -> None:
             materials,
             target,
             index,
+            facade,
         )
 
 
@@ -933,6 +1170,31 @@ def build_props(materials: dict[str, bpy.types.Material]) -> None:
             materials[accent],
             props,
             bevel=0.025,
+        )
+        for button_index, button_x in enumerate((-0.18, 0.0, 0.18), start=1):
+            box(
+                f"PROP_Vending_Button_{index}_{button_index}",
+                x + button_x,
+                1.42,
+                z - 0.372,
+                0.10,
+                0.10,
+                0.025,
+                materials["paper"],
+                props,
+                bevel=0.012,
+            )
+        box(
+            f"PROP_Vending_Slot_{index}",
+            x,
+            0.22,
+            z - 0.376,
+            0.36,
+            0.12,
+            0.025,
+            materials["black"],
+            props,
+            bevel=0.008,
         )
 
     # Deliberate clusters of plants, crates, boards, scooters, and bicycles outside clearance.
@@ -986,6 +1248,71 @@ def build_props(materials: dict[str, bpy.types.Material]) -> None:
             bevel=0.015,
         )
 
+    for cluster_index, (x, z, count) in enumerate(
+        ((-28.5, 18.4, 3), (-19.1, 10.6, 2), (7.0, -5.8, 3)), start=1
+    ):
+        for crate_index in range(count):
+            box(
+                f"PROP_Crate_{cluster_index}_{crate_index + 1}",
+                x + (crate_index % 2) * 0.48,
+                (crate_index // 2) * 0.34,
+                z + (crate_index % 2) * 0.10,
+                0.44,
+                0.34,
+                0.42,
+                materials["brown"],
+                props,
+                bevel=0.025,
+            )
+            box(
+                f"PROP_Crate_Slat_{cluster_index}_{crate_index + 1}",
+                x + (crate_index % 2) * 0.48,
+                0.11 + (crate_index // 2) * 0.34,
+                z - 0.22 + (crate_index % 2) * 0.10,
+                0.34,
+                0.055,
+                0.035,
+                materials["paper"],
+                props,
+                bevel=0.006,
+            )
+
+    # Two readable bicycle silhouettes, parked against walls beyond the clearance envelope.
+    for bicycle_index, (x, z) in enumerate(((-28.0, 10.8), (6.3, 4.5)), start=1):
+        for wheel_index, wheel_z in enumerate((z - 0.48, z + 0.48), start=1):
+            cylinder(
+                f"PROP_Bicycle_Wheel_{bicycle_index}_{wheel_index}",
+                x,
+                0.34,
+                wheel_z,
+                0.31,
+                0.055,
+                materials["metal"],
+                props,
+                vertices=16,
+                rotation=(0.0, math.pi / 2, 0.0),
+            )
+        cable(
+            f"PROP_Bicycle_Frame_{bicycle_index}",
+            [
+                (x, 0.35, z - 0.48),
+                (x, 0.78, z),
+                (x, 0.35, z + 0.48),
+                (x, 0.42, z - 0.10),
+                (x, 0.35, z - 0.48),
+            ],
+            materials["red"] if bicycle_index == 1 else materials["paper"],
+            props,
+            thickness=0.035,
+        )
+        cable(
+            f"PROP_Bicycle_Handle_{bicycle_index}",
+            [(x, 0.78, z), (x, 1.04, z + 0.38), (x, 1.03, z + 0.52)],
+            materials["metal"],
+            props,
+            thickness=0.025,
+        )
+
     # Low-poly parked scooter silhouettes outside the road envelope.
     for index, (x, z, yaw) in enumerate(((-21.1, 10.8, 0.1), (11.0, 4.8, 1.4)), start=1):
         body = box(
@@ -1017,7 +1344,7 @@ def build_props(materials: dict[str, bpy.types.Material]) -> None:
             )
 
     # Utility poles and sagging cables create density above the clear driving envelope.
-    pole_positions = [(-29.0, 23.0), (-29.0, 9.0), (-18.8, 2.4), (0.0, 4.4), (19.0, 2.5)]
+    pole_positions = [(-29.0, 23.0), (-29.0, 9.0), (-16.8, 4.8), (0.0, 4.4), (19.0, 2.5)]
     for index, (x, z) in enumerate(pole_positions, start=1):
         cylinder(
             f"PROP_UtilityPole_{index}",
@@ -1050,13 +1377,13 @@ def build_props(materials: dict[str, bpy.types.Material]) -> None:
     )
     cable(
         "PROP_Cable_Alley_B",
-        [(-29.0, 5.55, 9.0), (-24.0, 4.8, 4.0), (-18.8, 5.5, 2.4)],
+        [(-29.0, 5.55, 9.0), (-23.0, 4.8, 5.0), (-16.8, 5.5, 4.8)],
         materials["metal"],
         cables,
     )
     cable(
         "PROP_Cable_Secondary",
-        [(-18.8, 5.5, 2.4), (-9.0, 4.6, 2.8), (0.0, 5.4, 4.4)],
+        [(-16.8, 5.5, 4.8), (-8.5, 4.6, 4.2), (0.0, 5.4, 4.4)],
         materials["metal"],
         cables,
     )
@@ -1068,7 +1395,7 @@ def build_props(materials: dict[str, bpy.types.Material]) -> None:
     )
 
     # Warm paper-lantern forms, kept sparse.
-    for index, (x, z) in enumerate(((-28.8, 15.0), (-20.8, 6.0), (-9.0, 3.0), (5.0, 4.0))):
+    for index, (x, z) in enumerate(((-28.8, 15.0), (-17.2, 5.2), (-9.0, 4.8), (5.0, 4.0))):
         cylinder(
             f"PROP_Lantern_{index + 1}",
             x,
@@ -1080,6 +1407,47 @@ def build_props(materials: dict[str, bpy.types.Material]) -> None:
             props,
             vertices=12,
         )
+
+
+def profiled_shell(
+    name: str,
+    sections: list[tuple[float, float, float, float]],
+    mat: bpy.types.Material,
+    target: bpy.types.Collection,
+    *,
+    bevel: float,
+) -> bpy.types.Object:
+    vertices: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, ...]] = []
+    for forward, half_width, bottom, top in sections:
+        vertices.extend(
+            (
+                runtime_to_blender(-half_width, bottom, -forward),
+                runtime_to_blender(half_width, bottom, -forward),
+                runtime_to_blender(half_width, top, -forward),
+                runtime_to_blender(-half_width, top, -forward),
+            )
+        )
+    for index in range(len(sections) - 1):
+        first = index * 4
+        following = (index + 1) * 4
+        faces.extend(
+            (
+                (first, following, following + 1, first + 1),
+                (first + 1, following + 1, following + 2, first + 2),
+                (first + 2, following + 2, following + 3, first + 3),
+                (first + 3, following + 3, following, first),
+            )
+        )
+    faces.extend(((0, 1, 2, 3), tuple(range(len(vertices) - 4, len(vertices)))))
+    mesh = bpy.data.meshes.new(f"{name}_MESH")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    shell = bpy.data.objects.new(name, mesh)
+    shell.data.materials.append(mat)
+    target.objects.link(shell)
+    apply_bevel(shell, bevel, segments=2)
+    return shell
 
 
 def build_car(materials: dict[str, bpy.types.Material], *, at_spawn: bool) -> bpy.types.Object:
@@ -1113,20 +1481,61 @@ def build_car(materials: dict[str, bpy.types.Material], *, at_spawn: bool) -> bp
         obj.parent = root
         return obj
 
-    car_box("CAR_Chassis", 0.0, 0.72, 0.0, 1.72, 0.46, 4.18, "paint", 0.16)
-    car_box("CAR_Hood", 0.0, 0.95, 1.35, 1.60, 0.20, 1.26, "paint", 0.12)
-    car_box("CAR_Trunk", 0.0, 0.93, -1.52, 1.58, 0.25, 0.82, "paint", 0.10)
-    car_box("CAR_Cabin", 0.0, 1.25, -0.15, 1.43, 0.72, 1.72, "glass", 0.18)
-    car_box("CAR_Roof", 0.0, 1.62, -0.20, 1.30, 0.10, 1.25, "paint", 0.08)
-    car_box("CAR_Front_Bumper", 0.0, 0.58, 2.10, 1.68, 0.22, 0.16, "paint", 0.05)
-    car_box("CAR_Rear_Bumper", 0.0, 0.58, -2.10, 1.68, 0.22, 0.16, "paint", 0.05)
-    car_box("CAR_Front_Grille", 0.0, 0.68, 2.195, 0.72, 0.16, 0.04, "metal", 0.015)
+    lower_shell = profiled_shell(
+        "CAR_Body_Shell",
+        [
+            (2.10, 0.67, 0.43, 0.69),
+            (1.72, 0.82, 0.39, 0.90),
+            (0.65, 0.87, 0.37, 1.00),
+            (-0.75, 0.86, 0.38, 1.02),
+            (-1.72, 0.79, 0.40, 0.87),
+            (-2.10, 0.66, 0.46, 0.68),
+        ],
+        materials["paint"],
+        car_collection,
+        bevel=0.09,
+    )
+    lower_shell.parent = root
+    cabin = profiled_shell(
+        "CAR_Cabin_Glass",
+        [
+            (0.78, 0.58, 0.94, 1.23),
+            (0.35, 0.66, 0.96, 1.55),
+            (-0.58, 0.64, 0.98, 1.56),
+            (-1.18, 0.54, 0.92, 1.18),
+        ],
+        materials["glass"],
+        car_collection,
+        bevel=0.055,
+    )
+    cabin.parent = root
+    roof_shell = profiled_shell(
+        "CAR_Roof_Panel",
+        [
+            (0.28, 0.61, 1.51, 1.59),
+            (-0.55, 0.60, 1.52, 1.61),
+            (-0.86, 0.55, 1.43, 1.51),
+        ],
+        materials["paint"],
+        car_collection,
+        bevel=0.035,
+    )
+    roof_shell.parent = root
+
+    car_box("CAR_Hood_Inset", 0.0, 1.00, 1.36, 1.46, 0.055, 1.15, "paint", 0.035)
+    car_box("CAR_Front_Lip", 0.0, 0.42, 2.04, 1.58, 0.12, 0.22, "black", 0.025)
+    car_box("CAR_Rear_Bumper", 0.0, 0.47, -2.03, 1.55, 0.18, 0.20, "paint", 0.035)
+    car_box("CAR_Front_Grille", 0.0, 0.60, 2.105, 0.78, 0.16, 0.045, "black", 0.012)
+    car_box("CAR_Side_Skirt_L", -0.83, 0.43, 0.0, 0.08, 0.16, 2.65, "black", 0.018)
+    car_box("CAR_Side_Skirt_R", 0.83, 0.43, 0.0, 0.08, 0.16, 2.65, "black", 0.018)
+    for side, x in (("L", -0.87), ("R", 0.87)):
+        car_box(f"CAR_Mirror_{side}", x, 1.22, 0.24, 0.22, 0.16, 0.30, "paint", 0.045)
 
     wheel_specs = [
-        ("WHEEL_FL", -0.88, 1.30),
-        ("WHEEL_FR", 0.88, 1.30),
-        ("WHEEL_RL", -0.88, -1.30),
-        ("WHEEL_RR", 0.88, -1.30),
+        ("WHEEL_FL", -0.87, 1.34),
+        ("WHEEL_FR", 0.87, 1.34),
+        ("WHEEL_RL", -0.87, -1.36),
+        ("WHEEL_RR", 0.87, -1.36),
     ]
     for name, x, forward in wheel_specs:
         wheel = cylinder(
@@ -1134,11 +1543,11 @@ def build_car(materials: dict[str, bpy.types.Material], *, at_spawn: bool) -> bp
             x,
             0.46,
             -forward,
-            0.34,
-            0.22,
+            0.35,
+            0.24,
             materials["rubber"],
             car_collection,
-            vertices=16,
+            vertices=20,
             rotation=(0.0, math.pi / 2, 0.0),
         )
         bpy.context.view_layer.objects.active = wheel
@@ -1151,21 +1560,60 @@ def build_car(materials: dict[str, bpy.types.Material], *, at_spawn: bool) -> bp
             x,
             0.46,
             -forward,
-            0.18,
-            0.235,
+            0.21,
+            0.255,
             materials["metal"],
+            car_collection,
+            vertices=10,
+            rotation=(0.0, math.pi / 2, 0.0),
+        )
+        hub.parent = root
+        brake_disc = cylinder(
+            f"{name}_DISC",
+            x,
+            0.46,
+            -forward,
+            0.125,
+            0.262,
+            materials["red"],
             car_collection,
             vertices=12,
             rotation=(0.0, math.pi / 2, 0.0),
         )
-        hub.parent = wheel
+        brake_disc.parent = root
 
-    for side, x in (("L", -0.54), ("R", 0.54)):
-        car_box(f"HEADLIGHT_{side}", x, 0.78, 2.20, 0.42, 0.18, 0.05, "headlight", 0.025)
-        car_box(f"BRAKE_LIGHT_{side}", x, 0.78, -2.20, 0.42, 0.18, 0.05, "brake", 0.025)
+    for side, x in (("L", -0.52), ("R", 0.52)):
+        car_box(f"HEADLIGHT_{side}", x, 0.68, 2.13, 0.39, 0.16, 0.055, "headlight", 0.018)
+        car_box(f"BRAKE_LIGHT_{side}", x, 0.70, -2.13, 0.38, 0.15, 0.055, "brake", 0.018)
 
     # Small original geometric badge, deliberately not a real marque.
-    car_box("CAR_Badge_Hinode", 0.0, 0.83, 2.225, 0.16, 0.10, 0.025, "amber", 0.015)
+    car_box("CAR_Badge_Hinode", 0.0, 0.76, 2.14, 0.15, 0.09, 0.025, "amber", 0.012)
+    car_box("CAR_Spoiler_Wing", 0.0, 1.16, -1.92, 1.35, 0.08, 0.26, "paint", 0.025)
+    for side, x in (("L", -0.47), ("R", 0.47)):
+        car_box(
+            f"CAR_Spoiler_Stand_{side}",
+            x,
+            0.88,
+            -1.92,
+            0.07,
+            0.28,
+            0.08,
+            "metal",
+            0.012,
+        )
+    exhaust = cylinder(
+        "CAR_Exhaust",
+        0.52,
+        0.42,
+        2.12,
+        0.075,
+        0.34,
+        materials["metal"],
+        car_collection,
+        vertices=12,
+        rotation=(math.pi / 2, 0.0, 0.0),
+    )
+    exhaust.parent = root
     if at_spawn:
         root.location = runtime_to_blender(-25.0, 0.0, 23.0)
     return root
@@ -1205,14 +1653,22 @@ def build_lighting() -> None:
         24.0,
         -8.0,
         (0.22, 0.34, 0.55),
-        4200.0,
+        3200.0,
         lights,
         size=18.0,
     )
     direction = Vector(runtime_to_blender(-10.0, 0.0, 0.0)) - moon.location
     moon.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
     for index, (x, z, energy) in enumerate(
-        ((-27.0, 18.0, 620.0), (-20.0, 5.0, 720.0), (-8.0, 2.0, 580.0), (7.0, 2.5, 760.0)),
+        (
+            (-24.0, 23.0, 520.0),
+            (-24.0, 15.0, 580.0),
+            (-21.0, 6.5, 640.0),
+            (-12.0, 0.5, 560.0),
+            (2.0, -1.2, 620.0),
+            (16.0, -3.0, 540.0),
+            (19.0, 8.5, 480.0),
+        ),
         start=1,
     ):
         add_light(
@@ -1233,12 +1689,58 @@ def build_lighting() -> None:
         16.0,
         22.0,
         (0.18, 0.34, 0.62),
-        2800.0,
+        2200.0,
         lights,
         size=28.0,
     )
     fill_direction = Vector(runtime_to_blender(2.0, 0.0, 0.0)) - fill.location
     fill.rotation_euler = fill_direction.to_track_quat("-Z", "Y").to_euler()
+
+
+def build_review_lighting() -> None:
+    """Add temporary broad fill for readable evidence without saving it into source files."""
+
+    lights = collection("LIGHTING_REVIEW_ONLY")
+    for existing in list(lights.objects):
+        bpy.data.objects.remove(existing, do_unlink=True)
+    specifications = [
+        (
+            "LIGHT_Review_Key",
+            (-24.0, 30.0, 28.0),
+            (-8.0, 0.0, 2.0),
+            (1.0, 0.78, 0.56),
+            4200.0,
+            30.0,
+        ),
+        (
+            "LIGHT_Review_Fill",
+            (30.0, 22.0, 18.0),
+            (2.0, 0.0, 0.0),
+            (0.48, 0.68, 1.0),
+            3200.0,
+            34.0,
+        ),
+        (
+            "LIGHT_Review_Rim",
+            (12.0, 18.0, -28.0),
+            (4.0, 2.0, -2.0),
+            (0.72, 0.82, 1.0),
+            2200.0,
+            26.0,
+        ),
+    ]
+    for name, position, target, color, energy, size in specifications:
+        light = add_light(
+            name,
+            "AREA",
+            *position,
+            color,
+            energy,
+            lights,
+            size=size,
+        )
+        direction = Vector(runtime_to_blender(*target)) - light.location
+        light.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
 
 
 def camera_look(
@@ -1258,73 +1760,168 @@ def camera_look(
     return camera
 
 
-def render_evidence() -> list[str]:
+def render_evidence(car_root: bpy.types.Object) -> list[dict[str, object]]:
     scene = bpy.context.scene
+    scene.render.engine = "BLENDER_EEVEE"
+    scene.render.resolution_x = 1280
+    scene.render.resolution_y = 720
+    scene.render.resolution_percentage = 100
+    scene.render.image_settings.file_format = "PNG"
+    scene.render.film_transparent = False
+    scene.render.image_settings.color_mode = "RGBA"
+    scene.render.use_file_extension = True
+    scene.render.image_settings.color_depth = "8"
+    scene.render.fps = 30
+    scene.render.use_motion_blur = False
+    scene.view_settings.exposure = 0.58
+    try:
+        scene.view_settings.look = "AgX - Medium Low Contrast"
+    except TypeError:
+        pass
+    background = scene.world.node_tree.nodes.get("Background")
+    if background:
+        background.inputs["Color"].default_value = (0.006, 0.016, 0.045, 1.0)
+        background.inputs["Strength"].default_value = 0.38
+    build_review_lighting()
+
     renders = [
-        (
-            "hinode-top-down.png",
-            (0.0, 72.0, 2.0),
-            (0.0, 0.0, 0.0),
-            48.0,
-            False,
-        ),
-        (
-            "hinode-road-spline-clearance.png",
-            (-10.0, 34.0, 35.0),
-            (-8.0, 0.0, 3.0),
-            47.0,
-            True,
-        ),
-        (
-            "hinode-alley-entrance.png",
-            (-25.0, 2.1, 30.0),
-            (-24.0, 1.2, 14.0),
-            34.0,
-            False,
-        ),
-        (
-            "hinode-alley-curve.png",
-            (-23.0, 24.0, 4.0),
-            (-23.0, 0.0, 4.0),
-            50.0,
-            False,
-        ),
-        (
-            "hinode-flyover-composition.png",
-            (-9.0, 3.2, 1.0),
-            (18.0, 5.2, -2.0),
-            42.0,
-            False,
-        ),
-        (
-            "hinode-secondary-merge.png",
-            (-12.5, 3.0, 1.0),
-            (10.0, 1.1, -2.0),
-            40.0,
-            False,
-        ),
+        {
+            "filename": "hinode-top-down.png",
+            "location": (0.0, 78.0, 0.0),
+            "target": (0.0, 0.0, 0.0),
+            "lens": 48.0,
+            "clearance": False,
+            "orthographic": 82.0,
+            "vehicle": (-25.0, 23.0, 0.0),
+        },
+        {
+            "filename": "hinode-road-spline-clearance.png",
+            "location": (-8.0, 46.0, 44.0),
+            "target": (-4.0, 0.0, 1.0),
+            "lens": 48.0,
+            "clearance": True,
+            "vehicle": (-25.0, 23.0, 0.0),
+        },
+        {
+            "filename": "hinode-alley-entrance.png",
+            "location": (-25.0, 1.92, 31.0),
+            "target": (-24.2, 1.0, 9.0),
+            "lens": 40.0,
+            "clearance": False,
+            "vehicle": (-25.0, 23.0, 0.0),
+        },
+        {
+            "filename": "hinode-alley-curve.png",
+            "location": (-22.4, 1.75, 4.0),
+            "target": (-12.8, 0.9, -0.6),
+            "lens": 28.0,
+            "clearance": False,
+            "vehicle": (-16.0, 0.0, -1.15),
+        },
+        {
+            "filename": "hinode-flyover-composition.png",
+            "location": (-14.0, 1.78, 1.2),
+            "target": (10.0, 4.4, -2.5),
+            "lens": 36.0,
+            "clearance": False,
+            "vehicle": (-7.0, -0.5, -1.42),
+        },
+        {
+            "filename": "hinode-secondary-merge.png",
+            "location": (-16.0, 1.78, 1.6),
+            "target": (12.0, 1.0, -2.5),
+            "lens": 36.0,
+            "clearance": False,
+            "vehicle": (-5.8, -0.5, -1.42),
+        },
+        {
+            "filename": "hinode-side-scale.png",
+            "location": (45.0, 10.0, -4.0),
+            "target": (8.0, 3.0, -1.0),
+            "lens": 54.0,
+            "clearance": False,
+            "orthographic": 38.0,
+            "vehicle": (8.0, -1.0, -1.42),
+        },
+        {
+            "filename": "hinode-three-quarter-overview.png",
+            "location": (-50.0, 52.0, 52.0),
+            "target": (-5.0, 1.5, 1.0),
+            "lens": 54.0,
+            "clearance": False,
+            "vehicle": (-25.0, 23.0, 0.0),
+        },
     ]
-    output_paths: list[str] = []
+    evidence: list[dict[str, object]] = []
     debug = bpy.data.collections.get("DEBUG_CLEARANCE")
-    for filename, location, target, lens, show_clearance in renders:
+    original_location = car_root.location.copy()
+    original_rotation = car_root.rotation_euler.copy()
+    for specification in renders:
+        filename = str(specification["filename"])
+        show_clearance = bool(specification["clearance"])
         if debug:
             for obj in debug.objects:
                 obj.hide_render = not show_clearance
                 obj.hide_viewport = not show_clearance
-        camera = camera_look(f"CAM_{Path(filename).stem}", location, target, lens)
-        if filename == "hinode-top-down.png":
+        vehicle_x, vehicle_z, vehicle_yaw = specification["vehicle"]
+        car_root.location = runtime_to_blender(vehicle_x, 0.0, vehicle_z)
+        car_root.rotation_euler[2] = vehicle_yaw
+        camera = camera_look(
+            f"CAM_{Path(filename).stem}",
+            specification["location"],
+            specification["target"],
+            float(specification["lens"]),
+        )
+        if specification.get("orthographic"):
             camera.data.type = "ORTHO"
-            camera.data.ortho_scale = 82.0
+            camera.data.ortho_scale = float(specification["orthographic"])
         scene.camera = camera
         output = EVIDENCE_DIR / filename
         scene.render.filepath = str(output)
+        started = time.perf_counter()
         bpy.ops.render.render(write_still=True)
-        output_paths.append(str(output.relative_to(REPO_ROOT)).replace("\\", "/"))
+        duration = time.perf_counter() - started
+        relative_path = str(output.relative_to(REPO_ROOT)).replace("\\", "/")
+        evidence.append({"path": relative_path, "durationSeconds": round(duration, 3)})
+        print(f"Review render: {relative_path} ({duration:.3f}s)")
+    car_root.location = original_location
+    car_root.rotation_euler = original_rotation
     if debug:
         for obj in debug.objects:
             obj.hide_render = True
             obj.hide_viewport = True
-    return output_paths
+    return evidence
+
+
+def save_review_report(render_evidence: list[dict[str, object]]) -> None:
+    report_path = EVIDENCE_DIR / "hinode-blender-report.json"
+    report = {}
+    if report_path.exists():
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+    report["renders"] = [item["path"] for item in render_evidence]
+    report["renderEvidence"] = render_evidence
+    report["lastReviewAt"] = datetime.now(timezone.utc).isoformat()
+    report["reviewMode"] = {
+        "engine": "BLENDER_EEVEE",
+        "resolution": [1280, 720],
+        "motionBlur": False,
+        "depthOfField": False,
+        "temporaryReadableLighting": True,
+    }
+    report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+
+def render_review_mode() -> None:
+    ensure_directories()
+    master_path = SOURCE_DIR / "hinode_slice_master.blend"
+    if Path(bpy.data.filepath).resolve() != master_path.resolve():
+        bpy.ops.wm.open_mainfile(filepath=str(master_path))
+    car_root = bpy.data.objects.get("VEHICLE_ROOT")
+    if not car_root:
+        raise RuntimeError("Hinode master source is missing VEHICLE_ROOT")
+    evidence = render_evidence(car_root)
+    save_review_report(evidence)
+    print(f"Hinode review evidence refreshed from: {master_path}")
 
 
 def export_selection(path: Path, objects: list[bpy.types.Object]) -> None:
@@ -1447,7 +2044,7 @@ def triangle_count(objects: list[bpy.types.Object]) -> int:
 
 
 def write_report(
-    render_paths: list[str],
+    render_evidence: list[dict[str, object]],
     baked_object: bpy.types.Object,
     atlas_path: str,
 ) -> None:
@@ -1497,7 +2094,8 @@ def write_report(
             "buildingModules": 8,
             "dynamicRuntimeLightsPlanned": 3,
         },
-        "renders": render_paths,
+        "renders": [item["path"] for item in render_evidence],
+        "renderEvidence": render_evidence,
         "cleanRoom": True,
     }
     encoded = json.dumps(report, indent=2)
@@ -1507,6 +2105,9 @@ def write_report(
 
 def save_mode(mode: str) -> None:
     ensure_directories()
+    if mode == "review":
+        render_review_mode()
+        return
     clean_scene()
     materials = setup_world()
 
@@ -1534,7 +2135,7 @@ def save_mode(mode: str) -> None:
         build_lighting()
         master_path = SOURCE_DIR / "hinode_slice_master.blend"
         bpy.ops.wm.save_as_mainfile(filepath=str(master_path))
-        render_paths = render_evidence()
+        render_evidence_items = render_evidence(car_root)
 
         car_collection = bpy.data.collections["VEHICLE_HINODE_COUPÉ"]
         original_car_location = car_root.location.copy()
@@ -1546,7 +2147,7 @@ def save_mode(mode: str) -> None:
         export_selection(MODEL_DIR / "hinode-slice-environment.glb", [baked_object])
         export_path = SOURCE_DIR / "hinode_slice_export.blend"
         bpy.ops.wm.save_as_mainfile(filepath=str(export_path))
-        write_report(render_paths, baked_object, atlas_path)
+        write_report(render_evidence_items, baked_object, atlas_path)
         print(f"Hinode master generated: {master_path}")
         print(f"Hinode export generated: {export_path}")
         return

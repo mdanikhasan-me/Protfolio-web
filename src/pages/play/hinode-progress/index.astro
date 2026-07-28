@@ -1,0 +1,279 @@
+---
+import '../../../hinode/ui/hinode-progress.css';
+
+const title = 'Hinode City — Live visual review';
+const description =
+  'Development-only review surface for the provisional Hinode City vertical slice.';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#050912" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <main class="review-shell" data-review-root>
+      <header class="review-header">
+        <div>
+          <p class="review-kicker">Hinode City / internal visual checkpoint</p>
+          <h1>Provisional slice, made visible.</h1>
+          <p class="review-intro">
+            This is a development-only contact sheet for inspecting the current browser game and
+            Blender evidence. Technical success does not imply visual approval.
+          </p>
+        </div>
+        <nav class="review-actions" aria-label="Review links">
+          <a class="review-action review-action--primary" href="/play/hinode-preview/">
+            Open playable preview
+          </a>
+          <a class="review-action" href="#blender-evidence">Blender evidence</a>
+          <a class="review-action" href="#browser-evidence">Browser evidence</a>
+        </nav>
+      </header>
+
+      <section class="review-status" aria-label="Current review status">
+        <div class="review-stat">
+          <p class="review-label">Server</p>
+          <strong class="review-health" data-server-state data-state="checking">Checking</strong>
+        </div>
+        <div class="review-stat">
+          <p class="review-label">Branch</p>
+          <strong data-branch>Loading</strong>
+        </div>
+        <div class="review-stat">
+          <p class="review-label">Commit</p>
+          <strong data-commit>Loading</strong>
+        </div>
+        <div class="review-stat">
+          <p class="review-label">Modelling</p>
+          <strong data-modelling-stage>Loading</strong>
+        </div>
+        <div class="review-stat">
+          <p class="review-label">Rendering</p>
+          <strong data-render-stage>Loading</strong>
+        </div>
+        <div class="review-stat">
+          <p class="review-label">Last update</p>
+          <time data-last-update>Loading</time>
+        </div>
+      </section>
+
+      <section class="review-section" aria-labelledby="metrics-title">
+        <div class="review-section-heading">
+          <h2 id="metrics-title">Measured prototype state</h2>
+          <p data-browser-stage>Browser evidence loading</p>
+        </div>
+        <div class="review-ledger">
+          <article>
+            <h3>Visible geometry</h3>
+            <strong data-triangles>—</strong>
+            <p>Environment and vehicle triangles from the current exports.</p>
+          </article>
+          <article>
+            <h3>Runtime</h3>
+            <strong data-draw-calls>—</strong>
+            <p>Draw calls from the latest successful automated browser capture.</p>
+          </article>
+          <article>
+            <h3>Payload</h3>
+            <strong data-payload>—</strong>
+            <p>Current gzip total for public Hinode models and baked texture.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="review-section" id="blender-evidence" aria-labelledby="blender-title">
+        <div class="review-section-heading">
+          <h2 id="blender-title">Fresh Blender review views</h2>
+          <p>Actual current scene / low-cost Eevee evidence</p>
+        </div>
+        <div class="evidence-grid" data-blender-grid>
+          <p class="review-empty">Fresh render evidence is being prepared.</p>
+        </div>
+      </section>
+
+      <section class="review-section" id="browser-evidence" aria-labelledby="browser-title">
+        <div class="review-section-heading">
+          <h2 id="browser-title">Automated browser captures</h2>
+          <p>Real served route / automated Chrome, not manual QA</p>
+        </div>
+        <div class="evidence-grid" data-browser-grid>
+          <p class="review-empty">Browser evidence has not been captured yet.</p>
+        </div>
+      </section>
+
+      <section class="review-section" aria-labelledby="defects-title">
+        <div class="review-section-heading">
+          <h2 id="defects-title">Known defects</h2>
+          <p>Open findings, not approval language</p>
+        </div>
+        <div class="defect-columns">
+          <article class="defect-panel">
+            <h3>Visual</h3>
+            <ul class="defect-list" data-visual-defects>
+              <li>Loading current findings.</li>
+            </ul>
+          </article>
+          <article class="defect-panel">
+            <h3>Gameplay</h3>
+            <ul class="defect-list" data-gameplay-defects>
+              <li>Loading current findings.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      interface EvidenceItem {
+        id: string;
+        title: string;
+        url: string;
+        cacheKey: string;
+        updatedAt: string;
+        width: number;
+        height: number;
+        note: string;
+        durationSeconds?: number;
+      }
+
+      interface ProgressManifest {
+        server: { status: string };
+        branch: string;
+        commit: string;
+        updatedAt: string;
+        stages: { modelling: string; rendering: string; browser: string };
+        metrics: {
+          environmentTriangles: number;
+          vehicleTriangles: number;
+          drawCalls: number | null;
+          gzipBytes: number;
+        };
+        evidence: { blender: EvidenceItem[]; browser: EvidenceItem[] };
+        defects: { visual: string[]; gameplay: string[] };
+      }
+
+      const root = document.querySelector<HTMLElement>('[data-review-root]');
+      if (!root) throw new Error('Hinode review root is missing.');
+
+      const text = (selector: string, value: string) => {
+        const node = root.querySelector<HTMLElement>(selector);
+        if (node) node.textContent = value;
+      };
+
+      const renderList = (selector: string, items: string[]) => {
+        const list = root.querySelector<HTMLUListElement>(selector);
+        if (!list) return;
+        list.replaceChildren(
+          ...items.map((item) => {
+            const entry = document.createElement('li');
+            entry.textContent = item;
+            return entry;
+          }),
+        );
+      };
+
+      const renderEvidence = (selector: string, items: EvidenceItem[], emptyMessage: string) => {
+        const grid = root.querySelector<HTMLElement>(selector);
+        if (!grid) return;
+        if (items.length === 0) {
+          const empty = document.createElement('p');
+          empty.className = 'review-empty';
+          empty.textContent = emptyMessage;
+          grid.replaceChildren(empty);
+          return;
+        }
+        grid.replaceChildren(
+          ...items.map((item) => {
+            const card = document.createElement('figure');
+            card.className = 'evidence-card';
+            const image = document.createElement('img');
+            image.src = `${item.url}?v=${encodeURIComponent(item.cacheKey)}`;
+            image.alt = item.title;
+            image.width = item.width;
+            image.height = item.height;
+            image.loading = 'lazy';
+            const caption = document.createElement('figcaption');
+            const title = document.createElement('h3');
+            title.textContent = item.title;
+            const dimensions = document.createElement('span');
+            dimensions.className = 'evidence-meta';
+            dimensions.textContent = `${item.width} × ${item.height}`;
+            const timestamp = document.createElement('time');
+            timestamp.dateTime = item.updatedAt;
+            const duration =
+              typeof item.durationSeconds === 'number'
+                ? ` / ${item.durationSeconds.toFixed(2)} s render`
+                : '';
+            timestamp.textContent = `${new Date(item.updatedAt).toLocaleString()}${duration}`;
+            const note = document.createElement('p');
+            note.className = 'evidence-note';
+            note.textContent = item.note;
+            caption.append(title, dimensions, timestamp, note);
+            card.append(image, caption);
+            return card;
+          }),
+        );
+      };
+
+      const update = async () => {
+        const state = root.querySelector<HTMLElement>('[data-server-state]');
+        try {
+          const response = await fetch(`/hinode/review/status.json?t=${Date.now()}`, {
+            cache: 'no-store',
+          });
+          if (!response.ok) throw new Error(`Progress manifest returned ${response.status}`);
+          const manifest = (await response.json()) as ProgressManifest;
+          if (state) {
+            state.dataset.state = 'online';
+            state.textContent = 'Online';
+          }
+          text('[data-branch]', manifest.branch);
+          text('[data-commit]', manifest.commit);
+          text('[data-modelling-stage]', manifest.stages.modelling);
+          text('[data-render-stage]', manifest.stages.rendering);
+          text('[data-browser-stage]', manifest.stages.browser);
+          text('[data-last-update]', new Date(manifest.updatedAt).toLocaleString());
+          text(
+            '[data-triangles]',
+            `${(manifest.metrics.environmentTriangles + manifest.metrics.vehicleTriangles).toLocaleString()} tris`,
+          );
+          text(
+            '[data-draw-calls]',
+            manifest.metrics.drawCalls === null
+              ? 'Awaiting capture'
+              : `${manifest.metrics.drawCalls} calls`,
+          );
+          text('[data-payload]', `${(manifest.metrics.gzipBytes / 1024).toFixed(1)} KiB gzip`);
+          renderEvidence(
+            '[data-blender-grid]',
+            manifest.evidence.blender,
+            'No Blender evidence yet.',
+          );
+          renderEvidence(
+            '[data-browser-grid]',
+            manifest.evidence.browser,
+            'No browser captures yet.',
+          );
+          renderList('[data-visual-defects]', manifest.defects.visual);
+          renderList('[data-gameplay-defects]', manifest.defects.gameplay);
+        } catch (error) {
+          console.error(error);
+          if (state) {
+            state.dataset.state = 'offline';
+            state.textContent = 'Evidence unavailable';
+          }
+        }
+      };
+
+      void update();
+      window.setInterval(update, 10_000);
+    </script>
+  </body>
+</html>

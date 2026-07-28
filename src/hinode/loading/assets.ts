@@ -38,6 +38,30 @@ export async function loadHinodeAssets(onProgress: (ratio: number) => void): Pro
     if (!(node instanceof Mesh)) return;
     node.receiveShadow = true;
     node.castShadow = false;
+    const materials = Array.isArray(node.material) ? node.material : [node.material];
+    for (const candidate of materials) {
+      if (!(candidate instanceof MeshStandardMaterial) || !candidate.map) continue;
+      // The environment atlas already contains the authored night-light bake.
+      // Reusing it as a restrained emissive contribution keeps that bake
+      // legible in the browser without flattening the moon and headlight response.
+      candidate.emissiveMap = candidate.map;
+      candidate.emissive.set(0xffffff);
+      candidate.emissiveIntensity = 0.72;
+      candidate.onBeforeCompile = (shader) => {
+        shader.fragmentShader = shader.fragmentShader.replace(
+          '#include <map_fragment>',
+          `#include <map_fragment>
+          float hinodeAtlasPeak = max(max(diffuseColor.r, diffuseColor.g), diffuseColor.b);
+          vec3 hinodeNightFloor = vec3(0.085, 0.105, 0.145);
+          diffuseColor.rgb = max(
+            diffuseColor.rgb,
+            hinodeNightFloor * (1.0 - smoothstep(0.08, 0.42, hinodeAtlasPeak))
+          );`,
+        );
+      };
+      candidate.customProgramCacheKey = () => 'hinode-readable-night-atlas-v1';
+      candidate.needsUpdate = true;
+    }
   });
   vehicleScene.traverse((node) => {
     if (!(node instanceof Mesh)) return;

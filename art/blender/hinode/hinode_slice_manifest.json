@@ -31,15 +31,15 @@
   "exports": {
     "environment": {
       "path": "public/hinode/models/hinode-slice-environment.glb",
-      "bytes": 1255820
+      "bytes": 2931516
     },
     "vehicle": {
       "path": "public/hinode/models/hinode-fictional-coupe.glb",
-      "bytes": 131908
+      "bytes": 202372
     },
     "bakedAtlas": {
       "path": "public/hinode/textures/hinode-static-light-ao.png",
-      "bytes": 64437,
+      "bytes": 43928,
       "size": [
         1024,
         1024
@@ -48,9 +48,9 @@
     }
   },
   "scene": {
-    "objects": 225,
-    "materials": 23,
-    "bakedTriangles": 17944,
+    "objects": 450,
+    "materials": 29,
+    "bakedTriangles": 39416,
     "buildingModules": 8,
     "dynamicRuntimeLightsPlanned": 3
   },
@@ -60,7 +60,43 @@
     "artifacts/hinode/blender/hinode-alley-entrance.png",
     "artifacts/hinode/blender/hinode-alley-curve.png",
     "artifacts/hinode/blender/hinode-flyover-composition.png",
-    "artifacts/hinode/blender/hinode-secondary-merge.png"
+    "artifacts/hinode/blender/hinode-secondary-merge.png",
+    "artifacts/hinode/blender/hinode-side-scale.png",
+    "artifacts/hinode/blender/hinode-three-quarter-overview.png"
+  ],
+  "renderEvidence": [
+    {
+      "path": "artifacts/hinode/blender/hinode-top-down.png",
+      "durationSeconds": 1.061
+    },
+    {
+      "path": "artifacts/hinode/blender/hinode-road-spline-clearance.png",
+      "durationSeconds": 0.841
+    },
+    {
+      "path": "artifacts/hinode/blender/hinode-alley-entrance.png",
+      "durationSeconds": 0.676
+    },
+    {
+      "path": "artifacts/hinode/blender/hinode-alley-curve.png",
+      "durationSeconds": 0.641
+    },
+    {
+      "path": "artifacts/hinode/blender/hinode-flyover-composition.png",
+      "durationSeconds": 0.705
+    },
+    {
+      "path": "artifacts/hinode/blender/hinode-secondary-merge.png",
+      "durationSeconds": 0.789
+    },
+    {
+      "path": "artifacts/hinode/blender/hinode-side-scale.png",
+      "durationSeconds": 0.722
+    },
+    {
+      "path": "artifacts/hinode/blender/hinode-three-quarter-overview.png",
+      "durationSeconds": 0.734
+    }
   ],
   "cleanRoom": true
 }

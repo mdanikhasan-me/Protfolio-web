@@ -46,6 +46,15 @@ import HinodePreviewLayout from '../../../hinode/ui/HinodePreviewLayout.astro';
       <span class="hinode-gear" data-gear>GEAR N</span>
     </aside>
 
+    <aside class="hinode-debug" data-debug-metrics hidden aria-label="Renderer debug metrics">
+      <span>FPS <strong data-debug-fps>—</strong></span>
+      <span>Calls <strong data-debug-calls>—</strong></span>
+      <span>Tris <strong data-debug-triangles>—</strong></span>
+      <span>Road <strong data-debug-road>—</strong></span>
+      <span>Position <strong data-debug-position>—</strong></span>
+      <span>Contacts <strong data-debug-collisions>—</strong></span>
+    </aside>
+
     <p class="hinode-controls">
       W/S accelerate & brake · A/D steer · Space handbrake · R reset · C camera · Esc pause
     </p>

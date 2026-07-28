@@ -32,23 +32,38 @@ export class ChaseCamera {
 
   private resolveDesired(vehicle: VehicleState, position: Vector3, look: Vector3) {
     const requestedDistance = this.distanceMode === 0 ? 6.8 : 8.2;
-    let acceptedDistance = requestedDistance;
-    const height = this.distanceMode === 0 ? 3.0 : 3.6;
+    let acceptedDistance = 1.4;
+    const baseHeight = this.distanceMode === 0 ? 3.0 : 3.6;
 
-    for (let distance = requestedDistance; distance >= 2.8; distance -= 0.35) {
+    for (let distance = requestedDistance; distance >= 1.4; distance -= 0.35) {
       const candidateX = vehicle.x + Math.sin(vehicle.yaw) * distance;
       const candidateZ = vehicle.z + Math.cos(vehicle.yaw) * distance;
-      if (isDriveable({ x: candidateX, z: candidateZ }, 0.15)) {
+      const sightlineStaysInsideRoad = [0.25, 0.5, 0.75, 1].every((ratio) =>
+        isDriveable(
+          {
+            x: MathUtils.lerp(vehicle.x, candidateX, ratio),
+            z: MathUtils.lerp(vehicle.z, candidateZ, ratio),
+          },
+          0.1,
+        ),
+      );
+      if (sightlineStaysInsideRoad) {
         acceptedDistance = distance;
         break;
       }
     }
-
-    position.set(
-      vehicle.x + Math.sin(vehicle.yaw) * acceptedDistance,
-      height,
-      vehicle.z + Math.cos(vehicle.yaw) * acceptedDistance,
-    );
+    if (acceptedDistance < 3) {
+      // Dense façades can close the rear sightline at the hairpin. A brief
+      // overhead transition keeps the car and road visible instead of
+      // allowing the camera to pass through an upper-storey mesh.
+      position.set(vehicle.x, 11.5, vehicle.z);
+    } else {
+      position.set(
+        vehicle.x + Math.sin(vehicle.yaw) * acceptedDistance,
+        baseHeight,
+        vehicle.z + Math.cos(vehicle.yaw) * acceptedDistance,
+      );
+    }
     const lookAhead = MathUtils.clamp(Math.abs(vehicle.speed) * 0.16, 0.8, 2.8);
     look.set(
       vehicle.x - Math.sin(vehicle.yaw) * lookAhead,
