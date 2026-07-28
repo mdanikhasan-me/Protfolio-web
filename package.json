@@ -17,7 +17,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run tests/unit --passWithNoTests",
+    "test:e2e:hinode": "playwright test tests/e2e/hinode",
+    "validate:hinode": "node tools/validation/hinode/validate-hinode-slice.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
