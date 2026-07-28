@@ -1061,10 +1061,10 @@ export function createReferenceBackgroundSystem(
     tileMesh.geometry = activeGeometries[layoutIndex] ?? activeGeometries[0]!;
 
     noiseUniforms.uScreenAspectRatio.value = width / height;
-    const colorWidth = Math.max(384, Math.min(1024, Math.round(width * pixelRatio * 0.30)));
-    const colorHeight = Math.max(216, Math.min(576, Math.round(height * pixelRatio * 0.30)));
-    const displayWidth = Math.max(640, Math.min(1920, Math.round(width * pixelRatio * 0.80)));
-    const displayHeight = Math.max(360, Math.min(1080, Math.round(height * pixelRatio * 0.80)));
+    const colorWidth = Math.max(1, Math.round(width * pixelRatio * 0.15));
+    const colorHeight = Math.max(1, Math.round(height * pixelRatio * 0.15));
+    const displayWidth = Math.max(1, Math.round(width * pixelRatio * 0.40));
+    const displayHeight = Math.max(1, Math.round(height * pixelRatio * 0.40));
     patternTargets[0].setSize(colorWidth, colorHeight);
     patternTargets[1].setSize(displayWidth, displayHeight);
     patternTargets[2].setSize(displayWidth, displayHeight);
