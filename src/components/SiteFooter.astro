@@ -5,29 +5,26 @@ const year = new Date().getUTCFullYear();
 ---
 
 <footer class="site-footer">
-  <div class="footer-statement">
-    <p class="eyebrow">Workshop record</p>
-    <p>
-      Pixels <span aria-hidden="true">→</span> systems <span aria-hidden="true">→</span> finished products.
-    </p>
-  </div>
-  <div class="footer-details">
-    <p>
-      <strong>{SITE.name}</strong><br />
-      Website and software development from {SITE.location}.
-    </p>
+  <div class="shell footer-grid">
+    <div>
+      <p class="eyebrow">MD Anik Hasan</p>
+      <p class="footer-statement">Website and custom software development from {SITE.location}.</p>
+    </div>
     <nav aria-label="Footer navigation">
-      <a href="/now/">Now</a>
-      <a href="/open-source/">Open source</a>
-      <a href="/resume/">Résumé</a>
+      <a href="/work/">Work</a>
+      <a href="/services/">Services</a>
+      <a href="/writing/">Writing</a>
+      <a href="/about/">About</a>
       <a href="/contact/">Contact</a>
+      <a href="/search/">Search</a>
       <a href="/privacy/">Privacy</a>
     </nav>
+    <div class="footer-social">
+      <a href={SITE.linkedin}>LinkedIn</a>
+      <a href={SITE.github}>GitHub</a>
+      <a href={SITE.x}>X</a>
+      <a href={SITE.facebook}>Facebook</a>
+    </div>
   </div>
-  <div class="footer-gauge" aria-hidden="true">
-    <span>BUILD / {year}</span>
-    <span></span>
-    <span>STATIC · ACCESSIBLE · CRAWLABLE</span>
-  </div>
-  <p class="fine-print">© {year} {SITE.name}. No analytics or advertising trackers.</p>
+  <p class="shell fine-print">© {year} {SITE.name}. No analytics or advertising trackers.</p>
 </footer>

@@ -9,14 +9,11 @@ function isCurrent(href: string) {
 }
 ---
 
-<header class="site-header">
-  <div class="header-main">
+<header class="site-header" data-site-header>
+  <div class="header-main shell">
     <a class="site-mark" href="/" aria-label={`${SITE.name}, home`}>
-      <span class="mark-pixels" aria-hidden="true">AH</span>
-      <span class="mark-copy">
-        <strong>{SITE.name}</strong>
-        <small>From pixels to systems</small>
-      </span>
+      <span class="site-mark-monogram" aria-hidden="true">AH</span>
+      <span>{SITE.name}</span>
     </a>
 
     <nav class="desktop-navigation" aria-label="Primary navigation">
@@ -33,15 +30,8 @@ function isCurrent(href: string) {
       </ul>
     </nav>
 
-    <div class="header-actions">
-      <a href="/search/" aria-current={isCurrent('/search/') ? 'page' : undefined}>Search</a>
-      <a class="header-hire" href="/hire/" aria-current={isCurrent('/hire/') ? 'page' : undefined}>
-        Start a build
-      </a>
-    </div>
-
-    <details class="mobile-navigation">
-      <summary>Menu</summary>
+    <details class="mobile-navigation" data-mobile-navigation>
+      <summary aria-label="Open navigation">Menu</summary>
       <nav aria-label="Mobile navigation">
         <ul>
           {
@@ -54,15 +44,37 @@ function isCurrent(href: string) {
             ))
           }
           <li><a href="/search/">Search</a></li>
-          <li><a href="/contact/">Contact</a></li>
         </ul>
       </nav>
     </details>
-  </div>
 
-  <div class="header-gauge" aria-hidden="true">
-    <span>MBW / 2026</span>
-    <span class="gauge-line"></span>
-    <span>Dhaka · 23.8103° N</span>
+    <a
+      class="header-search"
+      href="/search/"
+      aria-current={isCurrent('/search/') ? 'page' : undefined}>Search</a
+    >
   </div>
 </header>
+
+<script>
+  const mobileNavigation = document.querySelector<HTMLDetailsElement>('[data-mobile-navigation]');
+
+  if (mobileNavigation) {
+    const syncNavigationState = () => {
+      document.body.classList.toggle('nav-open', mobileNavigation.open);
+    };
+
+    mobileNavigation.addEventListener('toggle', syncNavigationState);
+    mobileNavigation.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        mobileNavigation.open = false;
+      });
+    });
+    addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && mobileNavigation.open) {
+        mobileNavigation.open = false;
+        mobileNavigation.querySelector('summary')?.focus();
+      }
+    });
+  }
+</script>

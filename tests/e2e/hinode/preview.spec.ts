@@ -1,21 +1,10 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { existsSync } from 'node:fs';
-import path from 'node:path';
-import process from 'node:process';
 
 const preview = '[data-hinode-preview]';
-const frauncesInstalled = existsSync(
-  path.join(process.cwd(), 'node_modules/@fontsource/fraunces/600.css'),
-);
 
 async function startDrive(page: Page) {
-  const button = page.locator('[data-start-drive]');
-  if (frauncesInstalled) {
-    await button.click();
-  } else {
-    await button.evaluate((element: HTMLButtonElement) => element.click());
-  }
+  await page.locator('[data-start-drive]').click();
 }
 
 test('loads the clean slice and exposes renderer metrics', async ({ page }) => {
@@ -80,10 +69,6 @@ test('accelerates, steers, handbrakes, resets, and pauses', async ({ page }) => 
 });
 
 test('keeps unrelated public portfolio routes available', async ({ page }) => {
-  test.skip(
-    !frauncesInstalled,
-    'The declared Fraunces dependency is absent and installation is outside the authorised scope.',
-  );
   for (const route of ['/', '/work/', '/contact/']) {
     const response = await page.goto(route);
     expect(response?.ok(), `${route} should return a successful response`).toBe(true);
