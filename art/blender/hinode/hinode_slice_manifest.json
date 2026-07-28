@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "generator": "tools/blender/hinode/build_hinode_slice.py",
+  "blenderVersion": "5.2.0 LTS",
+  "boundaryMetres": {
+    "x": [
+      -37.5,
+      37.5
+    ],
+    "z": [
+      -30.0,
+      30.0
+    ]
+  },
+  "roadContracts": {
+    "alleyWidthMetres": 3.2,
+    "secondaryWidthMetres": 6.6,
+    "flyoverWidthMetres": 7.0,
+    "flyoverDeckMetres": 7.0,
+    "alleySamples": 46,
+    "secondarySamples": 46
+  },
+  "sourceFiles": [
+    "art/blender/hinode/hinode_slice_master.blend",
+    "art/blender/hinode/hinode_slice_roads.blend",
+    "art/blender/hinode/hinode_slice_buildings.blend",
+    "art/blender/hinode/hinode_slice_props.blend",
+    "art/blender/hinode/hinode_slice_car.blend",
+    "art/blender/hinode/hinode_slice_export.blend"
+  ],
+  "exports": {
+    "environment": {
+      "path": "public/hinode/models/hinode-slice-environment.glb",
+      "bytes": 1255820
+    },
+    "vehicle": {
+      "path": "public/hinode/models/hinode-fictional-coupe.glb",
+      "bytes": 131908
+    },
+    "bakedAtlas": {
+      "path": "public/hinode/textures/hinode-static-light-ao.png",
+      "bytes": 64437,
+      "size": [
+        1024,
+        1024
+      ],
+      "method": "Cycles combined static-light and ambient-occlusion atlas"
+    }
+  },
+  "scene": {
+    "objects": 225,
+    "materials": 23,
+    "bakedTriangles": 17944,
+    "buildingModules": 8,
+    "dynamicRuntimeLightsPlanned": 3
+  },
+  "renders": [
+    "artifacts/hinode/blender/hinode-top-down.png",
+    "artifacts/hinode/blender/hinode-road-spline-clearance.png",
+    "artifacts/hinode/blender/hinode-alley-entrance.png",
+    "artifacts/hinode/blender/hinode-alley-curve.png",
+    "artifacts/hinode/blender/hinode-flyover-composition.png",
+    "artifacts/hinode/blender/hinode-secondary-merge.png"
+  ],
+  "cleanRoom": true
+}

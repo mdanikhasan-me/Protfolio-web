@@ -13,6 +13,11 @@ yarn-error.log*
 pnpm-debug.log*
 *.log
 
+# generated Python and Blender caches
+__pycache__/
+*.py[cod]
+*.blend1
+
 
 # environment variables
 .env
