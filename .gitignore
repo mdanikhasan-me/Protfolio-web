@@ -13,10 +13,9 @@ yarn-error.log*
 pnpm-debug.log*
 *.log
 
-# generated Python and Blender caches
+# generated Python caches
 __pycache__/
 *.py[cod]
-*.blend1
 
 
 # environment variables
@@ -38,7 +37,6 @@ test-results/
 lighthouse-reports/
 .pagefind-cache/
 artifacts/
-public/hinode/review/
 
 # local tooling local concept work, caches, renders, captures, and backups
 .local-validation/
