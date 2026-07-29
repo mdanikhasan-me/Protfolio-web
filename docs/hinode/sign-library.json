@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "status": "research_only_pending_editor_placement",
+  "referenceStudy": "docs/hinode/NEON_VIDEO_STUDY.md",
+  "placementPolicy": {
+    "authoritativeSource": "future browser editor layout JSON",
+    "coordinatesRecordedHere": false,
+    "hostBuildingRequired": true,
+    "mountingZoneRequired": true,
+    "clearanceValidationRequired": true,
+    "cameraSightlineValidationRequired": true
+  },
+  "policies": {
+    "allBrandsFictional": true,
+    "copiedReferenceBrandingAllowed": false,
+    "buildingInteriorsAllowed": false,
+    "dynamicSpillLightsPerSign": 0,
+    "targetEmissiveNits": 1100
+  },
+  "signs": [
+    {
+      "assetId": "sign_akebono_auto",
+      "brand": "AKEBONO AUTO",
+      "type": "hero_billboard",
+      "nominalDimensionsMetres": [8.0, 3.5],
+      "mountMode": "surface_mounted",
+      "palette": ["cool", "paper"],
+      "glyphPattern": [
+        [-0.31, 0.24, 0.25],
+        [-0.05, 0.5, 0.46],
+        [0.28, 0.72, 0.18]
+      ],
+      "compatibleDistrictClasses": ["downtown", "commercial_neon"]
+    },
+    {
+      "assetId": "sign_kitsune_noodle",
+      "brand": "KITSUNE NOODLE",
+      "type": "vertical_blade_sign",
+      "nominalDimensionsMetres": [0.85, 3.2],
+      "mountMode": "projected_perpendicular",
+      "palette": ["red", "paper"],
+      "glyphPattern": [
+        [-0.28, 0.18, 0.22],
+        [0.02, 0.43, 0.34],
+        [0.26, 0.7, 0.26]
+      ],
+      "compatibleDistrictClasses": ["dense_alley", "commercial_neon"]
+    },
+    {
+      "assetId": "sign_aoi_radio",
+      "brand": "AOI RADIO",
+      "type": "horizontal_shop_fascia",
+      "nominalDimensionsMetres": [2.6, 0.68],
+      "mountMode": "surface_mounted",
+      "palette": ["amber", "black"],
+      "glyphPattern": [
+        [-0.34, 0.31, 0.16],
+        [-0.08, 0.57, 0.32],
+        [0.31, 0.36, 0.24]
+      ],
+      "compatibleDistrictClasses": ["dense_alley", "commercial_neon"]
+    },
+    {
+      "assetId": "sign_mizuno_tyres",
+      "brand": "MIZUNO TYRES",
+      "type": "medium_wall_billboard",
+      "nominalDimensionsMetres": [3.0, 1.6],
+      "mountMode": "surface_mounted",
+      "palette": ["cool", "paper"],
+      "glyphPattern": [
+        [-0.3, 0.7, 0.24],
+        [0.0, 0.42, 0.42],
+        [0.29, 0.23, 0.2]
+      ],
+      "compatibleDistrictClasses": ["commercial_neon", "industrial_port"]
+    },
+    {
+      "assetId": "sign_port_17",
+      "brand": "PORT 17",
+      "type": "directional_sign",
+      "nominalDimensionsMetres": [1.8, 0.55],
+      "mountMode": "surface_mounted",
+      "palette": ["red", "paper"],
+      "glyphPattern": [
+        [-0.29, 0.2, 0.3],
+        [0.04, 0.48, 0.18],
+        [0.28, 0.76, 0.36]
+      ],
+      "compatibleDistrictClasses": ["waterfront", "industrial_port"]
+    },
+    {
+      "assetId": "sign_sazanami_cafe",
+      "brand": "SAZANAMI CAFE",
+      "type": "hanging_restaurant_sign",
+      "nominalDimensionsMetres": [0.8, 0.85],
+      "mountMode": "projected_perpendicular",
+      "palette": ["amber", "black"],
+      "glyphPattern": [
+        [-0.33, 0.28, 0.2],
+        [-0.02, 0.62, 0.38],
+        [0.3, 0.31, 0.23]
+      ],
+      "compatibleDistrictClasses": ["dense_alley", "waterfront"]
+    },
+    {
+      "assetId": "sign_hinode_parking",
+      "brand": "HINODE PARKING",
+      "type": "parking_sign",
+      "nominalDimensionsMetres": [0.7, 1.1],
+      "mountMode": "surface_mounted",
+      "palette": ["cool", "paper"],
+      "glyphPattern": [
+        [-0.31, 0.17, 0.35],
+        [0.0, 0.49, 0.2],
+        [0.29, 0.75, 0.28]
+      ],
+      "compatibleDistrictClasses": ["commercial_neon", "downtown", "waterfront"]
+    },
+    {
+      "assetId": "sign_kawase_service",
+      "brand": "KAWASE SERVICE",
+      "type": "small_service_sign",
+      "nominalDimensionsMetres": [1.0, 0.4],
+      "mountMode": "surface_mounted",
+      "palette": ["red", "paper"],
+      "glyphPattern": [
+        [-0.32, 0.33, 0.22],
+        [0.0, 0.66, 0.44],
+        [0.3, 0.26, 0.16]
+      ],
+      "compatibleDistrictClasses": ["industrial_port", "residential"]
+    },
+    {
+      "assetId": "sign_aoi_electronics",
+      "brand": "AOI ELECTRONICS",
+      "type": "window_lightbox",
+      "nominalDimensionsMetres": [1.6, 0.8],
+      "mountMode": "surface_mounted",
+      "palette": ["amber", "black"],
+      "glyphPattern": [
+        [-0.3, 0.74, 0.19],
+        [0.0, 0.45, 0.4],
+        [0.29, 0.18, 0.27]
+      ],
+      "compatibleDistrictClasses": ["dense_alley", "commercial_neon"]
+    },
+    {
+      "assetId": "sign_hinode_ramen",
+      "brand": "HINODE RAMEN",
+      "type": "lantern_sign",
+      "nominalDimensionsMetres": [0.45, 0.72],
+      "mountMode": "surface_mounted",
+      "palette": ["cool", "paper"],
+      "glyphPattern": [
+        [-0.28, 0.23, 0.3],
+        [0.03, 0.5, 0.21],
+        [0.29, 0.71, 0.34]
+      ],
+      "compatibleDistrictClasses": ["dense_alley", "waterfront"]
+    }
+  ]
+}

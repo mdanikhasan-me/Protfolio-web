@@ -158,15 +158,18 @@ await page.waitForTimeout(600);
 await screenshot('hinode-browser-debug.png');
 const metrics = await telemetry();
 
-const errorPage = await context.newPage();
-await errorPage.goto(`${baseUrl}/`, { waitUntil: 'domcontentloaded' });
-await errorPage.waitForTimeout(700);
-await errorPage.screenshot({
-  path: path.join(captureDirectory, 'hinode-browser-font-error.png'),
+const homePage = await context.newPage();
+const homeResponse = await homePage.goto(`${baseUrl}/`, { waitUntil: 'domcontentloaded' });
+if (!homeResponse?.ok()) {
+  throw new Error(`Portfolio home returned HTTP ${homeResponse?.status() ?? 'no response'}`);
+}
+await homePage.waitForTimeout(700);
+await homePage.screenshot({
+  path: path.join(captureDirectory, 'hinode-portfolio-home.png'),
   fullPage: false,
 });
-screenshots.push('hinode-browser-font-error.png');
-await errorPage.close();
+screenshots.push('hinode-portfolio-home.png');
+await homePage.close();
 
 await page.close();
 const gameplayCaptureName = 'hinode-gameplay.webm';

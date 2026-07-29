@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-28T21:51:38.876201+00:00",
+  "authoritativeDirectory": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg",
+  "policy": {
+    "authoritativeFilesReadOnly": true,
+    "sourceFilesModified": false,
+    "derivedCopiesProjectLocal": true
+  },
+  "derivatives": [
+    {
+      "id": "compact_tree_v3",
+      "purpose": "compact alley and canal-edge tree",
+      "authoritativeSource": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg\\jabami_anime_tree_v3.glb",
+      "authoritativeSourceSha256Before": "da376c4abb41863d109ecb1d9a63bea3dd5244de66fae80b13fd9d02049f211c",
+      "authoritativeSourceSha256After": "da376c4abb41863d109ecb1d9a63bea3dd5244de66fae80b13fd9d02049f211c",
+      "authoritativeSourceUnchanged": true,
+      "selectedSourceNameTokens": [],
+      "recipe": {
+        "meshSubsetSelection": false,
+        "materials": "preserved",
+        "topology": "preserved",
+        "centredOnXY": true,
+        "groundedToZ0": true,
+        "remeshed": false,
+        "decimated": false
+      },
+      "derivativeGlb": "public/hinode/models/vegetation/hinode-compact-tree-v3.glb",
+      "derivativeGlbSha256": "84f14368ffe5bbbb39412228a93d92336e36584dc55144307fcb3e5ff153c4bb",
+      "derivativeGlbBytes": 561216,
+      "derivativeBlend": "art/blender/hinode/vegetation/hinode_compact_tree_v3.blend",
+      "derivativeBlendBytes": 597635,
+      "meshObjects": 4,
+      "triangles": 1298,
+      "boundsMetres": {
+        "min": [
+          -2.196,
+          -2.2355,
+          0.0
+        ],
+        "max": [
+          2.196,
+          2.2355,
+          6.4089
+        ],
+        "dimensions": [
+          4.3919,
+          4.471,
+          6.4089
+        ]
+      },
+      "maximumInstances": 12
+    },
+    {
+      "id": "tall_tree_v5",
+      "purpose": "tall district silhouette tree",
+      "authoritativeSource": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg\\jabami_anime_tree_v5.glb",
+      "authoritativeSourceSha256Before": "4a87f97a0d73d5b9f5c27f032384b60983945732d8adba1cb0c1ca5b5adac426",
+      "authoritativeSourceSha256After": "4a87f97a0d73d5b9f5c27f032384b60983945732d8adba1cb0c1ca5b5adac426",
+      "authoritativeSourceUnchanged": true,
+      "selectedSourceNameTokens": [],
+      "recipe": {
+        "meshSubsetSelection": false,
+        "materials": "preserved",
+        "topology": "preserved",
+        "centredOnXY": true,
+        "groundedToZ0": true,
+        "remeshed": false,
+        "decimated": false
+      },
+      "derivativeGlb": "public/hinode/models/vegetation/hinode-tall-tree-v5.glb",
+      "derivativeGlbSha256": "1333605fa162bd4cf2a18c74d8d052f026be6d43e4589f160eb9bea87ee5ff73",
+      "derivativeGlbBytes": 516520,
+      "derivativeBlend": "art/blender/hinode/vegetation/hinode_tall_tree_v5.blend",
+      "derivativeBlendBytes": 547274,
+      "meshObjects": 3,
+      "triangles": 909,
+      "boundsMetres": {
+        "min": [
+          -2.2802,
+          -2.1514,
+          0.0
+        ],
+        "max": [
+          2.2802,
+          2.1514,
+          12.7902
+        ],
+        "dimensions": [
+          4.5604,
+          4.3028,
+          12.7902
+        ]
+      },
+      "maximumInstances": 8
+    },
+    {
+      "id": "single_bush_v1",
+      "purpose": "single low shrub outside the driveable envelope",
+      "authoritativeSource": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg\\jabami_anime_bush_v1.glb",
+      "authoritativeSourceSha256Before": "aa0050ebd7839199935b002ada7be6d4a3431c493fac0fc5625678430769c080",
+      "authoritativeSourceSha256After": "aa0050ebd7839199935b002ada7be6d4a3431c493fac0fc5625678430769c080",
+      "authoritativeSourceUnchanged": true,
+      "selectedSourceNameTokens": [
+        "bush01"
+      ],
+      "recipe": {
+        "meshSubsetSelection": true,
+        "materials": "preserved",
+        "topology": "preserved",
+        "centredOnXY": true,
+        "groundedToZ0": true,
+        "remeshed": false,
+        "decimated": false
+      },
+      "derivativeGlb": "public/hinode/models/vegetation/hinode-single-bush-v1.glb",
+      "derivativeGlbSha256": "15458a52a5d6de6af898ce11db5ab3d0faeb9414758cd5f2ab6135cd69bb10ee",
+      "derivativeGlbBytes": 102448,
+      "derivativeBlend": "art/blender/hinode/vegetation/hinode_single_bush_v1.blend",
+      "derivativeBlendBytes": 272618,
+      "meshObjects": 2,
+      "triangles": 184,
+      "boundsMetres": {
+        "min": [
+          -1.727,
+          -1.4807,
+          0.0
+        ],
+        "max": [
+          1.727,
+          1.4807,
+          1.8139
+        ],
+        "dimensions": [
+          3.4539,
+          2.9614,
+          1.8139
+        ]
+      },
+      "maximumInstances": 20
+    },
+    {
+      "id": "single_sakura_v1",
+      "purpose": "single sakura landmark tree",
+      "authoritativeSource": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg\\jabami_anime_sakura_blossom.glb",
+      "authoritativeSourceSha256Before": "32c09359209e3260918da6acc5dadc1ea8ed14c26b9fbe61ef65f2fe51fba0a9",
+      "authoritativeSourceSha256After": "32c09359209e3260918da6acc5dadc1ea8ed14c26b9fbe61ef65f2fe51fba0a9",
+      "authoritativeSourceUnchanged": true,
+      "selectedSourceNameTokens": [
+        "Blossom01"
+      ],
+      "recipe": {
+        "meshSubsetSelection": true,
+        "materials": "preserved",
+        "topology": "preserved",
+        "centredOnXY": true,
+        "groundedToZ0": true,
+        "remeshed": false,
+        "decimated": false
+      },
+      "derivativeGlb": "public/hinode/models/vegetation/hinode-single-sakura-v1.glb",
+      "derivativeGlbSha256": "3cc09ba41d2f5b802e17152f1679b5880ed96d3fd5be0655323bd6180dbc3bde",
+      "derivativeGlbBytes": 851408,
+      "derivativeBlend": "art/blender/hinode/vegetation/hinode_single_sakura_v1.blend",
+      "derivativeBlendBytes": 980968,
+      "meshObjects": 2,
+      "triangles": 6564,
+      "boundsMetres": {
+        "min": [
+          -4.4646,
+          -5.2557,
+          0.0
+        ],
+        "max": [
+          4.4646,
+          5.2557,
+          9.2142
+        ],
+        "dimensions": [
+          8.9293,
+          10.5114,
+          9.2142
+        ]
+      },
+      "maximumInstances": 6
+    }
+  ]
+}
