@@ -1,0 +1,22 @@
+{
+  "files.exclude": {
+    "**/.astro": true,
+    "**/.local-validation": true,
+    "**/.local-validation": true,
+    "**/coverage": true,
+    "**/dist": true,
+    "**/node_modules": true,
+    "**/playwright-report": true,
+    "**/test-results": true
+  },
+  "search.exclude": {
+    "**/.astro": true,
+    "**/.local-validation": true,
+    "**/.local-validation": true,
+    "**/coverage": true,
+    "**/dist": true,
+    "**/node_modules": true,
+    "**/playwright-report": true,
+    "**/test-results": true
+  }
+}
