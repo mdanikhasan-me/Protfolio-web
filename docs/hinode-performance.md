@@ -1,36 +1,38 @@
-# Hinode City vertical-slice performance contract
+# Hinode City performance contract
 
-## Hard targets
+## Public profiles
 
-| Metric | Vertical-slice target |
-| --- | ---: |
-| Compressed public Hinode payload | below approximately 12 MB |
-| Normal visible triangles | below approximately 180,000 |
-| Normal draw calls | below approximately 150 |
-| Default-mode frame rate | smooth 60 FPS on the RTX 3070 development system |
-| Routine texture edge | 512 or 1024 pixels |
-| Exceptional texture edge | 2048 pixels only with written justification |
-| Dynamic lights | very few |
+Hinode exposes exactly **High** and **Low**.
 
-Repeated props use instancing where practical. Collision is simple and independent of render detail.
-The environment uses shared materials and a baked static-light/AO atlas. The real-time renderer uses
-only restrained ambient/moon lighting and the vehicle lights required by the composition.
+High is the primary artistic profile. Low preserves the same route and composition while reducing
+pixel ratio, shadow work and district-proxy density.
 
-## Quality hooks
+## Checkpoint 4 automated Chrome sample
 
-The runtime exposes high, medium, and low configuration hooks for pixel ratio, shadow quality,
-decorative density, and reflections. Only the default mode is tuned in this checkpoint.
+The values below come from the current installed-Chrome capture at 1440 × 900. They are diagnostic
+browser values, not an RTX 3070 GPU benchmark.
 
-## Measurements
+| Metric                |             High city |              Low city |
+| --------------------- | --------------------: | --------------------: |
+| Fixed physics         |                120 Hz |                120 Hz |
+| Draw calls            |                    80 |                    64 |
+| Visible triangles     |                22,444 |                15,700 |
+| Capture speed         |               38 km/h |               38 km/h |
+| Reported headless FPS | 180 (capture ceiling) | 180 (capture ceiling) |
 
-Final evidence records:
+Low reduced visible triangles by about 30% and draw calls by 20% in this capture. The requested 35%
+GPU-frame-cost reduction is not proven because headless Chrome reached the capture ceiling in both
+profiles. A manual RTX 3070 GPU/frame-time and VRAM benchmark remains required.
 
-- raw and gzip bytes for every public Hinode asset and generated script chunk;
-- renderer draw calls, triangles, textures, and geometries during representative driving;
-- sampled browser FPS and frame time;
-- Blender mesh and material counts;
-- the exact test browser, viewport, quality setting, and commit.
+The current MAH Nightline GLBs are measured by `npm run review:hinode`; raw and gzip totals are
+written to `public/hinode/review/status.json`. Runtime bundle measurements are recorded by the
+production build rather than inferred from source.
 
-The existing portfolio build and any old Three.js warning are not Hinode performance evidence. Only
-the clean preview route and newly generated assets count.
+## Guardrails
 
+- normal gameplay draw calls remain below 150 in the current proposal;
+- collision geometry is independent of render detail;
+- the player car uses LOD0 during normal gameplay;
+- LOD1 and LOD2 are available for distant/editor use;
+- unresolved vegetation models are not shipped;
+- decorative assets must not block initial driving.

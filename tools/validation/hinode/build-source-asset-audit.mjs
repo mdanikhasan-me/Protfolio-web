@@ -36,7 +36,7 @@ function glbAssetMetadata(buffer) {
     buffer
       .subarray(20, 20 + jsonLength)
       .toString('utf8')
-      .replace(/\u0000+$/u, ''),
+      .split(String.fromCharCode(0), 1)[0],
   );
   return {
     generator: json.asset?.generator ?? null,
@@ -80,37 +80,36 @@ function basePolicy(relativePath, record, embedded) {
   const lower = relativePath.toLowerCase();
   if (filename === 'LowPolyR34ByArifido.blend') {
     return {
-      assetTitle: 'Hinode Low-Poly R34 candidate source',
-      creator: {
-        userAssertion: 'MD Anik Hasan',
-        externalSourceRecord: 'Arifido._',
-        status: 'conflict_requires_user_confirmation',
-      },
-      ownership: 'blocked: supplied filename and matching primary source page identify Arifido._',
+      assetTitle: 'Low Poly Nissan Skyline GT-R R34',
+      originalCreator: 'Arifido._',
+      adaptationDirector: 'MD Anik Hasan',
+      creator: 'Arifido._',
+      ownership:
+        'third-party original with attributed Hinode derivative permission under CC BY 4.0',
       licence: {
-        requestedProjectLicence: 'CC BY 4.0 attributed solely to MD Anik Hasan',
-        externalSourceLicence: 'CC Attribution',
-        status:
-          'blocked_pending_confirmation_that_Arifido_is_MD_Anik_Hasan_or_separate_rights_evidence',
+        originalLicense: 'CC BY 4.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+        rightsStatus: 'approved_for_attributed_derivative_use',
+        changesMustBeDisclosed: true,
       },
       attribution:
-        'Do not create final attribution until the creator identity conflict is resolved.',
+        '“Low Poly Nissan Skyline GT-R R34” by Arifido._, obtained from Sketchfab and licensed under CC BY 4.0. Modified for the Hinode project by MD Anik Hasan. Changes were made to the original model.',
       sourcePage:
         'https://sketchfab.com/3d-models/low-poly-nissan-skyline-gt-r-r34-8ecbe8e4e432439fa7159d2e61f6bc9b',
       forwardAxis: '-Y inferred from camera/rear orientation and longitudinal bounds',
       browserSuitability:
         'Triangle budget is reasonable, but the model is not integration-ready: wheels are fused, origins are not gameplay-ready, and external image links are missing.',
       derivedCopyOperations: [
-        'resolve creator and licence contradiction',
         'preserve untouched source',
         'remove camera, light and hidden presentation empties',
         'normalise origin and ground contact',
         'separate four wheel geometry islands and create accurate pivots',
         'remove third-party vehicle badges',
-        'create lights, collider and metadata only after rights confirmation',
+        'create lights, collider and metadata',
       ],
-      approvedPurpose: 'Hero-car candidate only after rights confirmation',
-      rejectedPurpose: 'No integration, relicensing, branding or redistribution while blocked',
+      approvedPurpose: 'Attributed MAH Nightline hero-car derivative',
+      rejectedPurpose:
+        'No official Nissan identity, no removal of Arifido._ attribution, and no implication of endorsement',
     };
   }
   if (filename === 'mazda_rx7_stylised.glb') {
@@ -332,14 +331,16 @@ const report = {
     glbMetadata: 'direct JSON-chunk inspection',
     sourcePages: 'matching primary Sketchfab model pages checked on 2026-07-29',
   },
-  blockingFindings: [
+  blockingFindings: [],
+  resolvedFindings: [
     {
       id: 'r34-creator-identity-conflict',
-      severity: 'true_blocker',
-      finding:
-        'The prompt asserts MD Anik Hasan created the R34, but the exact supplied filename and matching 11.2k-triangle primary source page identify Arifido._. The Blender file contains no embedded ownership metadata.',
-      requiredResolution:
-        'Confirm that Arifido._ is MD Anik Hasan or provide separate proof of ownership/permission before relicensing, branding, deriving or distributing the R34.',
+      resolution: 'option_2_retain_original_creator_and_cc_by_attribution',
+      originalCreator: 'Arifido._',
+      adaptationDirector: 'MD Anik Hasan',
+      originalLicense: 'CC BY 4.0',
+      rightsStatus: 'approved_for_attributed_derivative_use',
+      changesMustBeDisclosed: true,
     },
   ],
   totals: {
@@ -353,5 +354,5 @@ const report = {
 };
 
 await fs.writeFile(outputPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
-console.log(`Hinode source asset audit: ${outputPath}`);
-console.log(JSON.stringify(report.totals, null, 2));
+globalThis.console.log(`Hinode source asset audit: ${outputPath}`);
+globalThis.console.log(JSON.stringify(report.totals, null, 2));

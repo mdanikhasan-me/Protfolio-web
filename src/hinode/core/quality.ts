@@ -1,4 +1,4 @@
-export type HinodeQuality = 'high' | 'medium' | 'low';
+export type HinodeQuality = 'high' | 'low';
 
 export interface HinodeQualitySettings {
   name: HinodeQuality;
@@ -20,15 +20,6 @@ const SETTINGS: Readonly<Record<HinodeQuality, HinodeQualitySettings>> = {
     decorativeDensity: 1,
     reflections: true,
   },
-  medium: {
-    name: 'medium',
-    pixelRatio: 1.35,
-    antialias: true,
-    shadowMapSize: 512,
-    headlightShadows: false,
-    decorativeDensity: 0.82,
-    reflections: false,
-  },
   low: {
     name: 'low',
     pixelRatio: 1,
@@ -42,8 +33,8 @@ const SETTINGS: Readonly<Record<HinodeQuality, HinodeQualitySettings>> = {
 
 export function resolveQuality(search: string): HinodeQualitySettings {
   const requested = new URLSearchParams(search).get('quality');
-  if (requested === 'high' || requested === 'medium' || requested === 'low') {
+  if (requested === 'high' || requested === 'low') {
     return SETTINGS[requested];
   }
-  return SETTINGS.medium;
+  return SETTINGS.high;
 }

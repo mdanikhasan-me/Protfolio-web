@@ -1,41 +1,29 @@
-# Hinode browser runtime
+# Hinode browser implementation
 
-This is the isolated clean-room Hinode implementation. Modules may depend on general framework
-infrastructure and Three.js, but may not import a rejected game module or rejected public asset.
+Hinode is an isolated browser racing implementation inside the portfolio application.
 
-## Current production boundary
+## Authoritative systems
 
-The current visible Hinode environment is rejected. Its road placement, parcels, buildings,
-flyover, vegetation placement, billboard placement, prop placement, generated coupe and full-city
-coordinates are not an approved foundation for the next city.
+- `map/city-layout.ts` validates and measures the versioned 500 × 350 metre layout.
+- `map/city-scene.ts` builds the shared editor/runtime road, footpath, drainage and proxy scene.
+- `editor/` owns layout transforms, history, import/export and planning overlays.
+- `handling/` contains the 120 Hz Rapier rigid-body foundation and custom tyre-force model.
+- `game/` contains the connected city runtime, checkpoints, minimap and three chase cameras.
+- `core/driving-input.ts` owns keyboard and gamepad response.
+- `vehicle/handling-model.ts` owns original Hinode handling curves and tuning.
 
-Reusable runtime infrastructure may be retained when it remains independent of those placements:
+The active routes are:
 
-- Astro route integration;
-- Three.js scene loading and rendering;
-- input handling and the fixed-step update loop;
-- pause, reset and arcade-driving behaviour;
-- road-height chase-camera behaviour;
-- unit, browser and validation infrastructure.
+- `/play/hinode-handling-lab/`
+- `/play/hinode-editor/`
+- `/play/hinode-city/`
+- `/play/hinode-progress/`
+- `/play/hinode-preview/` redirects to the replacement city.
 
-Technical validation of retained infrastructure is not visual approval of the rejected environment.
+Public graphics choices are exactly High and Low. The complete city remains a road-first approval
+proposal: buildings, skyline, vegetation, signs and future props are proxies. No building interior
+is modelled.
 
-## Authoritative layout
-
-The development-only browser level editor will become the authoritative city-layout tool. It will
-save structured layout JSON covering roads, districts, parcels, zones, sockets, clearances,
-collisions and route checkpoints. Three.js will load that exact layout for play and review.
-
-Blender is an asset-production, baking and export tool. It may reconstruct an approved editor layout
-for district baking, but it may not independently invent the city placement or generate the complete
-city as one master scene.
-
-## Asset and licence boundary
-
-The supplied asset library remains read-only. Project-local derivatives require documented
-provenance. Licence and attribution status remains pending the complete asset audit, including
-embedded glTF metadata, Blender text blocks and custom properties, and original source-page
-information where available.
-
-No asset may enter the runtime until its permission and attribution requirements are confirmed.
-Buildings are exterior shells only; no accessible or modelled interiors are permitted.
+The attributed runtime vehicle is `VEH_MAH_Nightline_R34_Derivative`, presented as **MAH
+Nightline**. Rights and modification records live in `ATTRIBUTION.md`,
+`LICENSES/ARIFIDO_R34_CC-BY-4.0.md` and the vehicle manifest.

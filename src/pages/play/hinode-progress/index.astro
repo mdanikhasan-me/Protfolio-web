@@ -1,9 +1,75 @@
 ---
 import '../../../hinode/ui/hinode-progress.css';
 
-const title = 'Hinode City — Live visual review';
+const title = 'Hinode City — Checkpoint 4 approval package';
 const description =
-  'Development-only review surface for the provisional Hinode City vertical slice.';
+  'Current visual, gameplay, vehicle, layout and validation evidence for the Hinode City road-first proposal.';
+
+const browserEvidence = [
+  {
+    image: '/hinode/review/browser/city-high-driving.png',
+    title: 'Complete city / High',
+    note: 'MAH Nightline driving the primary loop toward the authored touge route.',
+    metric: 'cityHigh',
+  },
+  {
+    image: '/hinode/review/browser/editor-isometric.png',
+    title: 'Authoritative layout / Isometric',
+    note: 'The complete 500 × 350 metre road network and five proxy districts in the editor.',
+    metric: 'editorHigh',
+  },
+  {
+    image: '/hinode/review/browser/handling-high-driving.png',
+    title: 'Handling laboratory / High',
+    note: 'The attributed vehicle under deterministic throttle and steering input.',
+    metric: 'handlingHigh',
+  },
+];
+
+const vehicleRenders: ReadonlyArray<readonly [string, string]> = [
+  ['front-three-quarter.png', 'Front three-quarter'],
+  ['front.png', 'Front'],
+  ['side.png', 'Side profile'],
+  ['rear-three-quarter.png', 'Rear three-quarter'],
+  ['rear.png', 'Rear'],
+  ['wheel-pivots.png', 'Wheel pivots'],
+];
+
+const routes: ReadonlyArray<readonly [string, string, string]> = [
+  ['01', 'Main Loop', 'Primary loop'],
+  ['02', 'Downtown Core', 'Neon connector'],
+  ['03', 'Alley District', 'Dense technical route'],
+  ['04', 'Touge Pass', 'Compact elevation route'],
+  ['05', 'Waterfront Route', 'Industrial coast'],
+  ['06', 'Flyover Junction', 'Elevated connector'],
+  ['07', 'Harbour Underpass', 'Below-grade connector'],
+  ['08', 'Market Cut', 'Shortcut'],
+  ['09', 'Canal Cut', 'Shortcut'],
+];
+
+const overlays: ReadonlyArray<readonly [string, string, string]> = [
+  ['road-width', 'Road-width envelope', 'Exact authored widths for all nine routes.'],
+  ['footpaths', 'Footpaths + drainage', 'Both planned edges on every route corridor.'],
+  ['parcels', 'Proxy parcels', 'Fifteen planning parcels around the driver-visible network.'],
+  [
+    'vegetation',
+    'Vegetation zones',
+    'Seven non-final zones; no unresolved source asset is shipped.',
+  ],
+  ['signs', 'Sign zones', 'Nine host-road placement zones, not final billboards.'],
+  ['collision', 'Collision', 'The four actual Rapier map-boundary volumes.'],
+  ['sightlines', 'Camera sightlines', 'Seven deterministic approval-camera vectors.'],
+];
+
+const reviewPairs: ReadonlyArray<readonly [string, string]> = [
+  ['district-touge', 'Touge Pass'],
+  ['district-alley', 'Alley District'],
+  ['district-downtown', 'Downtown Core'],
+  ['district-port', 'Port District'],
+  ['district-waterfront', 'Waterfront'],
+  ['feature-flyover', 'Flyover Junction'],
+  ['feature-underpass', 'Harbour Underpass'],
+];
 ---
 
 <!doctype html>
@@ -11,7 +77,7 @@ const description =
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#050912" />
+    <meta name="theme-color" content="#06101b" />
     <meta name="color-scheme" content="dark" />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="description" content={description} />
@@ -19,261 +85,536 @@ const description =
   </head>
   <body>
     <main class="review-shell" data-review-root>
-      <header class="review-header">
-        <div>
-          <p class="review-kicker">Hinode City / internal visual checkpoint</p>
-          <h1>Provisional slice, made visible.</h1>
-          <p class="review-intro">
-            This is a development-only contact sheet for inspecting the current browser game and
-            Blender evidence. Technical success does not imply visual approval.
-          </p>
-        </div>
-        <nav class="review-actions" aria-label="Review links">
-          <a class="review-action review-action--primary" href="/play/hinode-preview/">
-            Open playable preview
-          </a>
-          <a class="review-action" href="#blender-evidence">Blender evidence</a>
-          <a class="review-action" href="#browser-evidence">Browser evidence</a>
+      <header class="topbar">
+        <a class="wordmark" href="/play/hinode-city/">
+          <span>Hinode City</span>
+          <small>日の出市 / Honshu Coast</small>
+        </a>
+        <p class="topbar-state">
+          <span class="state-dot"></span>
+          Checkpoint 4 package
+        </p>
+        <nav aria-label="Open Hinode work surfaces">
+          <a href="/play/hinode-city/">Drive</a>
+          <a href="/play/hinode-editor/">Edit layout</a>
+          <a href="/play/hinode-handling-lab/">Tune handling</a>
         </nav>
       </header>
 
-      <section class="review-status" aria-label="Current review status">
-        <div class="review-stat">
-          <p class="review-label">Server</p>
-          <strong class="review-health" data-server-state data-state="checking">Checking</strong>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Visual + gameplay approval package / 29 July 2026</p>
+          <h1>A complete road-first city proposal.</h1>
+          <p class="hero-copy">
+            Hinode now has an attributed hero-car derivative, a 120 Hz handling laboratory, an
+            authoritative browser editor, and one connected 500 × 350 metre city layout. The road
+            system is complete for this checkpoint; buildings, vegetation, signs and skyline are
+            deliberately still proxies.
+          </p>
+          <div class="hero-actions">
+            <a class="button button--primary" href="/play/hinode-city/">Open playable city</a>
+            <a class="button" href="#evidence">Review evidence</a>
+            <a class="button" href="/hinode/review/videos/hinode-city-current.webm">
+              Open drive recording
+            </a>
+          </div>
         </div>
-        <div class="review-stat">
-          <p class="review-label">Branch</p>
-          <strong data-branch>Loading</strong>
-        </div>
-        <div class="review-stat">
-          <p class="review-label">Commit</p>
-          <strong data-commit>Loading</strong>
-        </div>
-        <div class="review-stat">
-          <p class="review-label">Modelling</p>
-          <strong data-modelling-stage>Loading</strong>
-        </div>
-        <div class="review-stat">
-          <p class="review-label">Rendering</p>
-          <strong data-render-stage>Loading</strong>
-        </div>
-        <div class="review-stat">
-          <p class="review-label">Last update</p>
-          <time data-last-update>Loading</time>
-        </div>
+        <aside class="decision-card">
+          <p class="panel-label">Decision requested</p>
+          <strong>Approve the road language, route mix and handling direction.</strong>
+          <p>
+            This is not approval of final buildings, vegetation, signs, skyline, materials or
+            lighting.
+          </p>
+          <dl>
+            <div>
+              <dt>Server</dt>
+              <dd data-server>Checking</dd>
+            </div>
+            <div>
+              <dt>Branch</dt>
+              <dd data-branch>Loading</dd>
+            </div>
+            <div>
+              <dt>HEAD</dt>
+              <dd data-head>Loading</dd>
+            </div>
+            <div>
+              <dt>Git</dt>
+              <dd data-git>Loading</dd>
+            </div>
+            <div>
+              <dt>Captured</dt>
+              <dd data-captured>Loading</dd>
+            </div>
+          </dl>
+        </aside>
       </section>
 
-      <section class="review-section" aria-labelledby="metrics-title">
-        <div class="review-section-heading">
-          <h2 id="metrics-title">Measured prototype state</h2>
-          <p data-browser-stage>Browser evidence loading</p>
+      <section class="checkpoint-strip" aria-label="Checkpoint completion">
+        <article>
+          <span>02</span>
+          <div>
+            <p class="panel-label">Vehicle + handling</p>
+            <strong>MAH Nightline integrated</strong>
+            <small>Three LODs / Rapier / custom tyre forces</small>
+          </div>
+          <b>Ready</b>
+        </article>
+        <article>
+          <span>03</span>
+          <div>
+            <p class="panel-label">Layout editor</p>
+            <strong>Authoritative system online</strong>
+            <small>Transform / snap / history / JSON</small>
+          </div>
+          <b>Ready</b>
+        </article>
+        <article>
+          <span>04</span>
+          <div>
+            <p class="panel-label">Road-first city</p>
+            <strong>Nine-route proposal connected</strong>
+            <small>High + Low / collisions / checkpoints</small>
+          </div>
+          <b>Review</b>
+        </article>
+      </section>
+
+      <section class="section" aria-labelledby="measured-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Measured state</p>
+            <h2 id="measured-title">One layout, three working surfaces.</h2>
+          </div>
+          <p>Runtime values below come from the latest installed-Chrome automation.</p>
         </div>
-        <div class="review-ledger">
+        <div class="metric-grid">
           <article>
-            <h3>Visible geometry</h3>
-            <strong data-triangles>—</strong>
-            <p>Environment and vehicle triangles from the current exports.</p>
+            <span>Map envelope</span>
+            <strong>500 × 350 m</strong>
+            <small>Authoritative JSON bounds</small>
           </article>
           <article>
-            <h3>Runtime</h3>
-            <strong data-draw-calls>—</strong>
-            <p>Draw calls from the latest successful automated browser capture.</p>
+            <span>Road network</span>
+            <strong data-network>3,312.2 m</strong>
+            <small>Nine named routes</small>
           </article>
           <article>
-            <h3>Payload</h3>
+            <span>Physics</span>
+            <strong>120 Hz</strong>
+            <small>Fixed-step Rapier simulation</small>
+          </article>
+          <article>
+            <span>High city</span>
+            <strong data-city-high>—</strong>
+            <small data-city-high-detail>Loading capture</small>
+          </article>
+          <article>
+            <span>Low city</span>
+            <strong data-city-low>—</strong>
+            <small data-city-low-detail>Loading capture</small>
+          </article>
+          <article>
+            <span>Hero vehicle</span>
+            <strong>11,988 tris</strong>
+            <small>Gameplay LOD0</small>
+          </article>
+          <article>
+            <span>Vehicle payload</span>
             <strong data-payload>—</strong>
-            <p>Current gzip total for public Hinode models and baked texture.</p>
+            <small>LOD0 + LOD1 + LOD2 / gzip</small>
           </article>
         </div>
       </section>
 
-      <section class="review-section" id="blender-evidence" aria-labelledby="blender-title">
-        <div class="review-section-heading">
-          <h2 id="blender-title">Fresh Blender review views</h2>
-          <p>Actual current scene / low-cost Eevee evidence</p>
+      <section class="section" id="evidence" aria-labelledby="evidence-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Current browser evidence</p>
+            <h2 id="evidence-title">The latest source, captured after the road-marking pass.</h2>
+          </div>
+          <p>Automated Chrome evidence; screenshot frames were visually inspected.</p>
         </div>
-        <div class="evidence-grid" data-blender-grid>
-          <p class="review-empty">Fresh render evidence is being prepared.</p>
+        <div class="browser-grid">
+          {
+            browserEvidence.map((item) => (
+              <figure class="evidence-card" data-evidence-card data-metric={item.metric}>
+                <a href={item.image}>
+                  <img src={item.image} alt={item.title} width="1440" height="900" loading="lazy" />
+                </a>
+                <figcaption>
+                  <div>
+                    <h3>{item.title}</h3>
+                    <p>{item.note}</p>
+                  </div>
+                  <span data-evidence-metric>Current</span>
+                </figcaption>
+              </figure>
+            ))
+          }
+        </div>
+        <div class="video-grid">
+          <article>
+            <div>
+              <p class="panel-label">Checkpoint 4 recording</p>
+              <h3>Hinode City drive</h3>
+            </div>
+            <video
+              controls
+              preload="metadata"
+              poster="/hinode/review/browser/city-high-driving.png"
+            >
+              <source src="/hinode/review/videos/hinode-city-current.webm" type="video/webm" />
+            </video>
+          </article>
+          <article>
+            <div>
+              <p class="panel-label">Checkpoint 2 recording</p>
+              <h3>Handling laboratory</h3>
+            </div>
+            <video
+              controls
+              preload="metadata"
+              poster="/hinode/review/browser/handling-high-driving.png"
+            >
+              <source src="/hinode/review/videos/handling-lab-current.webm" type="video/webm" />
+            </video>
+          </article>
+          <article>
+            <div>
+              <p class="panel-label">Checkpoint 4 map recording</p>
+              <h3>Route + planning overview</h3>
+            </div>
+            <video controls preload="metadata" poster="/hinode/review/browser/editor-top.png">
+              <source
+                src="/hinode/review/videos/hinode-map-route-overview.webm"
+                type="video/webm"
+              />
+            </video>
+          </article>
         </div>
       </section>
 
-      <section class="review-section" id="browser-evidence" aria-labelledby="browser-title">
-        <div class="review-section-heading">
-          <h2 id="browser-title">Automated browser captures</h2>
-          <p>Real served route / automated Chrome, not manual QA</p>
+      <section class="section route-section" aria-labelledby="routes-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Checkpoint 4 / authoritative layout</p>
+            <h2 id="routes-title">A complete connected route vocabulary.</h2>
+          </div>
+          <a class="text-link" href="/hinode/layouts/hinode-city-v1.json">Open layout JSON ↗</a>
         </div>
-        <div class="evidence-grid" data-browser-grid>
-          <p class="review-empty">Browser evidence has not been captured yet.</p>
+        <div class="route-layout">
+          <div class="route-list">
+            {
+              routes.map(([number, name, role]) => (
+                <article>
+                  <span>{number}</span>
+                  <strong>{name}</strong>
+                  <small>{role}</small>
+                </article>
+              ))
+            }
+          </div>
+          <figure class="map-frame">
+            <img
+              src="/hinode/review/browser/editor-top.png"
+              alt="Top-down view of the complete Hinode road-first layout"
+              width="1440"
+              height="900"
+              loading="lazy"
+            />
+            <figcaption>
+              <span>500 m</span>
+              <p>
+                Main loop, dense alleys, commercial connector, residential/touge route, waterfront,
+                flyover, underpass and two shortcuts.
+              </p>
+              <span>350 m</span>
+            </figcaption>
+          </figure>
         </div>
       </section>
 
-      <section class="review-section" aria-labelledby="defects-title">
-        <div class="review-section-heading">
-          <h2 id="defects-title">Known defects</h2>
-          <p>Open findings, not approval language</p>
+      <section class="section" aria-labelledby="overlay-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Planning overlays</p>
+            <h2 id="overlay-title">Every requested review layer is explicit.</h2>
+          </div>
+          <p>These are authoring and validation layers; they are not final environment art.</p>
         </div>
-        <div class="defect-columns">
-          <article class="defect-panel">
-            <h3>Visual</h3>
-            <ul class="defect-list" data-visual-defects>
-              <li>Loading current findings.</li>
+        <div class="detail-grid">
+          {
+            overlays.map(([file, label, note]) => (
+              <figure>
+                <a href={`/hinode/review/browser/overlay-${file}.png`}>
+                  <img
+                    src={`/hinode/review/browser/overlay-${file}.png`}
+                    alt={`Hinode City ${label.toLowerCase()} overlay`}
+                    width="1440"
+                    height="900"
+                    loading="lazy"
+                  />
+                </a>
+                <figcaption>
+                  <strong>{label}</strong>
+                  <span>{note}</span>
+                </figcaption>
+              </figure>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="views-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Road-level acceptance views</p>
+            <h2 id="views-title">Driver and chase cameras across the complete proposal.</h2>
+          </div>
+          <p>Five districts plus the flyover and underpass, rendered by the real city runtime.</p>
+        </div>
+        <div class="view-pair-grid">
+          {
+            reviewPairs.map(([file, label]) => (
+              <article>
+                <header>
+                  <strong>{label}</strong>
+                  <span>Driver / chase</span>
+                </header>
+                <div>
+                  <a href={`/hinode/review/browser/${file}-driver.png`}>
+                    <img
+                      src={`/hinode/review/browser/${file}-driver.png`}
+                      alt={`${label} driver-height view`}
+                      width="1440"
+                      height="900"
+                      loading="lazy"
+                    />
+                  </a>
+                  <a href={`/hinode/review/browser/${file}-chase.png`}>
+                    <img
+                      src={`/hinode/review/browser/${file}-chase.png`}
+                      alt={`${label} chase-camera view`}
+                      width="1440"
+                      height="900"
+                      loading="lazy"
+                    />
+                  </a>
+                </div>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="section vehicle-section" aria-labelledby="vehicle-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Checkpoint 2 / vehicle derivative</p>
+            <h2 id="vehicle-title">MAH Nightline.</h2>
+          </div>
+          <p>Project-facing identity; not presented as an official Nissan product.</p>
+        </div>
+        <div class="vehicle-summary">
+          <article>
+            <p class="panel-label">Production derivative</p>
+            <strong>11,988 / 7,452 / 3,645</strong>
+            <span>LOD0 / LOD1 / LOD2 triangles</span>
+          </article>
+          <article>
+            <p class="panel-label">Gameplay dimensions</p>
+            <strong>1.821 × 4.400 × 1.306 m</strong>
+            <span>Width / length / height</span>
+          </article>
+          <article>
+            <p class="panel-label">Preparation</p>
+            <strong>Four independent wheel pivots</strong>
+            <span>Steering, rotation, lamps and collider metadata</span>
+          </article>
+        </div>
+        <div class="vehicle-grid">
+          {
+            vehicleRenders.map(([file, label]) => (
+              <figure>
+                <a href={`/hinode/review/r34/${file}`}>
+                  <img
+                    src={`/hinode/review/r34/${file}`}
+                    alt={`MAH Nightline ${label.toLowerCase()} review render`}
+                    width="1280"
+                    height="720"
+                    loading="lazy"
+                  />
+                </a>
+                <figcaption>{label}</figcaption>
+              </figure>
+            ))
+          }
+        </div>
+        <aside class="rights-card">
+          <p class="panel-label">Required attribution retained</p>
+          <p>
+            “Low Poly Nissan Skyline GT-R R34” by <strong>Arifido._</strong>, obtained from
+            Sketchfab and licensed under CC BY 4.0. Modified for the Hinode project by MD Anik
+            Hasan. Changes were made to the original model.
+          </p>
+          <div>
+            <a
+              href="https://sketchfab.com/3d-models/low-poly-nissan-skyline-gt-r-r34-8ecbe8e4e432439fa7159d2e61f6bc9b"
+            >
+              Original source ↗
+            </a>
+            <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0 ↗</a>
+          </div>
+          <small>
+            Arifido._ remains the original creator. MD Anik Hasan is the project owner and
+            adaptation director. No creator, platform or manufacturer endorsement is implied.
+          </small>
+        </aside>
+      </section>
+
+      <section class="section boundary-section" aria-labelledby="boundary-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Approval boundary</p>
+            <h2 id="boundary-title">What this checkpoint proves—and what it does not.</h2>
+          </div>
+        </div>
+        <div class="boundary-grid">
+          <article class="boundary-card boundary-card--ready">
+            <h3>Ready for review</h3>
+            <ul>
+              <li>One connected nine-road racing layout</li>
+              <li>Flyover, underpass and two usable shortcuts</li>
+              <li>Keyboard and gamepad handling implementation</li>
+              <li>Collision, recovery, checkpoints and chase cameras</li>
+              <li>Editable authoritative layout with free orbit camera</li>
+              <li>High and Low runtime profiles</li>
             </ul>
           </article>
-          <article class="defect-panel">
-            <h3>Gameplay</h3>
-            <ul class="defect-list" data-gameplay-defects>
-              <li>Loading current findings.</li>
+          <article class="boundary-card">
+            <h3>Deliberately not final</h3>
+            <ul>
+              <li>Buildings and skyline are massing proxies</li>
+              <li>Vegetation is zone-only pending separate rights review</li>
+              <li>Signs and future props are placement concepts</li>
+              <li>Environment materials and lighting need an authored art pass</li>
+              <li>Handling still needs human feel approval and tuning</li>
+              <li>Headless FPS is not an RTX 3070 benchmark</li>
             </ul>
           </article>
         </div>
       </section>
+
+      <footer>
+        <p>Hinode City / internal development review</p>
+        <div>
+          <a href="/hinode/review/browser/capture-manifest.json">Capture manifest</a>
+          <a href="/play/hinode-city/">Playable city</a>
+          <a href="/play/hinode-editor/">Layout editor</a>
+          <a href="/play/hinode-handling-lab/">Handling lab</a>
+        </div>
+      </footer>
     </main>
 
     <script>
-      interface EvidenceItem {
-        id: string;
-        title: string;
-        url: string;
-        cacheKey: string;
-        updatedAt: string;
-        width: number;
-        height: number;
-        note: string;
-        durationSeconds?: number;
+      interface RuntimeMetric {
+        fps?: string;
+        drawCalls?: string;
+        triangles?: string;
+        speedKph?: string;
+        physicsHz?: string;
+        layoutValid?: string;
+        cameraLocked?: string;
       }
 
-      interface ProgressManifest {
-        server: { status: string };
-        branch: string;
-        commit: string;
+      interface ReviewStatus {
         updatedAt: string;
-        stages: { modelling: string; rendering: string; browser: string };
-        metrics: {
-          environmentTriangles: number;
-          vehicleTriangles: number;
-          drawCalls: number | null;
-          gzipBytes: number;
+        branch: string;
+        head: string;
+        server: { status: string; pid: number; url: string };
+        git: { dirtyEntries: number; stagedEntries: number };
+        layout: { networkLengthMetres: number };
+        runtime: {
+          handlingHigh: RuntimeMetric;
+          editorHigh: RuntimeMetric;
+          cityHigh: RuntimeMetric;
+          cityLow: RuntimeMetric;
         };
-        evidence: { blender: EvidenceItem[]; browser: EvidenceItem[] };
-        defects: { visual: string[]; gameplay: string[] };
+        payload: { vehicleRawBytes: number; vehicleGzipBytes: number };
       }
 
       const root = document.querySelector<HTMLElement>('[data-review-root]');
       if (!root) throw new Error('Hinode review root is missing.');
 
-      const text = (selector: string, value: string) => {
-        const node = root.querySelector<HTMLElement>(selector);
-        if (node) node.textContent = value;
+      const put = (selector: string, value: string) => {
+        const element = root.querySelector<HTMLElement>(selector);
+        if (element) element.textContent = value;
       };
 
-      const renderList = (selector: string, items: string[]) => {
-        const list = root.querySelector<HTMLUListElement>(selector);
-        if (!list) return;
-        list.replaceChildren(
-          ...items.map((item) => {
-            const entry = document.createElement('li');
-            entry.textContent = item;
-            return entry;
-          }),
-        );
-      };
-
-      const renderEvidence = (selector: string, items: EvidenceItem[], emptyMessage: string) => {
-        const grid = root.querySelector<HTMLElement>(selector);
-        if (!grid) return;
-        if (items.length === 0) {
-          const empty = document.createElement('p');
-          empty.className = 'review-empty';
-          empty.textContent = emptyMessage;
-          grid.replaceChildren(empty);
-          return;
-        }
-        grid.replaceChildren(
-          ...items.map((item) => {
-            const card = document.createElement('figure');
-            card.className = 'evidence-card';
-            const image = document.createElement('img');
-            image.src = `${item.url}?v=${encodeURIComponent(item.cacheKey)}`;
-            image.alt = item.title;
-            image.width = item.width;
-            image.height = item.height;
-            image.loading = 'lazy';
-            const caption = document.createElement('figcaption');
-            const title = document.createElement('h3');
-            title.textContent = item.title;
-            const dimensions = document.createElement('span');
-            dimensions.className = 'evidence-meta';
-            dimensions.textContent = `${item.width} × ${item.height}`;
-            const timestamp = document.createElement('time');
-            timestamp.dateTime = item.updatedAt;
-            const duration =
-              typeof item.durationSeconds === 'number'
-                ? ` / ${item.durationSeconds.toFixed(2)} s render`
-                : '';
-            timestamp.textContent = `${new Date(item.updatedAt).toLocaleString()}${duration}`;
-            const note = document.createElement('p');
-            note.className = 'evidence-note';
-            note.textContent = item.note;
-            caption.append(title, dimensions, timestamp, note);
-            card.append(image, caption);
-            return card;
-          }),
-        );
-      };
+      const metricSummary = (metric: RuntimeMetric) =>
+        `${metric.drawCalls ?? '—'} calls / ${Number(metric.triangles ?? 0).toLocaleString()} tris`;
 
       const update = async () => {
-        const state = root.querySelector<HTMLElement>('[data-server-state]');
         try {
           const response = await fetch(`/hinode/review/status.json?t=${Date.now()}`, {
             cache: 'no-store',
           });
-          if (!response.ok) throw new Error(`Progress manifest returned ${response.status}`);
-          const manifest = (await response.json()) as ProgressManifest;
-          if (state) {
-            state.dataset.state = 'online';
-            state.textContent = 'Online';
-          }
-          text('[data-branch]', manifest.branch);
-          text('[data-commit]', manifest.commit);
-          text('[data-modelling-stage]', manifest.stages.modelling);
-          text('[data-render-stage]', manifest.stages.rendering);
-          text('[data-browser-stage]', manifest.stages.browser);
-          text('[data-last-update]', new Date(manifest.updatedAt).toLocaleString());
-          text(
-            '[data-triangles]',
-            `${(manifest.metrics.environmentTriangles + manifest.metrics.vehicleTriangles).toLocaleString()} tris`,
+          if (!response.ok) throw new Error(`Review status returned ${response.status}.`);
+          const status = (await response.json()) as ReviewStatus;
+          put('[data-server]', `Online · PID ${status.server.pid}`);
+          put('[data-branch]', status.branch);
+          put('[data-head]', status.head);
+          put(
+            '[data-git]',
+            status.git.dirtyEntries === 0
+              ? 'Clean'
+              : `${status.git.dirtyEntries} local · ${status.git.stagedEntries} staged`,
           );
-          text(
-            '[data-draw-calls]',
-            manifest.metrics.drawCalls === null
-              ? 'Awaiting capture'
-              : `${manifest.metrics.drawCalls} calls`,
+          put('[data-captured]', new Date(status.updatedAt).toLocaleString());
+          put('[data-network]', `${status.layout.networkLengthMetres.toLocaleString()} m`);
+          put('[data-city-high]', metricSummary(status.runtime.cityHigh));
+          put(
+            '[data-city-high-detail]',
+            `${status.runtime.cityHigh.fps ?? '—'} headless fps / ${status.runtime.cityHigh.speedKph ?? '—'} km/h capture`,
           );
-          text('[data-payload]', `${(manifest.metrics.gzipBytes / 1024).toFixed(1)} KiB gzip`);
-          renderEvidence(
-            '[data-blender-grid]',
-            manifest.evidence.blender,
-            'No Blender evidence yet.',
+          put('[data-city-low]', metricSummary(status.runtime.cityLow));
+          put(
+            '[data-city-low-detail]',
+            `${status.runtime.cityLow.fps ?? '—'} headless fps / ${status.runtime.cityLow.speedKph ?? '—'} km/h capture`,
           );
-          renderEvidence(
-            '[data-browser-grid]',
-            manifest.evidence.browser,
-            'No browser captures yet.',
+          put(
+            '[data-payload]',
+            `${(status.payload.vehicleRawBytes / 1_048_576).toFixed(2)} MiB / ${(status.payload.vehicleGzipBytes / 1_048_576).toFixed(2)} MiB`,
           );
-          renderList('[data-visual-defects]', manifest.defects.visual);
-          renderList('[data-gameplay-defects]', manifest.defects.gameplay);
+
+          root.querySelectorAll<HTMLElement>('[data-evidence-card]').forEach((card) => {
+            const key = card.dataset.metric as keyof ReviewStatus['runtime'];
+            const metric = status.runtime[key];
+            const label = card.querySelector<HTMLElement>('[data-evidence-metric]');
+            if (!metric || !label) return;
+            label.textContent =
+              key === 'editorHigh'
+                ? `${metric.drawCalls} calls · ${metric.layoutValid === 'true' ? 'layout valid' : 'check layout'}`
+                : `${metric.drawCalls} calls · ${Number(metric.triangles ?? 0).toLocaleString()} tris`;
+          });
+
+          const version = encodeURIComponent(status.updatedAt);
+          root
+            .querySelectorAll<HTMLImageElement>('img[src*="/hinode/review/"]')
+            .forEach((image) => {
+              const url = new URL(image.src);
+              url.searchParams.set('v', version);
+              image.src = url.toString();
+            });
         } catch (error) {
           console.error(error);
-          if (state) {
-            state.dataset.state = 'offline';
-            state.textContent = 'Evidence unavailable';
-          }
+          put('[data-server]', 'Evidence manifest unavailable');
         }
       };
 
       void update();
-      window.setInterval(update, 10_000);
     </script>
   </body>
 </html>

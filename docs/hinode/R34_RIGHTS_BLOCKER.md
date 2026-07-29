@@ -1,6 +1,6 @@
 # R34 creator and licence blocker
 
-Status: user confirmation required before Checkpoint 2
+Status: `resolved_with_original_creator_attribution`
 
 The supplied source is:
 
@@ -21,19 +21,19 @@ The exact filename and geometry measurements match this primary source page:
 
 https://sketchfab.com/3d-models/low-poly-nissan-skyline-gt-r-r34-8ecbe8e4e432439fa7159d2e61f6bc9b
 
-That page identifies the creator as `Arifido._` and the licence as Creative Commons Attribution. The
-current project instruction identifies the creator and copyright owner as `MD Anik Hasan` and asks
-the project to issue attribution solely under that name.
+That page identifies the creator as `Arifido._` and the licence as Creative Commons Attribution 4.0.
 
-Those records are not compatible unless `Arifido._` is MD Anik Hasan or MD Anik Hasan separately
-owns the relevant copyright and relicensing rights.
+## Resolution
 
-Before the project creates the requested licence file, attribution, derivative, personal badges or
-runtime export, confirm one of:
+The user selected Option 2:
 
-1. `Arifido._` is a publishing alias owned by MD Anik Hasan; or
-2. MD Anik Hasan has a separate written transfer or permission covering the supplied model; or
-3. the model must remain attributed to `Arifido._` under its existing CC Attribution terms.
+- `Arifido._` remains the original creator.
+- The original model remains licensed under CC BY 4.0.
+- MD Anik Hasan is the Hinode project owner and adaptation director, not the original mesh creator
+  or copyright owner.
+- Every distributed derivative must retain the original source, creator and licence and disclose
+  that changes were made.
+- The runtime identity is `MAH Nightline`; it must not imply affiliation with Nissan, Sketchfab or
+  endorsement by Arifido._.
 
-Until resolved, the source remains untouched and excluded from preparation, integration and
-distribution.
+The source remains untouched. Project-local attributed derivative preparation is now approved.

@@ -1,0 +1,101 @@
+---
+import HinodePreviewLayout from '../../../hinode/ui/HinodePreviewLayout.astro';
+---
+
+<HinodePreviewLayout
+  title="Hinode City | MAH Nightline"
+  description="Drive the new 500 by 350 metre Hinode City proxy map in the attributed MAH Nightline."
+>
+  <main class="hinode-city" data-hinode-city data-phase="loading">
+    <canvas
+      class="city-canvas"
+      data-city-canvas
+      tabindex="0"
+      aria-label="Playable 500 by 350 metre Hinode City driving map"></canvas>
+
+    <header class="city-header">
+      <a href="/" class="city-wordmark">
+        <span>HINODE CITY</span>
+        <small>日の出市 / HONSHU COAST</small>
+      </a>
+      <nav>
+        <a href="/play/hinode-editor/">Layout editor</a>
+        <a href="/play/hinode-handling-lab/">Handling lab</a>
+        <a href="/play/hinode-progress/">Evidence</a>
+      </nav>
+      <div class="city-quality">
+        <a data-quality-high href="?quality=high">High</a>
+        <a data-quality-low href="?quality=low">Low</a>
+      </div>
+    </header>
+
+    <section class="city-loading" aria-labelledby="city-title">
+      <div class="city-loading-panel">
+        <p class="city-kicker">Checkpoint 4 / playable proxy city</p>
+        <h1 id="city-title">Five roads.<br />One coastal night.</h1>
+        <p>
+          Main Loop · Touge Pass · Downtown Core · Alley District · Waterfront Route, with two
+          shortcuts, a flyover, and harbour underpass.
+        </p>
+        <div class="city-map-facts">
+          <div><strong>500 × 350</strong><span>metres</span></div>
+          <div><strong>2.82 KM</strong><span>network</span></div>
+          <div><strong>6</strong><span>route gates</span></div>
+          <div><strong>120 HZ</strong><span>physics</span></div>
+        </div>
+        <div class="city-load-row">
+          <span data-loading-status>Loading authoritative city layout</span>
+          <b data-loading-percent>0%</b>
+        </div>
+        <progress data-loading-progress max="1" value="0" aria-label="Hinode City loading"
+        ></progress>
+        <button data-start-drive type="button" disabled>Preparing city</button>
+        <small
+          >W/S or triggers · A/D or left stick · Space/A handbrake · R reset · C camera · Esc pause</small
+        >
+      </div>
+    </section>
+
+    <aside class="city-route">
+      <span>ROUTE GATE <b data-checkpoint-index>01 / 06</b></span>
+      <strong data-checkpoint-name>Main Loop</strong>
+      <div><i data-route-progress></i></div>
+      <small data-road-name>Main Loop</small>
+    </aside>
+
+    <aside class="city-speed">
+      <span>MAH NIGHTLINE</span>
+      <strong data-speed>000</strong>
+      <small>KM/H</small>
+      <b data-gear>N</b>
+    </aside>
+
+    <aside class="city-minimap-shell" aria-label="Hinode City minimap">
+      <canvas data-minimap width="240" height="168"></canvas>
+      <span>N</span>
+    </aside>
+
+    <aside class="city-telemetry">
+      <span>FPS <b data-fps>--</b></span>
+      <span>CALLS <b data-draw-calls>--</b></span>
+      <span>TRIS <b data-triangles>--</b></span>
+      <span>GRIP <b data-grip>100%</b></span>
+      <span>CONTACTS <b data-collisions>0</b></span>
+      <span>LAP <b data-lap-time>00:00.0</b></span>
+    </aside>
+
+    <p class="city-status" data-drive-status role="status" aria-live="polite"></p>
+
+    <section class="city-pause" data-pause-panel hidden aria-labelledby="city-pause-title">
+      <div>
+        <p class="city-kicker">Drive paused</p>
+        <h2 id="city-pause-title">City telemetry held.</h2>
+        <button data-resume-drive type="button">Return to Hinode</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    import '../../../hinode/game/hinode-city';
+  </script>
+</HinodePreviewLayout>

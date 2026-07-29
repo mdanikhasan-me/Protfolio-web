@@ -1,73 +1,48 @@
-# Hinode City clean-room audit
+# Hinode City clean-room boundary
 
-Status: active vertical-slice checkpoint  
+Status: Checkpoint 4 road-first approval gate
 Branch: `rebuild/hinode-from-zero`
 
-## Clean-room boundary
+## Retained foundation
 
-Hinode City is a new implementation. No previous game code, art, Blender source, exported model,
-road, vehicle, camera, physics, collision, interface, screenshot, render, audio, test artifact, or
-local production script is an input.
+Hinode uses the portfolio's Astro and TypeScript application, general build and test infrastructure,
+Three.js, the approved written specification, supplied visual references, audited research and
+source assets whose permissions are confirmed.
 
-The retained foundation is limited to the portfolio's Astro and TypeScript application, general
-pages and content, build and test configuration, accessibility infrastructure, unrelated shared
-utilities, installed dependencies that are useful to the new implementation, the new written brief,
-and the four supplied Hinode concept images.
+The browser editor is the authoritative city-layout system. Blender does not own or generate the
+complete city.
 
-The mistaken preservation directory and branches were removed before this branch was created:
+## Rejected implementation removed
 
-- external backup `hinode-checkpoint1-20260728-214814`: absent;
-- `archive/immersive-portfolio-v4-pre-hinode-20260728`: absent locally and remotely;
-- `rebuild/hinode-web-racer`: absent locally and remotely;
-- five rejected preservation-planning documents: absent.
+After the replacement handling lab, editor, driveable map, server and evidence gates passed, the
+following were deliberately removed:
 
-## Rejected-game removal
+- the 75 × 60 metre slice Blender sources and manifest;
+- the generated slice environment, fictional coupe and baked atlas;
+- the old preview runtime, controller, chase camera, loader and slice-coordinate modules;
+- old slice-specific unit tests and validators;
+- city-blockout schemas and provisional coordinates;
+- one-off live Blender repair/control scripts;
+- stale Blender, browser, spatial and validation evidence;
+- generated vegetation derivatives with unresolved distribution permission.
 
-The clean branch contains no rejected `/play/` route, public game model, game stylesheet, game layout,
-gameplay script, vehicle/camera/collision helper, old Blender generator, game-specific local source,
-or game-generated visual artifact.
+Tracked files remain recoverable from Git history. Original read-only source assets were not
+modified or deleted.
 
-The following locations are reserved for the new work and must never import from rejected paths:
+## Current production boundary
 
-```text
-art/blender/hinode/
-art/references/hinode/
-public/hinode/
-src/hinode/
-src/pages/play/hinode-preview/
-tools/blender/hinode/
-tools/validation/hinode/
-tests/unit/hinode/
-tests/e2e/hinode/
-```
+The active result is one 500 × 350 metre road-first proposal with nine named routes, explicit
+footpath/drainage plans, planning parcels, vegetation and sign zones, boundary collision volumes,
+and deterministic review sightlines.
 
-## Approved reference roles
+Buildings, vegetation, signs, future props and skyline remain proxy-only. No interiors, final
+district art, final billboards, traffic, missions or pedestrians are part of Checkpoint 4.
 
-The four supplied images are stored outside `public/` and are visual guidance only:
+## Rights boundary
 
-1. `hinode-overview-map.png`: compact district layering and visible road hierarchy.
-2. `hinode-road-hierarchy.png`: smooth road classes, curvature, widths, and connector language.
-3. `hinode-alley-modules.png`: alley clearances, modular frontage, and prop exclusion.
-4. `hinode-alley-driving.png`: alley density, warm frontage, secondary-road merge, and visible
-   flyover composition.
+The hero derivative retains Arifido._ as the original model creator under CC BY 4.0. MD Anik Hasan
+is the Hinode project owner and adaptation director, not the original mesh creator. No creator,
+platform or manufacturer endorsement is implied.
 
-Text, measurements, brands, vehicle likenesses, and Japanese lettering visible inside generated
-images are not authoritative. The written specification controls. The new implementation uses
-fictional shops, graphics, and a completely original car.
-
-## Checkpoint boundary
-
-Only a `75 m × 60 m` vertical slice is authorised. It includes one driveable alley, a smooth curve,
-a T-junction, a wider secondary road, a visible but non-driveable flyover, a short canal edge, six
-to eight modular buildings, restrained props, one original coupe, a chase camera, real controls and
-collision, baked environmental lighting, a loading state, and a temporary speed display.
-
-The mountain, port, full downtown, island, complete loop, traffic, pedestrians, missions, garage,
-minimap, homepage integration, deployment, and complete city are explicitly outside this checkpoint.
-
-## Commit separation
-
-The branch records separate commits for cleanup, rejected-game removal, clean scaffold, Blender
-slice, browser runtime, and validation evidence. Unrelated portfolio work is never staged as Hinode
-work.
-
+Vegetation permission remains pending full asset audit. No unresolved vegetation model enters the
+public runtime.

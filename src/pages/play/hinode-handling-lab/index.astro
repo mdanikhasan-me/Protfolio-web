@@ -1,0 +1,130 @@
+---
+import HinodePreviewLayout from '../../../hinode/ui/HinodePreviewLayout.astro';
+---
+
+<HinodePreviewLayout
+  title="Hinode Handling Lab | MAH Nightline"
+  description="A fixed-120 Hz browser handling lab for the attributed MAH Nightline derivative."
+>
+  <main class="handling-lab" data-handling-lab data-phase="loading">
+    <canvas
+      class="handling-canvas"
+      data-handling-canvas
+      tabindex="0"
+      aria-label="Playable MAH Nightline vehicle handling laboratory"></canvas>
+
+    <header class="handling-topbar">
+      <a class="handling-wordmark" href="/">
+        <span>HINODE CITY</span>
+        <small>CHECKPOINT 2 / HANDLING LAB</small>
+      </a>
+      <nav aria-label="Hinode development routes">
+        <a href="/play/hinode-progress/">Evidence</a>
+        <a href="/play/hinode-preview/">Preview</a>
+      </nav>
+      <div class="quality-switch" aria-label="Rendering quality">
+        <a data-quality-high href="?quality=high">High</a>
+        <a data-quality-low href="?quality=low">Low</a>
+      </div>
+    </header>
+
+    <section class="handling-loading" aria-labelledby="handling-title">
+      <div class="handling-loading-card">
+        <p class="handling-kicker">MAH engineering / isolated proving ground</p>
+        <h1 id="handling-title">Nightline handling lab</h1>
+        <p>
+          Custom tire forces at 120 Hz, Rapier rigid-body collision, independent wheel pivots,
+          keyboard and gamepad input.
+        </p>
+        <div class="handling-readiness" aria-live="polite">
+          <span data-loading-status>Initialising physics</span>
+          <strong data-loading-percent>0%</strong>
+        </div>
+        <progress data-loading-progress max="1" value="0" aria-label="Handling lab loading"
+        ></progress>
+        <button data-start-drive type="button" disabled>Preparing lab</button>
+        <small
+          >W/S or triggers · A/D or left stick · Space/A handbrake · R reset · C camera · Esc pause</small
+        >
+      </div>
+    </section>
+
+    <aside class="handling-speed" aria-label="Vehicle speed and gear">
+      <span>MAH NIGHTLINE</span>
+      <strong data-speed>000</strong>
+      <small>KM/H</small>
+      <b data-gear>N</b>
+    </aside>
+
+    <aside class="handling-telemetry" aria-label="Live vehicle telemetry">
+      <div><span>STEER</span><strong data-steer>0.0°</strong></div>
+      <div><span>FRONT SLIP</span><strong data-front-slip>0.0°</strong></div>
+      <div><span>REAR SLIP</span><strong data-rear-slip>0.0°</strong></div>
+      <div><span>LATERAL</span><strong data-lateral-g>0.00 G</strong></div>
+      <div><span>REAR GRIP</span><strong data-rear-grip>100%</strong></div>
+      <div><span>CONTACTS</span><strong data-collisions>0</strong></div>
+    </aside>
+
+    <aside class="handling-diagnostics" aria-label="Renderer and physics diagnostics">
+      <span>RAPIER <b data-rapier>BOOT</b></span>
+      <span>PHYSICS <b>120 HZ</b></span>
+      <span>FPS <b data-fps>--</b></span>
+      <span>CALLS <b data-draw-calls>--</b></span>
+      <span>TRIS <b data-triangles>--</b></span>
+      <span>QUALITY <b data-quality>--</b></span>
+    </aside>
+
+    <details class="handling-development">
+      <summary>Telemetry & tuning</summary>
+      <div class="handling-development-grid" aria-label="Complete development telemetry">
+        <span>Engine RPM <b data-engine-rpm>900</b></span>
+        <span>Throttle <b data-throttle>0%</b></span>
+        <span>Brake <b data-brake>0%</b></span>
+        <span>Steer input <b data-steer-input>0%</b></span>
+        <span>Longitudinal <b data-longitudinal-g>0.00 G</b></span>
+        <span>Front grip <b data-front-grip>0%</b></span>
+        <span>Handbrake <b data-handbrake>OFF</b></span>
+        <span>Grounded <b data-grounded-wheels>4 / 4</b></span>
+        <span>Physics frame <b data-physics-frame>0.00 MS</b></span>
+        <span>Resets <b data-resets>0</b></span>
+        <span>Profile <b data-tuning-profile-output>BALANCED ROAD</b></span>
+      </div>
+      <form class="handling-tuning" data-tuning-form>
+        <label>
+          Profile
+          <select data-tuning-profile>
+            <option value="balanced-road">Balanced road</option>
+            <option value="road-grip">Road grip study</option>
+            <option value="drift-study">Drift study</option>
+          </select>
+        </label>
+        <label>
+          Steering response
+          <input data-tuning-steering type="range" min="0.65" max="1.35" step="0.05" value="1" />
+        </label>
+        <label>
+          Grip scale
+          <input data-tuning-grip type="range" min="0.78" max="1.18" step="0.02" value="1" />
+        </label>
+        <label>
+          Handbrake grip
+          <input data-tuning-handbrake type="range" min="0.62" max="1.35" step="0.03" value="1" />
+        </label>
+      </form>
+    </details>
+
+    <p class="handling-status" data-drive-status role="status" aria-live="polite"></p>
+
+    <section class="handling-pause" data-pause-panel hidden aria-labelledby="handling-pause-title">
+      <div>
+        <p class="handling-kicker">Simulation paused</p>
+        <h2 id="handling-pause-title">Telemetry held.</h2>
+        <button data-resume-drive type="button">Resume lab</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    import '../../../hinode/handling/handling-lab';
+  </script>
+</HinodePreviewLayout>

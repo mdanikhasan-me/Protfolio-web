@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "assetId": "VEH_MAH_Nightline_R34_Derivative",
+  "runtimeIdentity": "MAH Nightline",
+  "rights": {
+    "originalCreator": "Arifido._",
+    "sourceUrl": "https://sketchfab.com/3d-models/low-poly-nissan-skyline-gt-r-r34-8ecbe8e4e432439fa7159d2e61f6bc9b",
+    "originalLicense": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "adaptationDirector": "MD Anik Hasan",
+    "changesDisclosed": true
+  },
+  "source": {
+    "path": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Car model\\low-poly-nissan-skyline-gt-r-r34\\LowPolyR34ByArifido.blend",
+    "sha256Before": "cff164c2776900fa26ec4d6170efdf177b22680ce42522256759def838ec0276",
+    "sha256After": "cff164c2776900fa26ec4d6170efdf177b22680ce42522256759def838ec0276",
+    "unchanged": true,
+    "sourceGeometryTriangles": 11200
+  },
+  "derivative": {
+    "blendPath": "P:\\Projects\\Protfolio\\MyProtfolio\\art\\blender\\hinode\\vehicles\\mah_nightline_r34_derivative.blend",
+    "scaleFactor": 1.13685984,
+    "dimensionsMetres": {
+      "width": 1.8214,
+      "length": 4.4,
+      "height": 1.3061
+    },
+    "origin": "vehicle centre on X/Y with tyre ground contact at Z=0",
+    "forwardAxisBlender": "-Y",
+    "wheelPivots": {
+      "VEH_Wheel_FR_LOD0": [0.71147, -1.35614, 0.30166],
+      "VEH_Wheel_RR_LOD0": [0.71152, 1.25653, 0.30166],
+      "VEH_Wheel_FL_LOD0": [-0.71147, -1.35614, 0.30166],
+      "VEH_Wheel_RL_LOD0": [-0.71152, 1.25653, 0.30166]
+    },
+    "lights": ["headlamp", "brake off/on material states", "reverse lamp state"],
+    "colliders": {
+      "body": "box",
+      "wheels": "four cylinder metadata nodes"
+    },
+    "brandIdentity": {
+      "runtimeName": "MAH Nightline",
+      "frontEmblem": "MAH",
+      "rearBadge": "MD ANIK HASAN",
+      "officialBranding": "removed or covered; no endorsement implied"
+    }
+  },
+  "lods": {
+    "LOD0": {
+      "path": "P:\\Projects\\Protfolio\\MyProtfolio\\public\\hinode\\models\\vehicles\\mah-nightline-r34.glb",
+      "triangles": 11988,
+      "ratioToLOD0": 1.0,
+      "sha256": "6915d3dd84bc9ac420b9a6ac59e3dd76bc726e03d3553c0298bfb62efe4832e0",
+      "bytes": 800244
+    },
+    "LOD1": {
+      "path": "P:\\Projects\\Protfolio\\MyProtfolio\\public\\hinode\\models\\vehicles\\mah-nightline-r34-lod1.glb",
+      "triangles": 7452,
+      "ratioToLOD0": 0.6216,
+      "sha256": "a47bf9e0ae594e4b08b5a021c2ceb412ff66a9ca255170ea93bf25bc46218e52",
+      "bytes": 729656
+    },
+    "LOD2": {
+      "path": "P:\\Projects\\Protfolio\\MyProtfolio\\public\\hinode\\models\\vehicles\\mah-nightline-r34-lod2.glb",
+      "triangles": 3645,
+      "ratioToLOD0": 0.3041,
+      "sha256": "a6575f264fdeebdc26e20acb7cbf40b3e19eb2ae463fbab8a474b23ffca0337a",
+      "bytes": 384376
+    }
+  },
+  "reviewRenders": [
+    "P:\\Projects\\Protfolio\\MyProtfolio\\public\\hinode\\review\\r34\\front-three-quarter.png",
+    "P:\\Projects\\Protfolio\\MyProtfolio\\public\\hinode\\review\\r34\\front.png",
+    "P:\\Projects\\Protfolio\\MyProtfolio\\public\\hinode\\review\\r34\\side.png",
+    "P:\\Projects\\Protfolio\\MyProtfolio\\public\\hinode\\review\\r34\\rear-three-quarter.png",
+    "P:\\Projects\\Protfolio\\MyProtfolio\\public\\hinode\\review\\r34\\rear.png",
+    "P:\\Projects\\Protfolio\\MyProtfolio\\public\\hinode\\review\\r34\\wheel-pivots.png"
+  ]
+}

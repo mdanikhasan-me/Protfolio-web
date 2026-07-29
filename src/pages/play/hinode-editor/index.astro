@@ -1,0 +1,259 @@
+---
+import HinodePreviewLayout from '../../../hinode/ui/HinodePreviewLayout.astro';
+---
+
+<HinodePreviewLayout
+  title="Hinode City Layout Editor"
+  description="The browser-native authoritative layout editor for the 500 by 350 metre Hinode City map."
+>
+  <main
+    class="hinode-editor"
+    data-hinode-editor
+    data-phase="loading"
+    data-camera-locked="false"
+    data-active-overlay="none"
+  >
+    <canvas
+      class="editor-canvas"
+      data-editor-canvas
+      tabindex="0"
+      aria-label="Interactive Hinode City 3D layout editor"></canvas>
+
+    <header class="editor-header">
+      <a href="/" class="editor-brand">
+        <span>HINODE CITY</span>
+        <small>AUTHORITATIVE LAYOUT / 500 × 350 M</small>
+      </a>
+      <nav class="editor-file-actions" aria-label="Layout file actions">
+        <button data-action="new" type="button">Reload source</button>
+        <button data-action="save" type="button">Save local</button>
+        <button data-action="load" type="button">Load local</button>
+        <button data-action="import" type="button">Import</button>
+        <button data-action="export" type="button">Export JSON</button>
+        <input data-import-file type="file" accept="application/json,.json" hidden />
+      </nav>
+      <a class="editor-drive-link" href="/play/hinode-city/">Open drive</a>
+    </header>
+
+    <aside class="editor-toolbar" aria-label="Transform tools">
+      <button class="is-active" data-transform-mode="translate" type="button" title="Move (1)">
+        Move
+      </button>
+      <button data-transform-mode="rotate" type="button" title="Rotate (2)">Rotate</button>
+      <button data-transform-mode="scale" type="button" title="Scale (3)">Scale</button>
+      <i></i>
+      <button data-action="snap" type="button" aria-pressed="false">Snap off</button>
+      <button data-action="duplicate" type="button">Duplicate</button>
+      <button data-action="delete" type="button">Delete</button>
+      <button data-action="hide" type="button">Hide</button>
+      <button data-action="lock" type="button">Lock</button>
+      <i></i>
+      <button data-action="undo" type="button">Undo</button>
+      <button data-action="redo" type="button">Redo</button>
+      <i></i>
+      <button data-create-road="route" type="button">New route</button>
+      <button data-create-road="connector" type="button">Junction</button>
+      <button data-create-road="flyover" type="button">Flyover</button>
+      <button data-create-road="underpass" type="button">Underpass</button>
+      <button data-create-road="shortcut" type="button">Shortcut</button>
+    </aside>
+
+    <aside class="editor-hierarchy">
+      <div class="editor-panel-heading">
+        <span>Scene hierarchy</span>
+        <b data-object-count>--</b>
+      </div>
+      <div class="editor-hierarchy-list" data-hierarchy-list></div>
+    </aside>
+
+    <aside class="editor-inspector">
+      <div class="editor-panel-heading">
+        <span>Inspector</span>
+        <b data-selected-type>NONE</b>
+      </div>
+      <div class="editor-empty" data-inspector-empty>
+        Select a road or district in the viewport or hierarchy.
+      </div>
+      <form data-inspector-form hidden>
+        <label>
+          <span>Label</span>
+          <input data-field="label" type="text" />
+        </label>
+        <label>
+          <span>ID</span>
+          <input data-field="id" type="text" readonly />
+        </label>
+        <fieldset>
+          <legend>Position</legend>
+          <label>X <input data-field="x" type="number" step="0.1" /></label>
+          <label>Y <input data-field="y" type="number" step="0.1" /></label>
+          <label>Z <input data-field="z" type="number" step="0.1" /></label>
+        </fieldset>
+        <fieldset>
+          <legend>Rotation / scale</legend>
+          <label>Y° <input data-field="rotation" type="number" step="1" /></label>
+          <label>SX <input data-field="scale-x" type="number" step="0.05" min="0.1" /></label>
+          <label>SZ <input data-field="scale-z" type="number" step="0.05" min="0.1" /></label>
+        </fieldset>
+        <section class="editor-road-inspector" data-road-inspector hidden>
+          <h3>Cubic Bézier road</h3>
+          <fieldset>
+            <legend>Road class</legend>
+            <label>
+              Surface
+              <select data-road-field="surface">
+                <option value="highway">Highway</option>
+                <option value="city">City</option>
+                <option value="alley">Alley</option>
+                <option value="mountain">Mountain</option>
+                <option value="waterfront">Waterfront</option>
+                <option value="elevated">Elevated</option>
+                <option value="tunnel">Tunnel</option>
+              </select>
+            </label>
+            <label>
+              Width
+              <input data-road-field="width" type="number" min="4" max="14" step="0.1" />
+            </label>
+            <label>
+              Lanes
+              <input data-road-field="lanes" type="number" min="1" max="4" step="1" />
+            </label>
+          </fieldset>
+          <label>
+            Direction
+            <select data-road-field="direction">
+              <option value="two-way">Two-way</option>
+              <option value="one-way">One-way</option>
+            </select>
+          </label>
+          <fieldset>
+            <legend>Street edge</legend>
+            <label
+              >Left path <input
+                data-road-field="footpath-left"
+                type="number"
+                min="0.4"
+                max="3"
+                step="0.1"
+              /></label
+            >
+            <label
+              >Right path <input
+                data-road-field="footpath-right"
+                type="number"
+                min="0.4"
+                max="3"
+                step="0.1"
+              /></label
+            >
+            <label
+              >Drainage <input
+                data-road-field="drainage"
+                type="number"
+                min="0.1"
+                max="0.8"
+                step="0.05"
+              /></label
+            >
+          </fieldset>
+          <label>
+            Curb profile
+            <select data-road-field="curb-profile">
+              <option value="raised">Raised</option>
+              <option value="flush">Flush</option>
+              <option value="painted-shoulder">Painted shoulder</option>
+            </select>
+          </label>
+          <div class="editor-point-actions">
+            <button data-road-point-action="previous" type="button">Previous point</button>
+            <b data-road-point-index>01 / 01</b>
+            <button data-road-point-action="next" type="button">Next point</button>
+          </div>
+          <fieldset>
+            <legend>Anchor / elevation</legend>
+            <label>X <input data-road-field="point-x" type="number" step="0.1" /></label>
+            <label>Y <input data-road-field="point-y" type="number" step="0.1" /></label>
+            <label>Z <input data-road-field="point-z" type="number" step="0.1" /></label>
+          </fieldset>
+          <fieldset>
+            <legend>Tangent / banking</legend>
+            <label
+              >Length <input
+                data-road-field="tangent-length"
+                type="number"
+                min="0.1"
+                step="0.1"
+              /></label
+            >
+            <label>Yaw° <input data-road-field="tangent-yaw" type="number" step="1" /></label>
+            <label
+              >Bank° <input
+                data-road-field="bank"
+                type="number"
+                min="-12"
+                max="12"
+                step="0.5"
+              /></label
+            >
+          </fieldset>
+          <div class="editor-point-actions">
+            <button data-road-point-action="add" type="button">Add point</button>
+            <button data-road-point-action="delete" type="button">Delete point</button>
+          </div>
+        </section>
+        <div class="editor-object-state">
+          <span data-object-state>VISIBLE / EDITABLE</span>
+        </div>
+      </form>
+    </aside>
+
+    <aside class="editor-camera">
+      <span>CAMERA REMAINS FREE</span>
+      <button data-camera="iso" type="button">Isometric</button>
+      <button data-camera="top" type="button">Top</button>
+      <button data-camera="street" type="button">Driver</button>
+      <button data-camera="chase" type="button">Chase</button>
+      <button data-camera="playback" type="button">Playback</button>
+      <button data-camera="isolate" type="button">Isolate</button>
+    </aside>
+
+    <aside class="editor-overlays" aria-label="Checkpoint 4 planning overlays">
+      <span>REVIEW LAYERS</span>
+      <button data-overlay="road-width" type="button" aria-pressed="false">Road width</button>
+      <button data-overlay="footpaths" type="button" aria-pressed="false">Footpaths</button>
+      <button data-overlay="parcels" type="button" aria-pressed="false">Parcels</button>
+      <button data-overlay="vegetation" type="button" aria-pressed="false">Vegetation</button>
+      <button data-overlay="signs" type="button" aria-pressed="false">Sign zones</button>
+      <button data-overlay="collision" type="button" aria-pressed="false">Collision</button>
+      <button data-overlay="sightlines" type="button" aria-pressed="false">Sightlines</button>
+    </aside>
+
+    <aside class="editor-zone-tools" aria-label="Environment authoring tools">
+      <span>AUTHOR</span>
+      <button data-create-zone="parcel" type="button">Parcel</button>
+      <button data-create-zone="vegetation" type="button">Vegetation</button>
+      <button data-create-zone="sign" type="button">Sign</button>
+      <button data-create-zone="billboard" type="button">Billboard socket</button>
+      <button data-create-zone="prop" type="button">Prop socket</button>
+      <button data-create-zone="clearance" type="button">Clearance</button>
+      <button data-create-zone="sightline" type="button">Sightline</button>
+      <button data-create-zone="reset" type="button">Reset zone</button>
+      <button data-create-zone="landmark" type="button">Landmark</button>
+      <button data-create-zone="spawn" type="button">Set spawn</button>
+    </aside>
+
+    <footer class="editor-statusbar">
+      <span data-editor-status>Loading authoritative layout</span>
+      <span>VALIDATION <b data-layout-valid>--</b></span>
+      <span>ROADS <b data-road-count>--</b></span>
+      <span>NETWORK <b data-network-length>--</b></span>
+      <span>CALLS <b data-draw-calls>--</b></span>
+      <span>TRIS <b data-triangles>--</b></span>
+    </footer>
+  </main>
+
+  <script>
+    import '../../../hinode/editor/hinode-editor';
+  </script>
+</HinodePreviewLayout>

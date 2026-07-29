@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mdanikhasan.com/schemas/hinode-city-layout-v1.json",
+  "title": "Hinode City authoritative layout",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "editorVersion",
+    "layoutVersion",
+    "layoutId",
+    "bounds",
+    "spawn",
+    "gameplay",
+    "roads",
+    "districts",
+    "water",
+    "planning",
+    "authoring"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "layoutId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "editorVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "layoutVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bounds": {
+      "type": "object",
+      "required": ["width", "depth", "minimumX", "maximumX", "minimumZ", "maximumZ"],
+      "properties": {
+        "width": {
+          "const": 500
+        },
+        "depth": {
+          "const": 350
+        }
+      }
+    },
+    "roads": {
+      "type": "array",
+      "minItems": 9,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "kind",
+          "surface",
+          "width",
+          "lanes",
+          "direction",
+          "closed",
+          "spline",
+          "transform",
+          "points"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": ["primary-loop", "route", "connector", "shortcut", "underpass"]
+          },
+          "direction": {
+            "enum": ["one-way", "two-way"]
+          },
+          "spline": {
+            "type": "object",
+            "required": ["type", "tangentLengths", "tangentYawOffsetsDegrees", "bankingDegrees"],
+            "properties": {
+              "type": {
+                "const": "cubic-bezier"
+              },
+              "tangentLengths": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "number",
+                  "minimum": 0.1
+                }
+              },
+              "tangentYawOffsetsDegrees": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "number"
+                }
+              },
+              "bankingDegrees": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "number",
+                  "minimum": -12,
+                  "maximum": 12
+                }
+              }
+            }
+          },
+          "points": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "minItems": 3,
+              "maxItems": 3
+            }
+          }
+        }
+      }
+    },
+    "planning": {
+      "type": "object",
+      "required": [
+        "footpaths",
+        "parcels",
+        "vegetationZones",
+        "signZones",
+        "collisionVolumes",
+        "reviewViews"
+      ],
+      "properties": {
+        "footpaths": {
+          "type": "array",
+          "minItems": 9
+        },
+        "parcels": {
+          "type": "array",
+          "minItems": 10
+        },
+        "vegetationZones": {
+          "type": "array",
+          "minItems": 5
+        },
+        "signZones": {
+          "type": "array",
+          "minItems": 7
+        },
+        "collisionVolumes": {
+          "type": "array",
+          "minItems": 4
+        },
+        "reviewViews": {
+          "type": "array",
+          "minItems": 7
+        }
+      }
+    },
+    "authoring": {
+      "type": "object",
+      "required": [
+        "junctions",
+        "curbProfiles",
+        "buildingProxies",
+        "billboardSockets",
+        "futurePropSockets",
+        "structures",
+        "canals",
+        "landmarks",
+        "skylineProxies",
+        "vehicleClearanceVolumes",
+        "resetZones",
+        "routeCheckpoints",
+        "lodClasses",
+        "collisionClasses",
+        "assetSources",
+        "visibilityBands"
+      ],
+      "properties": {
+        "junctions": {
+          "type": "array",
+          "minItems": 3
+        },
+        "curbProfiles": {
+          "type": "array",
+          "minItems": 9
+        },
+        "buildingProxies": {
+          "type": "array",
+          "minItems": 15
+        },
+        "billboardSockets": {
+          "type": "array",
+          "minItems": 3
+        },
+        "futurePropSockets": {
+          "type": "array",
+          "minItems": 3
+        },
+        "structures": {
+          "type": "array",
+          "minItems": 2
+        },
+        "resetZones": {
+          "type": "array",
+          "minItems": 3
+        },
+        "routeCheckpoints": {
+          "type": "array",
+          "minItems": 6
+        }
+      }
+    }
+  }
+}

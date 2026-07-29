@@ -1,0 +1,1236 @@
+{
+  "schemaVersion": 1,
+  "editorVersion": "1.1.0",
+  "layoutVersion": "1.0.0",
+  "layoutId": "HINODE_CITY_OPTION_A_V1",
+  "name": "Hinode City / Honshu Coast",
+  "status": "checkpoint-4-proxy-layout",
+  "coordinateSystem": "metres, Y-up, road points stored as [x, elevation, z]",
+  "bounds": {
+    "width": 500,
+    "depth": 350,
+    "minimumX": -250,
+    "maximumX": 250,
+    "minimumZ": -175,
+    "maximumZ": 175
+  },
+  "spawn": {
+    "roadId": "main-loop",
+    "position": [-191, 0.68, -92],
+    "yawRadians": 2.3
+  },
+  "gameplay": {
+    "targetLapSeconds": [150, 240],
+    "estimatedRouteDistanceMetres": 2820,
+    "checkpointRoadOrder": [
+      "main-loop",
+      "touge-pass",
+      "downtown-core",
+      "flyover-junction",
+      "waterfront-route",
+      "alley-district"
+    ]
+  },
+  "authoring": {
+    "junctions": [
+      {
+        "id": "junction-west-network",
+        "kind": "merge",
+        "roadIds": ["main-loop", "touge-pass", "alley-district"],
+        "centre": [-190, 0, 12],
+        "clearanceMetres": 5
+      },
+      {
+        "id": "junction-downtown-flyover",
+        "kind": "crossing",
+        "roadIds": ["downtown-core", "flyover-junction", "shortcut-canal"],
+        "centre": [25, 0, 18],
+        "clearanceMetres": 5.2
+      },
+      {
+        "id": "junction-harbour-merge",
+        "kind": "merge",
+        "roadIds": ["main-loop", "waterfront-route", "tunnel-underpass"],
+        "centre": [132, 0, -67],
+        "clearanceMetres": 4.8
+      }
+    ],
+    "curbProfiles": [
+      { "roadId": "main-loop", "profile": "raised", "heightMetres": 0.16 },
+      { "roadId": "downtown-core", "profile": "raised", "heightMetres": 0.14 },
+      { "roadId": "alley-district", "profile": "flush", "heightMetres": 0.04 },
+      { "roadId": "touge-pass", "profile": "painted-shoulder", "heightMetres": 0.02 },
+      { "roadId": "waterfront-route", "profile": "raised", "heightMetres": 0.16 },
+      { "roadId": "flyover-junction", "profile": "raised", "heightMetres": 0.18 },
+      { "roadId": "tunnel-underpass", "profile": "raised", "heightMetres": 0.14 },
+      { "roadId": "shortcut-market", "profile": "flush", "heightMetres": 0.03 },
+      { "roadId": "shortcut-canal", "profile": "flush", "heightMetres": 0.03 }
+    ],
+    "buildingProxies": [
+      {
+        "id": "building-touge-ridge",
+        "parcelId": "parcel-touge-ridge",
+        "buildingType": "ridge-service",
+        "heightMetres": 8,
+        "facadeDirectionDegrees": 130,
+        "roofClass": "pitched",
+        "role": "scenic",
+        "signCapacity": 1,
+        "visibilityBand": "mid",
+        "futureAssetId": "BLD_Touge_Service_A",
+        "setbackMetres": 3
+      },
+      {
+        "id": "building-touge-lookout",
+        "parcelId": "parcel-touge-lookout",
+        "buildingType": "lookout-shell",
+        "heightMetres": 6,
+        "facadeDirectionDegrees": 205,
+        "roofClass": "pitched",
+        "role": "scenic",
+        "signCapacity": 0,
+        "visibilityBand": "hero",
+        "futureAssetId": "BLD_Touge_Lookout_A",
+        "setbackMetres": 4
+      },
+      {
+        "id": "building-touge-foothill",
+        "parcelId": "parcel-touge-foothill",
+        "buildingType": "residential-shell",
+        "heightMetres": 9,
+        "facadeDirectionDegrees": 40,
+        "roofClass": "pitched",
+        "role": "residential",
+        "signCapacity": 0,
+        "visibilityBand": "background",
+        "futureAssetId": "BLD_Residential_Hill_A",
+        "setbackMetres": 4
+      },
+      {
+        "id": "building-alley-west",
+        "parcelId": "parcel-alley-west",
+        "buildingType": "restaurant-row",
+        "heightMetres": 9,
+        "facadeDirectionDegrees": 80,
+        "roofClass": "flat",
+        "role": "commercial",
+        "signCapacity": 4,
+        "visibilityBand": "hero",
+        "futureAssetId": "BLD_Alley_Restaurant_A",
+        "setbackMetres": 0.8
+      },
+      {
+        "id": "building-alley-market",
+        "parcelId": "parcel-alley-market",
+        "buildingType": "market-row",
+        "heightMetres": 11,
+        "facadeDirectionDegrees": 110,
+        "roofClass": "flat",
+        "role": "commercial",
+        "signCapacity": 5,
+        "visibilityBand": "hero",
+        "futureAssetId": "BLD_Alley_Market_A",
+        "setbackMetres": 0.7
+      },
+      {
+        "id": "building-alley-canal",
+        "parcelId": "parcel-alley-canal",
+        "buildingType": "canal-shop-row",
+        "heightMetres": 8,
+        "facadeDirectionDegrees": 35,
+        "roofClass": "flat",
+        "role": "commercial",
+        "signCapacity": 3,
+        "visibilityBand": "hero",
+        "futureAssetId": "BLD_Alley_Canal_A",
+        "setbackMetres": 1
+      },
+      {
+        "id": "building-downtown-west",
+        "parcelId": "parcel-downtown-west",
+        "buildingType": "commercial-midrise",
+        "heightMetres": 24,
+        "facadeDirectionDegrees": 55,
+        "roofClass": "flat",
+        "role": "commercial",
+        "signCapacity": 4,
+        "visibilityBand": "mid",
+        "futureAssetId": "BLD_Downtown_Midrise_A",
+        "setbackMetres": 2
+      },
+      {
+        "id": "building-downtown-core",
+        "parcelId": "parcel-downtown-core",
+        "buildingType": "commercial-landmark",
+        "heightMetres": 34,
+        "facadeDirectionDegrees": 0,
+        "roofClass": "mechanical-screen",
+        "role": "commercial",
+        "signCapacity": 6,
+        "visibilityBand": "hero",
+        "futureAssetId": "BLD_Downtown_Landmark_A",
+        "setbackMetres": 2.5
+      },
+      {
+        "id": "building-downtown-east",
+        "parcelId": "parcel-downtown-east",
+        "buildingType": "commercial-midrise",
+        "heightMetres": 27,
+        "facadeDirectionDegrees": -35,
+        "roofClass": "flat",
+        "role": "commercial",
+        "signCapacity": 4,
+        "visibilityBand": "mid",
+        "futureAssetId": "BLD_Downtown_Midrise_B",
+        "setbackMetres": 2
+      },
+      {
+        "id": "building-port-north",
+        "parcelId": "parcel-port-north",
+        "buildingType": "warehouse",
+        "heightMetres": 12,
+        "facadeDirectionDegrees": 180,
+        "roofClass": "sawtooth",
+        "role": "industrial",
+        "signCapacity": 1,
+        "visibilityBand": "mid",
+        "futureAssetId": "BLD_Port_Warehouse_A",
+        "setbackMetres": 4
+      },
+      {
+        "id": "building-port-crane",
+        "parcelId": "parcel-port-crane",
+        "buildingType": "port-service",
+        "heightMetres": 15,
+        "facadeDirectionDegrees": 210,
+        "roofClass": "flat",
+        "role": "industrial",
+        "signCapacity": 1,
+        "visibilityBand": "hero",
+        "futureAssetId": "BLD_Port_Service_A",
+        "setbackMetres": 5
+      },
+      {
+        "id": "building-port-warehouse",
+        "parcelId": "parcel-port-warehouse",
+        "buildingType": "warehouse",
+        "heightMetres": 10,
+        "facadeDirectionDegrees": 160,
+        "roofClass": "sawtooth",
+        "role": "industrial",
+        "signCapacity": 1,
+        "visibilityBand": "background",
+        "futureAssetId": "BLD_Port_Warehouse_B",
+        "setbackMetres": 4
+      },
+      {
+        "id": "building-waterfront-west",
+        "parcelId": "parcel-waterfront-west",
+        "buildingType": "waterfront-commercial",
+        "heightMetres": 13,
+        "facadeDirectionDegrees": 150,
+        "roofClass": "flat",
+        "role": "commercial",
+        "signCapacity": 2,
+        "visibilityBand": "hero",
+        "futureAssetId": "BLD_Waterfront_Commercial_A",
+        "setbackMetres": 2
+      },
+      {
+        "id": "building-waterfront-centre",
+        "parcelId": "parcel-waterfront-centre",
+        "buildingType": "waterfront-residential",
+        "heightMetres": 17,
+        "facadeDirectionDegrees": 175,
+        "roofClass": "stepped",
+        "role": "residential",
+        "signCapacity": 1,
+        "visibilityBand": "mid",
+        "futureAssetId": "BLD_Waterfront_Residential_A",
+        "setbackMetres": 3
+      },
+      {
+        "id": "building-waterfront-east",
+        "parcelId": "parcel-waterfront-east",
+        "buildingType": "waterfront-service",
+        "heightMetres": 9,
+        "facadeDirectionDegrees": 200,
+        "roofClass": "flat",
+        "role": "commercial",
+        "signCapacity": 2,
+        "visibilityBand": "hero",
+        "futureAssetId": "BLD_Waterfront_Service_A",
+        "setbackMetres": 2
+      }
+    ],
+    "billboardSockets": [
+      {
+        "id": "billboard-downtown-hero",
+        "label": "Downtown hero billboard socket",
+        "centre": [18, 14, 58],
+        "size": [12, 8, 0.6],
+        "rotationY": 0,
+        "districtId": "downtown",
+        "hostRoadId": "downtown-core"
+      },
+      {
+        "id": "billboard-downtown-support",
+        "label": "Downtown support billboard socket",
+        "centre": [71, 10, 62],
+        "size": [8, 5, 0.5],
+        "rotationY": -0.5,
+        "districtId": "downtown",
+        "hostRoadId": "downtown-core"
+      },
+      {
+        "id": "billboard-alley-entry",
+        "label": "Alley entry blade-sign socket",
+        "centre": [-130, 6, -73],
+        "size": [3, 5, 0.4],
+        "rotationY": 1.1,
+        "districtId": "alley",
+        "hostRoadId": "alley-district"
+      }
+    ],
+    "futurePropSockets": [
+      {
+        "id": "prop-alley-vending-a",
+        "label": "Future vending socket A",
+        "centre": [-112, 0, -69],
+        "size": [1, 2, 1],
+        "rotationY": 0,
+        "districtId": "alley",
+        "hostRoadId": "alley-district"
+      },
+      {
+        "id": "prop-alley-vending-b",
+        "label": "Future vending socket B",
+        "centre": [-74, 0, -26],
+        "size": [1, 2, 1],
+        "rotationY": 0.4,
+        "districtId": "alley",
+        "hostRoadId": "alley-district"
+      },
+      {
+        "id": "prop-waterfront-bench",
+        "label": "Future waterfront bench socket",
+        "centre": [92, 0, -154],
+        "size": [2, 1, 1],
+        "rotationY": 0.2,
+        "districtId": "waterfront",
+        "hostRoadId": "waterfront-route"
+      }
+    ],
+    "structures": [
+      {
+        "id": "structure-flyover",
+        "type": "flyover",
+        "roadId": "flyover-junction",
+        "minimumClearanceMetres": 5.2
+      },
+      {
+        "id": "structure-underpass",
+        "type": "underpass",
+        "roadId": "tunnel-underpass",
+        "minimumClearanceMetres": 4.5
+      }
+    ],
+    "canals": ["inner-canal"],
+    "landmarks": [
+      {
+        "id": "landmark-touge-beacon",
+        "label": "Touge beacon",
+        "centre": [-176, 34, 132],
+        "size": [7, 18, 7],
+        "rotationY": 0,
+        "districtId": "touge"
+      },
+      {
+        "id": "landmark-downtown-tower",
+        "label": "Downtown sign tower",
+        "centre": [22, 26, 69],
+        "size": [12, 52, 12],
+        "rotationY": 0,
+        "districtId": "downtown"
+      },
+      {
+        "id": "landmark-port-crane",
+        "label": "Port crane silhouette",
+        "centre": [189, 21, -5],
+        "size": [20, 42, 10],
+        "rotationY": -0.2,
+        "districtId": "port"
+      },
+      {
+        "id": "landmark-waterfront-light",
+        "label": "Waterfront light",
+        "centre": [152, 12, -156],
+        "size": [6, 24, 6],
+        "rotationY": 0,
+        "districtId": "waterfront"
+      },
+      {
+        "id": "landmark-alley-gate",
+        "label": "Alley gate",
+        "centre": [-145, 5, -84],
+        "size": [9, 10, 2],
+        "rotationY": 0.6,
+        "districtId": "alley"
+      }
+    ],
+    "skylineProxies": [
+      {
+        "id": "skyline-north",
+        "label": "North skyline shell",
+        "centre": [25, 22, 142],
+        "size": [150, 44, 22],
+        "rotationY": 0
+      },
+      {
+        "id": "skyline-east",
+        "label": "East skyline shell",
+        "centre": [214, 18, 50],
+        "size": [28, 36, 110],
+        "rotationY": 0
+      }
+    ],
+    "vehicleClearanceVolumes": [
+      {
+        "id": "clearance-flyover",
+        "label": "Flyover vehicle clearance",
+        "centre": [28, 6, 14],
+        "size": [18, 5.2, 24]
+      },
+      {
+        "id": "clearance-underpass",
+        "label": "Underpass vehicle clearance",
+        "centre": [84, -1.6, 36],
+        "size": [12, 4.5, 46]
+      },
+      {
+        "id": "clearance-alley",
+        "label": "Alley vehicle envelope",
+        "centre": [-103, 1.8, -58],
+        "size": [5.2, 3.6, 38]
+      }
+    ],
+    "resetZones": [
+      {
+        "id": "reset-main-spawn",
+        "label": "Main Loop reset",
+        "centre": [-191, 0, -92],
+        "size": [12, 1, 18],
+        "rotationY": 2.3,
+        "roadId": "main-loop"
+      },
+      {
+        "id": "reset-touge",
+        "label": "Touge reset",
+        "centre": [-180, 16, 86],
+        "size": [10, 1, 16],
+        "rotationY": -1.5,
+        "roadId": "touge-pass"
+      },
+      {
+        "id": "reset-waterfront",
+        "label": "Waterfront reset",
+        "centre": [124, 0, -143],
+        "size": [12, 1, 18],
+        "rotationY": -1.8,
+        "roadId": "waterfront-route"
+      }
+    ],
+    "routeCheckpoints": [
+      { "id": "gate-main-loop", "roadId": "main-loop", "progress": 0 },
+      { "id": "gate-touge", "roadId": "touge-pass", "progress": 0.18 },
+      { "id": "gate-downtown", "roadId": "downtown-core", "progress": 0.5 },
+      { "id": "gate-flyover", "roadId": "flyover-junction", "progress": 0.5 },
+      { "id": "gate-waterfront", "roadId": "waterfront-route", "progress": 0.56 },
+      { "id": "gate-alley", "roadId": "alley-district", "progress": 0.42 }
+    ],
+    "lodClasses": {
+      "hero": { "minimumMetres": 0, "maximumMetres": 12 },
+      "mid": { "minimumMetres": 12, "maximumMetres": 35 },
+      "background": { "minimumMetres": 35, "maximumMetres": 90 }
+    },
+    "collisionClasses": {
+      "road-edge": { "dynamic": false, "purpose": "continuous road containment" },
+      "map-boundary": { "dynamic": false, "purpose": "outer recovery boundary" },
+      "vehicle": { "dynamic": true, "purpose": "MAH Nightline chassis and wheels" }
+    },
+    "assetSources": [
+      {
+        "assetId": "VEH_MAH_Nightline_R34_Derivative",
+        "sourceId": "SRC_ARIFIDO_R34",
+        "attributionId": "ATTR_ARIFIDO_R34_CC_BY_4",
+        "rightsStatus": "approved_for_attributed_derivative_use",
+        "approvedPurpose": "hero-player-vehicle"
+      },
+      {
+        "assetId": "ZONE_Anime_Vegetation_Pending",
+        "sourceId": "SRC_ANIME_VEGETATION_COLLECTION",
+        "attributionId": "PENDING_FULL_ASSET_AUDIT",
+        "rightsStatus": "pending_full_asset_audit",
+        "approvedPurpose": "zone-proxy-only"
+      }
+    ],
+    "visibilityBands": [
+      { "id": "hero", "minimumMetres": 0, "maximumMetres": 12 },
+      { "id": "mid", "minimumMetres": 12, "maximumMetres": 35 },
+      { "id": "background", "minimumMetres": 35, "maximumMetres": 90 }
+    ]
+  },
+  "roads": [
+    {
+      "id": "main-loop",
+      "label": "Main Loop",
+      "kind": "primary-loop",
+      "surface": "highway",
+      "width": 11,
+      "lanes": 2,
+      "direction": "two-way",
+      "closed": true,
+      "spline": {
+        "type": "cubic-bezier",
+        "tangentLengths": [18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18],
+        "tangentYawOffsetsDegrees": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "bankingDegrees": [0, 0, 1, 2, 2, 1, 0, -1, -2, -1, 0, 0]
+      },
+      "transform": {
+        "position": [0, 0, 0],
+        "rotationY": 0,
+        "scale": [1, 1, 1]
+      },
+      "points": [
+        [-205, 0, -72],
+        [-205, 0, 28],
+        [-168, 0, 116],
+        [-75, 0, 153],
+        [48, 0, 150],
+        [155, 0, 118],
+        [214, 0, 44],
+        [210, 0, -49],
+        [164, 0, -124],
+        [69, 0, -153],
+        [-52, 0, -151],
+        [-153, 0, -124]
+      ]
+    },
+    {
+      "id": "downtown-core",
+      "label": "Downtown Core",
+      "kind": "connector",
+      "surface": "city",
+      "width": 8,
+      "lanes": 2,
+      "direction": "two-way",
+      "closed": false,
+      "spline": {
+        "type": "cubic-bezier",
+        "tangentLengths": [12, 12, 12, 12, 12, 12, 12],
+        "tangentYawOffsetsDegrees": [0, 0, 0, 0, 0, 0, 0],
+        "bankingDegrees": [0, 0, 1, 1, 0, 0, 0]
+      },
+      "transform": {
+        "position": [0, 0, 0],
+        "rotationY": 0,
+        "scale": [1, 1, 1]
+      },
+      "points": [
+        [-112, 0, 104],
+        [-73, 0, 71],
+        [-34, 0, 42],
+        [12, 0, 25],
+        [57, 0, 32],
+        [104, 0, 63],
+        [153, 0, 102]
+      ]
+    },
+    {
+      "id": "alley-district",
+      "label": "Alley District",
+      "kind": "route",
+      "surface": "alley",
+      "width": 5.2,
+      "lanes": 1,
+      "direction": "one-way",
+      "closed": false,
+      "spline": {
+        "type": "cubic-bezier",
+        "tangentLengths": [7, 7, 7, 7, 7, 7, 7, 7],
+        "tangentYawOffsetsDegrees": [0, 0, 0, 0, 0, 0, 0, 0],
+        "bankingDegrees": [0, 0, 0, 0, 0, 0, 0, 0]
+      },
+      "transform": {
+        "position": [0, 0, 0],
+        "rotationY": 0,
+        "scale": [1, 1, 1]
+      },
+      "points": [
+        [-174, 0, -105],
+        [-151, 0, -79],
+        [-122, 0, -91],
+        [-97, 0, -63],
+        [-116, 0, -33],
+        [-83, 0, -14],
+        [-54, 0, -41],
+        [-32, 0, -18]
+      ]
+    },
+    {
+      "id": "touge-pass",
+      "label": "Touge Pass",
+      "kind": "route",
+      "surface": "mountain",
+      "width": 6.4,
+      "lanes": 2,
+      "direction": "two-way",
+      "closed": false,
+      "spline": {
+        "type": "cubic-bezier",
+        "tangentLengths": [8, 8, 8, 8, 8, 8, 8, 8, 8],
+        "tangentYawOffsetsDegrees": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "bankingDegrees": [0, 2, 4, -4, 5, -5, 4, -2, 0]
+      },
+      "transform": {
+        "position": [0, 0, 0],
+        "rotationY": 0,
+        "scale": [1, 1, 1]
+      },
+      "points": [
+        [-205, 0, 22],
+        [-174, 3, 39],
+        [-223, 7, 56],
+        [-169, 12, 72],
+        [-224, 17, 91],
+        [-165, 22, 108],
+        [-203, 27, 129],
+        [-145, 31, 145],
+        [-112, 27, 119]
+      ]
+    },
+    {
+      "id": "waterfront-route",
+      "label": "Waterfront Route",
+      "kind": "route",
+      "surface": "waterfront",
+      "width": 8.5,
+      "lanes": 2,
+      "direction": "two-way",
+      "closed": false,
+      "spline": {
+        "type": "cubic-bezier",
+        "tangentLengths": [13, 13, 13, 13, 13, 13, 13],
+        "tangentYawOffsetsDegrees": [0, 0, 0, 0, 0, 0, 0],
+        "bankingDegrees": [0, 0, 1, 2, 2, 1, 0]
+      },
+      "transform": {
+        "position": [0, 0, 0],
+        "rotationY": 0,
+        "scale": [1, 1, 1]
+      },
+      "points": [
+        [-45, 0, -151],
+        [11, 0, -166],
+        [72, 0, -157],
+        [129, 0, -141],
+        [178, 0, -113],
+        [211, 0, -72],
+        [214, 0, -30]
+      ]
+    },
+    {
+      "id": "flyover-junction",
+      "label": "Flyover Junction",
+      "kind": "connector",
+      "surface": "elevated",
+      "width": 8,
+      "lanes": 2,
+      "direction": "two-way",
+      "closed": false,
+      "spline": {
+        "type": "cubic-bezier",
+        "tangentLengths": [11, 11, 11, 11, 11, 11, 11],
+        "tangentYawOffsetsDegrees": [0, 0, 0, 0, 0, 0, 0],
+        "bankingDegrees": [0, 0, 1, 2, 1, 0, 0]
+      },
+      "transform": {
+        "position": [0, 0, 0],
+        "rotationY": 0,
+        "scale": [1, 1, 1]
+      },
+      "points": [
+        [-71, 0, -80],
+        [-45, 3, -39],
+        [-13, 9, -1],
+        [27, 12, 14],
+        [70, 11, 2],
+        [108, 5, -29],
+        [139, 0, -74]
+      ]
+    },
+    {
+      "id": "tunnel-underpass",
+      "label": "Harbour Underpass",
+      "kind": "underpass",
+      "surface": "tunnel",
+      "width": 7.2,
+      "lanes": 2,
+      "direction": "two-way",
+      "closed": false,
+      "spline": {
+        "type": "cubic-bezier",
+        "tangentLengths": [10, 10, 10, 10, 10, 10],
+        "tangentYawOffsetsDegrees": [0, 0, 0, 0, 0, 0],
+        "bankingDegrees": [0, 0, 0, 0, 0, 0]
+      },
+      "transform": {
+        "position": [0, 0, 0],
+        "rotationY": 0,
+        "scale": [1, 1, 1]
+      },
+      "points": [
+        [48, 0, 149],
+        [66, -2, 111],
+        [80, -4, 68],
+        [85, -4, 24],
+        [98, -2, -19],
+        [125, 0, -55]
+      ]
+    },
+    {
+      "id": "shortcut-market",
+      "label": "Market Cut",
+      "kind": "shortcut",
+      "surface": "alley",
+      "width": 4.8,
+      "lanes": 1,
+      "direction": "one-way",
+      "closed": false,
+      "spline": {
+        "type": "cubic-bezier",
+        "tangentLengths": [7, 7, 7, 7, 7],
+        "tangentYawOffsetsDegrees": [0, 0, 0, 0, 0],
+        "bankingDegrees": [0, 0, 0, 0, 0]
+      },
+      "transform": {
+        "position": [0, 0, 0],
+        "rotationY": 0,
+        "scale": [1, 1, 1]
+      },
+      "points": [
+        [-153, 0, -124],
+        [-127, 0, -101],
+        [-99, 0, -110],
+        [-79, 0, -84],
+        [-71, 0, -80]
+      ]
+    },
+    {
+      "id": "shortcut-canal",
+      "label": "Canal Cut",
+      "kind": "shortcut",
+      "surface": "alley",
+      "width": 5,
+      "lanes": 1,
+      "direction": "one-way",
+      "closed": false,
+      "spline": {
+        "type": "cubic-bezier",
+        "tangentLengths": [8, 8, 8, 8, 8],
+        "tangentYawOffsetsDegrees": [0, 0, 0, 0, 0],
+        "bankingDegrees": [0, 0, 0, 0, 0]
+      },
+      "transform": {
+        "position": [0, 0, 0],
+        "rotationY": 0,
+        "scale": [1, 1, 1]
+      },
+      "points": [
+        [12, 0, 25],
+        [31, 0, -8],
+        [54, 0, -37],
+        [89, 0, -58],
+        [125, 0, -55]
+      ]
+    }
+  ],
+  "districts": [
+    {
+      "id": "touge",
+      "label": "Touge Pass",
+      "centre": [-179, 8, 99],
+      "size": [126, 34, 133],
+      "proxyDensity": 0.16,
+      "colour": "#203c35",
+      "hidden": false,
+      "locked": false
+    },
+    {
+      "id": "alley",
+      "label": "Alley District",
+      "centre": [-115, 3, -55],
+      "size": [132, 18, 116],
+      "proxyDensity": 0.78,
+      "colour": "#453246",
+      "hidden": false,
+      "locked": false
+    },
+    {
+      "id": "downtown",
+      "label": "Downtown Core",
+      "centre": [25, 5, 57],
+      "size": [160, 28, 128],
+      "proxyDensity": 0.92,
+      "colour": "#263f5c",
+      "hidden": false,
+      "locked": false
+    },
+    {
+      "id": "port",
+      "label": "Port District",
+      "centre": [174, 4, 30],
+      "size": [104, 20, 134],
+      "proxyDensity": 0.48,
+      "colour": "#49332e",
+      "hidden": false,
+      "locked": false
+    },
+    {
+      "id": "waterfront",
+      "label": "Waterfront",
+      "centre": [83, 2, -119],
+      "size": [246, 15, 72],
+      "proxyDensity": 0.44,
+      "colour": "#244353",
+      "hidden": false,
+      "locked": false
+    }
+  ],
+  "water": [
+    {
+      "id": "honshu-bay",
+      "label": "Honshu Bay",
+      "centre": [95, -1.4, -184],
+      "size": [330, 1, 76],
+      "colour": "#071d36"
+    },
+    {
+      "id": "central-canal",
+      "label": "Central Canal",
+      "centre": [6, -0.8, -72],
+      "size": [22, 1, 140],
+      "colour": "#0a2941"
+    }
+  ],
+  "planning": {
+    "footpaths": [
+      {
+        "roadId": "main-loop",
+        "leftWidth": 1.2,
+        "rightWidth": 1.2,
+        "drainageWidth": 0.3
+      },
+      {
+        "roadId": "downtown-core",
+        "leftWidth": 1.8,
+        "rightWidth": 1.8,
+        "drainageWidth": 0.35
+      },
+      {
+        "roadId": "alley-district",
+        "leftWidth": 0.65,
+        "rightWidth": 0.65,
+        "drainageWidth": 0.2
+      },
+      {
+        "roadId": "touge-pass",
+        "leftWidth": 0.8,
+        "rightWidth": 0.8,
+        "drainageWidth": 0.25
+      },
+      {
+        "roadId": "waterfront-route",
+        "leftWidth": 2,
+        "rightWidth": 2,
+        "drainageWidth": 0.4
+      },
+      {
+        "roadId": "flyover-junction",
+        "leftWidth": 0.7,
+        "rightWidth": 0.7,
+        "drainageWidth": 0.2
+      },
+      {
+        "roadId": "tunnel-underpass",
+        "leftWidth": 0.65,
+        "rightWidth": 0.65,
+        "drainageWidth": 0.25
+      },
+      {
+        "roadId": "shortcut-market",
+        "leftWidth": 0.55,
+        "rightWidth": 0.55,
+        "drainageWidth": 0.2
+      },
+      {
+        "roadId": "shortcut-canal",
+        "leftWidth": 0.55,
+        "rightWidth": 0.55,
+        "drainageWidth": 0.2
+      }
+    ],
+    "parcels": [
+      {
+        "id": "parcel-touge-ridge",
+        "label": "Touge ridge reserve",
+        "centre": [-188, 0.03, 112],
+        "size": [72, 0.1, 42],
+        "rotationY": -0.12,
+        "districtId": "touge"
+      },
+      {
+        "id": "parcel-touge-lookout",
+        "label": "Touge lookout",
+        "centre": [-147, 0.03, 132],
+        "size": [42, 0.1, 32],
+        "rotationY": 0.2,
+        "districtId": "touge"
+      },
+      {
+        "id": "parcel-touge-foothill",
+        "label": "Touge foothill",
+        "centre": [-177, 0.03, 50],
+        "size": [58, 0.1, 27],
+        "rotationY": 0.05,
+        "districtId": "touge"
+      },
+      {
+        "id": "parcel-alley-west",
+        "label": "Alley west block",
+        "centre": [-150, 0.03, -55],
+        "size": [38, 0.1, 47],
+        "rotationY": -0.08,
+        "districtId": "alley"
+      },
+      {
+        "id": "parcel-alley-market",
+        "label": "Alley market block",
+        "centre": [-104, 0.03, -66],
+        "size": [38, 0.1, 38],
+        "rotationY": 0.12,
+        "districtId": "alley"
+      },
+      {
+        "id": "parcel-alley-canal",
+        "label": "Alley canal block",
+        "centre": [-61, 0.03, -40],
+        "size": [30, 0.1, 36],
+        "rotationY": -0.18,
+        "districtId": "alley"
+      },
+      {
+        "id": "parcel-downtown-west",
+        "label": "Downtown west block",
+        "centre": [-40, 0.03, 69],
+        "size": [48, 0.1, 46],
+        "rotationY": -0.05,
+        "districtId": "downtown"
+      },
+      {
+        "id": "parcel-downtown-core",
+        "label": "Downtown core block",
+        "centre": [20, 0.03, 78],
+        "size": [55, 0.1, 48],
+        "rotationY": 0.08,
+        "districtId": "downtown"
+      },
+      {
+        "id": "parcel-downtown-east",
+        "label": "Downtown east block",
+        "centre": [79, 0.03, 58],
+        "size": [43, 0.1, 52],
+        "rotationY": 0.16,
+        "districtId": "downtown"
+      },
+      {
+        "id": "parcel-port-north",
+        "label": "Port north block",
+        "centre": [162, 0.03, 64],
+        "size": [49, 0.1, 42],
+        "rotationY": 0.04,
+        "districtId": "port"
+      },
+      {
+        "id": "parcel-port-crane",
+        "label": "Port crane block",
+        "centre": [205, 0.03, 18],
+        "size": [43, 0.1, 62],
+        "rotationY": -0.06,
+        "districtId": "port"
+      },
+      {
+        "id": "parcel-port-warehouse",
+        "label": "Port warehouse block",
+        "centre": [151, 0.03, -22],
+        "size": [56, 0.1, 42],
+        "rotationY": 0.1,
+        "districtId": "port"
+      },
+      {
+        "id": "parcel-waterfront-west",
+        "label": "Waterfront west block",
+        "centre": [-5, 0.03, -119],
+        "size": [58, 0.1, 35],
+        "rotationY": -0.04,
+        "districtId": "waterfront"
+      },
+      {
+        "id": "parcel-waterfront-centre",
+        "label": "Waterfront centre block",
+        "centre": [68, 0.03, -119],
+        "size": [61, 0.1, 35],
+        "rotationY": 0.03,
+        "districtId": "waterfront"
+      },
+      {
+        "id": "parcel-waterfront-east",
+        "label": "Waterfront east block",
+        "centre": [138, 0.03, -105],
+        "size": [55, 0.1, 38],
+        "rotationY": 0.14,
+        "districtId": "waterfront"
+      }
+    ],
+    "vegetationZones": [
+      {
+        "id": "vegetation-touge-west",
+        "label": "Touge forest west",
+        "centre": [-232, 0.05, 102],
+        "size": [23, 0.1, 114],
+        "rotationY": 0,
+        "districtId": "touge"
+      },
+      {
+        "id": "vegetation-touge-inner",
+        "label": "Touge inner slope",
+        "centre": [-143, 0.05, 105],
+        "size": [26, 0.1, 63],
+        "rotationY": 0.12,
+        "districtId": "touge"
+      },
+      {
+        "id": "vegetation-alley-sakura",
+        "label": "Alley residential sakura",
+        "centre": [-129, 0.05, -16],
+        "size": [48, 0.1, 20],
+        "rotationY": -0.08,
+        "districtId": "alley"
+      },
+      {
+        "id": "vegetation-canal-linear",
+        "label": "Canal linear planting",
+        "centre": [-13, 0.05, -71],
+        "size": [12, 0.1, 92],
+        "rotationY": 0,
+        "districtId": "waterfront"
+      },
+      {
+        "id": "vegetation-waterfront-buffer",
+        "label": "Waterfront buffer planting",
+        "centre": [45, 0.05, -141],
+        "size": [88, 0.1, 16],
+        "rotationY": -0.03,
+        "districtId": "waterfront"
+      },
+      {
+        "id": "vegetation-port-edge",
+        "label": "Port edge planting",
+        "centre": [220, 0.05, 78],
+        "size": [16, 0.1, 56],
+        "rotationY": 0,
+        "districtId": "port"
+      },
+      {
+        "id": "vegetation-main-south",
+        "label": "Main loop south sakura",
+        "centre": [-96, 0.05, -160],
+        "size": [96, 0.1, 12],
+        "rotationY": 0.02,
+        "districtId": "alley"
+      }
+    ],
+    "signZones": [
+      {
+        "id": "sign-downtown-west",
+        "label": "Downtown west hero sign",
+        "centre": [-67, 0.12, 58],
+        "size": [9, 0.1, 5],
+        "rotationY": -0.7,
+        "districtId": "downtown",
+        "hostRoadId": "downtown-core"
+      },
+      {
+        "id": "sign-downtown-core",
+        "label": "Downtown core blade-sign zone",
+        "centre": [4, 0.12, 34],
+        "size": [13, 0.1, 5],
+        "rotationY": -0.35,
+        "districtId": "downtown",
+        "hostRoadId": "downtown-core"
+      },
+      {
+        "id": "sign-downtown-east",
+        "label": "Downtown east sign zone",
+        "centre": [77, 0.12, 47],
+        "size": [11, 0.1, 5],
+        "rotationY": 0.45,
+        "districtId": "downtown",
+        "hostRoadId": "downtown-core"
+      },
+      {
+        "id": "sign-alley-entry",
+        "label": "Alley entry sign zone",
+        "centre": [-163, 0.12, -92],
+        "size": [7, 0.1, 4],
+        "rotationY": -0.52,
+        "districtId": "alley",
+        "hostRoadId": "alley-district"
+      },
+      {
+        "id": "sign-alley-market",
+        "label": "Alley market sign zone",
+        "centre": [-102, 0.12, -78],
+        "size": [8, 0.1, 4],
+        "rotationY": 0.25,
+        "districtId": "alley",
+        "hostRoadId": "alley-district"
+      },
+      {
+        "id": "sign-waterfront",
+        "label": "Waterfront identity sign zone",
+        "centre": [78, 0.12, -146],
+        "size": [14, 0.1, 5],
+        "rotationY": 0.08,
+        "districtId": "waterfront",
+        "hostRoadId": "waterfront-route"
+      },
+      {
+        "id": "sign-port",
+        "label": "Port gantry sign zone",
+        "centre": [189, 0.12, -83],
+        "size": [16, 0.1, 5],
+        "rotationY": 0.55,
+        "districtId": "port",
+        "hostRoadId": "waterfront-route"
+      },
+      {
+        "id": "sign-touge",
+        "label": "Touge warning sign zone",
+        "centre": [-191, 0.12, 48],
+        "size": [7, 0.1, 4],
+        "rotationY": -0.38,
+        "districtId": "touge",
+        "hostRoadId": "touge-pass"
+      },
+      {
+        "id": "sign-flyover",
+        "label": "Flyover route sign zone",
+        "centre": [53, 10.9, 7],
+        "size": [10, 0.1, 4],
+        "rotationY": 0.22,
+        "districtId": "downtown",
+        "hostRoadId": "flyover-junction"
+      }
+    ],
+    "collisionVolumes": [
+      {
+        "id": "collision-north",
+        "label": "North map boundary",
+        "centre": [0, 0.75, -174],
+        "size": [500, 1.5, 2]
+      },
+      {
+        "id": "collision-south",
+        "label": "South map boundary",
+        "centre": [0, 0.75, 174],
+        "size": [500, 1.5, 2]
+      },
+      {
+        "id": "collision-west",
+        "label": "West map boundary",
+        "centre": [-249, 0.75, 0],
+        "size": [2, 1.5, 350]
+      },
+      {
+        "id": "collision-east",
+        "label": "East map boundary",
+        "centre": [249, 0.75, 0],
+        "size": [2, 1.5, 350]
+      }
+    ],
+    "reviewViews": [
+      {
+        "id": "touge",
+        "label": "Touge Pass",
+        "roadId": "touge-pass",
+        "progress": 0.58,
+        "districtId": "touge",
+        "feature": "district",
+        "sightlineMetres": 48
+      },
+      {
+        "id": "alley",
+        "label": "Alley District",
+        "roadId": "alley-district",
+        "progress": 0.42,
+        "districtId": "alley",
+        "feature": "district",
+        "sightlineMetres": 34
+      },
+      {
+        "id": "downtown",
+        "label": "Downtown Core",
+        "roadId": "downtown-core",
+        "progress": 0.5,
+        "districtId": "downtown",
+        "feature": "district",
+        "sightlineMetres": 52
+      },
+      {
+        "id": "port",
+        "label": "Port District",
+        "roadId": "waterfront-route",
+        "progress": 0.84,
+        "districtId": "port",
+        "feature": "district",
+        "sightlineMetres": 56
+      },
+      {
+        "id": "waterfront",
+        "label": "Waterfront",
+        "roadId": "waterfront-route",
+        "progress": 0.46,
+        "districtId": "waterfront",
+        "feature": "district",
+        "sightlineMetres": 58
+      },
+      {
+        "id": "flyover-review",
+        "label": "Flyover Junction",
+        "roadId": "flyover-junction",
+        "progress": 0.52,
+        "feature": "flyover",
+        "sightlineMetres": 62
+      },
+      {
+        "id": "underpass-review",
+        "label": "Harbour Underpass",
+        "roadId": "tunnel-underpass",
+        "progress": 0.52,
+        "feature": "underpass",
+        "sightlineMetres": 42
+      }
+    ]
+  }
+}

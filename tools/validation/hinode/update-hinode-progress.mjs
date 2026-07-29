@@ -1,175 +1,194 @@
-import console from 'node:console';
 import { execFileSync } from 'node:child_process';
-import { copyFile, mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import sharp from 'sharp';
+import { gzipSync } from 'node:zlib';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
-const evidenceRoot = path.join(root, 'artifacts/hinode');
-const reviewRoot = path.join(root, 'public/hinode/review');
+const reviewRoot = path.join(root, 'public', 'hinode', 'review');
 const statusPath = path.join(reviewRoot, 'status.json');
 
-const notes = {
-  'hinode-top-down.png':
-    'Complete authorised 75 m × 60 m slice, road hierarchy, building massing, canal and flyover.',
-  'hinode-road-spline-clearance.png':
-    'Spline continuity and the intended driveable clearance envelope, shown without beauty-lighting concealment.',
-  'hinode-alley-entrance.png':
-    'Driver-height approach used to judge vehicle width, shopfront scale and initial driving readability.',
-  'hinode-alley-curve.png':
-    'Driver-height curve view used to judge sightline, minimum radius and prop exclusion.',
-  'hinode-flyover-composition.png':
-    'Gameplay-height composition showing whether the elevated road reads from the alley.',
-  'hinode-secondary-merge.png':
-    'Driver-height T-junction and transition into the wider secondary road.',
-  'hinode-side-scale.png':
-    'Side elevation comparing road datum, coupe, building modules and seven-metre flyover deck.',
-  'hinode-three-quarter-overview.png':
-    'Three-quarter review view of the complete authorised slice with temporary neutral fill.',
-  'hinode-browser-loaded.png':
-    'Initial loaded gameplay state from the real served route in automated Chrome.',
-  'hinode-browser-alley.png':
-    'Chase-camera evidence at the alley start; automated capture, not manual QA.',
-  'hinode-browser-curve.png':
-    'Vehicle entering the authored alley curve during deterministic automated input.',
-  'hinode-browser-junction.png': 'Vehicle at the T-junction before the secondary-road merge.',
-  'hinode-browser-merge.png': 'Vehicle approaching the wider secondary road.',
-  'hinode-browser-flyover.png':
-    'Gameplay camera evidence of the flyover composition from the intended route.',
-  'hinode-browser-secondary.png': 'Vehicle entering the wider secondary road.',
-  'hinode-browser-debug.png': 'HUD, controls and renderer metrics captured from the live route.',
-  'hinode-browser-font-error.png':
-    'Visible Vite/font limitation retained as error evidence rather than hidden.',
-};
-
-const titleFromFile = (filename) =>
-  filename
-    .replace(/^hinode-(?:browser-)?/, '')
-    .replace(/\.png$/, '')
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-
-const readJson = async (file, fallback = null) => {
-  try {
-    return JSON.parse(await readFile(file, 'utf8'));
-  } catch {
-    return fallback;
-  }
-};
+const readJson = async (relativePath) =>
+  JSON.parse(await readFile(path.join(root, relativePath), 'utf8'));
 
 const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
 
-async function collectEvidence(kind, directory, durations = {}) {
-  let names;
-  try {
-    names = (await readdir(directory))
-      .filter((name) => name.endsWith('.png'))
-      .sort((first, second) => first.localeCompare(second));
-  } catch {
-    return [];
-  }
-  return Promise.all(
-    names.map(async (name) => {
-      const source = path.join(directory, name);
-      const destination = path.join(reviewRoot, name);
-      const fileStat = await stat(source);
-      const metadata = await sharp(source).metadata();
-      await copyFile(source, destination);
-      return {
-        id: name.replace(/\.png$/, ''),
-        title: titleFromFile(name),
-        url: `/hinode/review/${name}`,
-        cacheKey: `${Math.round(fileStat.mtimeMs)}-${fileStat.size}`,
-        updatedAt: fileStat.mtime.toISOString(),
-        width: metadata.width ?? 0,
-        height: metadata.height ?? 0,
-        note: notes[name] ?? `Current ${kind} review evidence.`,
-        durationSeconds: durations[name],
-      };
-    }),
-  );
-}
+const overlayEvidence = [
+  'road-width',
+  'footpaths',
+  'parcels',
+  'vegetation',
+  'signs',
+  'collision',
+  'sightlines',
+].map((name) => `public/hinode/review/browser/overlay-${name}.png`);
+const reviewEvidence = [
+  'district-touge',
+  'district-alley',
+  'district-downtown',
+  'district-port',
+  'district-waterfront',
+  'feature-flyover',
+  'feature-underpass',
+].flatMap((name) =>
+  ['driver', 'chase'].map((view) => `public/hinode/review/browser/${name}-${view}.png`),
+);
+const requiredEvidence = [
+  'public/hinode/review/browser/handling-low-ready.png',
+  'public/hinode/review/browser/handling-high-driving.png',
+  'public/hinode/review/browser/editor-isometric.png',
+  'public/hinode/review/browser/editor-top.png',
+  'public/hinode/review/browser/city-high-ready.png',
+  'public/hinode/review/browser/city-high-driving.png',
+  'public/hinode/review/browser/city-low-driving.png',
+  ...overlayEvidence,
+  ...reviewEvidence,
+  'public/hinode/review/videos/handling-lab-current.webm',
+  'public/hinode/review/videos/hinode-city-current.webm',
+  'public/hinode/review/videos/hinode-map-route-overview.webm',
+  'public/hinode/review/r34/front-three-quarter.png',
+  'public/hinode/review/r34/front.png',
+  'public/hinode/review/r34/side.png',
+  'public/hinode/review/r34/rear-three-quarter.png',
+  'public/hinode/review/r34/rear.png',
+  'public/hinode/review/r34/wheel-pivots.png',
+];
+const vehicleModelPaths = [
+  'public/hinode/models/vehicles/mah-nightline-r34.glb',
+  'public/hinode/models/vehicles/mah-nightline-r34-lod1.glb',
+  'public/hinode/models/vehicles/mah-nightline-r34-lod2.glb',
+];
 
-await mkdir(reviewRoot, { recursive: true });
+await Promise.all(
+  [...requiredEvidence, ...vehicleModelPaths].map((relativePath) =>
+    access(path.join(root, relativePath)),
+  ),
+);
 
-const serverState = await readJson(path.join(root, '.astro/dev.json'), {});
-const blenderReport = await readJson(
-  path.join(evidenceRoot, 'blender/hinode-blender-report.json'),
-  {},
-);
-const staticValidation = await readJson(
-  path.join(evidenceRoot, 'validation/hinode-static-validation.json'),
-  { totals: {} },
-);
-const browserMetrics = await readJson(
-  path.join(evidenceRoot, 'browser/hinode-browser-metrics.json'),
-  {},
-);
-const durations = Object.fromEntries(
-  (blenderReport.renderEvidence ?? []).map((item) => [
-    path.basename(item.path),
-    item.durationSeconds,
-  ]),
-);
-const blender = await collectEvidence('Blender', path.join(evidenceRoot, 'blender'), durations);
-const browser = await collectEvidence('browser', path.join(evidenceRoot, 'browser'));
+const [capture, vehicle, layout, server] = await Promise.all([
+  readJson('public/hinode/review/browser/capture-manifest.json'),
+  readJson('docs/hinode/mah-nightline-r34-manifest.json'),
+  readJson('public/hinode/layouts/hinode-city-v1.json'),
+  readJson('.astro/dev.json'),
+]);
 
-const manifest = {
-  schemaVersion: 1,
-  updatedAt: new Date().toISOString(),
+const evidenceBytes = Object.fromEntries(
+  await Promise.all(
+    requiredEvidence.map(async (relativePath) => [
+      relativePath.replaceAll('\\', '/'),
+      (await stat(path.join(root, relativePath))).size,
+    ]),
+  ),
+);
+
+const metric = (name) => {
+  const value = capture.metrics?.[name];
+  if (!value) throw new Error(`Capture manifest is missing ${name}.`);
+  return value;
+};
+
+const vehicleBuffers = await Promise.all(
+  vehicleModelPaths.map((relativePath) => readFile(path.join(root, relativePath))),
+);
+const gitStatus = execFileSync('git', ['status', '--short'], {
+  cwd: root,
+  encoding: 'utf8',
+})
+  .trimEnd()
+  .split(/\r?\n/)
+  .filter(Boolean);
+
+const status = {
+  schemaVersion: 2,
+  updatedAt: capture.capturedAt,
+  packageStatus: 'checkpoint-4-road-first-approval-package',
   branch: git('branch', '--show-current'),
-  commit: git('rev-parse', '--short=7', 'HEAD'),
+  head: git('rev-parse', '--short=12', 'HEAD'),
+  git: {
+    dirtyEntries: gitStatus.length,
+    stagedEntries: gitStatus.filter((line) => line[0] !== ' ' && line[0] !== '?').length,
+    trackedChanges: gitStatus.filter((line) => !line.startsWith('??')).length,
+    untrackedEntries: gitStatus.filter((line) => line.startsWith('??')).length,
+    status: gitStatus,
+  },
   server: {
-    status: serverState.pid ? 'running' : 'unknown',
-    pid: serverState.pid ?? null,
-    port: serverState.port ?? 4321,
-    url: serverState.url ?? 'http://localhost:4321',
-    startedAt: serverState.startedAt ?? null,
-    logPath: path.join(root, '.astro/dev.log'),
+    status: 'running',
+    pid: server.pid,
+    port: server.port,
+    url: server.url,
+    startedAt: server.startedAt,
   },
-  stages: {
-    modelling: 'Provisional technical prototype',
-    rendering:
-      blender.length >= 8
-        ? 'Eight fresh review views ready'
-        : `${blender.length} review views ready`,
-    browser:
-      browser.length > 0
-        ? `${browser.length} automated browser captures ready`
-        : 'Automated browser capture pending',
+  layout: {
+    layoutId: layout.layoutId,
+    status: layout.status,
+    widthMetres: layout.bounds.width,
+    depthMetres: layout.bounds.depth,
+    roadCount: layout.roads.length,
+    districtCount: layout.districts.length,
+    networkLengthMetres: Number(metric('editor-isometric').networkLength),
+    targetLapSeconds: layout.gameplay.targetLapSeconds,
   },
-  metrics: {
-    environmentTriangles:
-      staticValidation.totals?.environmentTriangles ?? blenderReport.scene?.bakedTriangles ?? 0,
-    vehicleTriangles: staticValidation.totals?.vehicleTriangles ?? 0,
-    drawCalls: browserMetrics.drawCalls ?? null,
-    fps: browserMetrics.fps ?? null,
-    gzipBytes: staticValidation.totals?.publicGzipBytes ?? 0,
+  vehicle: {
+    assetId: vehicle.assetId,
+    runtimeIdentity: vehicle.runtimeIdentity,
+    sourceTriangles: vehicle.source.sourceGeometryTriangles,
+    sourceUnchanged: vehicle.source.unchanged,
+    sourceSha256: vehicle.source.sha256After,
+    dimensionsMetres: vehicle.derivative.dimensionsMetres,
+    lods: vehicle.lods,
+    rights: vehicle.rights,
   },
-  evidence: { blender, browser },
-  gameplayCapture: browserMetrics.gameplayCapture ?? null,
-  defects: {
-    visual: [
-      'The current art remains a schematic prototype and is not visually approved.',
-      'Building silhouettes, signage, prop authorship and material separation remain underdeveloped.',
-      'Night lighting must remain readable; previous evidence was too dark and poorly framed.',
-      'Japanese identity is communicated mostly through generic module shapes rather than resolved original detail.',
-      'Automated browser captures do not replace manual visual review.',
+  runtime: {
+    browser: capture.browser,
+    handlingHigh: metric('handling-high-driving'),
+    editorHigh: metric('editor-isometric'),
+    cityHigh: metric('city-high-driving'),
+    cityLow: metric('city-low-driving'),
+  },
+  payload: {
+    vehicleRawBytes: vehicleBuffers.reduce((total, buffer) => total + buffer.byteLength, 0),
+    vehicleGzipBytes: vehicleBuffers.reduce(
+      (total, buffer) => total + gzipSync(buffer).byteLength,
+      0,
+    ),
+    evidenceBytes: Object.values(evidenceBytes).reduce((total, bytes) => total + bytes, 0),
+  },
+  evidence: {
+    requiredFiles: requiredEvidence,
+    bytes: evidenceBytes,
+    browserScreenshots: requiredEvidence.filter((item) => item.includes('/browser/')),
+    videos: requiredEvidence.filter((item) => item.includes('/videos/')),
+    vehicleRenders: requiredEvidence.filter((item) => item.includes('/r34/')),
+  },
+  scope: {
+    completeForCheckpoint: [
+      'attributed MAH Nightline derivative with three LODs',
+      '120 Hz Rapier handling laboratory',
+      'authoritative browser layout editor',
+      '500 x 350 metre road-first city proposal',
+      'nine named roads including flyover, underpass and two shortcuts',
+      'high and low runtime presets',
+      'current automated Chrome screenshots and video recordings',
     ],
-    gameplay: [
-      'Camera clipping and curve readability still require manual driving review.',
-      'The complete alley-to-secondary-road merge needs visual verification from the chase camera.',
-      'Collision is a continuous road corridor rather than prop-by-prop physical geometry.',
-      'The vertical slice remains visually provisional and requires an authored environment pass.',
-      'RTX 3070 sustained frame pacing has not been manually benchmarked.',
+    deliberatelyProxyOnly: [
+      'buildings and skyline',
+      'vegetation zones',
+      'sign zones and future props',
+      'final environment materials and lighting',
+    ],
+    evidenceLimits: [
+      'Chrome capture is automated rather than a manual driving session.',
+      'Headless FPS is a diagnostic ceiling, not an RTX 3070 benchmark.',
+      'Handling values remain approval-stage tuning rather than final production tuning.',
+      'The city is a complete road-first proposal, not final environment art.',
     ],
   },
 };
 
-await writeFile(statusPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
-console.log(`Hinode progress manifest updated: ${statusPath}`);
-console.log(
-  `Evidence: ${manifest.evidence.blender.length} Blender, ${manifest.evidence.browser.length} browser`,
+await mkdir(reviewRoot, { recursive: true });
+await writeFile(statusPath, `${JSON.stringify(status, null, 2)}\n`, 'utf8');
+
+globalThis.console.log(`Hinode Checkpoint 4 status updated: ${statusPath}`);
+globalThis.console.log(
+  `${status.evidence.requiredFiles.length} evidence files verified; ${status.layout.roadCount} roads; ${status.layout.networkLengthMetres.toFixed(1)} m network.`,
 );

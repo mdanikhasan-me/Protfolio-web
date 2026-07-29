@@ -1,17 +1,20 @@
-# Hinode Blender source
+# Hinode Blender production boundary
 
-This directory accepts only new Hinode source created from the written vertical-slice contract and
-approved references. Previous `.blend` files, meshes, materials, scripts, and exports are prohibited.
+The browser editor owns the complete city layout. There is no full-city Blender master and no
+rejected slice source in this directory.
 
-Planned source files:
+Current approved project-local Blender source:
 
-- `hinode_slice_master.blend`;
-- `hinode_slice_roads.blend`;
-- `hinode_slice_buildings.blend`;
-- `hinode_slice_props.blend`;
-- `hinode_slice_car.blend`;
-- `hinode_slice_export.blend`.
+- `vehicles/mah_nightline_r34_derivative.blend`
 
-One Blender unit equals one metre. Road generation, naming, and export must be reproducible through
-the new script under `tools/blender/hinode/`.
+The derivative is built by `tools/blender/hinode/prepare_mah_nightline.py` from the read-only
+original recorded in `docs/hinode/mah-nightline-r34-manifest.json`. The original source hash must
+remain unchanged. Attribution is retained in the derivative and exported GLB metadata.
 
+Blender is limited to asset inspection, derivative preparation, modular modelling, LODs, collision
+proxies, baking and export. Background execution is preferred. A visible Blender window is for
+completed milestone review only and must never lock the user's viewport.
+
+Generated vegetation derivatives are intentionally absent while their source permissions remain
+pending. The catalogue and derivative recipe are retained as research, but no unresolved vegetation
+asset is distributed or loaded by the runtime.
