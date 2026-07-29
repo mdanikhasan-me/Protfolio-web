@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": 1,
+  "capturedBranch": "rebuild/hinode-from-zero",
+  "capturedHead": "df287805b24e7c988d449d708f9104c7e0f3a404",
+  "capturedStatusCount": 35,
+  "categoryDefinitions": {
+    "A": "Reusable production source",
+    "B": "Reusable research or validation",
+    "C": "Rejected visual implementation",
+    "D": "Stale generated output",
+    "E": "Temporary repair tooling",
+    "F": "Provisional coordinates or schema",
+    "G": "Unrelated portfolio work",
+    "H": "Uncertain and requiring review"
+  },
+  "entries": [
+    {
+      "status": "M",
+      "path": "art/blender/hinode/hinode_slice_master.blend",
+      "category": "C",
+      "reason": "Rejected diorama scene and placement foundation.",
+      "checkpointAction": "Keep untouched until the replacement lab, editor and map gates pass; then remove deliberately."
+    },
+    {
+      "status": "M",
+      "path": "docs/hinode-validation.md",
+      "category": "H",
+      "reason": "Mixes reusable validation language with stale rejected-scene evidence and rebuild instructions.",
+      "checkpointAction": "Do not commit as-is; replace with current evidence documentation after the new runtime exists."
+    },
+    {
+      "status": "M",
+      "path": "docs/hinode-vertical-slice.md",
+      "category": "F",
+      "reason": "Defines the superseded 75 by 60 metre vertical-slice contract.",
+      "checkpointAction": "Supersede with the versioned 500 by 350 metre editor layout contract."
+    },
+    {
+      "status": "M",
+      "path": "package.json",
+      "category": "F",
+      "reason": "The pending change only adds validation for the provisional city schema.",
+      "checkpointAction": "Replace that script entry with commands for the approved lab, editor and map validators."
+    },
+    {
+      "status": "M",
+      "path": "src/hinode/environment/road-network.ts",
+      "category": "F",
+      "reason": "Reads the rejected vertical-slice coordinates.",
+      "checkpointAction": "Replace with versioned editor-layout road splines and generated road meshes."
+    },
+    {
+      "status": "M",
+      "path": "src/pages/play/hinode-preview/index.astro",
+      "category": "C",
+      "reason": "Current copy and loading contract still present the rejected visible environment.",
+      "checkpointAction": "Disconnect from rejected assets and point the preview to the replacement map runtime."
+    },
+    {
+      "status": "M",
+      "path": "tests/unit/hinode/road-network.test.ts",
+      "category": "F",
+      "reason": "Assertions are tied to superseded slice coordinates.",
+      "checkpointAction": "Replace with layout-version, spline-continuity and complete-loop tests."
+    },
+    {
+      "status": "M",
+      "path": "tools/blender/hinode/build_hinode_slice.py",
+      "category": "C",
+      "reason": "Generates the rejected scene directly in Blender.",
+      "checkpointAction": "Remove after the replacement gates pass; do not use for the new city."
+    },
+    {
+      "status": "M",
+      "path": "tools/blender/hinode/open_hinode_review.py",
+      "category": "E",
+      "reason": "Mixed rejected-scene review automation and prior viewport-control repair.",
+      "checkpointAction": "Do not run; remove with the rejected scene after replacement review works."
+    },
+    {
+      "status": "M",
+      "path": "tools/validation/hinode/capture-hinode-browser.mjs",
+      "category": "F",
+      "reason": "The remaining unstaged hunk contains superseded vertical-slice waypoints.",
+      "checkpointAction": "Replace with handling-lab and authoritative-map capture paths."
+    },
+    {
+      "status": "M",
+      "path": "tools/validation/hinode/validate-hinode-slice.mjs",
+      "category": "H",
+      "reason": "Contains useful validation patterns but is coupled to stale manifests, GLBs and rejected placement.",
+      "checkpointAction": "Do not commit as-is; replace with focused asset, handling, editor and map validators."
+    },
+    {
+      "status": "??",
+      "path": "art/blender/hinode/vegetation/hinode_compact_tree_v3.blend",
+      "category": "H",
+      "reason": "Project-local derivative is technically documented but source permission still requires a full licence decision.",
+      "checkpointAction": "Keep unintegrated and uncommitted pending source-licence confirmation."
+    },
+    {
+      "status": "??",
+      "path": "art/blender/hinode/vegetation/hinode_single_bush_v1.blend",
+      "category": "H",
+      "reason": "Project-local derivative is technically documented but source permission still requires a full licence decision.",
+      "checkpointAction": "Keep unintegrated and uncommitted pending source-licence confirmation."
+    },
+    {
+      "status": "??",
+      "path": "art/blender/hinode/vegetation/hinode_single_sakura_v1.blend",
+      "category": "H",
+      "reason": "Project-local derivative is technically documented but source permission still requires a full licence decision.",
+      "checkpointAction": "Keep unintegrated and uncommitted pending source-licence confirmation."
+    },
+    {
+      "status": "??",
+      "path": "art/blender/hinode/vegetation/hinode_tall_tree_v5.blend",
+      "category": "H",
+      "reason": "Project-local derivative is technically documented but source permission still requires a full licence decision.",
+      "checkpointAction": "Keep unintegrated and uncommitted pending source-licence confirmation."
+    },
+    {
+      "status": "??",
+      "path": "docs/hinode/CITY_BLOCKOUT_PLAN.md",
+      "category": "F",
+      "reason": "Documents the provisional generated full-city blockout rather than the authoritative editor proposal.",
+      "checkpointAction": "Replace with road-segment composition records generated from the editor layout."
+    },
+    {
+      "status": "??",
+      "path": "docs/hinode/HINODE_SPATIAL_AUDIT.md",
+      "category": "D",
+      "reason": "Audit evidence belongs to the rejected visible slice.",
+      "checkpointAction": "Remove after replacement evidence exists."
+    },
+    {
+      "status": "??",
+      "path": "docs/hinode/city-blockout-schema.json",
+      "category": "F",
+      "reason": "Contains provisional full-city coordinates not approved by the user.",
+      "checkpointAction": "Do not import; replace with authoritative layout version 1."
+    },
+    {
+      "status": "??",
+      "path": "docs/hinode/spatial-schema.json",
+      "category": "F",
+      "reason": "Contains slice-specific bounds, names and clearance assumptions.",
+      "checkpointAction": "Replace with editor-domain validation rules."
+    },
+    {
+      "status": "??",
+      "path": "docs/hinode/vertical-slice-layout.json",
+      "category": "F",
+      "reason": "Canonical data for the rejected 75 by 60 metre slice.",
+      "checkpointAction": "Do not load into the new editor or runtime."
+    },
+    {
+      "status": "??",
+      "path": "public/hinode/models/vegetation/hinode-compact-tree-v3.glb",
+      "category": "H",
+      "reason": "Generated derivative is not approved for runtime while the source licence remains unresolved.",
+      "checkpointAction": "Keep unintegrated and uncommitted pending source-licence confirmation."
+    },
+    {
+      "status": "??",
+      "path": "public/hinode/models/vegetation/hinode-single-bush-v1.glb",
+      "category": "H",
+      "reason": "Generated derivative is not approved for runtime while the source licence remains unresolved.",
+      "checkpointAction": "Keep unintegrated and uncommitted pending source-licence confirmation."
+    },
+    {
+      "status": "??",
+      "path": "public/hinode/models/vegetation/hinode-single-sakura-v1.glb",
+      "category": "H",
+      "reason": "Generated derivative is not approved for runtime while the source licence remains unresolved.",
+      "checkpointAction": "Keep unintegrated and uncommitted pending source-licence confirmation."
+    },
+    {
+      "status": "??",
+      "path": "public/hinode/models/vegetation/hinode-tall-tree-v5.glb",
+      "category": "H",
+      "reason": "Generated derivative is not approved for runtime while the source licence remains unresolved.",
+      "checkpointAction": "Keep unintegrated and uncommitted pending source-licence confirmation."
+    },
+    {
+      "status": "??",
+      "path": "tools/blender/hinode/build_hinode_city_blockout.py",
+      "category": "F",
+      "reason": "Generates an entire city from provisional Python coordinates.",
+      "checkpointAction": "Do not run; replace with exact reconstruction from approved editor JSON."
+    },
+    {
+      "status": "??",
+      "path": "tools/blender/hinode/derive_hinode_vegetation.py",
+      "category": "A",
+      "reason": "Reusable read-only-source derivative pipeline with hash and provenance records.",
+      "checkpointAction": "Retain, but do not run or integrate outputs until source permissions are confirmed."
+    },
+    {
+      "status": "??",
+      "path": "tools/blender/hinode/live_audit_slice.py",
+      "category": "E",
+      "reason": "Live audit helper tied to the rejected master scene.",
+      "checkpointAction": "Remove after replacement validation exists."
+    },
+    {
+      "status": "??",
+      "path": "tools/blender/hinode/live_correct_replayed_curvehouse.py",
+      "category": "E",
+      "reason": "One-off repair for rejected building placement.",
+      "checkpointAction": "Remove after replacement gates pass."
+    },
+    {
+      "status": "??",
+      "path": "tools/blender/hinode/live_fix_curvehouse.py",
+      "category": "E",
+      "reason": "One-off repair for rejected building placement.",
+      "checkpointAction": "Remove after replacement gates pass."
+    },
+    {
+      "status": "??",
+      "path": "tools/blender/hinode/live_integrate_slice_art.py",
+      "category": "E",
+      "reason": "One-off integration helper for rejected slice art.",
+      "checkpointAction": "Remove after replacement gates pass."
+    },
+    {
+      "status": "??",
+      "path": "tools/blender/hinode/live_rebuild_slice.py",
+      "category": "E",
+      "reason": "Live rebuild helper for the rejected master scene.",
+      "checkpointAction": "Remove after replacement gates pass."
+    },
+    {
+      "status": "??",
+      "path": "tools/blender/hinode/live_restore_corner_shop.py",
+      "category": "E",
+      "reason": "One-off repair for rejected building placement.",
+      "checkpointAction": "Remove after replacement gates pass."
+    },
+    {
+      "status": "??",
+      "path": "tools/blender/hinode/send_live_blender_command.py",
+      "category": "E",
+      "reason": "Control bridge created for the rejected live-edit workflow that previously interfered with viewport control.",
+      "checkpointAction": "Do not run; remove after replacement gates pass."
+    },
+    {
+      "status": "??",
+      "path": "tools/validation/hinode/audit-hinode-spatial.py",
+      "category": "H",
+      "reason": "Potentially reusable geometry checks are tightly coupled to the rejected master and slice schema.",
+      "checkpointAction": "Do not commit as-is; replace with editor-layout and runtime collision validation."
+    },
+    {
+      "status": "??",
+      "path": "tools/validation/hinode/validate-hinode-city-schema.mjs",
+      "category": "F",
+      "reason": "Validates provisional city coordinates rather than an approved editor layout.",
+      "checkpointAction": "Do not run; replace with the versioned authoritative-layout validator."
+    }
+  ],
+  "counts": {
+    "A": 1,
+    "B": 0,
+    "C": 3,
+    "D": 1,
+    "E": 8,
+    "F": 12,
+    "G": 0,
+    "H": 10
+  },
+  "deletionPolicy": "No classified file is deleted until the replacement handling lab, editor, complete driveable map and server-health gates pass."
+}

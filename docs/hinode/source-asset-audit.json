@@ -1,0 +1,1392 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": 1,
+  "sourceRoot": "C:\\Users\\anikh\\Downloads\\Webs blender ass",
+  "sourcePolicy": "read-only; no source file was changed, renamed, moved, resaved or overwritten",
+  "inspectedWith": {
+    "blender": "5.2.0 LTS background mode",
+    "glbMetadata": "direct JSON-chunk inspection",
+    "sourcePages": "matching primary Sketchfab model pages checked on 2026-07-29"
+  },
+  "blockingFindings": [
+    {
+      "id": "r34-creator-identity-conflict",
+      "severity": "true_blocker",
+      "finding": "The prompt asserts MD Anik Hasan created the R34, but the exact supplied filename and matching 11.2k-triangle primary source page identify Arifido._. The Blender file contains no embedded ownership metadata.",
+      "requiredResolution": "Confirm that Arifido._ is MD Anik Hasan or provide separate proof of ownership/permission before relicensing, branding, deriving or distributing the R34."
+    }
+  ],
+  "totals": {
+    "sourceAssets": 13,
+    "supportingFiles": 11,
+    "sourceBytes": 12638820,
+    "sourceTriangles": 71865
+  },
+  "assets": [
+    {
+      "id": "anime-nature-tree-01",
+      "exactFilename": "anime_nature_tree_01.glb",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg\\anime_nature_tree_01.glb",
+      "relativeSourcePath": "Anime style veg\\anime_nature_tree_01.glb",
+      "fileFormat": "glb",
+      "fileSizeBytes": 427348,
+      "sha256": "607714fdf22246611ea7e92235f31eed1d1ac0bbaf1a358bf2e7c23bea1a5261",
+      "assetTitle": "anime_nature_tree_01",
+      "creator": "JABAMI Production (matched collection/source naming)",
+      "ownership": "third-party",
+      "licence": {
+        "matchedSourceEvidence": "Sketchfab page currently reports Free Standard and NoAI",
+        "status": "pending_full_asset_audit_permission_confirmation"
+      },
+      "attribution": "Pending exact per-file permission and attribution terms.",
+      "sourcePage": "https://sketchfab.com/3d-models/anime-nature-tree-01-177e81f556564fc9a9a64e9d55c30ae4",
+      "forwardAxis": "not applicable",
+      "browserSuitability": "Geometry is suitable for controlled instancing after permission and derivative review.",
+      "derivedCopyOperations": [
+        "do not recolour or replace original materials",
+        "confirm source permission",
+        "normalise pivot and ground contact in a project-local copy",
+        "prepare LODs and instancing without altering the source"
+      ],
+      "approvedPurpose": "Road-visible vegetation composition after permission confirmation",
+      "rejectedPurpose": "No runtime integration while permission remains pending",
+      "objectCount": 6,
+      "meshCount": 2,
+      "triangleCount": 1216,
+      "materialCount": 2,
+      "textureDependencies": [
+        {
+          "name": "Image_0",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_1",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        }
+      ],
+      "dimensionsMetresAfterBlenderImport": [
+        11.198925018310547, 11.602035999298096, 13.126678168773651
+      ],
+      "boundingBoxAfterBlenderImport": {
+        "minimum": [-5.901458263397217, -5.431044101715088, -0.38913315534591675],
+        "maximum": [5.29746675491333, 6.170991897583008, 12.737545013427734]
+      },
+      "pivotAndRootOrigins": [
+        {
+          "object": "Sketchfab_model",
+          "originWorld": [0, 0, 0]
+        }
+      ],
+      "originAssessment": "multiple roots require normalisation in a derived copy",
+      "upAxis": "glTF Y-up; inspected after Blender Z-up import",
+      "hiddenObjects": [],
+      "presentationFloorOrBackgroundObjects": [],
+      "wheels": {
+        "namedObjectCount": 0,
+        "independentTransformNodes": [],
+        "separationStatus": "four independent wheel transforms not present"
+      },
+      "rigOrAnimation": {
+        "actionCount": 0,
+        "actions": [],
+        "textBlockCount": 0
+      },
+      "embeddedAssetMetadata": {
+        "generator": "Sketchfab-16.21.0",
+        "version": "2.0",
+        "extras": {
+          "author": "JABAMI Production (https://sketchfab.com/JabamiProduction)",
+          "license": "SKETCHFAB Standard (https://sketchfab.com/licenses)",
+          "source": "https://sketchfab.com/3d-models/anime-nature-tree-01-177e81f556564fc9a9a64e9d55c30ae4",
+          "title": "Anime Nature Tree 01"
+        }
+      }
+    },
+    {
+      "id": "jabami-anime-bush-v1",
+      "exactFilename": "jabami_anime_bush_v1.glb",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg\\jabami_anime_bush_v1.glb",
+      "relativeSourcePath": "Anime style veg\\jabami_anime_bush_v1.glb",
+      "fileFormat": "glb",
+      "fileSizeBytes": 282052,
+      "sha256": "aa0050ebd7839199935b002ada7be6d4a3431c493fac0fc5625678430769c080",
+      "assetTitle": "jabami_anime_bush_v1",
+      "creator": "JABAMI Production (matched collection/source naming)",
+      "ownership": "third-party",
+      "licence": {
+        "matchedSourceEvidence": "No embedded licence; matching JABAMI collection found but exact per-file permission not captured locally",
+        "status": "pending_full_asset_audit_permission_confirmation"
+      },
+      "attribution": "Pending exact per-file permission and attribution terms.",
+      "sourcePage": "https://sketchfab.com/JabamiProduction/collections/animes-vegetation-trees-1857f25e4885452989d634a46bd7ebd2",
+      "forwardAxis": "not applicable",
+      "browserSuitability": "Geometry is suitable for controlled instancing after permission and derivative review.",
+      "derivedCopyOperations": [
+        "do not recolour or replace original materials",
+        "confirm source permission",
+        "normalise pivot and ground contact in a project-local copy",
+        "prepare LODs and instancing without altering the source"
+      ],
+      "approvedPurpose": "Road-visible vegetation composition after permission confirmation",
+      "rejectedPurpose": "No runtime integration while permission remains pending",
+      "objectCount": 15,
+      "meshCount": 8,
+      "triangleCount": 1304,
+      "materialCount": 3,
+      "textureDependencies": [
+        {
+          "name": "Image_0",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_1",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_2",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        }
+      ],
+      "dimensionsMetresAfterBlenderImport": [
+        6.173294544219971, 21.387173652648926, 2.2674798369407654
+      ],
+      "boundingBoxAfterBlenderImport": {
+        "minimum": [-3.0027003288269043, -10.6459321975708, -0.3604181408882141],
+        "maximum": [3.1705942153930664, 10.741241455078125, 1.9070616960525513]
+      },
+      "pivotAndRootOrigins": [
+        {
+          "object": "Sketchfab_model",
+          "originWorld": [0, 0, 0]
+        }
+      ],
+      "originAssessment": "multiple roots require normalisation in a derived copy",
+      "upAxis": "glTF Y-up; inspected after Blender Z-up import",
+      "hiddenObjects": [],
+      "presentationFloorOrBackgroundObjects": [],
+      "wheels": {
+        "namedObjectCount": 0,
+        "independentTransformNodes": [],
+        "separationStatus": "four independent wheel transforms not present"
+      },
+      "rigOrAnimation": {
+        "actionCount": 0,
+        "actions": [],
+        "textBlockCount": 0
+      },
+      "embeddedAssetMetadata": {
+        "generator": "Sketchfab-16.21.0",
+        "version": "2.0",
+        "extras": {
+          "author": "JABAMI Production (https://sketchfab.com/JabamiProduction)",
+          "license": "SKETCHFAB Standard (https://sketchfab.com/licenses)",
+          "source": "https://sketchfab.com/3d-models/jabami-anime-bush-v1-b0847ca35fd947919bc537cef88ff991",
+          "title": "Jabami Anime Bush v1"
+        }
+      }
+    },
+    {
+      "id": "jabami-anime-sakura-blossom",
+      "exactFilename": "jabami_anime_sakura_blossom.glb",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg\\jabami_anime_sakura_blossom.glb",
+      "relativeSourcePath": "Anime style veg\\jabami_anime_sakura_blossom.glb",
+      "fileFormat": "glb",
+      "fileSizeBytes": 1420196,
+      "sha256": "32c09359209e3260918da6acc5dadc1ea8ed14c26b9fbe61ef65f2fe51fba0a9",
+      "assetTitle": "jabami_anime_sakura_blossom",
+      "creator": "JABAMI Production (matched collection/source naming)",
+      "ownership": "third-party",
+      "licence": {
+        "matchedSourceEvidence": "No embedded licence; matching JABAMI collection found but exact per-file permission not captured locally",
+        "status": "pending_full_asset_audit_permission_confirmation"
+      },
+      "attribution": "Pending exact per-file permission and attribution terms.",
+      "sourcePage": "https://sketchfab.com/JabamiProduction/collections/animes-vegetation-trees-1857f25e4885452989d634a46bd7ebd2",
+      "forwardAxis": "not applicable",
+      "browserSuitability": "Hero or reduced-density use only; requires LOD review after permission confirmation.",
+      "derivedCopyOperations": [
+        "do not recolour or replace original materials",
+        "confirm source permission",
+        "normalise pivot and ground contact in a project-local copy",
+        "prepare LODs and instancing without altering the source"
+      ],
+      "approvedPurpose": "Road-visible vegetation composition after permission confirmation",
+      "rejectedPurpose": "No runtime integration while permission remains pending",
+      "objectCount": 12,
+      "meshCount": 6,
+      "triangleCount": 19146,
+      "materialCount": 2,
+      "textureDependencies": [
+        {
+          "name": "Image_0",
+          "filepath": "",
+          "packed": true,
+          "resolution": [512, 512],
+          "missing": false
+        },
+        {
+          "name": "Image_1",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        }
+      ],
+      "dimensionsMetresAfterBlenderImport": [
+        14.874061584472656, 29.94834804534912, 11.986247115277365
+      ],
+      "boundingBoxAfterBlenderImport": {
+        "minimum": [-9.213985443115234, -14.955936431884766, -0.000001959942892426625],
+        "maximum": [5.660076141357422, 14.992411613464355, 11.986245155334473]
+      },
+      "pivotAndRootOrigins": [
+        {
+          "object": "Sketchfab_model",
+          "originWorld": [0, 0, 0]
+        }
+      ],
+      "originAssessment": "multiple roots require normalisation in a derived copy",
+      "upAxis": "glTF Y-up; inspected after Blender Z-up import",
+      "hiddenObjects": [],
+      "presentationFloorOrBackgroundObjects": [],
+      "wheels": {
+        "namedObjectCount": 0,
+        "independentTransformNodes": [],
+        "separationStatus": "four independent wheel transforms not present"
+      },
+      "rigOrAnimation": {
+        "actionCount": 0,
+        "actions": [],
+        "textBlockCount": 0
+      },
+      "embeddedAssetMetadata": {
+        "generator": "Sketchfab-16.21.0",
+        "version": "2.0",
+        "extras": {
+          "author": "JABAMI Production (https://sketchfab.com/JabamiProduction)",
+          "license": "SKETCHFAB Standard (https://sketchfab.com/licenses)",
+          "source": "https://sketchfab.com/3d-models/jabami-anime-sakura-blossom-2b0bb78ab0df45fe8795ca7e9da939ba",
+          "title": "Jabami Anime Sakura blossom"
+        }
+      }
+    },
+    {
+      "id": "jabami-anime-tree-grass-v1",
+      "exactFilename": "jabami_anime_tree-grass_v1.glb",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg\\jabami_anime_tree-grass_v1.glb",
+      "relativeSourcePath": "Anime style veg\\jabami_anime_tree-grass_v1.glb",
+      "fileFormat": "glb",
+      "fileSizeBytes": 2691236,
+      "sha256": "07bc2ecc96b2941a90aaa00de4150dd62c56e8ef5d84f84aa848db4cd3e9d3cf",
+      "assetTitle": "jabami_anime_tree-grass_v1",
+      "creator": "JABAMI Production (matched collection/source naming)",
+      "ownership": "third-party",
+      "licence": {
+        "matchedSourceEvidence": "No embedded licence; matching JABAMI collection found but exact per-file permission not captured locally",
+        "status": "pending_full_asset_audit_permission_confirmation"
+      },
+      "attribution": "Pending exact per-file permission and attribution terms.",
+      "sourcePage": "https://sketchfab.com/JabamiProduction/collections/animes-vegetation-trees-1857f25e4885452989d634a46bd7ebd2",
+      "forwardAxis": "not applicable",
+      "browserSuitability": "Geometry is suitable for controlled instancing after permission and derivative review.",
+      "derivedCopyOperations": [
+        "do not recolour or replace original materials",
+        "confirm source permission",
+        "normalise pivot and ground contact in a project-local copy",
+        "prepare LODs and instancing without altering the source"
+      ],
+      "approvedPurpose": "Road-visible vegetation composition after permission confirmation",
+      "rejectedPurpose": "No runtime integration while permission remains pending",
+      "objectCount": 10,
+      "meshCount": 5,
+      "triangleCount": 1754,
+      "materialCount": 5,
+      "textureDependencies": [
+        {
+          "name": "Image_0",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_1",
+          "filepath": "",
+          "packed": true,
+          "resolution": [512, 512],
+          "missing": false
+        },
+        {
+          "name": "Image_2",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_3",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_4",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        }
+      ],
+      "dimensionsMetresAfterBlenderImport": [
+        5.727522611618042, 6.186009883880615, 18.07130851596594
+      ],
+      "boundingBoxAfterBlenderImport": {
+        "minimum": [-2.7115352153778076, -3.018699884414673, -0.11341705173254013],
+        "maximum": [3.0159873962402344, 3.1673099994659424, 17.9578914642334]
+      },
+      "pivotAndRootOrigins": [
+        {
+          "object": "Sketchfab_model",
+          "originWorld": [0, 0, 0]
+        }
+      ],
+      "originAssessment": "multiple roots require normalisation in a derived copy",
+      "upAxis": "glTF Y-up; inspected after Blender Z-up import",
+      "hiddenObjects": [],
+      "presentationFloorOrBackgroundObjects": [],
+      "wheels": {
+        "namedObjectCount": 0,
+        "independentTransformNodes": [],
+        "separationStatus": "four independent wheel transforms not present"
+      },
+      "rigOrAnimation": {
+        "actionCount": 0,
+        "actions": [],
+        "textBlockCount": 0
+      },
+      "embeddedAssetMetadata": {
+        "generator": "Sketchfab-16.21.0",
+        "version": "2.0",
+        "extras": {
+          "author": "JABAMI Production (https://sketchfab.com/JabamiProduction)",
+          "license": "SKETCHFAB Standard (https://sketchfab.com/licenses)",
+          "source": "https://sketchfab.com/3d-models/jabami-anime-tree-grass-v1-6f150cee01314023a79c293a15d0805b",
+          "title": "Jabami Anime Tree-grass v1"
+        }
+      }
+    },
+    {
+      "id": "jabami-anime-tree-v1",
+      "exactFilename": "jabami_anime_tree_v1.glb",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg\\jabami_anime_tree_v1.glb",
+      "relativeSourcePath": "Anime style veg\\jabami_anime_tree_v1.glb",
+      "fileFormat": "glb",
+      "fileSizeBytes": 905536,
+      "sha256": "fe77d87f55203002f647d637123c170b91f058fad207f5db077626ec4f570a5e",
+      "assetTitle": "jabami_anime_tree_v1",
+      "creator": "JABAMI Production (matched collection/source naming)",
+      "ownership": "third-party",
+      "licence": {
+        "matchedSourceEvidence": "No embedded licence; matching JABAMI collection found but exact per-file permission not captured locally",
+        "status": "pending_full_asset_audit_permission_confirmation"
+      },
+      "attribution": "Pending exact per-file permission and attribution terms.",
+      "sourcePage": "https://sketchfab.com/JabamiProduction/collections/animes-vegetation-trees-1857f25e4885452989d634a46bd7ebd2",
+      "forwardAxis": "not applicable",
+      "browserSuitability": "Geometry is suitable for controlled instancing after permission and derivative review.",
+      "derivedCopyOperations": [
+        "do not recolour or replace original materials",
+        "confirm source permission",
+        "normalise pivot and ground contact in a project-local copy",
+        "prepare LODs and instancing without altering the source"
+      ],
+      "approvedPurpose": "Road-visible vegetation composition after permission confirmation",
+      "rejectedPurpose": "No runtime integration while permission remains pending",
+      "objectCount": 9,
+      "meshCount": 5,
+      "triangleCount": 4483,
+      "materialCount": 5,
+      "textureDependencies": [
+        {
+          "name": "Image_0",
+          "filepath": "",
+          "packed": true,
+          "resolution": [512, 512],
+          "missing": false
+        },
+        {
+          "name": "Image_1",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_2",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_3",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_4",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        }
+      ],
+      "dimensionsMetresAfterBlenderImport": [
+        5.459885358810425, 4.878427028656006, 8.017814636230469
+      ],
+      "boundingBoxAfterBlenderImport": {
+        "minimum": [-2.89389967918396, -2.561012029647827, -0.18200206756591797],
+        "maximum": [2.565985679626465, 2.3174149990081787, 7.835812568664551]
+      },
+      "pivotAndRootOrigins": [
+        {
+          "object": "Sketchfab_model",
+          "originWorld": [0, 0, 0]
+        }
+      ],
+      "originAssessment": "multiple roots require normalisation in a derived copy",
+      "upAxis": "glTF Y-up; inspected after Blender Z-up import",
+      "hiddenObjects": [],
+      "presentationFloorOrBackgroundObjects": [],
+      "wheels": {
+        "namedObjectCount": 0,
+        "independentTransformNodes": [],
+        "separationStatus": "four independent wheel transforms not present"
+      },
+      "rigOrAnimation": {
+        "actionCount": 0,
+        "actions": [],
+        "textBlockCount": 0
+      },
+      "embeddedAssetMetadata": {
+        "generator": "Sketchfab-16.21.0",
+        "version": "2.0",
+        "extras": {
+          "author": "JABAMI Production (https://sketchfab.com/JabamiProduction)",
+          "license": "SKETCHFAB Standard (https://sketchfab.com/licenses)",
+          "source": "https://sketchfab.com/3d-models/jabami-anime-tree-v1-1f4eef944c85475eb2be3b36be4b6e4d",
+          "title": "Jabami Anime Tree v1"
+        }
+      }
+    },
+    {
+      "id": "jabami-anime-tree-v2",
+      "exactFilename": "jabami_anime_tree_v2.glb",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg\\jabami_anime_tree_v2.glb",
+      "relativeSourcePath": "Anime style veg\\jabami_anime_tree_v2.glb",
+      "fileFormat": "glb",
+      "fileSizeBytes": 997236,
+      "sha256": "a78d23e747a4c20e5c7534c8e887639a0d39947d733e8ef71517364ddf9bf3cf",
+      "assetTitle": "jabami_anime_tree_v2",
+      "creator": "JABAMI Production (matched collection/source naming)",
+      "ownership": "third-party",
+      "licence": {
+        "matchedSourceEvidence": "No embedded licence; matching JABAMI collection found but exact per-file permission not captured locally",
+        "status": "pending_full_asset_audit_permission_confirmation"
+      },
+      "attribution": "Pending exact per-file permission and attribution terms.",
+      "sourcePage": "https://sketchfab.com/JabamiProduction/collections/animes-vegetation-trees-1857f25e4885452989d634a46bd7ebd2",
+      "forwardAxis": "not applicable",
+      "browserSuitability": "Geometry is suitable for controlled instancing after permission and derivative review.",
+      "derivedCopyOperations": [
+        "do not recolour or replace original materials",
+        "confirm source permission",
+        "normalise pivot and ground contact in a project-local copy",
+        "prepare LODs and instancing without altering the source"
+      ],
+      "approvedPurpose": "Road-visible vegetation composition after permission confirmation",
+      "rejectedPurpose": "No runtime integration while permission remains pending",
+      "objectCount": 9,
+      "meshCount": 5,
+      "triangleCount": 5895,
+      "materialCount": 5,
+      "textureDependencies": [
+        {
+          "name": "Image_0",
+          "filepath": "",
+          "packed": true,
+          "resolution": [512, 512],
+          "missing": false
+        },
+        {
+          "name": "Image_1",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_2",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_3",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_4",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        }
+      ],
+      "dimensionsMetresAfterBlenderImport": [
+        9.269687175750732, 9.425478458404541, 14.193656533956528
+      ],
+      "boundingBoxAfterBlenderImport": {
+        "minimum": [-4.560640811920166, -4.40709924697876, -0.14940127730369568],
+        "maximum": [4.709046363830566, 5.018379211425781, 14.044255256652832]
+      },
+      "pivotAndRootOrigins": [
+        {
+          "object": "Sketchfab_model",
+          "originWorld": [0, 0, 0]
+        }
+      ],
+      "originAssessment": "multiple roots require normalisation in a derived copy",
+      "upAxis": "glTF Y-up; inspected after Blender Z-up import",
+      "hiddenObjects": [],
+      "presentationFloorOrBackgroundObjects": [],
+      "wheels": {
+        "namedObjectCount": 0,
+        "independentTransformNodes": [],
+        "separationStatus": "four independent wheel transforms not present"
+      },
+      "rigOrAnimation": {
+        "actionCount": 0,
+        "actions": [],
+        "textBlockCount": 0
+      },
+      "embeddedAssetMetadata": {
+        "generator": "Sketchfab-16.21.0",
+        "version": "2.0",
+        "extras": {
+          "author": "JABAMI Production (https://sketchfab.com/JabamiProduction)",
+          "license": "SKETCHFAB Standard (https://sketchfab.com/licenses)",
+          "source": "https://sketchfab.com/3d-models/jabami-anime-tree-v2-2b04272463c2451690964946210418ef",
+          "title": "Jabami Anime Tree v2"
+        }
+      }
+    },
+    {
+      "id": "jabami-anime-tree-v3",
+      "exactFilename": "jabami_anime_tree_v3.glb",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg\\jabami_anime_tree_v3.glb",
+      "relativeSourcePath": "Anime style veg\\jabami_anime_tree_v3.glb",
+      "fileFormat": "glb",
+      "fileSizeBytes": 569824,
+      "sha256": "da376c4abb41863d109ecb1d9a63bea3dd5244de66fae80b13fd9d02049f211c",
+      "assetTitle": "jabami_anime_tree_v3",
+      "creator": "JABAMI Production (matched collection/source naming)",
+      "ownership": "third-party",
+      "licence": {
+        "matchedSourceEvidence": "No embedded licence; matching JABAMI collection found but exact per-file permission not captured locally",
+        "status": "pending_full_asset_audit_permission_confirmation"
+      },
+      "attribution": "Pending exact per-file permission and attribution terms.",
+      "sourcePage": "https://sketchfab.com/JabamiProduction/collections/animes-vegetation-trees-1857f25e4885452989d634a46bd7ebd2",
+      "forwardAxis": "not applicable",
+      "browserSuitability": "Geometry is suitable for controlled instancing after permission and derivative review.",
+      "derivedCopyOperations": [
+        "do not recolour or replace original materials",
+        "confirm source permission",
+        "normalise pivot and ground contact in a project-local copy",
+        "prepare LODs and instancing without altering the source"
+      ],
+      "approvedPurpose": "Road-visible vegetation composition after permission confirmation",
+      "rejectedPurpose": "No runtime integration while permission remains pending",
+      "objectCount": 8,
+      "meshCount": 4,
+      "triangleCount": 1298,
+      "materialCount": 4,
+      "textureDependencies": [
+        {
+          "name": "Image_0",
+          "filepath": "",
+          "packed": true,
+          "resolution": [512, 512],
+          "missing": false
+        },
+        {
+          "name": "Image_1",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_2",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_3",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        }
+      ],
+      "dimensionsMetresAfterBlenderImport": [
+        4.3919079303741455, 4.47097635269165, 6.408917176333318
+      ],
+      "boundingBoxAfterBlenderImport": {
+        "minimum": [-2.4047293663024902, -2.256537914276123, -7.029446464912326e-7],
+        "maximum": [1.9871785640716553, 2.2144384384155273, 6.408916473388672]
+      },
+      "pivotAndRootOrigins": [
+        {
+          "object": "Sketchfab_model",
+          "originWorld": [0, 0, 0]
+        }
+      ],
+      "originAssessment": "multiple roots require normalisation in a derived copy",
+      "upAxis": "glTF Y-up; inspected after Blender Z-up import",
+      "hiddenObjects": [],
+      "presentationFloorOrBackgroundObjects": [],
+      "wheels": {
+        "namedObjectCount": 0,
+        "independentTransformNodes": [],
+        "separationStatus": "four independent wheel transforms not present"
+      },
+      "rigOrAnimation": {
+        "actionCount": 0,
+        "actions": [],
+        "textBlockCount": 0
+      },
+      "embeddedAssetMetadata": {
+        "generator": "Sketchfab-16.21.0",
+        "version": "2.0",
+        "extras": {
+          "author": "JABAMI Production (https://sketchfab.com/JabamiProduction)",
+          "license": "SKETCHFAB Standard (https://sketchfab.com/licenses)",
+          "source": "https://sketchfab.com/3d-models/jabami-anime-tree-v3-02e0690cb6104098b47bfbbde5c6dd8a",
+          "title": "Jabami Anime Tree v3"
+        }
+      }
+    },
+    {
+      "id": "jabami-anime-tree-v4",
+      "exactFilename": "jabami_anime_tree_v4.glb",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg\\jabami_anime_tree_v4.glb",
+      "relativeSourcePath": "Anime style veg\\jabami_anime_tree_v4.glb",
+      "fileFormat": "glb",
+      "fileSizeBytes": 515376,
+      "sha256": "c5561423de02a3e5ff32002507f20afac4593de97a1fb332d75b28ba76520cbc",
+      "assetTitle": "jabami_anime_tree_v4",
+      "creator": "JABAMI Production (matched collection/source naming)",
+      "ownership": "third-party",
+      "licence": {
+        "matchedSourceEvidence": "No embedded licence; matching JABAMI collection found but exact per-file permission not captured locally",
+        "status": "pending_full_asset_audit_permission_confirmation"
+      },
+      "attribution": "Pending exact per-file permission and attribution terms.",
+      "sourcePage": "https://sketchfab.com/JabamiProduction/collections/animes-vegetation-trees-1857f25e4885452989d634a46bd7ebd2",
+      "forwardAxis": "not applicable",
+      "browserSuitability": "Geometry is suitable for controlled instancing after permission and derivative review.",
+      "derivedCopyOperations": [
+        "do not recolour or replace original materials",
+        "confirm source permission",
+        "normalise pivot and ground contact in a project-local copy",
+        "prepare LODs and instancing without altering the source"
+      ],
+      "approvedPurpose": "Road-visible vegetation composition after permission confirmation",
+      "rejectedPurpose": "No runtime integration while permission remains pending",
+      "objectCount": 7,
+      "meshCount": 3,
+      "triangleCount": 945,
+      "materialCount": 3,
+      "textureDependencies": [
+        {
+          "name": "Image_0",
+          "filepath": "",
+          "packed": true,
+          "resolution": [512, 512],
+          "missing": false
+        },
+        {
+          "name": "Image_1",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_2",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        }
+      ],
+      "dimensionsMetresAfterBlenderImport": [
+        4.7166008949279785, 4.557009220123291, 8.845123908228857
+      ],
+      "boundingBoxAfterBlenderImport": {
+        "minimum": [-2.303942918777466, -2.0997140407562256, -6.172132316351053e-7],
+        "maximum": [2.4126579761505127, 2.4572951793670654, 8.845123291015625]
+      },
+      "pivotAndRootOrigins": [
+        {
+          "object": "Sketchfab_model",
+          "originWorld": [0, 0, 0]
+        }
+      ],
+      "originAssessment": "multiple roots require normalisation in a derived copy",
+      "upAxis": "glTF Y-up; inspected after Blender Z-up import",
+      "hiddenObjects": [],
+      "presentationFloorOrBackgroundObjects": [],
+      "wheels": {
+        "namedObjectCount": 0,
+        "independentTransformNodes": [],
+        "separationStatus": "four independent wheel transforms not present"
+      },
+      "rigOrAnimation": {
+        "actionCount": 0,
+        "actions": [],
+        "textBlockCount": 0
+      },
+      "embeddedAssetMetadata": {
+        "generator": "Sketchfab-16.21.0",
+        "version": "2.0",
+        "extras": {
+          "author": "JABAMI Production (https://sketchfab.com/JabamiProduction)",
+          "license": "SKETCHFAB Standard (https://sketchfab.com/licenses)",
+          "source": "https://sketchfab.com/3d-models/jabami-anime-tree-v4-ebc528b9103e46358b83d576e5023064",
+          "title": "Jabami Anime Tree v4"
+        }
+      }
+    },
+    {
+      "id": "jabami-anime-tree-v5",
+      "exactFilename": "jabami_anime_tree_v5.glb",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg\\jabami_anime_tree_v5.glb",
+      "relativeSourcePath": "Anime style veg\\jabami_anime_tree_v5.glb",
+      "fileFormat": "glb",
+      "fileSizeBytes": 522556,
+      "sha256": "4a87f97a0d73d5b9f5c27f032384b60983945732d8adba1cb0c1ca5b5adac426",
+      "assetTitle": "jabami_anime_tree_v5",
+      "creator": "JABAMI Production (matched collection/source naming)",
+      "ownership": "third-party",
+      "licence": {
+        "matchedSourceEvidence": "No embedded licence; matching JABAMI collection found but exact per-file permission not captured locally",
+        "status": "pending_full_asset_audit_permission_confirmation"
+      },
+      "attribution": "Pending exact per-file permission and attribution terms.",
+      "sourcePage": "https://sketchfab.com/JabamiProduction/collections/animes-vegetation-trees-1857f25e4885452989d634a46bd7ebd2",
+      "forwardAxis": "not applicable",
+      "browserSuitability": "Geometry is suitable for controlled instancing after permission and derivative review.",
+      "derivedCopyOperations": [
+        "do not recolour or replace original materials",
+        "confirm source permission",
+        "normalise pivot and ground contact in a project-local copy",
+        "prepare LODs and instancing without altering the source"
+      ],
+      "approvedPurpose": "Road-visible vegetation composition after permission confirmation",
+      "rejectedPurpose": "No runtime integration while permission remains pending",
+      "objectCount": 7,
+      "meshCount": 3,
+      "triangleCount": 909,
+      "materialCount": 3,
+      "textureDependencies": [
+        {
+          "name": "Image_0",
+          "filepath": "",
+          "packed": true,
+          "resolution": [512, 512],
+          "missing": false
+        },
+        {
+          "name": "Image_1",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        },
+        {
+          "name": "Image_2",
+          "filepath": "",
+          "packed": true,
+          "resolution": [1024, 1024],
+          "missing": false
+        }
+      ],
+      "dimensionsMetresAfterBlenderImport": [
+        4.560418367385864, 4.302786827087402, 12.790153056383133
+      ],
+      "boundingBoxAfterBlenderImport": {
+        "minimum": [-2.2647812366485596, -2.2460973262786865, -0.1417708694934845],
+        "maximum": [2.2956371307373047, 2.056689500808716, 12.648382186889648]
+      },
+      "pivotAndRootOrigins": [
+        {
+          "object": "Sketchfab_model",
+          "originWorld": [0, 0, 0]
+        }
+      ],
+      "originAssessment": "multiple roots require normalisation in a derived copy",
+      "upAxis": "glTF Y-up; inspected after Blender Z-up import",
+      "hiddenObjects": [],
+      "presentationFloorOrBackgroundObjects": [],
+      "wheels": {
+        "namedObjectCount": 0,
+        "independentTransformNodes": [],
+        "separationStatus": "four independent wheel transforms not present"
+      },
+      "rigOrAnimation": {
+        "actionCount": 0,
+        "actions": [],
+        "textBlockCount": 0
+      },
+      "embeddedAssetMetadata": {
+        "generator": "Sketchfab-16.21.0",
+        "version": "2.0",
+        "extras": {
+          "author": "JABAMI Production (https://sketchfab.com/JabamiProduction)",
+          "license": "SKETCHFAB Standard (https://sketchfab.com/licenses)",
+          "source": "https://sketchfab.com/3d-models/jabami-anime-tree-v5-c4254f4b7d9a48a6bde87e36a836a6c6",
+          "title": "Jabami Anime Tree v5"
+        }
+      }
+    },
+    {
+      "id": "lowpolyr34byarifido",
+      "exactFilename": "LowPolyR34ByArifido.blend",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Car model\\low-poly-nissan-skyline-gt-r-r34\\LowPolyR34ByArifido.blend",
+      "relativeSourcePath": "Car model\\low-poly-nissan-skyline-gt-r-r34\\LowPolyR34ByArifido.blend",
+      "fileFormat": "blend",
+      "fileSizeBytes": 1422940,
+      "sha256": "cff164c2776900fa26ec4d6170efdf177b22680ce42522256759def838ec0276",
+      "assetTitle": "Hinode Low-Poly R34 candidate source",
+      "creator": {
+        "userAssertion": "MD Anik Hasan",
+        "externalSourceRecord": "Arifido._",
+        "status": "conflict_requires_user_confirmation"
+      },
+      "ownership": "blocked: supplied filename and matching primary source page identify Arifido._",
+      "licence": {
+        "requestedProjectLicence": "CC BY 4.0 attributed solely to MD Anik Hasan",
+        "externalSourceLicence": "CC Attribution",
+        "status": "blocked_pending_confirmation_that_Arifido_is_MD_Anik_Hasan_or_separate_rights_evidence"
+      },
+      "attribution": "Do not create final attribution until the creator identity conflict is resolved.",
+      "sourcePage": "https://sketchfab.com/3d-models/low-poly-nissan-skyline-gt-r-r34-8ecbe8e4e432439fa7159d2e61f6bc9b",
+      "forwardAxis": "-Y inferred from camera/rear orientation and longitudinal bounds",
+      "browserSuitability": "Triangle budget is reasonable, but the model is not integration-ready: wheels are fused, origins are not gameplay-ready, and external image links are missing.",
+      "derivedCopyOperations": [
+        "resolve creator and licence contradiction",
+        "preserve untouched source",
+        "remove camera, light and hidden presentation empties",
+        "normalise origin and ground contact",
+        "separate four wheel geometry islands and create accurate pivots",
+        "remove third-party vehicle badges",
+        "create lights, collider and metadata only after rights confirmation"
+      ],
+      "approvedPurpose": "Hero-car candidate only after rights confirmation",
+      "rejectedPurpose": "No integration, relicensing, branding or redistribution while blocked",
+      "objectCount": 10,
+      "meshCount": 2,
+      "triangleCount": 11200,
+      "materialCount": 16,
+      "textureDependencies": [
+        {
+          "name": "00876-mid.jpg",
+          "filepath": "//..\\OneDrive\\Desktop\\00876-mid.jpg",
+          "packed": false,
+          "resolution": [0, 0],
+          "missing": true
+        },
+        {
+          "name": "lilienstein_4k.hdr",
+          "filepath": "//lilienstein_4k.hdr",
+          "packed": false,
+          "resolution": [0, 0],
+          "missing": true
+        }
+      ],
+      "dimensionsMetresAfterBlenderImport": [
+        1.6020948886871338, 3.8703100085258484, 1.1488328576087952
+      ],
+      "boundingBoxAfterBlenderImport": {
+        "minimum": [-0.8143439888954163, -3.095254421234131, -0.4279172420501709],
+        "maximum": [0.7877508997917175, 0.7750555872917175, 0.7209156155586243]
+      },
+      "pivotAndRootOrigins": [
+        {
+          "object": "Camera",
+          "originWorld": [1.47628, 4.27846, 0.90241]
+        },
+        {
+          "object": "Cube",
+          "originWorld": [-0.0133, -0.90987, 0]
+        },
+        {
+          "object": "Empty",
+          "originWorld": [-10.65883, -0.1919, -1.02126]
+        },
+        {
+          "object": "Empty.001",
+          "originWorld": [2.00007, 3.65412, -1.03172]
+        },
+        {
+          "object": "Empty.002",
+          "originWorld": [2.02021, 10.34218, 1.00994]
+        },
+        {
+          "object": "Empty.003",
+          "originWorld": [-0.86678, -0.16838, -2.20513]
+        },
+        {
+          "object": "Empty.004",
+          "originWorld": [-1.54787, -0.19679, -1.01469]
+        },
+        {
+          "object": "Empty.005",
+          "originWorld": [1.97551, -0.19679, -1.01469]
+        },
+        {
+          "object": "Light",
+          "originWorld": [4.07625, 1.00545, 5.90386]
+        }
+      ],
+      "originAssessment": "multiple roots require normalisation in a derived copy",
+      "upAxis": "Blender Z-up",
+      "hiddenObjects": ["Empty", "Empty.001", "Empty.002", "Empty.003", "Empty.004", "Empty.005"],
+      "presentationFloorOrBackgroundObjects": [],
+      "wheels": {
+        "namedObjectCount": 0,
+        "independentTransformNodes": [],
+        "separationStatus": "four independent wheel transforms not present"
+      },
+      "rigOrAnimation": {
+        "actionCount": 0,
+        "actions": [],
+        "textBlockCount": 0
+      },
+      "embeddedAssetMetadata": null
+    },
+    {
+      "id": "mazda-rx7-stylised",
+      "exactFilename": "mazda_rx7_stylised.glb",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Car model\\rx7\\mazda_rx7_stylised.glb",
+      "relativeSourcePath": "Car model\\rx7\\mazda_rx7_stylised.glb",
+      "fileFormat": "glb",
+      "fileSizeBytes": 408876,
+      "sha256": "424fd9d57d7034fd9535ebcde97450a00fa55e467bf7cb2a414cc12c87e21d19",
+      "assetTitle": "Mazda RX7 Stylised",
+      "creator": "SheldonJ99 (https://sketchfab.com/sheldonj99)",
+      "ownership": "third-party",
+      "licence": {
+        "identifier": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+        "status": "verified_from_embedded_glTF_asset_extras_and_matching_primary_source_page"
+      },
+      "attribution": "Attribution to SheldonJ99 is required for any later derivative or distribution.",
+      "sourcePage": "https://sketchfab.com/3d-models/mazda-rx7-stylised-898e9be8c8964f6298188a2901216e80",
+      "forwardAxis": "undetermined; source is approximately 100x real scale",
+      "browserSuitability": "Reasonable 5,733-triangle budget, but not ready: presentation floor, extreme scale and no independent wheel transforms.",
+      "derivedCopyOperations": [
+        "optional later vehicle only",
+        "remove presentation floor",
+        "normalise metre scale, origin, forward axis and ground contact",
+        "separate or prepare wheel pivots",
+        "preserve CC BY attribution and source metadata"
+      ],
+      "approvedPurpose": "Catalogue now; optional later vehicle after a separate approval",
+      "rejectedPurpose": "Do not add to the active game during Checkpoints 1 through 4",
+      "objectCount": 21,
+      "meshCount": 15,
+      "triangleCount": 5733,
+      "materialCount": 14,
+      "textureDependencies": [],
+      "dimensionsMetresAfterBlenderImport": [
+        585.6792907714844, 287.1656799316406, 177.21628046035767
+      ],
+      "boundingBoxAfterBlenderImport": {
+        "minimum": [-292.4000244140625, -143.65756225585938, -1.645632266998291],
+        "maximum": [293.2792663574219, 143.50811767578125, 175.57064819335938]
+      },
+      "pivotAndRootOrigins": [
+        {
+          "object": "Sketchfab_model",
+          "originWorld": [0, 0, 0]
+        }
+      ],
+      "originAssessment": "multiple roots require normalisation in a derived copy",
+      "upAxis": "glTF Y-up; inspected after Blender Z-up import",
+      "hiddenObjects": [],
+      "presentationFloorOrBackgroundObjects": ["Floor", "Floor_Material #7_0"],
+      "wheels": {
+        "namedObjectCount": 0,
+        "independentTransformNodes": [],
+        "separationStatus": "four independent wheel transforms not present"
+      },
+      "rigOrAnimation": {
+        "actionCount": 0,
+        "actions": [],
+        "textBlockCount": 0
+      },
+      "embeddedAssetMetadata": {
+        "generator": "Sketchfab-12.66.0",
+        "version": "2.0",
+        "extras": {
+          "author": "SheldonJ99 (https://sketchfab.com/sheldonj99)",
+          "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+          "source": "https://sketchfab.com/3d-models/mazda-rx7-stylised-898e9be8c8964f6298188a2901216e80",
+          "title": "Mazda RX7 Stylised"
+        }
+      }
+    },
+    {
+      "id": "nissan-skyline-r32-low-poly",
+      "exactFilename": "nissan_skyline_r32_-__low_poly.glb",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Car model\\skyline\\nissan_skyline_r32_-__low_poly.glb",
+      "relativeSourcePath": "Car model\\skyline\\nissan_skyline_r32_-__low_poly.glb",
+      "fileFormat": "glb",
+      "fileSizeBytes": 947804,
+      "sha256": "ef75a43572e54349dc97c118a897be9ef9c27e19d83f10767c0b03b503c05011",
+      "assetTitle": "Nissan Skyline R32 -  Low Poly",
+      "creator": "JiggleSticks (https://sketchfab.com/JiggleSticks)",
+      "ownership": "third-party",
+      "licence": {
+        "identifier": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+        "additionalRestrictionNotice": "Sketchfab source page is marked NoAI",
+        "status": "verified_for_catalogue_only"
+      },
+      "attribution": "Attribution to JiggleSticks would be required if used.",
+      "sourcePage": "https://sketchfab.com/3d-models/nissan-skyline-r32-low-poly-3c784f0649464a66b46007d7951723d2",
+      "forwardAxis": "-Y from front-wheel and rear-wheel node positions",
+      "browserSuitability": "Technically usable 17,980-triangle model with four independent wheel transforms, but explicitly excluded from initial production.",
+      "derivedCopyOperations": [],
+      "approvedPurpose": "Catalogue evidence only",
+      "rejectedPurpose": "Do not integrate, optimise or use as the hero vehicle",
+      "objectCount": 25,
+      "meshCount": 16,
+      "triangleCount": 17980,
+      "materialCount": 9,
+      "textureDependencies": [],
+      "dimensionsMetresAfterBlenderImport": [
+        1.733354091644287, 4.12143611907959, 1.2177577018737793
+      ],
+      "boundingBoxAfterBlenderImport": {
+        "minimum": [-0.8666769862174988, -2.061378240585327, -0.02953159809112549],
+        "maximum": [0.8666771054267883, 2.0600578784942627, 1.1882261037826538]
+      },
+      "pivotAndRootOrigins": [
+        {
+          "object": "Sketchfab_model",
+          "originWorld": [0, 0, 0]
+        }
+      ],
+      "originAssessment": "multiple roots require normalisation in a derived copy",
+      "upAxis": "glTF Y-up; inspected after Blender Z-up import",
+      "hiddenObjects": [],
+      "presentationFloorOrBackgroundObjects": [],
+      "wheels": {
+        "namedObjectCount": 12,
+        "independentTransformNodes": [
+          {
+            "name": "Front Wheel Left",
+            "originWorld": [0.82089, -1.1852, 0.27627]
+          },
+          {
+            "name": "Front Wheel Right",
+            "originWorld": [-0.79751, -1.18426, 0.27643]
+          },
+          {
+            "name": "Rear Wheel Left",
+            "originWorld": [0.82089, 1.17992, 0.27231]
+          },
+          {
+            "name": "Rear Wheel Right",
+            "originWorld": [-0.79751, 1.17937, 0.27194]
+          }
+        ],
+        "separationStatus": "four independent wheel transforms present"
+      },
+      "rigOrAnimation": {
+        "actionCount": 0,
+        "actions": [],
+        "textBlockCount": 0
+      },
+      "embeddedAssetMetadata": {
+        "generator": "Sketchfab-15.25.0",
+        "version": "2.0",
+        "extras": {
+          "author": "JiggleSticks (https://sketchfab.com/JiggleSticks)",
+          "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+          "source": "https://sketchfab.com/3d-models/nissan-skyline-r32-low-poly-3c784f0649464a66b46007d7951723d2",
+          "title": "Nissan Skyline R32 -  Low Poly"
+        }
+      }
+    },
+    {
+      "id": "neongenerator",
+      "exactFilename": "NeonGenerator.blend",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\NeonGenerator\\NeonGenerator.blend",
+      "relativeSourcePath": "NeonGenerator\\NeonGenerator.blend",
+      "fileFormat": "blend",
+      "fileSizeBytes": 1527840,
+      "sha256": "3eac0fbe42a1081897d1977b4133c9f3f8f0cbf155556f4fe9f26f3561e4c5d4",
+      "assetTitle": "Hinode NeonGenerator source",
+      "creator": "MD Anik Hasan (user assertion)",
+      "ownership": "user-owned per project instruction; no embedded ownership metadata found",
+      "licence": {
+        "identifier": "project-internal ownership assertion",
+        "status": "usable_for_internal_project_development; redistribution_terms_not_defined"
+      },
+      "attribution": "MD Anik Hasan",
+      "sourcePage": null,
+      "forwardAxis": "not applicable",
+      "browserSuitability": "Blender production tool, not a runtime asset. Contains curves, text, one reference-image plane and one action.",
+      "derivedCopyOperations": [
+        "preserve untouched source",
+        "derive project-local sign assets",
+        "remove reference-image plane from exported assets",
+        "convert approved curves/text to efficient sign geometry and emissive atlases"
+      ],
+      "approvedPurpose": "Sign and neon asset production after editor sign-zone approval",
+      "rejectedPurpose": "Do not load the Blender scene directly into the browser",
+      "objectCount": 4,
+      "meshCount": 1,
+      "triangleCount": 2,
+      "materialCount": 7,
+      "textureDependencies": [
+        {
+          "name": "Screenshot 2021-11-02 145338.png",
+          "filepath": "//Screenshot 2021-11-02 145338.png",
+          "packed": false,
+          "resolution": [0, 0],
+          "missing": true
+        }
+      ],
+      "dimensionsMetresAfterBlenderImport": [
+        0.640103816986084, 2.642536856001243e-8, 0.6045417785644531
+      ],
+      "boundingBoxAfterBlenderImport": {
+        "minimum": [1.2724361419677734, -0.000001250331138180627, 8.905203819274902],
+        "maximum": [1.9125399589538574, -0.0000012239057696206146, 9.509745597839355]
+      },
+      "pivotAndRootOrigins": [
+        {
+          "object": "NeonGlass",
+          "originWorld": [-2.52199, 0, 0]
+        },
+        {
+          "object": "NeonLight",
+          "originWorld": [-2.52199, 0, 0]
+        },
+        {
+          "object": "Screenshot 2021-11-02 145338",
+          "originWorld": [1.59249, 0, 9.20747]
+        },
+        {
+          "object": "Text",
+          "originWorld": [-10.05339, 0, 10.40748]
+        }
+      ],
+      "originAssessment": "multiple roots require normalisation in a derived copy",
+      "upAxis": "Blender Z-up",
+      "hiddenObjects": [],
+      "presentationFloorOrBackgroundObjects": [],
+      "wheels": {
+        "namedObjectCount": 0,
+        "independentTransformNodes": [],
+        "separationStatus": "four independent wheel transforms not present"
+      },
+      "rigOrAnimation": {
+        "actionCount": 1,
+        "actions": [
+          {
+            "name": "Shader NodetreeAction.001",
+            "frameRange": [1, 1],
+            "customProperties": {}
+          }
+        ],
+        "textBlockCount": 0
+      },
+      "embeddedAssetMetadata": null
+    }
+  ],
+  "supportingFiles": [
+    {
+      "exactFilename": "assets preview.png",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Anime style veg\\assets preview.png",
+      "relativeSourcePath": "Anime style veg\\assets preview.png",
+      "fileFormat": "png",
+      "fileSizeBytes": 627474,
+      "sha256": "6ac8c9976dfa60c5bf4c7720c7fde8cd34ac8e153feaca36b574c3f7ccc4eb37",
+      "role": "source preview or source-page evidence; never a runtime asset",
+      "imageDimensions": {
+        "width": 1577,
+        "height": 750
+      }
+    },
+    {
+      "exactFilename": "Screenshot 2026-07-29 033057.png",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Car model\\low-poly-nissan-skyline-gt-r-r34\\Screenshot 2026-07-29 033057.png",
+      "relativeSourcePath": "Car model\\low-poly-nissan-skyline-gt-r-r34\\Screenshot 2026-07-29 033057.png",
+      "fileFormat": "png",
+      "fileSizeBytes": 102365,
+      "sha256": "224af8fa3b7030b2fc20f08c3b810f3b57383039c2b788bec74c1b2d3bdf48e8",
+      "role": "source preview or source-page evidence; never a runtime asset",
+      "imageDimensions": {
+        "width": 807,
+        "height": 581
+      }
+    },
+    {
+      "exactFilename": "Screenshot 2026-07-29 033101.png",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Car model\\low-poly-nissan-skyline-gt-r-r34\\Screenshot 2026-07-29 033101.png",
+      "relativeSourcePath": "Car model\\low-poly-nissan-skyline-gt-r-r34\\Screenshot 2026-07-29 033101.png",
+      "fileFormat": "png",
+      "fileSizeBytes": 43296,
+      "sha256": "1df766c672c506ee8860ea3bc9c2ca48bf6efaf852d4107ce69ec882f5852d53",
+      "role": "source preview or source-page evidence; never a runtime asset",
+      "imageDimensions": {
+        "width": 533,
+        "height": 448
+      }
+    },
+    {
+      "exactFilename": "Screenshot 2026-07-29 033110.png",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Car model\\low-poly-nissan-skyline-gt-r-r34\\Screenshot 2026-07-29 033110.png",
+      "relativeSourcePath": "Car model\\low-poly-nissan-skyline-gt-r-r34\\Screenshot 2026-07-29 033110.png",
+      "fileFormat": "png",
+      "fileSizeBytes": 68047,
+      "sha256": "9b32b1daf9ac7399bf534c970a8fda58e8ec359652090546413502be7323e364",
+      "role": "source preview or source-page evidence; never a runtime asset",
+      "imageDimensions": {
+        "width": 687,
+        "height": 401
+      }
+    },
+    {
+      "exactFilename": "Screenshot 2026-07-29 033113.png",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Car model\\low-poly-nissan-skyline-gt-r-r34\\Screenshot 2026-07-29 033113.png",
+      "relativeSourcePath": "Car model\\low-poly-nissan-skyline-gt-r-r34\\Screenshot 2026-07-29 033113.png",
+      "fileFormat": "png",
+      "fileSizeBytes": 95389,
+      "sha256": "22732985f207ea42c4fac11e3a4bc364683eec451ca76ed53e9ce1fe1bddd74f",
+      "role": "source preview or source-page evidence; never a runtime asset",
+      "imageDimensions": {
+        "width": 700,
+        "height": 469
+      }
+    },
+    {
+      "exactFilename": "Screenshot_29-7-2026_33049_sketchfab.com.jpeg",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Car model\\low-poly-nissan-skyline-gt-r-r34\\Screenshot_29-7-2026_33049_sketchfab.com.jpeg",
+      "relativeSourcePath": "Car model\\low-poly-nissan-skyline-gt-r-r34\\Screenshot_29-7-2026_33049_sketchfab.com.jpeg",
+      "fileFormat": "jpeg",
+      "fileSizeBytes": 50902,
+      "sha256": "c86045dea4a4cd8ff26358b229c4978cd90d96a2df328798623fc049f01c1e5c",
+      "role": "source preview or source-page evidence; never a runtime asset",
+      "imageDimensions": {
+        "width": 1100,
+        "height": 651
+      }
+    },
+    {
+      "exactFilename": "Screenshot 2026-07-29 033630.png",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Car model\\rx7\\Screenshot 2026-07-29 033630.png",
+      "relativeSourcePath": "Car model\\rx7\\Screenshot 2026-07-29 033630.png",
+      "fileFormat": "png",
+      "fileSizeBytes": 428568,
+      "sha256": "84318b4790e0e2291fb1b154bc1081c1a290ffcedef7bd08e52f48d7bf9cf6ec",
+      "role": "source preview or source-page evidence; never a runtime asset",
+      "imageDimensions": {
+        "width": 887,
+        "height": 502
+      }
+    },
+    {
+      "exactFilename": "Screenshot 2026-07-29 033447.png",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Car model\\skyline\\Screenshot 2026-07-29 033447.png",
+      "relativeSourcePath": "Car model\\skyline\\Screenshot 2026-07-29 033447.png",
+      "fileFormat": "png",
+      "fileSizeBytes": 230830,
+      "sha256": "e2807b1be8d66e3e698f0c907b313479ea1a11439a58ae1ad162a409afe5ed25",
+      "role": "source preview or source-page evidence; never a runtime asset",
+      "imageDimensions": {
+        "width": 780,
+        "height": 545
+      }
+    },
+    {
+      "exactFilename": "Screenshot 2026-07-29 033452.png",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Car model\\skyline\\Screenshot 2026-07-29 033452.png",
+      "relativeSourcePath": "Car model\\skyline\\Screenshot 2026-07-29 033452.png",
+      "fileFormat": "png",
+      "fileSizeBytes": 275644,
+      "sha256": "c221f7928ac9ba03a3b6ca3fee04349b44d8394796676665e1f49540b8153a48",
+      "role": "source preview or source-page evidence; never a runtime asset",
+      "imageDimensions": {
+        "width": 881,
+        "height": 598
+      }
+    },
+    {
+      "exactFilename": "Screenshot 2026-07-29 033505.png",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Car model\\skyline\\Screenshot 2026-07-29 033505.png",
+      "relativeSourcePath": "Car model\\skyline\\Screenshot 2026-07-29 033505.png",
+      "fileFormat": "png",
+      "fileSizeBytes": 108282,
+      "sha256": "876479e796b8c9ad9e63bcca340ba72eeb0020367acf8cb2ad8f1911aeed6230",
+      "role": "source preview or source-page evidence; never a runtime asset",
+      "imageDimensions": {
+        "width": 512,
+        "height": 361
+      }
+    },
+    {
+      "exactFilename": "Screenshot 2026-07-29 033511.png",
+      "exactSourcePath": "C:\\Users\\anikh\\Downloads\\Webs blender ass\\Car model\\skyline\\Screenshot 2026-07-29 033511.png",
+      "relativeSourcePath": "Car model\\skyline\\Screenshot 2026-07-29 033511.png",
+      "fileFormat": "png",
+      "fileSizeBytes": 199007,
+      "sha256": "36ee87028e52b85995e5d45328d6499ea2ef429c0379eb4fb03e6da709a97266",
+      "role": "source preview or source-page evidence; never a runtime asset",
+      "imageDimensions": {
+        "width": 742,
+        "height": 509
+      }
+    }
+  ]
+}
