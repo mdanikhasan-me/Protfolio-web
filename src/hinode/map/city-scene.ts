@@ -17,6 +17,7 @@ import {
   MeshStandardMaterial,
   Object3D,
   PlaneGeometry,
+  SphereGeometry,
   Vector3,
 } from 'three';
 import {
@@ -43,7 +44,19 @@ export interface CitySceneBuild {
 }
 
 export type ReviewLayerKind =
-  'road-width' | 'footpaths' | 'parcels' | 'vegetation' | 'signs' | 'collision' | 'sightlines';
+  | 'topology'
+  | 'road-hierarchy'
+  | 'elevation'
+  | 'road-width'
+  | 'road-edges'
+  | 'safety'
+  | 'district-density'
+  | 'footpaths'
+  | 'parcels'
+  | 'vegetation'
+  | 'signs'
+  | 'collision'
+  | 'sightlines';
 
 interface ProxyFootprint {
   x: number;
@@ -70,6 +83,30 @@ const MARKING_COLOURS: Readonly<Record<HinodeRoad['surface'], number>> = {
   waterfront: 0x77cbea,
   elevated: 0xe9e7d9,
   tunnel: 0xff745f,
+};
+
+const EDGE_COLOURS: Readonly<Record<string, number>> = {
+  'highway-shoulder': 0x7fa8c9,
+  'crash-barrier-zone': 0xff665b,
+  'urban-pavement': 0xc8bfa9,
+  'maintenance-walkway': 0x7b91a6,
+  'painted-shoulder': 0xe3c65a,
+  'narrow-alley-drainage': 0x40677b,
+  'flush-building-edge': 0x8e6b73,
+  'mountain-drainage-channel': 0x426975,
+  'guardrail-zone': 0xf19a52,
+  seawall: 0x5eb3c6,
+};
+
+const HIERARCHY_COLOURS: Readonly<Record<string, number>> = {
+  'main-loop-highway': 0xf5f0da,
+  'secondary-commercial': 0x77d7ff,
+  'secondary-industrial': 0x92a6be,
+  'alley-narrow': 0xff6f9e,
+  'touge-mountain': 0xf5b84b,
+  'waterfront-scenic': 0x50e1d0,
+  'elevated-flyover': 0xff705b,
+  'underpass-connector': 0x9a7cff,
 };
 
 const hashString = (value: string) => {
@@ -205,10 +242,69 @@ function roadBand(
   return geometry;
 }
 
+const edgeMaterial = (edgeClass: string) => {
+  const colour = EDGE_COLOURS[edgeClass] ?? 0x626a76;
+  return new MeshStandardMaterial({
+    color: colour,
+    emissive: new Color(colour).multiplyScalar(0.16),
+    emissiveIntensity: 0.5,
+    roughness: 0.9,
+    metalness: edgeClass.includes('barrier') ? 0.28 : 0.04,
+    side: DoubleSide,
+  });
+};
+
+function roadProtection(
+  road: HinodeRoad,
+  points: Vector3[],
+  side: -1 | 1,
+  roadsideWidth: number,
+  protection: string,
+) {
+  if (protection === 'none' || protection === 'tunnel-wall') return undefined;
+  const halfWidth = road.width * 0.5;
+  const stride = protection === 'seawall' ? 2 : 3;
+  const placements = Math.ceil((points.length - 1) / stride);
+  const height = protection === 'seawall' ? 1.15 : 0.72;
+  const geometry = new BoxGeometry(0.18, height, 1);
+  const material = new MeshStandardMaterial({
+    color: protection === 'seawall' ? 0x59798b : 0x9ba7ad,
+    emissive: protection === 'canal-guardrail' ? 0x173444 : 0x15191d,
+    emissiveIntensity: 0.46,
+    roughness: 0.58,
+    metalness: 0.48,
+  });
+  const barriers = new InstancedMesh(geometry, material, placements);
+  barriers.name = `SAFETY_${side > 0 ? 'LEFT' : 'RIGHT'}_${road.id}`;
+  const dummy = new Object3D();
+  let placement = 0;
+  for (let index = 0; index < points.length - 1; index += stride) {
+    const point = points[index]!;
+    const next = points[Math.min(points.length - 1, index + stride)]!;
+    const tangent = next.clone().sub(point);
+    const length = Math.hypot(tangent.x, tangent.z) || 1;
+    const offset = side * (halfWidth + (road.edgePlan?.drainageWidth ?? 0) + roadsideWidth + 0.16);
+    dummy.position.set(
+      (point.x + next.x) * 0.5 + (tangent.z / length) * offset,
+      (point.y + next.y) * 0.5 + height * 0.5,
+      (point.z + next.z) * 0.5 - (tangent.x / length) * offset,
+    );
+    dummy.rotation.set(0, Math.atan2(tangent.x, tangent.z), 0);
+    dummy.scale.set(1, 1, Math.max(0.8, length * 1.04));
+    dummy.updateMatrix();
+    barriers.setMatrixAt(placement, dummy.matrix);
+    placement += 1;
+  }
+  barriers.count = placement;
+  barriers.instanceMatrix.needsUpdate = true;
+  return barriers;
+}
+
 function createRoad(
   road: HinodeRoad,
   roadside: HinodeRoadsidePlan | undefined,
   options: CitySceneOptions,
+  structure: HinodeCityLayout['authoring']['structures'][number] | undefined,
 ) {
   const group = new Group();
   group.name = `ROAD_${road.id}`;
@@ -247,34 +343,29 @@ function createRoad(
   );
   marking.name = `ROAD_MARKING_${road.id}`;
   group.add(marking);
-  const edgeMaterial = new LineBasicMaterial({
+  const roadEdgeLineMaterial = new LineBasicMaterial({
     color: road.surface === 'tunnel' ? 0xff655d : 0xa7c9e8,
     transparent: true,
     opacity: road.surface === 'alley' ? 0.34 : 0.66,
   });
-  const leftMarking = new Line(new BufferGeometry().setFromPoints(leftEdge), edgeMaterial);
+  const leftMarking = new Line(new BufferGeometry().setFromPoints(leftEdge), roadEdgeLineMaterial);
   leftMarking.name = `ROAD_EDGE_LEFT_${road.id}`;
-  const rightMarking = new Line(new BufferGeometry().setFromPoints(rightEdge), edgeMaterial);
+  const rightMarking = new Line(
+    new BufferGeometry().setFromPoints(rightEdge),
+    roadEdgeLineMaterial,
+  );
   rightMarking.name = `ROAD_EDGE_RIGHT_${road.id}`;
   group.add(leftMarking, rightMarking);
 
   if (roadside) {
     const halfWidth = road.width * 0.5;
-    const footpathMaterial = new MeshStandardMaterial({
-      color: road.surface === 'waterfront' ? 0x61778a : 0x626a76,
-      emissive: road.surface === 'waterfront' ? 0x122a38 : 0x171c25,
-      emissiveIntensity: 0.62,
-      roughness: 0.92,
-      metalness: 0.04,
-      side: DoubleSide,
-    });
     const leftFootpath = new Mesh(
       roadBand(
         road,
         halfWidth + roadside.drainageWidth,
         halfWidth + roadside.drainageWidth + roadside.leftWidth,
       ),
-      footpathMaterial,
+      edgeMaterial(roadside.leftClass),
     );
     leftFootpath.name = `FOOTPATH_LEFT_${road.id}`;
     leftFootpath.receiveShadow = options.quality === 'high';
@@ -284,7 +375,7 @@ function createRoad(
         -halfWidth - roadside.drainageWidth,
         -halfWidth - roadside.drainageWidth - roadside.rightWidth,
       ),
-      footpathMaterial,
+      edgeMaterial(roadside.rightClass),
     );
     rightFootpath.name = `FOOTPATH_RIGHT_${road.id}`;
     rightFootpath.receiveShadow = options.quality === 'high';
@@ -318,6 +409,23 @@ function createRoad(
     );
     rightDrain.name = `DRAINAGE_RIGHT_${road.id}`;
     group.add(leftDrain, rightDrain);
+
+    const leftProtection = roadProtection(
+      road,
+      points,
+      1,
+      roadside.leftWidth,
+      roadside.leftProtection,
+    );
+    const rightProtection = roadProtection(
+      road,
+      points,
+      -1,
+      roadside.rightWidth,
+      roadside.rightProtection,
+    );
+    if (leftProtection) group.add(leftProtection);
+    if (rightProtection) group.add(rightProtection);
   }
 
   if (road.surface === 'elevated') {
@@ -326,14 +434,37 @@ function createRoad(
       roughness: 0.72,
       metalness: 0.35,
     });
-    const supportGeometry = new BoxGeometry(1.2, 1, 1.2);
-    for (let index = 3; index < points.length - 3; index += 10) {
-      const point = points[index]!;
+    const underside = new Mesh(
+      roadBand(
+        road,
+        road.width * 0.5,
+        -road.width * 0.5,
+        -(structure?.deckThicknessMetres ?? 0.65),
+      ),
+      supportMaterial,
+    );
+    underside.name = `FLYOVER_UNDERSIDE_${road.id}`;
+    group.add(underside);
+    const supportGeometry = new BoxGeometry(1.15, 1, 1.15);
+    const curve = roadCurve({
+      ...road,
+      transform: { position: [0, 0, 0], rotationY: 0, scale: [1, 1, 1] },
+    });
+    for (const progress of structure?.supportProgress ?? [0.42, 0.68]) {
+      const point = curve.getPointAt(progress);
       if (point.y < 2) continue;
-      const support = new Mesh(supportGeometry, supportMaterial);
-      support.position.set(point.x, point.y * 0.5, point.z);
-      support.scale.y = point.y;
-      group.add(support);
+      const tangent = curve.getTangentAt(progress);
+      const normal = new Vector3(tangent.z, 0, -tangent.x).normalize();
+      for (const side of [-1, 1]) {
+        const support = new Mesh(supportGeometry, supportMaterial);
+        support.name = `FLYOVER_SUPPORT_${road.id}_${progress}_${side}`;
+        support.position
+          .copy(point)
+          .addScaledVector(normal, side * (structure?.supportOffsetMetres ?? 4.7));
+        support.position.y = point.y * 0.5;
+        support.scale.y = point.y;
+        group.add(support);
+      }
     }
   }
 
@@ -343,16 +474,55 @@ function createRoad(
       roughness: 0.78,
       metalness: 0.26,
     });
-    const wallGeometry = new BoxGeometry(0.8, 4.5, 4);
+    const wallGeometry = new BoxGeometry(0.8, 4.6, 4);
+    const ceilingGeometry = new BoxGeometry(road.width + 2.1, 0.7, 4);
+    const tunnelSamples: Array<{
+      point: Vector3;
+      normal: Vector3;
+      yaw: number;
+      segmentLength: number;
+    }> = [];
     for (let index = 8; index < points.length - 8; index += 8) {
       const point = points[index]!;
       if (point.y > -1) continue;
-      for (const side of [-1, 1]) {
-        const wall = new Mesh(wallGeometry, tunnelMaterial);
-        wall.position.set(point.x + side * (road.width * 0.55), point.y + 2.2, point.z);
-        group.add(wall);
-      }
+      const before = points[Math.max(0, index - 1)]!;
+      const after = points[Math.min(points.length - 1, index + 1)]!;
+      const tangent = after.clone().sub(before);
+      const length = Math.hypot(tangent.x, tangent.z) || 1;
+      tunnelSamples.push({
+        point,
+        normal: new Vector3(tangent.z / length, 0, -tangent.x / length),
+        yaw: Math.atan2(tangent.x, tangent.z),
+        segmentLength: Math.max(1, length * 0.5),
+      });
     }
+    const walls = new InstancedMesh(wallGeometry, tunnelMaterial, tunnelSamples.length * 2);
+    walls.name = `TUNNEL_WALLS_${road.id}`;
+    const ceilings = new InstancedMesh(ceilingGeometry, tunnelMaterial, tunnelSamples.length);
+    ceilings.name = `TUNNEL_CEILING_${road.id}`;
+    const dummy = new Object3D();
+    let wallIndex = 0;
+    tunnelSamples.forEach((sample, sampleIndex) => {
+      for (const side of [-1, 1]) {
+        dummy.position
+          .copy(sample.point)
+          .addScaledVector(sample.normal, side * (road.width * 0.58));
+        dummy.position.y = sample.point.y + 2.25;
+        dummy.rotation.set(0, sample.yaw, 0);
+        dummy.scale.set(1, 1, sample.segmentLength);
+        dummy.updateMatrix();
+        walls.setMatrixAt(wallIndex, dummy.matrix);
+        wallIndex += 1;
+      }
+      dummy.position.set(sample.point.x, sample.point.y + 4.65, sample.point.z);
+      dummy.rotation.set(0, sample.yaw, 0);
+      dummy.scale.set(1, 1, sample.segmentLength);
+      dummy.updateMatrix();
+      ceilings.setMatrixAt(sampleIndex, dummy.matrix);
+    });
+    walls.instanceMatrix.needsUpdate = true;
+    ceilings.instanceMatrix.needsUpdate = true;
+    group.add(walls, ceilings);
   }
   return group;
 }
@@ -360,6 +530,119 @@ function createRoad(
 const footprintsOverlap = (first: ProxyFootprint, second: ProxyFootprint, margin = 0.8) =>
   Math.abs(first.x - second.x) < first.halfWidth + second.halfWidth + margin &&
   Math.abs(first.z - second.z) < first.halfDepth + second.halfDepth + margin;
+
+function createTerrainMass(
+  mass: NonNullable<HinodeCityLayout['authoring']['terrainMasses']>[number],
+) {
+  const group = new Group();
+  group.name = `TERRAIN_MASS_${mass.id}`;
+  const geometry =
+    mass.shape === 'rounded-foothill'
+      ? new SphereGeometry(0.5, 24, 12)
+      : new SphereGeometry(0.5, 18, 8);
+  const material = new MeshStandardMaterial({
+    color: mass.shape === 'rounded-foothill' ? 0x23352f : 0x1b2c29,
+    emissive: 0x07110f,
+    emissiveIntensity: 0.42,
+    roughness: 0.98,
+    metalness: 0,
+  });
+  const mesh = new Mesh(geometry, material);
+  mesh.name = `TERRAIN_SURFACE_${mass.id}`;
+  mesh.position.set(mass.centre[0], mass.maximumHeightMetres * 0.5 - 2, mass.centre[2]);
+  mesh.rotation.y = mass.rotationY;
+  mesh.scale.set(mass.size[0], mass.maximumHeightMetres, mass.size[2]);
+  mesh.receiveShadow = true;
+  mesh.castShadow = true;
+  group.add(mesh);
+  return group;
+}
+
+function createLightingSockets(layout: HinodeCityLayout) {
+  const group = new Group();
+  group.name = 'LIGHTING_SOURCE_PROXIES';
+  const polePlacements: Array<{ matrix: Matrix4; colour: Color }> = [];
+  const fixturePlacements: Array<{ matrix: Matrix4; colour: Color }> = [];
+  const signPlacements: Array<{ matrix: Matrix4; colour: Color }> = [];
+  const dummy = new Object3D();
+  for (const zone of layout.authoring.lightingZones ?? []) {
+    const road = layout.roads.find((candidate) => candidate.id === zone.roadId);
+    if (!road) continue;
+    const curve = roadCurve(road);
+    zone.progresses.forEach((progress, index) => {
+      const point = curve.getPointAt(progress);
+      const tangent = curve.getTangentAt(progress).normalize();
+      const normal = new Vector3(tangent.z, 0, -tangent.x).normalize();
+      const yaw = Math.atan2(tangent.x, tangent.z);
+      const colour = new Color(zone.colour);
+      if (zone.type === 'streetlight') {
+        const side = index % 2 === 0 ? 1 : -1;
+        const base = point.clone().addScaledVector(normal, side * (road.width * 0.5 + 1.25));
+        dummy.position.set(base.x, point.y + 2.1, base.z);
+        dummy.rotation.set(0, yaw, 0);
+        dummy.scale.set(1, 1, 1);
+        dummy.updateMatrix();
+        polePlacements.push({ matrix: dummy.matrix.clone(), colour });
+        dummy.position.set(base.x, point.y + 4.2, base.z);
+        dummy.rotation.set(0, yaw, 0);
+        dummy.scale.set(1, 1, 1);
+        dummy.updateMatrix();
+        fixturePlacements.push({ matrix: dummy.matrix.clone(), colour });
+      } else if (zone.type === 'tunnel-light') {
+        dummy.position.set(point.x, point.y + 4.15, point.z);
+        dummy.rotation.set(0, yaw, 0);
+        dummy.scale.set(1.8, 1, 0.65);
+        dummy.updateMatrix();
+        fixturePlacements.push({ matrix: dummy.matrix.clone(), colour });
+      } else {
+        const base = point.clone().addScaledVector(normal, road.width * 0.5 + 2.4);
+        dummy.position.set(base.x, point.y + 4.4, base.z);
+        dummy.rotation.set(0, yaw, 0);
+        dummy.scale.set(1, 1, 1);
+        dummy.updateMatrix();
+        signPlacements.push({ matrix: dummy.matrix.clone(), colour });
+      }
+    });
+  }
+
+  if (polePlacements.length) {
+    const poles = new InstancedMesh(
+      new BoxGeometry(0.14, 4.2, 0.14),
+      new MeshStandardMaterial({ color: 0x34414d, roughness: 0.62, metalness: 0.5 }),
+      polePlacements.length,
+    );
+    poles.name = 'STREETLIGHT_PROXY_POLES';
+    polePlacements.forEach((placement, index) => poles.setMatrixAt(index, placement.matrix));
+    group.add(poles);
+  }
+  if (fixturePlacements.length) {
+    const fixtures = new InstancedMesh(
+      new BoxGeometry(0.72, 0.16, 0.72),
+      new MeshBasicMaterial({ color: 0xffffff }),
+      fixturePlacements.length,
+    );
+    fixtures.name = 'VISIBLE_LIGHT_PROXY_FIXTURES';
+    fixturePlacements.forEach((placement, index) => {
+      fixtures.setMatrixAt(index, placement.matrix);
+      fixtures.setColorAt(index, placement.colour);
+    });
+    group.add(fixtures);
+  }
+  if (signPlacements.length) {
+    const signs = new InstancedMesh(
+      new BoxGeometry(2.6, 1.35, 0.18),
+      new MeshBasicMaterial({ color: 0xffffff }),
+      signPlacements.length,
+    );
+    signs.name = 'COMMERCIAL_LIGHT_PROXY_SOURCES';
+    signPlacements.forEach((placement, index) => {
+      signs.setMatrixAt(index, placement.matrix);
+      signs.setColorAt(index, placement.colour);
+    });
+    group.add(signs);
+  }
+  return group;
+}
 
 function createDistrict(
   district: HinodeDistrict,
@@ -384,7 +667,7 @@ function createDistrict(
     district.id === 'touge' ? 12 : 18,
     Math.min(options.quality === 'high' ? 130 : 52, baseCount),
   );
-  const geometry = district.id === 'touge' ? new ConeGeometry(1, 1, 7) : new BoxGeometry(1, 1, 1);
+  const geometry = new BoxGeometry(1, 1, 1);
   const colour = new Color(district.colour);
   const material = new MeshStandardMaterial({
     color: colour,
@@ -405,13 +688,13 @@ function createDistrict(
   for (let attempt = 0; attempt < maximumAttempts && placements.length < count; attempt += 1) {
     const x = (random() - 0.5) * district.size[0] * 0.88;
     const z = (random() - 0.5) * district.size[2] * 0.88;
-    const width = district.id === 'touge' ? 10 + random() * 20 : 5 + random() * 9;
-    const depth = district.id === 'touge' ? 10 + random() * 20 : 5 + random() * 10;
+    const width = district.id === 'touge' ? 4 + random() * 6 : 5 + random() * 9;
+    const depth = district.id === 'touge' ? 4 + random() * 7 : 5 + random() * 10;
     const height =
       district.id === 'downtown'
         ? 12 + random() * district.size[1]
         : district.id === 'touge'
-          ? 14 + random() * 22
+          ? 3 + random() * 6
           : 5 + random() * district.size[1] * 0.7;
     const worldX = district.centre[0] + x;
     const worldZ = district.centre[2] + z;
@@ -518,7 +801,13 @@ function createReviewLayers(layout: HinodeCityLayout) {
     layers.set(kind, group);
     return group;
   };
+  const topology = addLayer('topology');
+  const hierarchy = addLayer('road-hierarchy');
+  const elevation = addLayer('elevation');
   const roadWidth = addLayer('road-width');
+  const roadEdges = addLayer('road-edges');
+  const safety = addLayer('safety');
+  const districtDensity = addLayer('district-density');
   const footpaths = addLayer('footpaths');
   const parcels = addLayer('parcels');
   const vegetation = addLayer('vegetation');
@@ -527,12 +816,13 @@ function createReviewLayers(layout: HinodeCityLayout) {
   const sightlines = addLayer('sightlines');
 
   for (const road of layout.roads) {
+    const roadGeometry = roadRibbon(road);
     const wrapper = new Group();
     wrapper.position.set(...road.transform.position);
     wrapper.rotation.y = road.transform.rotationY;
     wrapper.scale.set(...road.transform.scale);
     const overlay = new Mesh(
-      roadRibbon(road).geometry,
+      roadGeometry.geometry,
       new MeshBasicMaterial({
         color: 0x57e6ff,
         transparent: true,
@@ -545,6 +835,59 @@ function createReviewLayers(layout: HinodeCityLayout) {
     overlay.renderOrder = 45;
     wrapper.add(overlay);
     roadWidth.add(wrapper);
+
+    const topologyWrapper = new Group();
+    topologyWrapper.position.copy(wrapper.position);
+    topologyWrapper.rotation.copy(wrapper.rotation);
+    topologyWrapper.scale.copy(wrapper.scale);
+    const topologyLine = new Line(
+      new BufferGeometry().setFromPoints(
+        roadGeometry.points.map((point) => point.clone().add(new Vector3(0, 0.2, 0))),
+      ),
+      new LineBasicMaterial({
+        color:
+          road.kind === 'primary-loop' ? 0xffffff : road.kind === 'shortcut' ? 0xff6b9b : 0x66d9ff,
+        depthTest: false,
+      }),
+    );
+    topologyLine.renderOrder = 55;
+    topologyWrapper.add(topologyLine);
+    topology.add(topologyWrapper);
+
+    const overlayRoad = (target: Group, colour: number, opacity: number, renderOrder: number) => {
+      const overlayWrapper = new Group();
+      overlayWrapper.position.copy(wrapper.position);
+      overlayWrapper.rotation.copy(wrapper.rotation);
+      overlayWrapper.scale.copy(wrapper.scale);
+      const mesh = new Mesh(
+        roadGeometry.geometry,
+        new MeshBasicMaterial({
+          color: colour,
+          transparent: true,
+          opacity,
+          side: DoubleSide,
+          depthWrite: false,
+          depthTest: false,
+        }),
+      );
+      mesh.renderOrder = renderOrder;
+      overlayWrapper.add(mesh);
+      target.add(overlayWrapper);
+    };
+    overlayRoad(hierarchy, HIERARCHY_COLOURS[road.roadClass ?? ''] ?? 0x8190a8, 0.82, 47);
+    const maximumRoadElevation = Math.max(...road.points.map((point) => point[1]));
+    overlayRoad(
+      elevation,
+      maximumRoadElevation >= 6
+        ? 0xff5c56
+        : maximumRoadElevation > 0
+          ? 0xffc657
+          : road.surface === 'tunnel'
+            ? 0x8f73ff
+            : 0x4dc7f0,
+      0.84,
+      48,
+    );
 
     const roadside = layout.planning.footpaths.find((item) => item.roadId === road.id);
     if (!roadside) continue;
@@ -576,8 +919,78 @@ function createReviewLayers(layout: HinodeCityLayout) {
       footpathWrapper.add(mesh);
     }
     footpaths.add(footpathWrapper);
+
+    const edgeWrapper = new Group();
+    edgeWrapper.position.copy(wrapper.position);
+    edgeWrapper.rotation.copy(wrapper.rotation);
+    edgeWrapper.scale.copy(wrapper.scale);
+    const safetyWrapper = edgeWrapper.clone(false);
+    const sidePlans = [
+      {
+        side: 1,
+        width: roadside.leftWidth,
+        edgeClass: roadside.leftClass,
+        protection: roadside.leftProtection,
+      },
+      {
+        side: -1,
+        width: roadside.rightWidth,
+        edgeClass: roadside.rightClass,
+        protection: roadside.rightProtection,
+      },
+    ] as const;
+    for (const sidePlan of sidePlans) {
+      const inner = sidePlan.side * (halfWidth + roadside.drainageWidth);
+      const outer = sidePlan.side * (halfWidth + roadside.drainageWidth + sidePlan.width);
+      const edgeMesh = new Mesh(
+        roadBand(road, inner, outer, 0.14),
+        new MeshBasicMaterial({
+          color: EDGE_COLOURS[sidePlan.edgeClass] ?? 0xffffff,
+          transparent: true,
+          opacity: 0.92,
+          side: DoubleSide,
+          depthWrite: false,
+          depthTest: false,
+        }),
+      );
+      edgeMesh.renderOrder = 49;
+      edgeWrapper.add(edgeMesh);
+      if (sidePlan.protection !== 'none') {
+        const safetyMesh = new Mesh(
+          roadBand(road, inner, outer, 0.18),
+          new MeshBasicMaterial({
+            color: 0xff4f5f,
+            transparent: true,
+            opacity: 0.9,
+            side: DoubleSide,
+            depthWrite: false,
+            depthTest: false,
+          }),
+        );
+        safetyMesh.renderOrder = 50;
+        safetyWrapper.add(safetyMesh);
+      }
+    }
+    roadEdges.add(edgeWrapper);
+    safety.add(safetyWrapper);
   }
 
+  layout.districts.forEach((district) =>
+    districtDensity.add(
+      zonePlane(
+        {
+          id: `density-${district.id}`,
+          label: `${district.label} density`,
+          centre: district.centre,
+          size: district.size,
+          rotationY: district.rotationY ?? 0,
+          districtId: district.id,
+        },
+        new Color(district.colour).getHex(),
+        0.42 + district.proxyDensity * 0.35,
+      ),
+    ),
+  );
   layout.planning.parcels.forEach((zone) => parcels.add(zonePlane(zone, 0xa9baff, 0.19)));
   layout.planning.vegetationZones.forEach((zone) =>
     vegetation.add(zonePlane(zone, 0x51ef91, 0.42)),
@@ -676,6 +1089,11 @@ export function buildCityScene(
     root.add(mesh);
   }
 
+  for (const terrainMass of layout.authoring.terrainMasses ?? []) {
+    root.add(createTerrainMass(terrainMass));
+  }
+  root.add(createLightingSockets(layout));
+
   const occupied: ProxyFootprint[] = [];
   for (const district of layout.districts) {
     const group = createDistrict(district, layout, options, occupied);
@@ -687,6 +1105,7 @@ export function buildCityScene(
       road,
       layout.planning.footpaths.find((item) => item.roadId === road.id),
       options,
+      layout.authoring.structures.find((structure) => structure.roadId === road.id),
     );
     root.add(group);
     editableObjects.set(`road:${road.id}`, group);

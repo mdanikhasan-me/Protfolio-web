@@ -9,6 +9,29 @@ export interface LayoutTransform {
 }
 
 export type HinodeRoadKind = 'primary-loop' | 'route' | 'connector' | 'shortcut' | 'underpass';
+export type HinodeRoadEdgeClass =
+  | 'highway-shoulder'
+  | 'crash-barrier-zone'
+  | 'urban-pavement'
+  | 'maintenance-walkway'
+  | 'painted-shoulder'
+  | 'narrow-alley-drainage'
+  | 'flush-building-edge'
+  | 'mountain-drainage-channel'
+  | 'guardrail-zone'
+  | 'seawall';
+export type HinodeRoadProtection =
+  'none' | 'crash-barrier' | 'guardrail' | 'seawall' | 'tunnel-wall' | 'canal-guardrail';
+
+export interface HinodeRoadEdgePlan {
+  leftClass: HinodeRoadEdgeClass;
+  rightClass: HinodeRoadEdgeClass;
+  leftWidth: number;
+  rightWidth: number;
+  drainageWidth: number;
+  leftProtection: HinodeRoadProtection;
+  rightProtection: HinodeRoadProtection;
+}
 
 export interface HinodeBezierSpline {
   type: 'cubic-bezier';
@@ -21,11 +44,13 @@ export interface HinodeRoad {
   id: string;
   label: string;
   kind: HinodeRoadKind;
+  roadClass?: string;
   surface: 'highway' | 'city' | 'alley' | 'mountain' | 'waterfront' | 'elevated' | 'tunnel';
   width: number;
   lanes: number;
   direction: 'one-way' | 'two-way';
   closed: boolean;
+  edgePlan?: HinodeRoadEdgePlan;
   spline: HinodeBezierSpline;
   transform: LayoutTransform;
   points: LayoutPoint[];
@@ -53,11 +78,8 @@ export interface HinodeWater {
   colour: string;
 }
 
-export interface HinodeRoadsidePlan {
+export interface HinodeRoadsidePlan extends HinodeRoadEdgePlan {
   roadId: string;
-  leftWidth: number;
-  rightWidth: number;
-  drainageWidth: number;
 }
 
 export interface HinodePlanZone {
@@ -75,6 +97,7 @@ export interface HinodeCollisionVolume {
   label: string;
   centre: LayoutPoint;
   size: LayoutPoint;
+  collisionClass?: string;
 }
 
 export interface HinodeReviewView {
@@ -92,6 +115,7 @@ export interface HinodePlanningLayers {
   parcels: HinodePlanZone[];
   vegetationZones: HinodePlanZone[];
   signZones: HinodePlanZone[];
+  darkRestZones?: HinodePlanZone[];
   collisionVolumes: HinodeCollisionVolume[];
   reviewViews: HinodeReviewView[];
 }
@@ -129,6 +153,46 @@ export interface HinodeAuthoringData {
     type: 'flyover' | 'underpass';
     roadId: string;
     minimumClearanceMetres: number;
+    originRoadId?: string;
+    destinationRoadId?: string;
+    lowerRoadId?: string;
+    entranceProgress?: [number, number];
+    deckProgress?: [number, number];
+    exitProgress?: [number, number];
+    deckElevationMetres?: number;
+    deckThicknessMetres?: number;
+    maximumGradientPercent?: number;
+    supportProgress?: [number, number] | [];
+    supportOffsetMetres?: number;
+    reason?: string;
+  }>;
+  gradeSeparatedCrossings?: Array<{
+    id: string;
+    upperRoadId: string;
+    lowerRoadId: string;
+    centre: [number, number];
+    upperElevationMetres: number;
+    lowerElevationMetres: number;
+    minimumClearanceMetres: number;
+    junctionAtSameGrade: false;
+  }>;
+  terrainMasses?: Array<{
+    id: string;
+    label: string;
+    centre: LayoutPoint;
+    size: LayoutPoint;
+    rotationY: number;
+    shape: string;
+    maximumHeightMetres: number;
+  }>;
+  lightingZones?: Array<{
+    id: string;
+    type: 'streetlight' | 'commercial-zone' | 'tunnel-light';
+    roadId: string;
+    progresses: number[];
+    colour: string;
+    intensity: number;
+    rangeMetres: number;
   }>;
   canals: string[];
   landmarks: HinodePlanZone[];
@@ -164,6 +228,8 @@ export interface HinodeCityLayout {
   editorVersion: string;
   layoutVersion: string;
   layoutId: string;
+  topologyId?: string;
+  referenceManifestId?: string;
   name: string;
   status: string;
   coordinateSystem: string;
@@ -452,8 +518,8 @@ export function validateCityLayout(value: unknown): LayoutValidation {
     if (!Array.isArray(road.points) || road.points.length < 2) {
       errors.push(`${road.id} needs at least two control points.`);
     }
-    if (!(road.width >= 4 && road.width <= 14)) {
-      errors.push(`${road.id} width is outside the 4–14 metre authoring range.`);
+    if (!(road.width >= 3 && road.width <= 14)) {
+      errors.push(`${road.id} width is outside the 3–14 metre authoring range.`);
     }
     if (road.spline?.type !== 'cubic-bezier') {
       errors.push(`${road.id} must use the cubic-bezier spline contract.`);
@@ -489,8 +555,11 @@ export function validateCityLayout(value: unknown): LayoutValidation {
   }
   for (const item of footpaths) {
     if (!ids.has(item.roadId)) errors.push(`Footpath references unknown road: ${item.roadId}.`);
-    if (item.leftWidth < 0.4 || item.rightWidth < 0.4) {
-      errors.push(`Footpath width is too narrow for ${item.roadId}.`);
+    if (item.leftWidth < 0 || item.rightWidth < 0) {
+      errors.push(`Road-edge width cannot be negative for ${item.roadId}.`);
+    }
+    if (!item.leftClass || !item.rightClass || !item.leftProtection || !item.rightProtection) {
+      errors.push(`Explicit edge classes and protection are missing for ${item.roadId}.`);
     }
   }
   const districts = Array.isArray(layout?.districts) ? layout.districts : [];
@@ -520,7 +589,20 @@ export function validateCityLayout(value: unknown): LayoutValidation {
       errors.push(`Sign zone references unknown road: ${zone.id}.`);
     }
   }
-  const requiredViews = new Set([...districtIds, 'flyover-review', 'underpass-review']);
+  const requiredViews =
+    layout.layoutId === 'HINODE_CITY_V2_CANDIDATE'
+      ? new Set([
+          'main-loop-v2',
+          'secondary-v2',
+          'alley-v2',
+          'touge-v2',
+          'waterfront-v2',
+          'port-v2',
+          'flyover-approach-v2',
+          'flyover-lower-v2',
+          'underpass-entrance-v2',
+        ])
+      : new Set([...districtIds, 'flyover-review', 'underpass-review']);
   const reviewIds = new Set(reviewViews.map((view) => view.id));
   for (const id of requiredViews) {
     if (!reviewIds.has(id)) errors.push(`Required review view is missing: ${id}.`);
@@ -534,7 +616,7 @@ export function validateCityLayout(value: unknown): LayoutValidation {
   const elevations = roads.flatMap((road) => road.points.map((point) => point[1]));
   const maximumElevationMetres = Math.max(0, ...elevations);
   const minimumElevationMetres = Math.min(0, ...elevations);
-  if (maximumElevationMetres < 8) errors.push('A visible flyover elevation is required.');
+  if (maximumElevationMetres < 8) errors.push('Visible elevation change is required.');
   if (minimumElevationMetres >= 0) errors.push('A tunnel or underpass below grade is required.');
   const routeLengthMetres = roads.reduce((total, road) => total + roadLength(road), 0);
   if (routeLengthMetres < 2_500) errors.push('The authored road network is too short.');
@@ -551,6 +633,16 @@ export function validateCityLayout(value: unknown): LayoutValidation {
     }
     if (layout.authoring.routeCheckpoints.length < layout.gameplay.checkpointRoadOrder.length) {
       errors.push('Every gameplay route gate requires an authored checkpoint.');
+    }
+    if (
+      layout.layoutId === 'HINODE_CITY_V2_CANDIDATE' &&
+      !layout.authoring.structures.some(
+        (structure) =>
+          structure.type === 'flyover' &&
+          (structure.deckElevationMetres ?? 0) >= structure.minimumClearanceMetres,
+      )
+    ) {
+      errors.push('The v2 flyover requires a complete, clearance-safe deck.');
     }
   }
 
@@ -576,7 +668,7 @@ export function validateCityLayout(value: unknown): LayoutValidation {
 }
 
 export async function loadCityLayout(
-  url = '/hinode/layouts/hinode-city-v1.json',
+  url = '/hinode/layouts/hinode-city-v2-candidate.json',
 ): Promise<HinodeCityLayout> {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Hinode layout request failed: HTTP ${response.status}`);

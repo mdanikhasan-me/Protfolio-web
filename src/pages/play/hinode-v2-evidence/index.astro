@@ -1,0 +1,852 @@
+---
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import process from 'node:process';
+import HinodePreviewLayout from '../../../hinode/ui/HinodePreviewLayout.astro';
+
+const topology = JSON.parse(
+  await readFile(
+    path.join(process.cwd(), 'public', 'hinode', 'layouts', 'hinode-city-v2-topology.json'),
+    'utf8',
+  ),
+);
+const layout = JSON.parse(
+  await readFile(
+    path.join(process.cwd(), 'public', 'hinode', 'layouts', 'hinode-city-v2-candidate.json'),
+    'utf8',
+  ),
+);
+
+const viewWidth = 750;
+const viewHeight = 525;
+const mapPoint = ([x, z]: [number, number]): [number, number] => [
+  ((x - topology.bounds.minimumX) / topology.bounds.width) * viewWidth,
+  viewHeight - ((z - topology.bounds.minimumZ) / topology.bounds.depth) * viewHeight,
+];
+const routePoints = (route: (typeof topology.routes)[number]) =>
+  [...route.points, ...(route.closed ? [route.points[0]] : [])]
+    .map((point: [number, number]) => mapPoint(point).join(','))
+    .join(' ');
+const districtRect = (district: (typeof topology.districts)[number]) => {
+  const [x, y] = mapPoint([
+    district.centre[0] - district.size[0] / 2,
+    district.centre[1] + district.size[1] / 2,
+  ]);
+  return {
+    x,
+    y,
+    width: (district.size[0] / topology.bounds.width) * viewWidth,
+    height: (district.size[1] / topology.bounds.depth) * viewHeight,
+  };
+};
+const hierarchyColours: Record<string, string> = {
+  'main-loop-highway': '#f5f0da',
+  'secondary-commercial': '#6ed6ff',
+  'secondary-industrial': '#8da0b8',
+  'alley-narrow': '#ff6b9a',
+  'touge-mountain': '#efb449',
+  'waterfront-scenic': '#4ce0cc',
+  'elevated-flyover': '#ff6657',
+  'underpass-connector': '#9479ff',
+};
+const edgeColours: Record<string, string> = {
+  'highway-shoulder': '#7fa8c9',
+  'crash-barrier-zone': '#ff665b',
+  'urban-pavement': '#c8bfa9',
+  'maintenance-walkway': '#7b91a6',
+  'painted-shoulder': '#e3c65a',
+  'narrow-alley-drainage': '#40677b',
+  'flush-building-edge': '#8e6b73',
+  'mountain-drainage-channel': '#426975',
+  'guardrail-zone': '#f19a52',
+  seawall: '#5eb3c6',
+};
+const districtColours: Record<string, string> = {
+  touge: '#46695a',
+  alley: '#9f3d5c',
+  downtown: '#7256aa',
+  port: '#5e7388',
+  waterfront: '#347494',
+};
+const safetyRoads = topology.routes.filter(
+  (route: (typeof topology.routes)[number]) =>
+    route.edgePlan.leftProtection !== 'none' || route.edgePlan.rightProtection !== 'none',
+);
+const flyover = topology.routes.find(
+  (route: (typeof topology.routes)[number]) => route.id === 'flyover-junction',
+);
+const flyoverDistances = [0];
+for (let index = 1; index < flyover.points.length; index += 1) {
+  flyoverDistances.push(
+    flyoverDistances[index - 1]! +
+      Math.hypot(
+        flyover.points[index][0] - flyover.points[index - 1][0],
+        flyover.points[index][1] - flyover.points[index - 1][1],
+      ),
+  );
+}
+const flyoverLength = flyoverDistances.at(-1)!;
+const flyoverProfile = flyoverDistances
+  .map(
+    (distance: number, index: number) =>
+      `${40 + (distance / flyoverLength) * 670},${180 - (flyover.elevations[index] / 8) * 130}`,
+  )
+  .join(' ');
+const referenceCards = [
+  [
+    'master-overview.webp',
+    'Master overview',
+    'District placement, hierarchy, and island-wide loop',
+  ],
+  ['road-hierarchy.webp', 'Road hierarchy', 'Widths, connectors, and distinct route language'],
+  ['alley-modules.webp', 'Alley modules', '3.0m-scale edges, drainage, and close urban rhythm'],
+  [
+    'driver-composition.webp',
+    'Driver composition',
+    'Alley-to-secondary merge with visible flyover',
+  ],
+  ['neon-study.webp', 'Neon study', 'Controlled hero/support signs with dark visual rest'],
+];
+const routeViews = [
+  ['main-loop-v2', 'Main loop'],
+  ['secondary-v2', 'Secondary road'],
+  ['alley-v2', 'Alley'],
+  ['touge-v2', 'Touge'],
+  ['waterfront-v2', 'Waterfront'],
+  ['port-v2', 'Port'],
+  ['flyover-approach-v2', 'Flyover approach'],
+  ['flyover-lower-v2', 'Flyover lower road'],
+  ['underpass-entrance-v2', 'Underpass entrance'],
+];
+const deviations = [
+  [
+    'Island scale',
+    'Reference-scale districts are compressed into adjacent zones.',
+    'The playable bounds remain fixed at 500 × 350m.',
+    'Required by limit',
+    'Weakens long-distance separation; preserves relative placement.',
+  ],
+  [
+    'Flyover',
+    'The multi-ramp interchange becomes one downtown-to-waterfront bypass.',
+    'A larger interchange would consume the commercial core and obscure route identity.',
+    'Required by limit',
+    'Reduces interchange spectacle; keeps the hierarchy and vertical read.',
+  ],
+  [
+    'Touge',
+    'The mountain stage uses one compact chain of switchbacks.',
+    'The reference climb cannot fit at its apparent length or design speed.',
+    'Required by limit',
+    'Shortens the climb; preserves northwest massing and hairpin rhythm.',
+  ],
+  [
+    'Port',
+    'Warehouses occupy one eastern field with a service cut and underpass.',
+    'Independent container yards and peninsulas would crowd the loop.',
+    'Partly required',
+    'Reduces yard depth; preserves the east-side industrial silhouette.',
+  ],
+  [
+    'Waterfront',
+    'The coast is one southern sweep rather than several waterfront branches.',
+    'One readable racing route is safer and clearer in the fixed footprint.',
+    'Required by hierarchy',
+    'Reduces route variety; strengthens main-loop readability.',
+  ],
+  [
+    'Alley and canal',
+    'Separate alley modules are joined into one southwest route and one market cut.',
+    'Disconnected showcases would create miniature maps instead of a city network.',
+    'Design choice',
+    'Does not weaken the reference role; module variety remains legible.',
+  ],
+];
+const spawnNode = topology.nodes.find(
+  (candidate: (typeof topology.nodes)[number]) => candidate.id === topology.spawn.nodeId,
+);
+---
+
+<HinodePreviewLayout
+  title="Hinode City v2 Candidate Evidence"
+  description="Candidate-only topology, road-edge, safety, structure, reference, and driver-view evidence."
+>
+  <main class="evidence-shell">
+    <header class="evidence-hero">
+      <p>HINODE CITY / V2 CANDIDATE / INTERNAL VISUAL CHECKPOINT</p>
+      <h1>North-up candidate, awaiting user decision.</h1>
+      <div>
+        <span>{layout.layoutId}</span>
+        <span>{layout.status}</span>
+        <span>{topology.bounds.width} × {topology.bounds.depth} m</span>
+        <span>{topology.routes.length} routes</span>
+      </div>
+      <nav>
+        <a href="/play/hinode-editor/?overlay=topology">Open topology editor</a>
+        <a href="/play/hinode-city/">Open playable candidate</a>
+        <a href="/play/hinode-progress/">Open progress page</a>
+      </nav>
+    </header>
+
+    <section class="map-grid" aria-label="Candidate map evidence">
+      <article>
+        <h2>01 / Topology map</h2>
+        <svg
+          viewBox={`0 0 ${viewWidth} ${viewHeight}`}
+          role="img"
+          aria-label="V2 candidate topology"
+        >
+          <defs>
+            <marker
+              id="route-arrow"
+              viewBox="0 0 10 10"
+              refX="8"
+              refY="5"
+              markerWidth="5"
+              markerHeight="5"
+              orient="auto-start-reverse"
+            >
+              <path d="M 0 0 L 10 5 L 0 10 z" class="arrow"></path>
+            </marker>
+          </defs>
+          <rect width={viewWidth} height={viewHeight} class="map-bg"></rect>
+          {
+            topology.water.map((water: (typeof topology.water)[number]) => {
+              const rect = districtRect(water);
+              return <rect {...rect} class="water" />;
+            })
+          }
+          {
+            topology.districts.map((district: (typeof topology.districts)[number]) => {
+              const rect = districtRect(district);
+              const [labelX, labelY] = mapPoint(district.centre);
+              return (
+                <>
+                  <rect {...rect} fill={districtColours[district.id]} class="topology-district" />
+                  <text x={labelX} y={labelY} text-anchor="middle" class="district-label">
+                    {district.id.toUpperCase()}
+                  </text>
+                </>
+              );
+            })
+          }
+          {
+            topology.routes.map((route: (typeof topology.routes)[number]) => (
+              <polyline
+                points={routePoints(route)}
+                class:list={['route', route.kind === 'primary-loop' && 'primary']}
+                marker-end="url(#route-arrow)"
+              />
+            ))
+          }
+          {
+            topology.nodes.map((node: (typeof topology.nodes)[number]) => {
+              const [cx, cy] = mapPoint(node.position);
+              return <circle cx={cx} cy={cy} r="4" class="node" />;
+            })
+          }
+          {
+            layout.authoring.resetZones.map(
+              (zone: (typeof layout.authoring.resetZones)[number]) => {
+                const [cx, cy] = mapPoint([zone.centre[0], zone.centre[2]]);
+                return <circle cx={cx} cy={cy} r="7" class="reset" />;
+              },
+            )
+          }
+          {
+            topology.landmarks.map((landmark: (typeof topology.landmarks)[number]) => {
+              const [x, y] = mapPoint([landmark.centre[0], landmark.centre[2]]);
+              return (
+                <text x={x} y={y} class="landmark">
+                  ◆
+                </text>
+              );
+            })
+          }
+          {
+            spawnNode &&
+              (() => {
+                const [x, y] = mapPoint(spawnNode.position);
+                return <rect x={x - 6} y={y - 6} width="12" height="12" class="spawn" />;
+              })()
+          }
+        </svg>
+        <p class="caption">
+          Arrows show authored route order; diamonds mark landmarks, green rings mark resets, and
+          the white square marks spawn.
+        </p>
+      </article>
+
+      <article>
+        <h2>02 / Road hierarchy</h2>
+        <svg viewBox={`0 0 ${viewWidth} ${viewHeight}`} role="img" aria-label="V2 road hierarchy">
+          <rect width={viewWidth} height={viewHeight} class="map-bg"></rect>
+          {
+            topology.routes.map((route: (typeof topology.routes)[number]) => (
+              <polyline
+                points={routePoints(route)}
+                class="hierarchy-route"
+                style={`stroke:${hierarchyColours[route.roadClass]}`}
+              />
+            ))
+          }
+        </svg>
+        <ul class="legend">
+          {
+            Object.entries(hierarchyColours).map(([label, colour]) => (
+              <li>
+                <i style={`background:${colour}`} />
+                {label.replaceAll('-', ' ')}
+              </li>
+            ))
+          }
+        </ul>
+      </article>
+
+      <article>
+        <h2>03 / Elevation map</h2>
+        <svg viewBox={`0 0 ${viewWidth} ${viewHeight}`} role="img" aria-label="V2 elevation map">
+          <rect width={viewWidth} height={viewHeight} class="map-bg"></rect>
+          {
+            topology.routes.map((route: (typeof topology.routes)[number]) => {
+              const maximum = Math.max(...route.elevations);
+              const minimum = Math.min(...route.elevations);
+              const colour =
+                minimum < 0
+                  ? '#9176ff'
+                  : maximum >= 6
+                    ? '#ff6158'
+                    : maximum > 0
+                      ? '#f5bd4d'
+                      : '#4dc8f0';
+              return (
+                <polyline
+                  points={routePoints(route)}
+                  class="hierarchy-route"
+                  style={`stroke:${colour}`}
+                />
+              );
+            })
+          }
+        </svg>
+        <p class="caption">Blue: grade · amber: climbing · red: elevated · violet: below grade</p>
+      </article>
+
+      <article>
+        <h2>04 / District density</h2>
+        <svg viewBox={`0 0 ${viewWidth} ${viewHeight}`} role="img" aria-label="V2 district density">
+          <rect width={viewWidth} height={viewHeight} class="map-bg"></rect>
+          {
+            topology.districts.map((district: (typeof topology.districts)[number]) => {
+              const rect = districtRect(district);
+              const [labelX, labelY] = mapPoint(district.centre);
+              return (
+                <>
+                  <rect
+                    {...rect}
+                    fill={districtColours[district.id]}
+                    opacity={0.22 + district.density * 0.62}
+                    class="district"
+                  />
+                  <text x={labelX} y={labelY}>
+                    {district.label}
+                  </text>
+                </>
+              );
+            })
+          }
+        </svg>
+      </article>
+
+      <article>
+        <h2>05 / Road-edge classes</h2>
+        <div class="edge-matrix">
+          {
+            topology.routes.map((route: (typeof topology.routes)[number]) => (
+              <div>
+                <b>{route.label}</b>
+                <span style={`--edge:${edgeColours[route.edgePlan.leftClass]}`}>
+                  L / {route.edgePlan.leftClass} / {route.edgePlan.leftWidth}m
+                </span>
+                <span style={`--edge:${edgeColours[route.edgePlan.rightClass]}`}>
+                  R / {route.edgePlan.rightClass} / {route.edgePlan.rightWidth}m
+                </span>
+              </div>
+            ))
+          }
+        </div>
+      </article>
+
+      <article>
+        <h2>06 / Safety map</h2>
+        <svg
+          viewBox={`0 0 ${viewWidth} ${viewHeight}`}
+          role="img"
+          aria-label="V2 protection routes"
+        >
+          <rect width={viewWidth} height={viewHeight} class="map-bg"></rect>
+          {
+            topology.routes.map((route: (typeof topology.routes)[number]) => (
+              <polyline points={routePoints(route)} class="safety-base" />
+            ))
+          }
+          {
+            safetyRoads.map((route: (typeof topology.routes)[number]) => (
+              <polyline points={routePoints(route)} class="safety-route" />
+            ))
+          }
+          {
+            topology.gradeSeparatedCrossings.map(
+              (crossing: (typeof topology.gradeSeparatedCrossings)[number]) => {
+                const [cx, cy] = mapPoint(crossing.centre);
+                return <circle cx={cx} cy={cy} r="10" class="crossing" />;
+              },
+            )
+          }
+        </svg>
+        <p class="caption">
+          Red: guardrail, crash barrier, seawall, canal rail, or tunnel wall. Rings: declared
+          grade-separated crossings.
+        </p>
+      </article>
+
+      <article>
+        <h2>07 / Flyover elevation</h2>
+        <svg viewBox="0 0 750 220" role="img" aria-label="Flyover side elevation">
+          <rect width="750" height="220" class="map-bg"></rect>
+          <line x1="40" y1="180" x2="710" y2="180" class="datum"></line>
+          <polyline points={flyoverProfile} class="profile"></polyline>
+          {
+            topology.gradeSeparatedCrossings.map(
+              (crossing: (typeof topology.gradeSeparatedCrossings)[number], index: number) => (
+                <g transform={`translate(${380 + index * 65} 180)`}>
+                  <line y1="0" y2="-100" class="clearance" />
+                  <text y="-108" text-anchor="middle">
+                    {crossing.minimumClearanceMetres}m min
+                  </text>
+                </g>
+              ),
+            )
+          }
+        </svg>
+        <p class="caption">
+          0m → 7m deck → 0m merge; paired supports are offset outside the upper carriageway.
+        </p>
+      </article>
+
+      <article>
+        <h2>08 / Underpass section</h2>
+        <svg viewBox="0 0 750 220" role="img" aria-label="Underpass cross section">
+          <rect width="750" height="220" class="map-bg"></rect>
+          <path d="M100 180V62H650V180" class="tunnel-shell"></path>
+          <rect x="185" y="98" width="380" height="82" class="tunnel-road"></rect>
+          <line x1="205" y1="139" x2="545" y2="139" class="lane"></line>
+          <line x1="615" y1="180" x2="615" y2="98" class="clearance"></line>
+          <text x="615" y="88" text-anchor="middle">4.7m min</text>
+          <text x="375" y="208" text-anchor="middle"
+            >7.0m two-way road + 0.75m maintenance walks</text
+          >
+        </svg>
+      </article>
+    </section>
+
+    <section class="reference-section">
+      <header>
+        <p>REFERENCE COMPARISON</p>
+        <h2>Principles were adapted; imagery was not treated as literal geometry.</h2>
+      </header>
+      <div class="reference-grid">
+        {
+          referenceCards.map(([image, label, purpose]) => (
+            <article>
+              <img src={`/hinode/references/v2/${image}`} alt="" loading="lazy" />
+              <h3>{label}</h3>
+              <p>{purpose}</p>
+            </article>
+          ))
+        }
+      </div>
+      <div class="comparison">
+        <img
+          src="/hinode/references/v2/master-overview.webp"
+          alt="Supplied Hinode master overview reference"
+        />
+        <article>
+          <h3>Candidate response</h3>
+          <ul>
+            <li>
+              Northwest touge; southwest alley; north-central downtown; east port; southern
+              waterfront.
+            </li>
+            <li>One island-wide loop with district routes and only two intentional shortcuts.</li>
+            <li>
+              Centre-west canal, centre-south flyover, east underpass, and visible waterfront edge.
+            </li>
+            <li>
+              Lighting is zoned into street, commercial, alley, waterfront, tunnel, and dark-rest
+              behavior.
+            </li>
+          </ul>
+        </article>
+      </div>
+      <div class="deviation-table" role="table" aria-label="Reference deviations">
+        <div class="deviation-head" role="row">
+          <b>Area</b><b>What changed</b><b>Why</b><b>500 × 350m</b><b>Effect</b>
+        </div>
+        {
+          deviations.map((row) => (
+            <div role="row">
+              {row.map((cell) => (
+                <span role="cell">{cell}</span>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="route-section">
+      <header>
+        <p>DRIVER AND STRUCTURE VIEWS</p>
+        <h2>Open candidate-specific runtime viewpoints.</h2>
+      </header>
+      <div>
+        {
+          routeViews.map(([id, label]) => (
+            <a href={`/play/hinode-city/?review=${id}&view=driver&quality=low`}>{label}</a>
+          ))
+        }
+      </div>
+      <div class="overlay-links">
+        <a href="/play/hinode-editor/?overlay=collision">Collision / barrier overlay</a>
+        <a href="/play/hinode-editor/?overlay=road-edges">Road-edge overlay</a>
+        <a href="/play/hinode-editor/?overlay=safety">Safety overlay</a>
+        <a href="/play/hinode-editor/?overlay=road-hierarchy">Hierarchy overlay</a>
+      </div>
+    </section>
+  </main>
+
+  <style>
+    :global(body) {
+      margin: 0;
+      background: #040914;
+      color: #edf4ff;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .evidence-shell {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 54px 0 90px;
+    }
+    .evidence-hero {
+      border: 1px solid #273a56;
+      background: #07101f;
+      padding: clamp(24px, 4vw, 58px);
+    }
+    p {
+      color: #9eb6d5;
+      line-height: 1.65;
+    }
+    .evidence-hero > p,
+    section header > p {
+      color: #69cfff;
+      letter-spacing: 0.13em;
+      font-size: 0.75rem;
+    }
+    h1 {
+      max-width: 900px;
+      margin: 12px 0 30px;
+      font-family: Archivo, sans-serif;
+      font-size: clamp(2.5rem, 6vw, 6rem);
+      line-height: 0.94;
+      letter-spacing: -0.055em;
+    }
+    h2 {
+      margin: 0 0 18px;
+      font:
+        700 0.92rem/1.2 Archivo,
+        sans-serif;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    h3 {
+      margin: 16px 0 8px;
+      font:
+        700 1rem/1.2 Archivo,
+        sans-serif;
+    }
+    .evidence-hero > div,
+    .evidence-hero nav,
+    .route-section > div {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .evidence-hero span,
+    a {
+      border: 1px solid #385271;
+      padding: 10px 13px;
+      color: #dcecff;
+      text-decoration: none;
+      font-size: 0.76rem;
+    }
+    .evidence-hero nav {
+      margin-top: 26px;
+    }
+    a:hover {
+      border-color: #66d7ff;
+      color: #66d7ff;
+    }
+    .map-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+    .map-grid > article,
+    .reference-section,
+    .route-section {
+      border: 1px solid #273a56;
+      background: #07101f;
+      padding: 18px;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: #030812;
+    }
+    .map-bg {
+      fill: #030812;
+    }
+    .water {
+      fill: #0b405b;
+      opacity: 0.72;
+    }
+    .topology-district {
+      opacity: 0.18;
+      stroke: #8ca9c7;
+      stroke-width: 1;
+    }
+    .district-label {
+      fill: #c5d8ed;
+      font-size: 10px;
+      letter-spacing: 0.09em;
+    }
+    .arrow {
+      fill: #ffcf62;
+    }
+    .route,
+    .hierarchy-route,
+    .safety-base {
+      fill: none;
+      stroke: #66d7ff;
+      stroke-width: 4;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+    .route.primary {
+      stroke: #fff1cb;
+      stroke-width: 7;
+    }
+    .node {
+      fill: #ff5471;
+      stroke: #fff;
+      stroke-width: 1;
+    }
+    .reset {
+      fill: none;
+      stroke: #65ffae;
+      stroke-width: 2;
+    }
+    .landmark {
+      fill: #ffe65f;
+      font-size: 14px;
+    }
+    .spawn {
+      fill: #fff;
+      stroke: #ff5471;
+      stroke-width: 2;
+    }
+    .hierarchy-route {
+      stroke-width: 8;
+    }
+    .district {
+      stroke: #aec8e8;
+      stroke-width: 1;
+    }
+    text {
+      fill: #eaf3ff;
+      font:
+        12px 'IBM Plex Mono',
+        monospace;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      padding: 14px 0 0;
+      margin: 0;
+      list-style: none;
+      font-size: 0.68rem;
+      color: #a8bed8;
+    }
+    .legend i {
+      width: 9px;
+      height: 9px;
+      display: inline-block;
+      margin-right: 6px;
+    }
+    .caption {
+      margin: 12px 0 0;
+      font-size: 0.75rem;
+    }
+    .edge-matrix {
+      display: grid;
+      gap: 8px;
+    }
+    .edge-matrix > div {
+      display: grid;
+      grid-template-columns: minmax(160px, 1.2fr) 1fr 1fr;
+      gap: 8px;
+      align-items: center;
+      border-top: 1px solid #1e314a;
+      padding-top: 8px;
+      font-size: 0.68rem;
+    }
+    .edge-matrix span {
+      border-left: 7px solid var(--edge);
+      padding-left: 8px;
+      color: #a9bfd9;
+    }
+    .safety-base {
+      stroke: #31465f;
+      stroke-width: 5;
+    }
+    .safety-route {
+      fill: none;
+      stroke: #ff4f61;
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .crossing {
+      fill: none;
+      stroke: #ffe55f;
+      stroke-width: 4;
+    }
+    .datum,
+    .lane {
+      stroke: #66809d;
+      stroke-width: 2;
+    }
+    .profile {
+      fill: none;
+      stroke: #ff655d;
+      stroke-width: 8;
+      stroke-linejoin: round;
+    }
+    .clearance {
+      stroke: #ffe55f;
+      stroke-width: 3;
+      stroke-dasharray: 7 5;
+    }
+    .tunnel-shell {
+      fill: none;
+      stroke: #7992ac;
+      stroke-width: 20;
+    }
+    .tunnel-road {
+      fill: #354052;
+    }
+    .reference-section,
+    .route-section {
+      margin-top: 18px;
+      padding: clamp(20px, 3vw, 38px);
+    }
+    .reference-section header,
+    .route-section header {
+      max-width: 800px;
+      margin-bottom: 25px;
+    }
+    .reference-section header h2,
+    .route-section header h2 {
+      font-size: clamp(1.2rem, 2.3vw, 2.1rem);
+      text-transform: none;
+      letter-spacing: -0.02em;
+    }
+    .reference-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .reference-grid article {
+      border: 1px solid #233852;
+      padding: 10px;
+    }
+    .reference-grid img,
+    .comparison img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .reference-grid p {
+      margin: 0;
+      font-size: 0.68rem;
+    }
+    .comparison {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 22px;
+      margin-top: 24px;
+      align-items: center;
+    }
+    .deviation-table {
+      margin-top: 24px;
+      border-top: 1px solid #2d4562;
+      font-size: 0.68rem;
+    }
+    .deviation-table > div {
+      display: grid;
+      grid-template-columns: 0.65fr 1.15fr 1.15fr 0.7fr 1.2fr;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #1e3048;
+    }
+    .deviation-table span {
+      color: #a9bfd9;
+      line-height: 1.55;
+    }
+    .deviation-head {
+      color: #6dd8ff;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    li {
+      margin: 10px 0;
+      color: #aec2db;
+      line-height: 1.55;
+    }
+    .overlay-links {
+      margin-top: 10px;
+    }
+    @media (max-width: 900px) {
+      .map-grid,
+      .comparison {
+        grid-template-columns: 1fr;
+      }
+      .reference-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .edge-matrix > div {
+        grid-template-columns: 1fr;
+      }
+      .deviation-table > div {
+        grid-template-columns: 1fr;
+      }
+      .deviation-head {
+        display: none;
+      }
+    }
+  </style>
+</HinodePreviewLayout>

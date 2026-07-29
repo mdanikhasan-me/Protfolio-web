@@ -44,7 +44,7 @@ interface Selection {
   object: Group;
 }
 
-const LOCAL_STORAGE_KEY = 'hinode-city-layout-v1-editor';
+const LOCAL_STORAGE_KEY = 'hinode-city-layout-v2-candidate-editor';
 const root = document.querySelector<HTMLElement>('[data-hinode-editor]');
 const canvas = document.querySelector<HTMLCanvasElement>('[data-editor-canvas]');
 if (!root || !canvas) throw new Error('Hinode editor shell is incomplete.');
@@ -117,6 +117,7 @@ let editableObjects = new Map<string, Group>();
 let reviewLayers = new Map<ReviewLayerKind, Group>();
 let selection: Selection | undefined;
 let activeOverlay: ReviewLayerKind | undefined;
+let mirrorTopProjection = false;
 let snapEnabled = false;
 let duplicateCounter = 1;
 let roadCounter = 1;
@@ -225,6 +226,10 @@ const refreshInspector = () => {
     roadField<HTMLInputElement>('footpath-left')!.value = String(roadside?.leftWidth ?? 1);
     roadField<HTMLInputElement>('footpath-right')!.value = String(roadside?.rightWidth ?? 1);
     roadField<HTMLInputElement>('drainage')!.value = String(roadside?.drainageWidth ?? 0.2);
+    roadField<HTMLSelectElement>('edge-left')!.value = roadside?.leftClass ?? 'urban-pavement';
+    roadField<HTMLSelectElement>('edge-right')!.value = roadside?.rightClass ?? 'urban-pavement';
+    roadField<HTMLSelectElement>('protection-left')!.value = roadside?.leftProtection ?? 'none';
+    roadField<HTMLSelectElement>('protection-right')!.value = roadside?.rightProtection ?? 'none';
     roadField<HTMLSelectElement>('curb-profile')!.value = curb?.profile ?? 'raised';
     roadField<HTMLInputElement>('point-x')!.value = point[0].toFixed(2);
     roadField<HTMLInputElement>('point-y')!.value = point[1].toFixed(2);
@@ -559,6 +564,15 @@ const createRoad = (preset: RoadCreationPreset) => {
     lanes: shortcut ? 1 : 2,
     direction: shortcut ? 'one-way' : 'two-way',
     closed: false,
+    edgePlan: {
+      leftClass: shortcut ? 'narrow-alley-drainage' : 'urban-pavement',
+      rightClass: shortcut ? 'flush-building-edge' : 'urban-pavement',
+      leftWidth: shortcut ? 0.35 : 1.4,
+      rightWidth: shortcut ? 0.18 : 1.4,
+      drainageWidth: shortcut ? 0.18 : 0.3,
+      leftProtection: 'none',
+      rightProtection: elevated ? 'crash-barrier' : underpass ? 'tunnel-wall' : 'none',
+    },
     spline: {
       type: 'cubic-bezier',
       tangentLengths: [7, 7, 7, 7],
@@ -575,9 +589,13 @@ const createRoad = (preset: RoadCreationPreset) => {
   layout.roads.push(road);
   layout.planning.footpaths.push({
     roadId: road.id,
-    leftWidth: shortcut ? 0.6 : 1.4,
-    rightWidth: shortcut ? 0.6 : 1.4,
-    drainageWidth: shortcut ? 0.2 : 0.3,
+    leftWidth: shortcut ? 0.35 : 1.4,
+    rightWidth: shortcut ? 0.18 : 1.4,
+    drainageWidth: shortcut ? 0.18 : 0.3,
+    leftClass: shortcut ? 'narrow-alley-drainage' : 'urban-pavement',
+    rightClass: shortcut ? 'flush-building-edge' : 'urban-pavement',
+    leftProtection: 'none',
+    rightProtection: elevated ? 'crash-barrier' : underpass ? 'tunnel-wall' : 'none',
   });
   layout.authoring.curbProfiles.push({
     roadId: road.id,
@@ -787,8 +805,15 @@ const cameraPreset = (preset: string) => {
     return;
   }
   stopRoutePlayback();
+  camera.up.set(0, 1, 0);
+  mirrorTopProjection = false;
+  camera.updateProjectionMatrix();
   if (preset === 'top') {
     camera.position.set(0, 520, 0.01);
+    camera.up.set(0, 0, 1);
+    mirrorTopProjection = true;
+    camera.projectionMatrix.elements[0] *= -1;
+    camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
     orbit.target.set(0, 0, 0);
   } else if (preset === 'street') {
     camera.position.set(-222, 28, -154);
@@ -938,7 +963,7 @@ inspectorForm?.addEventListener('change', () => {
   if (selection.type === 'road') {
     const road = item as HinodeRoad;
     road.surface = roadField<HTMLSelectElement>('surface')!.value as HinodeRoad['surface'];
-    road.width = MathUtils.clamp(Number(roadField<HTMLInputElement>('width')!.value), 4, 14);
+    road.width = MathUtils.clamp(Number(roadField<HTMLInputElement>('width')!.value), 3, 14);
     road.lanes = Math.round(
       MathUtils.clamp(Number(roadField<HTMLInputElement>('lanes')!.value), 1, 4),
     );
@@ -947,12 +972,12 @@ inspectorForm?.addEventListener('change', () => {
     if (roadside) {
       roadside.leftWidth = MathUtils.clamp(
         Number(roadField<HTMLInputElement>('footpath-left')!.value),
-        0.4,
+        0,
         3,
       );
       roadside.rightWidth = MathUtils.clamp(
         Number(roadField<HTMLInputElement>('footpath-right')!.value),
-        0.4,
+        0,
         3,
       );
       roadside.drainageWidth = MathUtils.clamp(
@@ -960,6 +985,23 @@ inspectorForm?.addEventListener('change', () => {
         0.1,
         0.8,
       );
+      roadside.leftClass = roadField<HTMLSelectElement>('edge-left')!
+        .value as typeof roadside.leftClass;
+      roadside.rightClass = roadField<HTMLSelectElement>('edge-right')!
+        .value as typeof roadside.rightClass;
+      roadside.leftProtection = roadField<HTMLSelectElement>('protection-left')!
+        .value as typeof roadside.leftProtection;
+      roadside.rightProtection = roadField<HTMLSelectElement>('protection-right')!
+        .value as typeof roadside.rightProtection;
+      road.edgePlan = {
+        leftClass: roadside.leftClass,
+        rightClass: roadside.rightClass,
+        leftWidth: roadside.leftWidth,
+        rightWidth: roadside.rightWidth,
+        drainageWidth: roadside.drainageWidth,
+        leftProtection: roadside.leftProtection,
+        rightProtection: roadside.rightProtection,
+      };
     }
     const curb = layout.authoring.curbProfiles.find((candidate) => candidate.roadId === road.id);
     if (curb) {
@@ -1014,6 +1056,10 @@ const resize = () => {
   renderer.setSize(width, height, false);
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
+  if (mirrorTopProjection) {
+    camera.projectionMatrix.elements[0] *= -1;
+    camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+  }
 };
 
 const frame = (now: number) => {

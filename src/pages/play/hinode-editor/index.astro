@@ -3,8 +3,8 @@ import HinodePreviewLayout from '../../../hinode/ui/HinodePreviewLayout.astro';
 ---
 
 <HinodePreviewLayout
-  title="Hinode City Layout Editor"
-  description="The browser-native authoritative layout editor for the 500 by 350 metre Hinode City map."
+  title="Hinode City v2 Candidate Editor"
+  description="Browser-native inspection and authoring for the unapproved Hinode City v2 candidate."
 >
   <main
     class="hinode-editor"
@@ -22,7 +22,7 @@ import HinodePreviewLayout from '../../../hinode/ui/HinodePreviewLayout.astro';
     <header class="editor-header">
       <a href="/" class="editor-brand">
         <span>HINODE CITY</span>
-        <small>AUTHORITATIVE LAYOUT / 500 × 350 M</small>
+        <small>V2 CANDIDATE / 500 × 350 M / NOT APPROVED</small>
       </a>
       <nav class="editor-file-actions" aria-label="Layout file actions">
         <button data-action="new" type="button">Reload source</button>
@@ -113,7 +113,7 @@ import HinodePreviewLayout from '../../../hinode/ui/HinodePreviewLayout.astro';
             </label>
             <label>
               Width
-              <input data-road-field="width" type="number" min="4" max="14" step="0.1" />
+              <input data-road-field="width" type="number" min="3" max="14" step="0.1" />
             </label>
             <label>
               Lanes
@@ -133,7 +133,7 @@ import HinodePreviewLayout from '../../../hinode/ui/HinodePreviewLayout.astro';
               >Left path <input
                 data-road-field="footpath-left"
                 type="number"
-                min="0.4"
+                min="0"
                 max="3"
                 step="0.1"
               /></label
@@ -142,7 +142,7 @@ import HinodePreviewLayout from '../../../hinode/ui/HinodePreviewLayout.astro';
               >Right path <input
                 data-road-field="footpath-right"
                 type="number"
-                min="0.4"
+                min="0"
                 max="3"
                 step="0.1"
               /></label
@@ -156,6 +156,58 @@ import HinodePreviewLayout from '../../../hinode/ui/HinodePreviewLayout.astro';
                 step="0.05"
               /></label
             >
+            <label>
+              Left class
+              <select data-road-field="edge-left">
+                <option value="highway-shoulder">Highway shoulder</option>
+                <option value="crash-barrier-zone">Crash barrier zone</option>
+                <option value="urban-pavement">Urban pavement</option>
+                <option value="maintenance-walkway">Maintenance walkway</option>
+                <option value="painted-shoulder">Painted shoulder</option>
+                <option value="narrow-alley-drainage">Alley drainage</option>
+                <option value="flush-building-edge">Flush building edge</option>
+                <option value="mountain-drainage-channel">Mountain drainage</option>
+                <option value="guardrail-zone">Guardrail zone</option>
+                <option value="seawall">Seawall</option>
+              </select>
+            </label>
+            <label>
+              Right class
+              <select data-road-field="edge-right">
+                <option value="highway-shoulder">Highway shoulder</option>
+                <option value="crash-barrier-zone">Crash barrier zone</option>
+                <option value="urban-pavement">Urban pavement</option>
+                <option value="maintenance-walkway">Maintenance walkway</option>
+                <option value="painted-shoulder">Painted shoulder</option>
+                <option value="narrow-alley-drainage">Alley drainage</option>
+                <option value="flush-building-edge">Flush building edge</option>
+                <option value="mountain-drainage-channel">Mountain drainage</option>
+                <option value="guardrail-zone">Guardrail zone</option>
+                <option value="seawall">Seawall</option>
+              </select>
+            </label>
+            <label>
+              Left protection
+              <select data-road-field="protection-left">
+                <option value="none">None</option>
+                <option value="crash-barrier">Crash barrier</option>
+                <option value="guardrail">Guardrail</option>
+                <option value="seawall">Seawall</option>
+                <option value="tunnel-wall">Tunnel wall</option>
+                <option value="canal-guardrail">Canal guardrail</option>
+              </select>
+            </label>
+            <label>
+              Right protection
+              <select data-road-field="protection-right">
+                <option value="none">None</option>
+                <option value="crash-barrier">Crash barrier</option>
+                <option value="guardrail">Guardrail</option>
+                <option value="seawall">Seawall</option>
+                <option value="tunnel-wall">Tunnel wall</option>
+                <option value="canal-guardrail">Canal guardrail</option>
+              </select>
+            </label>
           </fieldset>
           <label>
             Curb profile
@@ -218,9 +270,15 @@ import HinodePreviewLayout from '../../../hinode/ui/HinodePreviewLayout.astro';
       <button data-camera="isolate" type="button">Isolate</button>
     </aside>
 
-    <aside class="editor-overlays" aria-label="Checkpoint 4 planning overlays">
-      <span>REVIEW LAYERS</span>
+    <aside class="editor-overlays" aria-label="Hinode v2 candidate review overlays">
+      <span>V2 REVIEW LAYERS</span>
+      <button data-overlay="topology" type="button" aria-pressed="false">Topology</button>
+      <button data-overlay="road-hierarchy" type="button" aria-pressed="false">Hierarchy</button>
+      <button data-overlay="elevation" type="button" aria-pressed="false">Elevation</button>
       <button data-overlay="road-width" type="button" aria-pressed="false">Road width</button>
+      <button data-overlay="road-edges" type="button" aria-pressed="false">Road edges</button>
+      <button data-overlay="safety" type="button" aria-pressed="false">Safety</button>
+      <button data-overlay="district-density" type="button" aria-pressed="false">Density</button>
       <button data-overlay="footpaths" type="button" aria-pressed="false">Footpaths</button>
       <button data-overlay="parcels" type="button" aria-pressed="false">Parcels</button>
       <button data-overlay="vegetation" type="button" aria-pressed="false">Vegetation</button>

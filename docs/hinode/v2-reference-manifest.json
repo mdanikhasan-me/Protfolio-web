@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "manifestId": "HINODE_V2_REFERENCE_CONSTRAINTS",
+  "candidateStatus": "candidate_awaiting_user_approval",
+  "primaryTopologyReference": "hinode-master-city-overview",
+  "inspectedAt": "2026-07-29",
+  "references": [
+    {
+      "id": "hinode-master-city-overview",
+      "exactFilePath": "C:\\Users\\anikh\\Downloads\\ChatGPT Image Jul 28, 2026, 09_00_32 PM (1).png",
+      "candidateComparisonCopy": "/hinode/references/v2/master-overview.webp",
+      "referencePurpose": "Primary topology, district composition, route hierarchy and elevation-layering constraint.",
+      "requiredLayoutPrinciples": [
+        "north-up island composition",
+        "touge in the northwest",
+        "alley district in the southwest",
+        "downtown across the north and centre",
+        "port in the northeast and east",
+        "waterfront route along the south and southeast",
+        "canal separation through the centre-west",
+        "compact flyover junction linking downtown, main route and waterfront",
+        "one legible connected road system rather than scattered test tracks"
+      ],
+      "elementsToAdapt": [
+        "readable outer main route",
+        "central cross-city connection",
+        "switchback mountain route",
+        "dense alley block",
+        "port warehouse field",
+        "southern coastal sweep",
+        "grade-separated central junction",
+        "water as a compositional divider"
+      ],
+      "elementsThatCannotFitLiterally": [
+        "the reference island's full building count",
+        "every depicted interchange ramp",
+        "multiple large waterfront peninsulas",
+        "the reference's apparent multi-kilometre road length",
+        "fully separated industrial yards and downtown superblocks"
+      ],
+      "compressionPlan": "Use one 500 x 350 metre island footprint, a single continuous main loop, one cross-city commercial spine, one compact two-ramp flyover, a short underpass, and five tightly adjacent route identities. Occlusion, elevation and water preserve the reference hierarchy without copying every road."
+    },
+    {
+      "id": "hinode-road-hierarchy-sheet",
+      "exactFilePath": "C:\\Users\\anikh\\Downloads\\ChatGPT Image Jul 28, 2026, 09_00_33 PM (2).png",
+      "candidateComparisonCopy": "/hinode/references/v2/road-hierarchy.webp",
+      "referencePurpose": "Primary road-class, width, curve-radius and safety-edge constraint.",
+      "requiredLayoutPrinciples": [
+        "long controlled main-road curves",
+        "moderate secondary-road curves",
+        "3.0 to 3.4 metre clear alley carriageway",
+        "deliberate touge hairpins",
+        "sweeping waterfront curves",
+        "structurally distinct bridge, underpass and tunnel connections",
+        "road markings and edges appropriate to each class"
+      ],
+      "elementsToAdapt": [
+        "main-loop shoulder and barrier language",
+        "urban pavement only on pedestrian-access streets",
+        "alley drainage and flush edges",
+        "touge drainage and guardrails",
+        "waterfront seawall and selective walkway",
+        "clear tunnel portals and lighting rhythm"
+      ],
+      "elementsThatCannotFitLiterally": [
+        "full highway design speed",
+        "wide multi-lane interchange spacing",
+        "long independent mountain and waterfront stages"
+      ],
+      "compressionPlan": "Reduce speed and lane count while preserving the relative road hierarchy, safety treatment, readable curve radius and vehicle-clearance ratios."
+    },
+    {
+      "id": "hinode-alleyway-module-sheet",
+      "exactFilePath": "C:\\Users\\anikh\\Downloads\\ChatGPT Image Jul 28, 2026, 09_00_33 PM (3).png",
+      "candidateComparisonCopy": "/hinode/references/v2/alley-modules.webp",
+      "referencePurpose": "Primary alley topology, driveable-clearance and corner-sightline constraint.",
+      "requiredLayoutPrinciples": [
+        "straight, curved, T-junction and canal-side alley forms",
+        "3.0 to 3.4 metre clear carriageway",
+        "minimum 3.5 metre vertical clearance",
+        "flush or drainage edges where pavement cannot fit",
+        "clear corner sightlines",
+        "roadside density without blocking the drive envelope"
+      ],
+      "elementsToAdapt": [
+        "one straight restaurant run",
+        "one curved alley",
+        "one T-junction",
+        "one canal-side segment",
+        "one small pull-off represented only as layout space",
+        "narrow service connection behind future shop shells"
+      ],
+      "elementsThatCannotFitLiterally": [
+        "six isolated showcase modules",
+        "fully modelled storefront clutter",
+        "literal prop placement and final signage"
+      ],
+      "compressionPlan": "Join the key modules into one southwest route with a single logical branch and reconnect it to the main loop at both ends."
+    },
+    {
+      "id": "hinode-driver-alley-flyover-composition",
+      "exactFilePath": "C:\\Users\\anikh\\Downloads\\ChatGPT Image Jul 28, 2026, 09_00_33 PM (4).png",
+      "candidateComparisonCopy": "/hinode/references/v2/driver-composition.webp",
+      "referencePurpose": "Driver-height sightline, alley-to-secondary merge and visible flyover relationship constraint.",
+      "requiredLayoutPrinciples": [
+        "the flyover is visible before the alley merge",
+        "the alley clearly joins a secondary road",
+        "the vehicle path remains unobstructed",
+        "street walls frame rather than hide route continuation",
+        "lighting must have visible sources"
+      ],
+      "elementsToAdapt": [
+        "alley exit bending toward a broader road",
+        "flyover silhouette in the middle distance",
+        "clear merge direction",
+        "dark road surface with restrained reflected light zones"
+      ],
+      "elementsThatCannotFitLiterally": [
+        "final storefront architecture",
+        "licensed branded signs",
+        "dense street props",
+        "photoreal wet-road material"
+      ],
+      "compressionPlan": "Reserve the southwest alley exit sightline toward the centre-south flyover and encode future light/sign zones without creating final assets."
+    },
+    {
+      "id": "hinode-neon-billboard-video",
+      "exactFilePath": "C:\\Users\\anikh\\Videos\\NVIDIA\\Desktop\\New folder\\web neon effects and bill borad really high quaility and optimized .mp4",
+      "candidateComparisonCopy": "/hinode/references/v2/neon-study.webp",
+      "referencePurpose": "Commercial sign hierarchy, dark-rest spacing, reflection and motion-readability constraint.",
+      "requiredLayoutPrinciples": [
+        "few hero signs",
+        "supporting blade-sign rhythm",
+        "large dark negative-space intervals",
+        "sign mounting depth",
+        "controlled red, cyan, violet and warm-white groups",
+        "lighting zones aligned with visible sign sources"
+      ],
+      "elementsToAdapt": [
+        "downtown hero-sign locations",
+        "commercial sign-density zones",
+        "dark-rest zones",
+        "streetlight and tunnel-light proxy sockets",
+        "view-distance hierarchy"
+      ],
+      "elementsThatCannotFitLiterally": [
+        "the video's screen count",
+        "full-screen animated billboard playback",
+        "unbounded bloom",
+        "real or supplied third-party brands"
+      ],
+      "compressionPlan": "Encode a small number of mounting and light-source zones in the candidate. Actual NeonGenerator assets, animation and materials remain blocked until map approval."
+    }
+  ],
+  "globalCompressionRules": [
+    "Use most of the 500 x 350 metre footprint.",
+    "Compress road length through adjacency, not repeated self-looping.",
+    "Use one grade-separated flyover and one short underpass rather than a full motorway interchange.",
+    "Preserve water, terrain and skyline as route-framing masses.",
+    "Keep all buildings, vegetation, signs and props as non-final proxies."
+  ]
+}

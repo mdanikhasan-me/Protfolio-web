@@ -154,14 +154,55 @@ const setPhase = (next: typeof phase) => {
   if (pausePanel) pausePanel.hidden = next !== 'paused';
 };
 
-const mapBarriers = (city: HinodeCityLayout): HandlingBarrier[] =>
-  city.planning.collisionVolumes.map((volume) => ({
+const mapBarriers = (city: HinodeCityLayout): HandlingBarrier[] => {
+  const barriers: HandlingBarrier[] = city.planning.collisionVolumes.map((volume) => ({
     id: volume.id,
     x: volume.centre[0],
     z: volume.centre[2],
     width: volume.size[0],
     depth: volume.size[2],
   }));
+  for (const road of city.roads) {
+    if (road.surface === 'elevated') continue;
+    const edgePlan = city.planning.footpaths.find((plan) => plan.roadId === road.id);
+    if (!edgePlan) continue;
+    const points = sampleRoad(road, Math.max(32, road.points.length * 8));
+    const sides = [
+      {
+        side: 1,
+        width: edgePlan.leftWidth,
+        protection: edgePlan.leftProtection,
+      },
+      {
+        side: -1,
+        width: edgePlan.rightWidth,
+        protection: edgePlan.rightProtection,
+      },
+    ] as const;
+    for (const edge of sides) {
+      if (edge.protection === 'none' || edge.protection === 'tunnel-wall') continue;
+      const firstIndex = road.closed ? 0 : 2;
+      const finalIndex = road.closed ? points.length - 1 : points.length - 3;
+      for (let index = firstIndex; index < finalIndex; index += 1) {
+        const point = points[index]!;
+        const next = points[index + 1]!;
+        const tangentX = next.x - point.x;
+        const tangentZ = next.z - point.z;
+        const length = Math.hypot(tangentX, tangentZ) || 1;
+        const offset = edge.side * (road.width * 0.5 + edgePlan.drainageWidth + edge.width + 0.16);
+        barriers.push({
+          id: `${road.id}-${edge.side > 0 ? 'left' : 'right'}-${index}`,
+          x: (point.x + next.x) * 0.5 + (tangentZ / length) * offset,
+          z: (point.z + next.z) * 0.5 - (tangentX / length) * offset,
+          width: 0.45,
+          depth: length * 1.04,
+          yaw: Math.atan2(tangentX, tangentZ),
+        });
+      }
+    }
+  }
+  return barriers;
+};
 
 const buildCheckpoints = (city: HinodeCityLayout): CityCheckpoint[] => {
   const requested: Array<[string, string, number]> = [
@@ -184,26 +225,23 @@ const buildCheckpoints = (city: HinodeCityLayout): CityCheckpoint[] => {
 };
 
 const addCityLighting = (city: HinodeCityLayout) => {
-  const colours = [0x52dfff, 0xff4266, 0xf2ba52, 0x886cff, 0x48d9c0];
-  city.districts.forEach((district, index) => {
-    const light = new PointLight(
-      colours[index % colours.length],
-      quality.name === 'high' ? 72 : 42,
-      quality.name === 'high' ? 82 : 58,
-      1.7,
-    );
-    light.position.set(district.centre[0], 18, district.centre[2]);
-    scene.add(light);
-  });
-  const main = city.roads.find((road) => road.id === 'main-loop');
-  if (!main) return;
-  const samples = sampleRoad(main, quality.name === 'high' ? 28 : 14);
-  samples.forEach((point, index) => {
-    if (index % 2 !== 0) return;
-    const light = new PointLight(index % 4 === 0 ? 0xff4b64 : 0x5ddfff, 24, 32, 1.8);
-    light.position.set(point.x, point.y + 4.2, point.z);
-    scene.add(light);
-  });
+  for (const zone of city.authoring.lightingZones ?? []) {
+    const road = city.roads.find((candidate) => candidate.id === zone.roadId);
+    if (!road) continue;
+    const samples = sampleRoad(road, 120);
+    for (const progress of zone.progresses) {
+      const point = samples[Math.round(progress * (samples.length - 1))]!;
+      const light = new PointLight(
+        zone.colour,
+        zone.intensity * (quality.name === 'high' ? 1 : 0.72),
+        zone.rangeMetres,
+        zone.type === 'commercial-zone' ? 1.55 : 1.85,
+      );
+      light.name = `${zone.id}_${progress}`;
+      light.position.set(point.x, point.y + (zone.type === 'tunnel-light' ? 3.2 : 4.4), point.z);
+      scene.add(light);
+    }
+  }
 };
 
 const loadVehicle = async () => {
@@ -239,10 +277,6 @@ const loadVehicle = async () => {
     light.castShadow = quality.headlightShadows;
     vehicleAnchor.add(light, light.target);
   }
-  const vehicleFill = new PointLight(0x93caff, 18, 13, 1.7);
-  vehicleFill.name = 'RUNTIME_VEHICLE_FILL';
-  vehicleFill.position.set(0, 3.2, 1.2);
-  vehicleAnchor.add(vehicleFill);
 };
 
 const nearestRoad = () =>

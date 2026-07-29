@@ -3,7 +3,7 @@ import path from 'node:path';
 import process from 'node:process';
 
 const root = process.cwd();
-const layoutPath = path.join(root, 'public', 'hinode', 'layouts', 'hinode-city-v1.json');
+const layoutPath = path.join(root, 'public', 'hinode', 'layouts', 'hinode-city-v2-candidate.json');
 const layout = JSON.parse(await fs.readFile(layoutPath, 'utf8'));
 const failures = [];
 
@@ -14,6 +14,15 @@ const requireValue = (condition, message) => {
 requireValue(layout.schemaVersion === 1, 'schemaVersion must equal 1');
 requireValue(Boolean(layout.editorVersion), 'editorVersion is required');
 requireValue(Boolean(layout.layoutVersion), 'layoutVersion is required');
+requireValue(layout.layoutId === 'HINODE_CITY_V2_CANDIDATE', 'layoutId must identify v2 candidate');
+requireValue(
+  layout.status === 'candidate_awaiting_user_approval',
+  'layout status must remain candidate_awaiting_user_approval',
+);
+requireValue(
+  layout.topologyId === 'HINODE_CITY_V2_TOPOLOGY',
+  'validated v2 topologyId is required',
+);
 requireValue(layout.bounds?.width === 500, 'map width must equal 500 metres');
 requireValue(layout.bounds?.depth === 350, 'map depth must equal 350 metres');
 requireValue(Array.isArray(layout.roads), 'roads must be an array');
@@ -33,6 +42,14 @@ for (const road of roads) {
   requireValue(
     road.spline?.bankingDegrees?.length === road.points?.length,
     `${road.id} banking values must match its anchors`,
+  );
+  requireValue(road.width >= 3 && road.width <= 14, `${road.id} width must remain within 3-14m`);
+  requireValue(Boolean(road.edgePlan?.leftClass), `${road.id} requires a left edge class`);
+  requireValue(Boolean(road.edgePlan?.rightClass), `${road.id} requires a right edge class`);
+  requireValue(Boolean(road.edgePlan?.leftProtection), `${road.id} requires left protection data`);
+  requireValue(
+    Boolean(road.edgePlan?.rightProtection),
+    `${road.id} requires right protection data`,
   );
 }
 for (const id of [
@@ -60,7 +77,7 @@ requireValue(
 );
 
 const elevations = roads.flatMap((road) => road.points.map((point) => point[1]));
-requireValue(Math.max(...elevations) >= 8, 'flyover elevation is missing');
+requireValue(Math.max(...elevations) >= 8, 'visible elevation change is missing');
 requireValue(Math.min(...elevations) < 0, 'tunnel or underpass elevation is missing');
 requireValue(
   layout.gameplay?.targetLapSeconds?.[0] === 150 && layout.gameplay?.targetLapSeconds?.[1] === 240,
@@ -76,20 +93,22 @@ const collisionVolumes = Array.isArray(planning.collisionVolumes) ? planning.col
 const reviewViews = Array.isArray(planning.reviewViews) ? planning.reviewViews : [];
 requireValue(
   roads.every((road) => footpaths.some((item) => item.roadId === road.id)),
-  'every road requires a footpath and drainage plan',
+  'every road requires an explicit road-edge and drainage plan',
 );
 requireValue(parcels.length >= 10, 'at least ten parcel zones are required');
 requireValue(vegetationZones.length >= 5, 'at least five vegetation zones are required');
 requireValue(signZones.length >= 7, 'at least seven sign zones are required');
 requireValue(collisionVolumes.length >= 4, 'at least four collision volumes are required');
 for (const reviewId of [
-  'touge',
-  'alley',
-  'downtown',
-  'port',
-  'waterfront',
-  'flyover-review',
-  'underpass-review',
+  'main-loop-v2',
+  'secondary-v2',
+  'touge-v2',
+  'alley-v2',
+  'port-v2',
+  'waterfront-v2',
+  'flyover-approach-v2',
+  'flyover-lower-v2',
+  'underpass-entrance-v2',
 ]) {
   requireValue(
     reviewViews.some((view) => view.id === reviewId),
@@ -110,6 +129,21 @@ requireValue(
 requireValue(authoring.billboardSockets?.length >= 3, 'billboard sockets are required');
 requireValue(authoring.futurePropSockets?.length >= 3, 'future prop sockets are required');
 requireValue(authoring.structures?.length >= 2, 'flyover and underpass structures are required');
+requireValue(
+  authoring.structures?.some(
+    (structure) =>
+      structure.type === 'flyover' &&
+      structure.deckElevationMetres >= structure.minimumClearanceMetres &&
+      structure.supportProgress?.length >= 2,
+  ),
+  'complete flyover deck, clearance, and support metadata are required',
+);
+requireValue(
+  authoring.gradeSeparatedCrossings?.length === 3,
+  'three declared v2 grade-separated crossings are required',
+);
+requireValue(authoring.terrainMasses?.length === 2, 'two coherent terrain masses are required');
+requireValue(authoring.lightingZones?.length === 6, 'explicit v2 lighting zones are required');
 requireValue(authoring.resetZones?.length >= 3, 'reset zones are required');
 requireValue(
   authoring.routeCheckpoints?.length >= layout.gameplay.checkpointRoadOrder.length,

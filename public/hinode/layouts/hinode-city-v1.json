@@ -4,7 +4,7 @@
   "layoutVersion": "1.0.0",
   "layoutId": "HINODE_CITY_OPTION_A_V1",
   "name": "Hinode City / Honshu Coast",
-  "status": "checkpoint-4-proxy-layout",
+  "status": "rejected_visual_layout",
   "coordinateSystem": "metres, Y-up, road points stored as [x, elevation, z]",
   "bounds": {
     "width": 500,

@@ -10,7 +10,7 @@ test('loads the authoritative city layout with a permanently free camera', async
   await expect(page.locator(editor)).toHaveAttribute('data-phase', 'ready', { timeout: 20_000 });
   await expect(page.locator(editor)).toHaveAttribute('data-camera-locked', 'false');
   await expect(page.locator(editor)).toHaveAttribute('data-layout-valid', 'true');
-  await expect(page.locator(editor)).toHaveAttribute('data-road-count', '9');
+  await expect(page.locator(editor)).toHaveAttribute('data-road-count', '11');
   await expect
     .poll(async () => Number(await page.locator(editor).getAttribute('data-triangles')))
     .toBeGreaterThan(0);
@@ -28,6 +28,12 @@ test('exposes every checkpoint planning overlay without locking the camera', asy
   await expect(page.locator(editor)).toHaveAttribute('data-camera-locked', 'false');
 
   for (const overlay of [
+    'topology',
+    'road-hierarchy',
+    'elevation',
+    'road-edges',
+    'safety',
+    'district-density',
     'footpaths',
     'parcels',
     'vegetation',
@@ -54,7 +60,7 @@ test('selects, transforms, snaps, duplicates, hides, locks, and undoes layout ob
   await expect(page.locator('[data-action="snap"]')).toHaveAttribute('aria-pressed', 'true');
 
   await page.locator('[data-action="duplicate"]').click();
-  await expect(page.locator(editor)).toHaveAttribute('data-road-count', '10');
+  await expect(page.locator(editor)).toHaveAttribute('data-road-count', '12');
   await expect(page.locator(editor)).toHaveAttribute('data-selected', 'road:main-loop-copy-1');
   await page.locator('[data-action="hide"]').click();
   await page.locator('[data-action="lock"]').click();
@@ -63,7 +69,7 @@ test('selects, transforms, snaps, duplicates, hides, locks, and undoes layout ob
   await page.locator('[data-action="undo"]').click();
   await page.locator('[data-action="undo"]').click();
   await page.locator('[data-action="undo"]').click();
-  await expect(page.locator(editor)).toHaveAttribute('data-road-count', '9');
+  await expect(page.locator(editor)).toHaveAttribute('data-road-count', '11');
 });
 
 test('authors cubic Bezier roads and exposes user-controlled review views', async ({ page }) => {
@@ -102,8 +108,8 @@ test('authors cubic Bezier roads and exposes user-controlled review views', asyn
   await expect(page.locator(editor)).toHaveAttribute('data-isolated-district', 'none');
 
   await page.locator('[data-create-road="flyover"]').click();
-  await expect(page.locator(editor)).toHaveAttribute('data-road-count', '10');
+  await expect(page.locator(editor)).toHaveAttribute('data-road-count', '12');
   await expect(page.locator(editor)).toHaveAttribute('data-selected', /road:authored-flyover-/);
   await page.locator('[data-action="undo"]').click();
-  await expect(page.locator(editor)).toHaveAttribute('data-road-count', '9');
+  await expect(page.locator(editor)).toHaveAttribute('data-road-count', '11');
 });
