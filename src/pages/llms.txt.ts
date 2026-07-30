@@ -20,7 +20,7 @@ const content = `# ${SITE.name}
 
 ## Boundaries
 
-Boilabin has no claimed public launch date, revenue, customers, sellers, funding, team, or partnerships. Salty Potato AI is experimental, not production-ready or a benchmark claim. Pixel-art indie games are a future direction, not a current service or professional title.
+Boilabin has no claimed public launch date, revenue, customers, sellers, funding, team, or partnerships. Salty Potato AI is experimental, not production-ready or a benchmark claim.
 `;
 
 export const GET: APIRoute = () =>
