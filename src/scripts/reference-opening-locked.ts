@@ -1180,8 +1180,8 @@ async function startReferenceWorld(
   });
   renderer.autoClear = false;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMapping = THREE.NoToneMapping;
+  renderer.toneMappingExposure = 1;
   renderer.setClearColor(0x020109, 1);
 
   const baseScene = new THREE.Scene();
