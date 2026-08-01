@@ -656,7 +656,6 @@ const compositeFragmentShader = `
   precision highp float;
   varying vec2 vUv;
   uniform sampler2D uScene;
-  uniform sampler2D uIdentity;
   uniform sampler2D uFluid;
   uniform sampler2D uBloomTexture0;
   uniform sampler2D uBloomTexture1;
@@ -762,61 +761,6 @@ const compositeFragmentShader = `
     color +=
       (bloomQuarter * 0.075 + bloomEighth * 0.15 + bloomSixteenth * 0.225) * bloomGain;
     color *= mix(1.3, 1.08, galleryProtect);
-
-    vec4 identityLayer = texture2D(uIdentity, warpedUv);
-    // Keep a restrained part of the authored metallic treatment in the gallery. The previous
-    // all-or-nothing cutoff exposed the raw rainbow layer as soon as projects appeared.
-    float identityTreatment = mix(1.0, 0.16, galleryProtect);
-    float identityMask = smoothstep(0.008, 0.24, identityLayer.a) * identityTreatment;
-    vec2 identityPixel = 1.0 / uResolution;
-    float identityNeighbour = max(
-      max(
-        texture2D(uIdentity, warpedUv + vec2(identityPixel.x, 0.0)).a,
-        texture2D(uIdentity, warpedUv - vec2(identityPixel.x, 0.0)).a
-      ),
-      max(
-        texture2D(uIdentity, warpedUv + vec2(0.0, identityPixel.y)).a,
-        texture2D(uIdentity, warpedUv - vec2(0.0, identityPixel.y)).a
-      )
-    );
-    float identityEdge =
-      clamp(identityNeighbour - identityLayer.a, 0.0, 1.0) * mix(1.0, 0.18, galleryProtect);
-    vec3 identitySource = clamp(
-      identityLayer.rgb / max(identityLayer.a, 0.045),
-      vec3(0.0),
-      vec3(1.35)
-    );
-    float identityLuma = dot(identitySource, vec3(0.2126, 0.7152, 0.0722));
-    vec3 identitySilver = mix(
-      identitySource,
-      vec3(identityLuma) * vec3(0.90, 1.00, 1.15),
-      0.14
-    );
-    identitySilver = mix(
-      identitySilver,
-      vec3(identityLuma) * vec3(0.82, 0.96, 1.12),
-      galleryProtect * 0.32
-    );
-    identitySilver *= 0.72;
-    float identityResponse = smoothstep(0.025, 0.78, identityLuma);
-    vec3 environmentalSilver = mix(
-      vec3(0.055, 0.12, 0.28),
-      vec3(0.075, 0.20, 0.19),
-      smoothstep(0.46, 0.84, vUv.x)
-    );
-    vec3 readableIdentity = max(
-      vec3(0.06, 0.08, 0.12),
-      identitySilver * (1.15 + identityResponse * 0.32) + vec3(0.030, 0.045, 0.072)
-    );
-    readableIdentity += environmentalSilver * (0.14 + identityResponse * 0.10);
-    vec3 galleryResponsiveIdentity = mix(readableIdentity * 0.55, color * 1.18, 0.62);
-    readableIdentity = mix(readableIdentity, galleryResponsiveIdentity, galleryProtect);
-    float identityDensity = mix(0.88, 0.96, identityResponse);
-    color = mix(color, max(readableIdentity, color * 0.32), identityMask * identityDensity);
-    float darkIdentity = (1.0 - smoothstep(0.06, 0.30, identityLuma)) * identityMask;
-    float rightSideSupport = mix(0.64, 1.0, smoothstep(0.46, 0.84, vUv.x));
-    color += vec3(0.026, 0.044, 0.086) * darkIdentity * rightSideSupport;
-    color += vec3(0.048, 0.074, 0.135) * identityEdge * 0.44;
 
     vec3 smokeTint = mix(vec3(0.12, 0.22, 0.34), vec3(0.20, 0.10, 0.34), vUv.y);
     color = mix(color, color * 1.035 + smokeTint * 0.095, smoke * 0.74);
@@ -1258,13 +1202,6 @@ async function startReferenceWorld(
     depthBuffer: true,
     depthTexture: backgroundDepthTexture,
   });
-  const identityTarget = new THREE.WebGLRenderTarget(1, 1, {
-    type: THREE.HalfFloatType,
-    minFilter: THREE.LinearFilter,
-    magFilter: THREE.LinearFilter,
-    depthBuffer: false,
-  });
-
   const materialNoiseTexture = createMaterialNoiseTexture();
   const glassUniforms = {
     uScene: { value: backgroundTarget.texture },
@@ -1406,7 +1343,6 @@ async function startReferenceWorld(
   bloomScene.add(bloomQuad);
   const compositeUniforms = {
     uScene: { value: sceneTarget.texture },
-    uIdentity: { value: identityTarget.texture },
     uFluid: { value: fluid?.texture ?? sceneTarget.texture },
     uBloomTexture0: { value: bloomHorizontalTargets[0]!.texture },
     uBloomTexture1: { value: bloomHorizontalTargets[1]!.texture },
@@ -1602,7 +1538,6 @@ async function startReferenceWorld(
     const renderHeight = Math.max(1, outputCanvas.height);
     sceneTarget.setSize(renderWidth, renderHeight);
     backgroundTarget.setSize(renderWidth, renderHeight);
-    identityTarget.setSize(renderWidth, renderHeight);
     // The first retained bloom level is quarter-resolution. Threshold directly into that
     // footprint instead of paying for a full-resolution intermediate that is immediately
     // downsampled by the first blur pass.
@@ -1618,7 +1553,6 @@ async function startReferenceWorld(
     });
     renderer.initRenderTarget(sceneTarget);
     renderer.initRenderTarget(backgroundTarget);
-    renderer.initRenderTarget(identityTarget);
     renderer.initRenderTarget(bloomBrightTarget);
     bloomVerticalTargets.forEach((target) => renderer.initRenderTarget(target));
     bloomHorizontalTargets.forEach((target) => renderer.initRenderTarget(target));
@@ -1885,11 +1819,6 @@ async function startReferenceWorld(
       renderer.setRenderTarget(backgroundTarget);
       renderer.render(galleryScene, camera);
     }
-    renderer.setRenderTarget(identityTarget);
-    renderer.setClearColor(0x000000, 0);
-    renderer.clear(true, false, false);
-    renderer.render(identityScene, camera);
-    renderer.setClearColor(0x020109, 1);
     renderer.setRenderTarget(sceneTarget);
     renderer.render(identityScene, camera);
     if (galleryHasVisibleVisual) renderer.render(galleryScene, camera);
@@ -1981,7 +1910,6 @@ async function startReferenceWorld(
     fluid?.dispose();
     sceneTarget.dispose();
     backgroundTarget.dispose();
-    identityTarget.dispose();
     bloomBrightTarget.dispose();
     bloomVerticalTargets.forEach((target) => target.dispose());
     bloomHorizontalTargets.forEach((target) => target.dispose());
