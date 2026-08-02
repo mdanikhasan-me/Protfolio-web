@@ -405,6 +405,8 @@ const tileFragmentShader = /* glsl */ `
     float galleryLogoScale = mix(1.0, 0.30, uGallery);
     displayColor += vec3(logoWeight * 0.20 * galleryLogoScale * (1.0 - effectiveBlackout));
 
+    displayColor *= smoothstep(1.9, 0.1, length(vUv - 0.5));
+
     vec2 dotUv = fract(vGlobalUv * 414.0) - 0.5;
     float dotMask = smoothstep(0.50, 0.20, length(dotUv));
     displayColor *= mix(dotMask, 1.0, 0.60) * 0.90;
