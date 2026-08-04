@@ -435,7 +435,7 @@ const gridVertexShader = /* glsl */ `
   void main() {
     vec2 flatPosition = position.xy;
     float theta = flatPosition.x * PI;
-    float radius = uScale.x * 0.5 - 0.010;
+    float radius = uScale.x * 0.5;
     vec3 curvedPosition = vec3(
       sin(theta) * radius,
       flatPosition.y * uScale.y * 1.5,
@@ -450,16 +450,17 @@ const gridFragmentShader = /* glsl */ `
   precision highp float;
 
   varying vec2 vUv;
+  uniform sampler2D uFluid;
 
   void main() {
     vec2 coordinate = vUv * 64.0;
-    vec2 distanceToLine = min(fract(coordinate), 1.0 - fract(coordinate));
-    vec2 antialias = fwidth(coordinate) * 0.92;
-    float vertical = 1.0 - smoothstep(0.0, antialias.x, distanceToLine.x);
-    float horizontal = 1.0 - smoothstep(0.0, antialias.y, distanceToLine.y);
+    float vertical = smoothstep(0.46, 0.5, abs(fract(coordinate.x) - 0.5));
+    float horizontal = smoothstep(0.46, 0.5, abs(fract(coordinate.y) - 0.5));
     float line = max(vertical, horizontal);
-    float edgeFade = smoothstep(0.58, 0.08, length(vUv - 0.5));
-    gl_FragColor = vec4(vec3(0.48, 0.58, 0.64), line * 0.24 * edgeFade);
+    vec4 fluid = texture2D(uFluid, vUv);
+    vec3 color = vec3(1.0);
+    color.xy -= fluid.xy * 0.005;
+    gl_FragColor = vec4(color, line * 0.10);
   }
 `;
 
@@ -472,15 +473,23 @@ const crossVertexShader = /* glsl */ `
 
   const float PI = 3.14159265359;
 
+  mat2 rotate2d(float radians) {
+    float sine = sin(radians);
+    float cosine = cos(radians);
+    return mat2(cosine, sine, -sine, cosine);
+  }
+
   void main() {
-    vec2 flatPosition = instancePosition + position.xy * 0.006;
-    float theta = flatPosition.x * PI;
-    float radius = uScale.x * 0.5 - 0.018;
-    vec3 curvedPosition = vec3(
+    float theta = instancePosition.x * PI;
+    float radius = uScale.x * 0.5;
+    vec3 anchorPosition = vec3(
       sin(theta) * radius,
-      flatPosition.y * uScale.y * 1.5,
+      instancePosition.y * uScale.y * 1.5,
       -cos(theta) * radius
     );
+    vec3 curvedPosition = position * 0.15;
+    curvedPosition.xz *= rotate2d(-theta);
+    curvedPosition += anchorPosition;
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(curvedPosition, 1.0);
   }
@@ -492,13 +501,11 @@ const crossFragmentShader = /* glsl */ `
   varying vec2 vUv;
 
   void main() {
-    vec2 centered = abs(vUv - 0.5);
-    float horizontal = (1.0 - smoothstep(0.055, 0.12, centered.y)) *
-      (1.0 - smoothstep(0.28, 0.48, centered.x));
-    float vertical = (1.0 - smoothstep(0.055, 0.12, centered.x)) *
-      (1.0 - smoothstep(0.28, 0.48, centered.y));
-    float cross = max(horizontal, vertical);
-    gl_FragColor = vec4(vec3(0.66, 0.74, 0.78), cross * 0.10);
+    vec2 centered = vUv - 0.5;
+    float width = 0.08;
+    float cross = smoothstep(width, 0.01, abs(centered.x));
+    cross = max(cross, smoothstep(width, width * 0.1, abs(centered.y)));
+    gl_FragColor = vec4(vec3(1.0), cross * 0.30);
   }
 `;
 
@@ -579,9 +586,9 @@ function createCrossGeometry() {
   if (source.index) geometry.setIndex(source.index.clone());
 
   const positions: number[] = [];
-  for (let row = 1; row < 10; row += 1) {
-    for (let column = 1; column < 10; column += 1) {
-      positions.push(column / 10 - 0.5, row / 10 - 0.5);
+  for (let row = 0; row <= 8; row += 1) {
+    for (let column = 0; column <= 8; column += 1) {
+      positions.push(column / 8 - 0.5, row / 8 - 0.5);
     }
   }
   geometry.setAttribute(
@@ -814,13 +821,12 @@ export function createReferenceBackgroundSystem(
 
   const gridGeometry = new THREE.PlaneGeometry(1, 1, 64, 64);
   const gridMaterial = new THREE.ShaderMaterial({
-    uniforms: { uScale: scaleUniform },
+    uniforms: { uScale: scaleUniform, uFluid: tileUniforms.uFluid },
     vertexShader: gridVertexShader,
     fragmentShader: gridFragmentShader,
     transparent: true,
-    depthTest: true,
+    depthTest: false,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
   });
   const gridMesh = new THREE.Mesh(gridGeometry, gridMaterial);
   gridMesh.name = 'curved-display-grid';
@@ -834,9 +840,8 @@ export function createReferenceBackgroundSystem(
     vertexShader: crossVertexShader,
     fragmentShader: crossFragmentShader,
     transparent: true,
-    depthTest: true,
+    depthTest: false,
     depthWrite: false,
-    blending: THREE.AdditiveBlending,
   });
   const crossMesh = new THREE.Mesh(crossGeometry, crossMaterial);
   crossMesh.name = 'curved-display-crosses';
