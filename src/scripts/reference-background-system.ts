@@ -201,6 +201,7 @@ const tileVertexShader = /* glsl */ `
   varying vec2 vGlobalUv;
   varying vec2 vScreenUv;
   varying float vFrontFace;
+  varying float vEmitSide;
   varying float vPatternMix;
   varying float vBlackout;
   varying vec4 vInstanceId;
@@ -213,6 +214,7 @@ const tileVertexShader = /* glsl */ `
   uniform float uUvShiftRate;
   uniform float uUvShiftSeed;
   uniform float uUvShiftPower;
+  uniform sampler2D uFluid;
 
   const float PI = 3.14159265359;
 
@@ -263,7 +265,9 @@ const tileVertexShader = /* glsl */ `
       localPosition.z
     );
     vec4 screenClip = projectionMatrix * modelViewMatrix * vec4(screenFlatPosition * 0.5, 1.0);
-    vec2 screenUv = screenClip.xy / screenClip.w * 0.5 + 0.5 + uvShift;
+    vec2 projectedScreenUv = screenClip.xy / screenClip.w * 0.5 + 0.5;
+    vec2 screenUv = projectedScreenUv + uvShift;
+    vEmitSide = length(texture2D(uFluid, projectedScreenUv).xy);
     float theta = flatPosition.x * PI;
     float radius = uScale.x * 0.5;
     vec3 curvedPosition = vec3(
@@ -289,6 +293,7 @@ const tileFragmentShader = /* glsl */ `
   varying vec2 vGlobalUv;
   varying vec2 vScreenUv;
   varying float vFrontFace;
+  varying float vEmitSide;
   varying float vPatternMix;
   varying float vBlackout;
   varying vec4 vInstanceId;
@@ -414,9 +419,7 @@ const tileFragmentShader = /* glsl */ `
     float chamberFade = smoothstep(0.55, 0.05, length(vGlobalUv - 0.5));
     displayColor *= chamberFade;
 
-    vec2 fluidVelocity = texture2D(uFluid, clamp(vGlobalUv, 0.0, 1.0)).xy;
-    float fluidEnergy = clamp(length(fluidVelocity) * 3.2, 0.0, 1.0);
-    vec3 sideColor = vec3(fluidEnergy * 0.18);
+    vec3 sideColor = vec3(vEmitSide * 0.80);
     sideColor = mix(sideColor, projectTint * 0.32, uGallery);
     vec3 color = mix(sideColor, displayColor, vFrontFace);
     color *= mix(uDisplayGain, 0.50, uGallery);
