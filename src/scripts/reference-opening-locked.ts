@@ -1279,6 +1279,7 @@ async function startReferenceWorld(
   identity.updateMatrix();
   identity.matrixAutoUpdate = false;
   identityScene.add(identity);
+  openingBackground.setProjectTextures(loadedGalleryVisuals.map((visual) => visual.texture));
   loadedGalleryVisuals.forEach((visual) => {
     galleryGroup.add(visual.mesh);
     galleryVisuals.push(visual);

@@ -12,6 +12,7 @@ type OpeningPatternStep = {
 
 export interface ReferenceBackgroundSystem {
   group: THREE.Group;
+  setProjectTextures: (textures: readonly THREE.Texture[]) => void;
   update: (
     elapsed: number,
     fluidTexture: THREE.Texture | null,
@@ -308,62 +309,66 @@ const tileFragmentShader = /* glsl */ `
   uniform float uDisplayGain;
   uniform float uGallery;
   uniform float uProject;
+  uniform sampler2D uProjectCurrent;
+  uniform sampler2D uProjectNext;
+  uniform float uProjectCurrentAspect;
+  uniform float uProjectNextAspect;
+  uniform float uProjectTextureReady;
+  uniform float uScreenAspectRatio;
 
-  vec3 projectPaletteLeft(float index) {
-    // Project order: Boilabin, SoctuKit, UIU Bot, Salty Potato AI.
-    if (index < 0.5) return vec3(0.38, 0.24, 0.15);
-    if (index < 1.5) return vec3(0.08, 0.10, 0.15);
-    if (index < 2.5) return vec3(0.06, 0.20, 0.48);
-    return vec3(0.38, 0.16, 0.045);
+  float random(vec2 value) {
+    return fract(sin(dot(value, vec2(12.9898, 78.233))) * 43758.5453);
   }
 
-  vec3 projectPaletteRight(float index) {
-    if (index < 0.5) return vec3(0.04, 0.24, 0.56);
-    if (index < 1.5) return vec3(0.06, 0.24, 0.58);
-    if (index < 2.5) return vec3(0.42, 0.22, 0.055);
-    return vec3(0.045, 0.20, 0.50);
+  vec3 rgbToHsv(vec3 color) {
+    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    vec4 p = mix(vec4(color.bg, K.wz), vec4(color.gb, K.xy), step(color.b, color.g));
+    vec4 q = mix(vec4(p.xyw, color.r), vec4(color.r, p.yzx), step(p.x, color.r));
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+  }
+
+  vec3 hsvToRgb(vec3 color) {
+    return (
+      (clamp(abs(fract(color.x + vec3(0.0, 2.0, 1.0) / 3.0) * 6.0 - 3.0) - 1.0, 0.0, 1.0) - 1.0) *
+        color.y +
+      1.0
+    ) * color.z;
+  }
+
+  vec2 projectCoverUv(vec2 uv, float textureAspect) {
+    if (uScreenAspectRatio < textureAspect) {
+      uv.x = (uv.x - 0.5) * uScreenAspectRatio / textureAspect + 0.5;
+    } else {
+      uv.y = (uv.y - 0.5) / (uScreenAspectRatio / textureAspect) + 0.5;
+    }
+    return uv;
   }
 
   void main() {
     vec3 currentPattern = texture2D(uPatternCurrent, vScreenUv).rgb;
     vec3 nextPattern = texture2D(uPatternNext, vScreenUv).rgb;
     vec3 displayColor = mix(currentPattern, nextPattern, vPatternMix);
-    float tilePaletteMix = fract(
-      sin(dot(vInstanceId.xy, vec2(12.9898, 78.233))) * 43758.5453
-    );
-    // Retain a sparse set of stable dark panels for depth without letting the gallery inherit
-    // the broad black slabs visible in the earlier recording. tilePaletteMix is seeded per panel,
-    // so this remains spatially stable while reducing the expected blackout share from 16% to 8%.
-    float stableProjectBlackout = step(0.92, tilePaletteMix);
-    float effectiveBlackout = mix(vBlackout, stableProjectBlackout, uGallery);
+    float effectiveBlackout = vBlackout * (1.0 - uGallery);
     displayColor *= 1.0 - effectiveBlackout;
 
-    float projectIndex = clamp(uProject, 0.0, 3.0);
-    float projectBase = floor(projectIndex);
-    float projectBlend = smoothstep(0.18, 0.82, fract(projectIndex));
-    vec3 projectLeft = mix(
-      projectPaletteLeft(projectBase),
-      projectPaletteLeft(min(projectBase + 1.0, 3.0)),
-      projectBlend
+    vec2 currentProjectUv = projectCoverUv(vScreenUv, uProjectCurrentAspect);
+    vec2 nextProjectUv = projectCoverUv(vScreenUv, uProjectNextAspect);
+    vec3 currentProjectColor = texture2D(uProjectCurrent, currentProjectUv).rgb;
+    vec3 nextProjectColor = texture2D(uProjectNext, nextProjectUv).rgb;
+    float projectFraction = fract(clamp(uProject, 0.0, 3.0));
+    float projectBlend = smoothstep(
+      vScreenUv.x - 0.03,
+      vScreenUv.x + 0.03,
+      projectFraction * 1.06 - 0.03
     );
-    vec3 projectRight = mix(
-      projectPaletteRight(projectBase),
-      projectPaletteRight(min(projectBase + 1.0, 3.0)),
-      projectBlend
-    );
-    float spatialPaletteMix = smoothstep(0.06, 0.94, vGlobalUv.x);
-    vec3 projectTint = mix(
-      projectLeft,
-      projectRight,
-      mix(spatialPaletteMix, tilePaletteMix, 0.10)
-    );
-    float stablePanelLight = 0.70 + tilePaletteMix * 0.14 + spatialPaletteMix * 0.10;
-    vec3 projectColor = projectTint * stablePanelLight;
-    projectColor = mix(projectColor, displayColor * 1.04, 0.01);
-    float projectLuma = dot(projectColor, vec3(0.2126, 0.7152, 0.0722));
-    projectColor = mix(vec3(projectLuma), projectColor, 1.45) * 1.22;
-    projectColor *= 1.0 - effectiveBlackout;
-    displayColor = mix(displayColor, projectColor, uGallery * 0.98);
+    vec3 projectColor = mix(currentProjectColor, nextProjectColor, projectBlend);
+    projectColor *= mix(1.0, random(gl_FragCoord.xy / 1000.0), 0.10);
+    vec3 projectHsv = rgbToHsv(projectColor);
+    projectColor = hsvToRgb(vec3(projectHsv.x, projectHsv.y * 2.0, projectHsv.z));
+    vec3 projectTint = projectColor;
+    displayColor = mix(displayColor, projectColor, uGallery * uProjectTextureReady);
 
     const float WORDMARK_ASPECT = 787.842 / 209.0;
     vec2 logoUv = vGlobalUv;
@@ -802,6 +807,12 @@ export function createReferenceBackgroundSystem(
     uDisplayGain: { value: patternGains[2] as number },
     uGallery: { value: 0 },
     uProject: { value: 0 },
+    uProjectCurrent: { value: blackTexture as THREE.Texture },
+    uProjectNext: { value: blackTexture as THREE.Texture },
+    uProjectCurrentAspect: { value: 16 / 9 },
+    uProjectNextAspect: { value: 16 / 9 },
+    uProjectTextureReady: { value: 0 },
+    uScreenAspectRatio: { value: 16 / 9 },
   };
   const tileMaterial = new THREE.ShaderMaterial({
     uniforms: tileUniforms,
@@ -851,6 +862,56 @@ export function createReferenceBackgroundSystem(
   crossMesh.frustumCulled = false;
   crossMesh.renderOrder = 2;
   group.add(crossMesh);
+
+  let projectColorTextures: THREE.CanvasTexture[] = [];
+  let activeProjectTextureIndex = -1;
+
+  const setProjectTexturePair = (progress: number) => {
+    if (projectColorTextures.length === 0) return;
+    const maximumIndex = projectColorTextures.length - 1;
+    const currentIndex = Math.min(maximumIndex, Math.max(0, Math.floor(progress)));
+    if (currentIndex === activeProjectTextureIndex) return;
+    const nextIndex = Math.min(maximumIndex, currentIndex + 1);
+    const currentTexture = projectColorTextures[currentIndex]!;
+    const nextTexture = projectColorTextures[nextIndex]!;
+    tileUniforms.uProjectCurrent.value = currentTexture;
+    tileUniforms.uProjectNext.value = nextTexture;
+    tileUniforms.uProjectCurrentAspect.value = currentTexture.userData.projectAspect as number;
+    tileUniforms.uProjectNextAspect.value = nextTexture.userData.projectAspect as number;
+    activeProjectTextureIndex = currentIndex;
+  };
+
+  const setProjectTextures = (textures: readonly THREE.Texture[]) => {
+    projectColorTextures.forEach((texture) => texture.dispose());
+    projectColorTextures = textures.map((sourceTexture) => {
+      const sourceImage = sourceTexture.image as CanvasImageSource & {
+        width?: number;
+        height?: number;
+      };
+      const sourceWidth = Math.max(1, sourceImage.width ?? 16);
+      const sourceHeight = Math.max(1, sourceImage.height ?? 9);
+      const sourceAspect = sourceWidth / sourceHeight;
+      const canvas = document.createElement('canvas');
+      canvas.width = 24;
+      canvas.height = Math.max(1, Math.round(canvas.width / sourceAspect));
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('Unable to derive project color field');
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = 'high';
+      context.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
+      const colorTexture = new THREE.CanvasTexture(canvas);
+      colorTexture.colorSpace = THREE.SRGBColorSpace;
+      colorTexture.minFilter = THREE.LinearFilter;
+      colorTexture.magFilter = THREE.LinearFilter;
+      colorTexture.generateMipmaps = false;
+      colorTexture.userData.projectAspect = sourceAspect;
+      colorTexture.needsUpdate = true;
+      return colorTexture;
+    });
+    activeProjectTextureIndex = -1;
+    tileUniforms.uProjectTextureReady.value = projectColorTextures.length > 0 ? 1 : 0;
+    setProjectTexturePair(0);
+  };
 
   let layoutIndex = 0;
   let currentPattern: PatternIndex = 2;
@@ -996,7 +1057,13 @@ export function createReferenceBackgroundSystem(
     tileUniforms.uTime.value = elapsed;
     tileUniforms.uFluid.value = fluidTexture ?? blackTexture;
     tileUniforms.uGallery.value = THREE.MathUtils.clamp(galleryPresence, 0, 1);
-    tileUniforms.uProject.value = THREE.MathUtils.clamp(projectProgress, 0, 3);
+    const clampedProjectProgress = THREE.MathUtils.clamp(
+      projectProgress,
+      0,
+      Math.max(0, projectColorTextures.length - 1),
+    );
+    tileUniforms.uProject.value = clampedProjectProgress;
+    setProjectTexturePair(clampedProjectProgress);
 
     while (elapsed >= nextPatternAt) {
       const changeAt = nextPatternAt;
@@ -1071,6 +1138,7 @@ export function createReferenceBackgroundSystem(
     tileMesh.geometry = activeGeometries[layoutIndex] ?? activeGeometries[0]!;
 
     noiseUniforms.uScreenAspectRatio.value = width / height;
+    tileUniforms.uScreenAspectRatio.value = width / height;
     const colorWidth = Math.max(1, Math.round(width * pixelRatio * 0.15));
     const colorHeight = Math.max(1, Math.round(height * pixelRatio * 0.15));
     const displayWidth = Math.max(1, Math.round(width * pixelRatio * 0.40));
@@ -1096,8 +1164,9 @@ export function createReferenceBackgroundSystem(
     patternTargets.forEach((target) => target.dispose());
     symbolTexture.dispose();
     wordmarkTexture.dispose();
+    projectColorTextures.forEach((texture) => texture.dispose());
     blackTexture.dispose();
   };
 
-  return { group, update, resize, dispose };
+  return { group, setProjectTextures, update, resize, dispose };
 }
