@@ -925,7 +925,7 @@ export function createReferenceBackgroundSystem(
   let nextPatternAt = 2.6;
   let mobileDenseLayout = false;
   const patternTimingRandom = createSeededRandom(0x7a11ce26);
-  const referenceTransitionDurations = [0, 0.3, 3] as const;
+  const referenceHoldExtensions = [0, 0.3, 3] as const;
   const openingPatternSequence: OpeningPatternStep[] = [
     { at: 2.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
     { at: 5.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
@@ -1073,10 +1073,10 @@ export function createReferenceBackgroundSystem(
         step = openingPatternSequence[patternStep % openingPatternSequence.length]!;
         patternStep += 1;
       }
-      const transition = Math.floor(patternTimingRandom() * 3);
-      const duration = referenceTransitionDurations[transition] ?? 0;
-      beginPatternChange(changeAt, step.pattern, transition, duration, step.palette ?? 0);
-      nextPatternAt = changeAt + 1 + duration + patternTimingRandom();
+      const holdExtensionIndex = Math.floor(patternTimingRandom() * 3);
+      const holdExtension = referenceHoldExtensions[holdExtensionIndex] ?? 0;
+      beginPatternChange(changeAt, step.pattern, 0, 0, step.palette ?? 0);
+      nextPatternAt = changeAt + 1 + holdExtension + patternTimingRandom();
     }
 
     const motifStep = Math.floor(Math.max(0, elapsed - motifCycleStart) / motifHoldDuration);
