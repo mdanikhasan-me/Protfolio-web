@@ -665,10 +665,6 @@ const compositeFragmentShader = `
   uniform float uReveal;
   uniform float uGallery;
 
-  float hash21(vec2 value) {
-    return fract(sin(dot(value, vec2(127.1, 311.7))) * 43758.5453123);
-  }
-
   vec3 fxaa(vec2 uv, out vec3 center) {
     vec2 pixel = 1.0 / uResolution;
     center = texture2D(uScene, uv).rgb;
@@ -713,30 +709,12 @@ const compositeFragmentShader = `
     return resultB;
   }
 
-  #if POINTER_FX == 1
-  float fluidSmoke(vec2 uv, vec2 centerVelocity) {
-    vec2 pixel = 1.0 / uResolution;
-    float smoke = length(centerVelocity) * 0.22;
-    smoke += length(texture2D(uFluid, uv + vec2( 5.0,  0.0) * pixel).xy) * 0.13;
-    smoke += length(texture2D(uFluid, uv + vec2(-5.0,  0.0) * pixel).xy) * 0.13;
-    smoke += length(texture2D(uFluid, uv + vec2( 0.0,  5.0) * pixel).xy) * 0.13;
-    smoke += length(texture2D(uFluid, uv + vec2( 0.0, -5.0) * pixel).xy) * 0.13;
-    smoke += length(texture2D(uFluid, uv + vec2( 9.0,  7.0) * pixel).xy) * 0.065;
-    smoke += length(texture2D(uFluid, uv + vec2(-9.0,  7.0) * pixel).xy) * 0.065;
-    smoke += length(texture2D(uFluid, uv + vec2( 9.0, -7.0) * pixel).xy) * 0.065;
-    smoke += length(texture2D(uFluid, uv + vec2(-9.0, -7.0) * pixel).xy) * 0.065;
-    return smoothstep(0.018, 0.62, smoke);
-  }
-  #endif
-
   void main() {
     vec2 velocity = vec2(0.0);
     float wake = 0.0;
-    float smoke = 0.0;
     #if POINTER_FX == 1
     velocity = texture2D(uFluid, vUv).xy;
     wake = min(length(velocity), 1.0);
-    smoke = fluidSmoke(vUv, velocity);
     #endif
     float galleryProtect = smoothstep(0.18, 0.82, uGallery);
     float warpStrength = mix(0.0105, 0.0015, galleryProtect);
@@ -754,6 +732,9 @@ const compositeFragmentShader = `
     }
     #endif
 
+    color *= smoothstep(1.2, 0.0, length(vUv - 0.5));
+    color *= 1.0 + wake * 0.80;
+
     vec3 bloomQuarter = texture2D(uBloomTexture0, warpedUv).rgb;
     vec3 bloomEighth = texture2D(uBloomTexture1, warpedUv).rgb;
     vec3 bloomSixteenth = texture2D(uBloomTexture2, warpedUv).rgb;
@@ -761,18 +742,6 @@ const compositeFragmentShader = `
     color +=
       (bloomQuarter * 0.075 + bloomEighth * 0.15 + bloomSixteenth * 0.225) * bloomGain;
     color *= mix(1.3, 1.08, galleryProtect);
-
-    vec3 smokeTint = mix(vec3(0.12, 0.22, 0.34), vec3(0.20, 0.10, 0.34), vUv.y);
-    color = mix(color, color * 1.035 + smokeTint * 0.095, smoke * 0.74);
-    color *= 1.0 + wake * 0.10;
-    color += vec3(smoke) * 0.012;
-
-    float dotPattern = 0.996 + step(0.982, hash21(floor(gl_FragCoord.xy * 0.5))) * 0.008;
-    float grain = hash21(gl_FragCoord.xy + uTime * 59.0) - 0.5;
-    float vignette =
-      1.0 - smoothstep(0.27, 0.92, length((vUv - 0.5) * vec2(0.82, 1.0)));
-    color *= mix(dotPattern * (0.78 + vignette * 0.25), 0.95 + vignette * 0.05, galleryProtect);
-    color += grain * mix(0.008, 0.002, galleryProtect);
     color *= smoothstep(0.0, 1.0, uReveal);
     gl_FragColor = vec4(color, 1.0);
   }
