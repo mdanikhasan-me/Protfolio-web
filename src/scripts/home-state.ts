@@ -41,7 +41,8 @@ let activeProject = -1;
 let projectSwapTimer = 0;
 let targetMelt = 0;
 let renderedMelt = 0;
-let targetCurveProgress = 0;
+let targetCurveTrigger = 0;
+let renderedCurveTrigger = 0;
 let renderedCurveProgress = 0;
 let renderedCurveVelocity = 0;
 let lastMotionFrame = performance.now();
@@ -214,17 +215,17 @@ function setActiveProject(index: number) {
   if (nextButton) nextButton.disabled = activeProject === curveCards.length - 1;
 }
 
-function renderCurve(progress: number, measuredBounds?: SectionBounds) {
+function renderCurve(progress: number) {
   if (!curveSection || !usesStageRail() || !curveCards.length) return;
-  const bounds = measuredBounds ?? readCurveBounds();
-  const entrance = clamp((innerHeight - bounds.top) / Math.max(1, innerHeight));
-  const exit = clamp(bounds.bottom / Math.max(1, innerHeight));
+  const entrance = Math.min(1, progress * 2);
+  const exit = Math.min(1, (curveCards.length + 1 - progress) * 2);
   const sectionPresence = clamp(Math.min(entrance, exit));
   const curvePresence = sectionPresence.toFixed(4);
   if (curvePresence !== lastCurvePresence) {
     curveSection.style.setProperty('--curve-presence', curvePresence);
     lastCurvePresence = curvePresence;
   }
+  referenceMotionState.curveProgress = Math.round(progress * 100_000) / 100_000;
   referenceMotionState.curveVelocity = Math.round(renderedCurveVelocity * 100_000) / 100_000;
 
   if (curveSection.dataset.webglGallery === 'true') return;
@@ -241,7 +242,7 @@ function renderCurve(progress: number, measuredBounds?: SectionBounds) {
   const depthRadius = Math.min(compactStage ? 120 : 270, innerWidth * (compactStage ? 0.2 : 0.145));
 
   curveCards.forEach((card, index) => {
-    const offset = index - progress;
+    const offset = index + 1 - progress;
     const distance = Math.abs(offset);
     const x = Math.sin(offset) * horizontalRadius;
     const y = offset * verticalStep;
@@ -266,8 +267,10 @@ function renderCurve(progress: number, measuredBounds?: SectionBounds) {
 function updateCurveTarget(measuredBounds?: SectionBounds) {
   if (!curveSection || !usesStageRail() || !curveCards.length) return;
   const bounds = measuredBounds ?? readCurveBounds();
-  const travel = Math.max(1, bounds.height - innerHeight);
-  targetCurveProgress = clamp(-bounds.top / travel) * Math.max(0, curveCards.length - 1);
+  // The reference works trigger runs from `top bottom` through `bottom top`.
+  targetCurveTrigger = clamp(
+    (innerHeight - bounds.top) / Math.max(1, bounds.height + innerHeight),
+  );
 }
 
 function updateAll(timestamp = performance.now()) {
@@ -289,10 +292,16 @@ function updateAll(timestamp = performance.now()) {
 
   if (curveSection && curveNearViewport && usesStageRail() && curveCards.length) {
     const previousProgress = renderedCurveProgress;
-    // Match the reference lerper: deliberate travel without project-to-project snapping.
-    const curveBlendRate = mobileMotionQuery.matches ? 4.2 : 5.4;
-    const curveBlend = 1 - Math.exp(-curveBlendRate * deltaSeconds);
-    renderedCurveProgress += (targetCurveProgress - renderedCurveProgress) * curveBlend;
+    // Match the reference's two-stage works rail exactly: first smooth the section trigger at
+    // 10/s, then bias the nearest project stop 60/40 and smooth that result at 5/s.
+    renderedCurveTrigger +=
+      (targetCurveTrigger - renderedCurveTrigger) * Math.min(1, deltaSeconds * 10);
+    const continuousProgress = renderedCurveTrigger * (curveCards.length + 1);
+    const nearestProjectStop = Math.round(continuousProgress);
+    const targetCurveProgress =
+      nearestProjectStop - (nearestProjectStop - continuousProgress) * 0.4;
+    renderedCurveProgress +=
+      (targetCurveProgress - renderedCurveProgress) * Math.min(1, deltaSeconds * 5);
     if (Math.abs(targetCurveProgress - renderedCurveProgress) < 0.0005) {
       renderedCurveProgress = targetCurveProgress;
     }
@@ -300,8 +309,8 @@ function updateAll(timestamp = performance.now()) {
       (renderedCurveProgress - previousProgress) / Math.max(deltaSeconds, 1 / 240);
     renderedCurveVelocity +=
       (instantaneousVelocity - renderedCurveVelocity) * (1 - Math.exp(-8 * deltaSeconds));
-    renderCurve(renderedCurveProgress, curveBounds);
-    setActiveProject(Math.round(renderedCurveProgress));
+    renderCurve(renderedCurveProgress);
+    setActiveProject(Math.floor(renderedCurveProgress - 0.5));
   }
 }
 
@@ -309,10 +318,9 @@ function selectProject(index: number) {
   if (!curveSection || curveCards.length < 2) return;
   const target = Math.round(clamp(index, 0, curveCards.length - 1));
   if (usesStageRail()) {
-    const sectionTop = curveDocumentTop;
-    const travel = Math.max(1, curveSectionHeight - innerHeight);
-    const denominator = Math.max(1, curveCards.length - 1);
-    const scrollTarget = sectionTop + (target / denominator) * travel;
+    const triggerProgress = (target + 1) / (curveCards.length + 1);
+    const scrollTarget =
+      curveDocumentTop - innerHeight + triggerProgress * (curveSectionHeight + innerHeight);
     if (smoothScroller) {
       smoothScroller.scrollTo(scrollTarget, { duration: 1.55 });
     } else {

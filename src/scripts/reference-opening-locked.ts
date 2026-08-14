@@ -1403,39 +1403,28 @@ async function startReferenceWorld(
     if (curveSection && curveSection.style.cursor !== cursor) curveSection.style.cursor = cursor;
   };
 
-  const updateProjectScene = (deltaSeconds: number) => {
+  const updateProjectScene = (_deltaSeconds: number) => {
     if (!curveSection || galleryVisuals.length === 0) return;
-    let boundsTop: number;
-    let boundsHeight: number;
-    if (referenceMotionState.curveBoundsHeight > 0) {
-      boundsTop = referenceMotionState.curveDocumentTop - scrollY;
-      boundsHeight = referenceMotionState.curveBoundsHeight;
-    } else {
-      const bounds = curveSection.getBoundingClientRect();
-      boundsTop = bounds.top;
-      boundsHeight = bounds.height;
-    }
-    const entry = clamp((innerHeight - boundsTop) / Math.max(innerHeight, 1));
-    currentGalleryPresence = smoothstep(0.05, 0.9, entry);
-    const travel = Math.max(1, boundsHeight - innerHeight);
-    currentGalleryProgress = clamp(-boundsTop / travel) * Math.max(0, galleryVisuals.length - 1);
-    // Touch scrolling on the phone is native; soften only the visual stage lerp so the
-    // project rail follows a swipe with a deliberate beat instead of snapping in.
-    const blendRate = compactGallery ? 4.2 : 5.4;
-    const blend = 1 - Math.exp(-blendRate * deltaSeconds);
-    renderedGalleryProgress += (currentGalleryProgress - renderedGalleryProgress) * blend;
-    renderedGalleryPresence += (currentGalleryPresence - renderedGalleryPresence) * blend;
+    // home-state owns the reference's two-stage rail lerp so the DOM metadata, background,
+    // and WebGL planes all consume one continuous project position instead of drifting apart.
+    currentGalleryProgress = referenceMotionState.curveProgress;
+    renderedGalleryProgress = currentGalleryProgress;
+    const galleryEntrance = Math.min(1, renderedGalleryProgress * 2);
+    const galleryExit = Math.min(
+      1,
+      (galleryVisuals.length + 1 - renderedGalleryProgress) * 2,
+    );
+    currentGalleryPresence = clamp(Math.min(galleryEntrance, galleryExit));
+    renderedGalleryPresence = currentGalleryPresence;
     wallUniforms.uGallery.value = renderedGalleryPresence;
     // Keep the chamber attached to the same continuously eased project position as the card rail.
     // A separately rounded, faster palette state made the wall jump projects before the selected
     // plane had settled, which read as an unrelated flash during scroll and touch transitions.
-    wallUniforms.uProject.value = renderedGalleryProgress;
+    const projectTextureProgress = Math.max(0, renderedGalleryProgress - 1);
+    wallUniforms.uProject.value = projectTextureProgress;
     compositeUniforms.uGallery.value = renderedGalleryPresence;
     const heroExit = smoothstep(0.04, 0.3, renderedGalleryPresence);
-    const galleryReveal = smoothstep(0.72, 1.0, renderedGalleryPresence);
-    const galleryProgress = galleryReveal + renderedGalleryProgress;
-    const galleryEntrance = Math.min(1, galleryProgress * 2);
-    const galleryExit = Math.min(1, galleryVisuals.length + 1 - galleryProgress);
+    const galleryProgress = renderedGalleryProgress;
     const galleryVelocity = referenceMotionState.curveVelocity;
     const heroWordOpacity = heroWordBaseOpacity * (1 - heroExit);
     if (heroWordMaterial.opacity !== heroWordOpacity) heroWordMaterial.opacity = heroWordOpacity;
@@ -1458,10 +1447,7 @@ async function startReferenceWorld(
     galleryVisuals.forEach((visual, index) => {
       const offset = index + 1 - galleryProgress;
       const distance = Math.abs(offset);
-      // Keep the selected plane and the two planes crossing at mid-swipe fully readable, then
-      // clear settled side planes quickly. The earlier 0.8-2.5 range left a one-step neighbour at
-      // roughly 96% opacity, so dark project artwork became a pair of black slabs at the edges.
-      const visibility = (1 - smoothstep(0.55, 1.45, distance)) * galleryEntrance * galleryExit;
+      const visibility = (1 - smoothstep(0.8, 2.5, distance)) * galleryEntrance * galleryExit;
       visual.mesh.visible = visibility > 0.002;
       galleryHasVisibleVisual ||= visual.mesh.visible;
       visual.mesh.position.set(Math.sin(offset) * 11, -offset, Math.cos(offset) * 5 - 6);
@@ -1772,7 +1758,7 @@ async function startReferenceWorld(
       backgroundElapsed,
       fluid?.texture ?? null,
       renderedGalleryPresence,
-      renderedGalleryProgress,
+      Math.max(0, renderedGalleryProgress - 1),
     );
     const reveal = reducedMotion ? 1 : clamp((time - revealStart) / 2600);
     compositeUniforms.uReveal.value = smoothstep(0, 1, reveal);

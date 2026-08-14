@@ -1,4 +1,5 @@
 export const referenceMotionState = {
+  curveProgress: 0,
   curveVelocity: 0,
   curveDocumentTop: 0,
   curveBoundsHeight: 0,
