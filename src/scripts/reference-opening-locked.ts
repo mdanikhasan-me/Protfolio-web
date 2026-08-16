@@ -419,117 +419,93 @@ const glassFragmentShader = `
 
   uniform sampler2D uScene;
   uniform sampler2D uNoise;
+  uniform samplerCube uEnvironment;
   uniform vec2 uResolution;
-  uniform float uTime;
-  uniform float uOpacity;
+  uniform float uRoughness;
+  uniform float uNoiseScale;
+  uniform vec3 uMaterialColor;
 
   varying vec2 vUv;
   varying vec3 vViewNormal;
   varying vec3 vViewPosition;
 
   float random(vec2 coordinate) {
-    return fract(sin(dot(coordinate, vec2(12.9898, 78.233))) * 43758.5453123);
+    return fract(sin(dot(coordinate, vec2(12.9898, 78.233))) * 43758.5453);
   }
 
-  float distributionGGX(vec3 normal, vec3 halfVector, float roughness) {
-    float a = roughness * roughness;
-    float a2 = a * a;
-    float nDotH = max(dot(normal, halfVector), 0.0);
-    float denominator = nDotH * nDotH * (a2 - 1.0) + 1.0;
-    return a2 / max(3.14159265 * denominator * denominator, 0.0001);
+  float distributionGGX(float normalDotHalf, float roughness) {
+    float roughnessSquared = roughness * roughness;
+    roughnessSquared *= roughnessSquared;
+    float normalDotHalfSquared = normalDotHalf * normalDotHalf;
+    if (normalDotHalfSquared <= 0.0) return 0.0;
+    return roughnessSquared /
+      (
+        3.14159265 *
+        pow(normalDotHalfSquared * (roughnessSquared - 1.0) + 1.0, 2.0)
+      );
+  }
+
+  float fresnel(float viewDotNormal) {
+    const float baseReflectance = 0.1;
+    return baseReflectance +
+      (1.0 - baseReflectance) * pow(1.0 - viewDotNormal, 5.0);
   }
 
   void main() {
     vec2 screenUv = gl_FragCoord.xy / uResolution;
     vec3 viewNormal = normalize(vViewNormal);
-    if (!gl_FrontFacing) viewNormal *= -1.0;
     vec3 viewDirection = normalize(vViewPosition);
-    vec4 firstNoise = texture2D(uNoise, vUv * 9.0);
+    vec4 firstNoise = texture2D(uNoise, vUv * uNoiseScale);
     vec4 secondNoise = texture2D(
       uNoise,
       vUv + (firstNoise.xy - 0.5) * 2.0
     );
-    float roughness = smoothstep(0.3, 0.8, secondNoise.y) * 0.10;
+    float roughness = smoothstep(0.3, 0.8, secondNoise.y) * uRoughness;
     float refractPower = 0.10;
     vec2 refractNormal = viewNormal.xy * (1.0 - viewNormal.z * 0.7);
     vec3 refractedColor = vec3(0.0);
-    float sineB = sin(firstNoise.b * 6.2831853);
-    float cosineB = cos(firstNoise.b * 6.2831853);
-    float sineG = sin(firstNoise.g * 6.2831853);
-    float cosineG = cos(firstNoise.g * 6.2831853);
-    const float sineOne = 0.8414709848;
-    const float cosineOne = 0.5403023059;
 
     for (int index = 0; index < 8; index++) {
       float sampleIndex = float(index);
-      float slide = 0.005 + firstNoise.r * 0.004 + sampleIndex * 0.00043;
-      vec2 roughnessDirection =
-        (secondNoise.xy - 0.5) * roughness * 0.30 +
-        vec2(sineB, cosineG) * roughness * 0.028;
-      vec2 uvR = clamp(
-        roughnessDirection + screenUv - refractNormal * (refractPower + slide),
-        0.001,
-        0.999
-      );
-      vec2 uvG = clamp(
-        roughnessDirection + screenUv - refractNormal * (refractPower + slide * 2.0),
-        0.001,
-        0.999
-      );
-      vec2 uvB = clamp(
-        roughnessDirection + screenUv - refractNormal * (refractPower + slide * 4.0),
-        0.001,
-        0.999
-      );
+      float slide = 0.005 + random(screenUv + sampleIndex * 0.2) * 0.007;
+      vec2 roughnessDirection = vec2(
+        random(screenUv + sampleIndex * 0.1) - 0.5,
+        random(screenUv + sampleIndex * 0.2) - 0.5
+      ) * roughness * 0.30;
+      vec2 uvR =
+        roughnessDirection + screenUv - refractNormal * (refractPower + slide);
+      vec2 uvG =
+        roughnessDirection + screenUv - refractNormal * (refractPower + slide * 2.0);
+      vec2 uvB =
+        roughnessDirection + screenUv - refractNormal * (refractPower + slide * 4.0);
       refractedColor += vec3(
         texture2D(uScene, uvR).r,
         texture2D(uScene, uvG).g,
         texture2D(uScene, uvB).b
       ) * 0.9;
-      float nextSineB = sineB * cosineOne + cosineB * sineOne;
-      cosineB = cosineB * cosineOne - sineB * sineOne;
-      sineB = nextSineB;
-      float nextSineG = sineG * cosineOne + cosineG * sineOne;
-      cosineG = cosineG * cosineOne - sineG * sineOne;
-      sineG = nextSineG;
     }
-    vec3 color = refractedColor * 0.125;
+    refractedColor /= 8.0;
+    vec3 color = refractedColor;
 
     vec3 lightDirection = normalize(vec3(-1.0, 0.8, -1.0));
     vec3 halfVector = normalize(viewDirection + lightDirection);
     float specular = distributionGGX(
-      viewNormal,
-      halfVector,
-      0.018 + roughness * 0.46
+      dot(viewNormal, halfVector),
+      0.003 + roughness * 0.4
     );
-    color += vec3(min(0.82, specular * 0.075));
+    color += vec3(specular);
 
-    float fresnel =
-      0.1 +
-      0.9 * pow(1.0 - max(dot(viewDirection, viewNormal), 0.0), 5.0);
-    vec2 reflectionUv = clamp(
-      screenUv +
-        viewNormal.xy * (0.04 + fresnel * 0.05) +
-        (secondNoise.xy - 0.5) * roughness * 0.08,
-      0.001,
-      0.999
-    );
-    vec3 chamberReflection = texture2D(uScene, reflectionUv).rgb;
-    color = mix(color, chamberReflection, 0.12 + fresnel * 0.5);
-    vec3 edgeSpectrum =
-      0.5 +
-      0.5 *
-        cos(
-          6.2831853 *
-            (vec3(0.0, 0.34, 0.67) +
-              firstNoise.r * 0.035)
-        );
-    color += edgeSpectrum * pow(fresnel, 1.7) * 0.07;
-    float microGrain = random(gl_FragCoord.xy + floor(uTime * 24.0)) - 0.5;
-    color += microGrain * 0.0015;
-    color = max(color, vec3(0.0));
-
-    gl_FragColor = vec4(color * 1.14, uOpacity);
+    float fresnelAmount = fresnel(dot(viewDirection, viewNormal));
+    vec3 environmentReflection = textureCube(
+      uEnvironment,
+      reflect(viewDirection, viewNormal)
+    ).rgb;
+    color +=
+      mix(color, environmentReflection, fresnelAmount * 0.9) *
+      (1.0 - fresnelAmount);
+    color *= 1.2;
+    color *= uMaterialColor / 255.0;
+    gl_FragColor = vec4(color, 1.0);
   }
 `;
 
@@ -854,25 +830,60 @@ function createWordTexture(textureWidth = 4096) {
   return texture;
 }
 
-function createMaterialNoiseTexture() {
+function createStudioEnvironmentTexture() {
   const size = 128;
-  const data = new Uint8Array(size * size * 4);
-  let seed = 0x6d2b79f5;
-  for (let index = 0; index < data.length; index += 4) {
-    seed ^= seed << 13;
-    seed ^= seed >>> 17;
-    seed ^= seed << 5;
-    seed >>>= 0;
-    const value = seed & 255;
-    data[index] = value;
-    data[index + 1] = value;
-    data[index + 2] = value;
-    data[index + 3] = 255;
-  }
-  const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat, THREE.UnsignedByteType);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.minFilter = THREE.LinearFilter;
+  const makeFace = (face: number) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Unable to create identity environment face');
+
+    const base = context.createLinearGradient(0, 0, size, size);
+    if (face === 0 || face === 3) {
+      base.addColorStop(0, '#d8d8d8');
+      base.addColorStop(0.72, '#a8a8a8');
+      base.addColorStop(1, '#181818');
+    } else {
+      base.addColorStop(0, '#050505');
+      base.addColorStop(0.58, '#121212');
+      base.addColorStop(1, '#2a2a2a');
+    }
+    context.fillStyle = base;
+    context.fillRect(0, 0, size, size);
+
+    const panel = context.createLinearGradient(0, 0, size, 0);
+    panel.addColorStop(0, 'rgba(255,255,255,0)');
+    panel.addColorStop(0.45, 'rgba(255,255,255,0.82)');
+    panel.addColorStop(0.55, 'rgba(255,255,255,0.96)');
+    panel.addColorStop(1, 'rgba(255,255,255,0)');
+    context.save();
+    context.translate(size * (face % 2 === 0 ? 0.22 : 0.68), size * 0.48);
+    context.rotate(face % 3 === 0 ? -0.22 : 0.17);
+    context.fillStyle = panel;
+    context.fillRect(-size * 0.34, -size * 0.11, size * 0.68, size * 0.22);
+    context.restore();
+
+    const lamp = context.createRadialGradient(
+      size * 0.72,
+      size * 0.26,
+      0,
+      size * 0.72,
+      size * 0.26,
+      size * 0.20,
+    );
+    lamp.addColorStop(0, 'rgba(255,255,255,1)');
+    lamp.addColorStop(0.14, 'rgba(255,255,255,0.88)');
+    lamp.addColorStop(1, 'rgba(255,255,255,0)');
+    context.fillStyle = lamp;
+    context.fillRect(0, 0, size, size);
+    return canvas;
+  };
+
+  const texture = new THREE.CubeTexture(Array.from({ length: 6 }, (_, face) => makeFace(face)));
+  texture.colorSpace = THREE.NoColorSpace;
+  texture.generateMipmaps = true;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.magFilter = THREE.LinearFilter;
   texture.needsUpdate = true;
   return texture;
@@ -1171,22 +1182,21 @@ async function startReferenceWorld(
     depthBuffer: true,
     depthTexture: backgroundDepthTexture,
   });
-  const materialNoiseTexture = createMaterialNoiseTexture();
+  const studioEnvironmentTexture = createStudioEnvironmentTexture();
   const glassUniforms = {
     uScene: { value: backgroundTarget.texture },
-    uNoise: { value: materialNoiseTexture },
+    uNoise: { value: openingBackground.noiseTexture },
+    uEnvironment: { value: studioEnvironmentTexture },
     uResolution: { value: new THREE.Vector2(1, 1) },
-    uTime: { value: 0 },
-    uOpacity: { value: 1 },
+    uRoughness: { value: 0.1 },
+    uNoiseScale: { value: 9 },
+    uMaterialColor: { value: new THREE.Vector3(255, 255, 255) },
   };
   const glassMaterial = new THREE.ShaderMaterial({
     uniforms: glassUniforms,
     vertexShader: glassVertexShader,
     fragmentShader: glassFragmentShader,
     transparent: true,
-    depthTest: false,
-    depthWrite: false,
-    side: THREE.DoubleSide,
   });
   const identityPromise = loadIdentity(glassMaterial);
 
@@ -1703,7 +1713,6 @@ async function startReferenceWorld(
     lastFrame = time;
     const elapsed = Math.max(0, (time - revealStart) * 0.001);
     wallUniforms.uTime.value = elapsed;
-    glassUniforms.uTime.value = elapsed;
     compositeUniforms.uTime.value = elapsed;
     updateProjectScene(deltaSeconds);
 
@@ -1825,7 +1834,7 @@ async function startReferenceWorld(
 
   resize();
   if (heroWordMaterial.map) renderer.initTexture(heroWordMaterial.map);
-  renderer.initTexture(materialNoiseTexture);
+  renderer.initTexture(studioEnvironmentTexture);
   galleryVisuals.forEach((visual) => renderer.initTexture(visual.texture));
   await Promise.all([
     renderer.compileAsync(baseScene, camera),
@@ -1876,7 +1885,7 @@ async function startReferenceWorld(
     heroWord.geometry.dispose();
     heroWordMaterial.map?.dispose();
     heroWordMaterial.dispose();
-    materialNoiseTexture.dispose();
+    studioEnvironmentTexture.dispose();
     identity.traverse((child) => {
       if (child instanceof THREE.Mesh) child.geometry.dispose();
     });

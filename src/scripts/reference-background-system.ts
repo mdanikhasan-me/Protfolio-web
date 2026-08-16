@@ -12,6 +12,7 @@ type OpeningPatternStep = {
 
 export interface ReferenceBackgroundSystem {
   group: THREE.Group;
+  noiseTexture: THREE.Texture;
   setProjectTextures: (textures: readonly THREE.Texture[]) => void;
   update: (
     elapsed: number,
@@ -1168,5 +1169,5 @@ export function createReferenceBackgroundSystem(
     blackTexture.dispose();
   };
 
-  return { group, setProjectTextures, update, resize, dispose };
+  return { group, noiseTexture: noiseTarget.texture, setProjectTextures, update, resize, dispose };
 }
