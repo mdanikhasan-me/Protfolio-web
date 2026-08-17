@@ -830,63 +830,28 @@ function createWordTexture(textureWidth = 4096) {
   return texture;
 }
 
-function createStudioEnvironmentTexture() {
-  const size = 128;
-  const makeFace = (face: number) => {
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    const context = canvas.getContext('2d');
-    if (!context) throw new Error('Unable to create identity environment face');
-
-    const base = context.createLinearGradient(0, 0, size, size);
-    if (face === 0 || face === 3) {
-      base.addColorStop(0, '#d8d8d8');
-      base.addColorStop(0.72, '#a8a8a8');
-      base.addColorStop(1, '#181818');
-    } else {
-      base.addColorStop(0, '#050505');
-      base.addColorStop(0.58, '#121212');
-      base.addColorStop(1, '#2a2a2a');
-    }
-    context.fillStyle = base;
-    context.fillRect(0, 0, size, size);
-
-    const panel = context.createLinearGradient(0, 0, size, 0);
-    panel.addColorStop(0, 'rgba(255,255,255,0)');
-    panel.addColorStop(0.45, 'rgba(255,255,255,0.82)');
-    panel.addColorStop(0.55, 'rgba(255,255,255,0.96)');
-    panel.addColorStop(1, 'rgba(255,255,255,0)');
-    context.save();
-    context.translate(size * (face % 2 === 0 ? 0.22 : 0.68), size * 0.48);
-    context.rotate(face % 3 === 0 ? -0.22 : 0.17);
-    context.fillStyle = panel;
-    context.fillRect(-size * 0.34, -size * 0.11, size * 0.68, size * 0.22);
-    context.restore();
-
-    const lamp = context.createRadialGradient(
-      size * 0.72,
-      size * 0.26,
-      0,
-      size * 0.72,
-      size * 0.26,
-      size * 0.20,
+function loadStudioEnvironmentTexture() {
+  const faces = ['px', 'nx', 'py', 'ny', 'pz', 'nz'].map(
+    (face) => `/media/identity/environment/${face}.png`,
+  );
+  return new Promise<THREE.CubeTexture>((resolve, reject) => {
+    new THREE.CubeTextureLoader().load(
+      faces,
+      (texture) => {
+        // The reference environment is authored in sRGB. Keeping that declaration is
+        // essential: treating those pixels as linear both shifts the surface color and
+        // exaggerates each cube face into the rectangular hover flash reported in QA.
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.generateMipmaps = true;
+        texture.minFilter = THREE.LinearMipmapLinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.needsUpdate = true;
+        resolve(texture);
+      },
+      undefined,
+      reject,
     );
-    lamp.addColorStop(0, 'rgba(255,255,255,1)');
-    lamp.addColorStop(0.14, 'rgba(255,255,255,0.88)');
-    lamp.addColorStop(1, 'rgba(255,255,255,0)');
-    context.fillStyle = lamp;
-    context.fillRect(0, 0, size, size);
-    return canvas;
-  };
-
-  const texture = new THREE.CubeTexture(Array.from({ length: 6 }, (_, face) => makeFace(face)));
-  texture.colorSpace = THREE.NoColorSpace;
-  texture.generateMipmaps = true;
-  texture.minFilter = THREE.LinearMipmapLinearFilter;
-  texture.magFilter = THREE.LinearFilter;
-  texture.needsUpdate = true;
-  return texture;
+  });
 }
 
 function loadTexture(loader: THREE.TextureLoader, source: string) {
@@ -1182,11 +1147,11 @@ async function startReferenceWorld(
     depthBuffer: true,
     depthTexture: backgroundDepthTexture,
   });
-  const studioEnvironmentTexture = createStudioEnvironmentTexture();
+  const studioEnvironmentTexturePromise = loadStudioEnvironmentTexture();
   const glassUniforms = {
     uScene: { value: backgroundTarget.texture },
     uNoise: { value: openingBackground.noiseTexture },
-    uEnvironment: { value: studioEnvironmentTexture },
+    uEnvironment: { value: null as THREE.CubeTexture | null },
     uResolution: { value: new THREE.Vector2(1, 1) },
     uRoughness: { value: 0.1 },
     uNoiseScale: { value: 9 },
@@ -1245,11 +1210,18 @@ async function startReferenceWorld(
       return { mesh, material, route: project.route, texture };
     }),
   );
-  const [{ heroWord, heroWordMaterial }, identity, loadedGalleryVisuals] = await Promise.all([
+  const [
+    { heroWord, heroWordMaterial },
+    identity,
+    loadedGalleryVisuals,
+    studioEnvironmentTexture,
+  ] = await Promise.all([
     heroWordPromise,
     identityPromise,
     galleryVisualsPromise,
+    studioEnvironmentTexturePromise,
   ]);
+  glassUniforms.uEnvironment.value = studioEnvironmentTexture;
   const identityBaseScale = identity.scale.x;
   const identityBaseQuaternion = identity.quaternion.clone();
   // The first rendered frame always normalizes the authored root to this origin. Set it once
