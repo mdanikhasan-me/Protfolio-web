@@ -1322,21 +1322,20 @@ async function startReferenceWorld(
 
   const identityQuaternion = new THREE.Quaternion();
   const interactionQuaternion = new THREE.Quaternion();
-  const targetQuaternion = new THREE.Quaternion();
   const deltaQuaternion = new THREE.Quaternion();
   const deltaEuler = new THREE.Euler();
-  const targetCamera = new THREE.Vector3();
+  const hoverEuler = new THREE.Euler();
   const pointer = new THREE.Vector2();
   const previousPointer = new THREE.Vector2();
   const pointerNdc = new THREE.Vector2();
+  const filteredPointerNdc = new THREE.Vector2();
+  const pointerVelocityNdc = new THREE.Vector2();
   const raycaster = new THREE.Raycaster();
   const appliedInteractionQuaternion = interactionQuaternion.clone();
   let appliedIdentityScale = identity.scale.x;
   let pointerInitialized = false;
-  let pointerOverIdentity = false;
   let hoveredGalleryVisual: GalleryVisual | null = null;
   let lastPointerTime = performance.now();
-  let lastMotionTime = -1000;
   let pointerEnergy = 0;
   let revealStart = performance.now();
   let animationFrame = 0;
@@ -1542,8 +1541,12 @@ async function startReferenceWorld(
     if (!worldInView || coarsePointer) return;
     const now = performance.now();
     pointer.set(event.clientX, event.clientY);
+    const normalizedX = (event.clientX / Math.max(1, canvasWidth)) * 2 - 1;
+    const normalizedY = -((event.clientY / Math.max(1, canvasHeight)) * 2 - 1);
+    pointerNdc.set(normalizedX, normalizedY);
     if (!pointerInitialized) {
       previousPointer.copy(pointer);
+      filteredPointerNdc.copy(pointerNdc);
       pointerInitialized = true;
       lastPointerTime = now;
       return;
@@ -1551,15 +1554,6 @@ async function startReferenceWorld(
     const deltaTime = Math.max(8, now - lastPointerTime);
     const deltaX = pointer.x - previousPointer.x;
     const deltaY = pointer.y - previousPointer.y;
-    const speed = Math.hypot(deltaX, deltaY) / deltaTime;
-    const normalizedX = (event.clientX / Math.max(1, canvasWidth)) * 2 - 1;
-    const normalizedY = -((event.clientY / Math.max(1, canvasHeight)) * 2 - 1);
-    const wasPointerOverIdentity = pointerOverIdentity;
-    pointerNdc.set(normalizedX, normalizedY);
-    identity.updateWorldMatrix(true, true);
-    raycaster.setFromCamera(pointerNdc, camera);
-    pointerOverIdentity =
-      renderedGalleryPresence < 0.18 && raycaster.intersectObject(identity, true).length > 0;
     hoveredGalleryVisual = galleryVisualAt(event.clientX, event.clientY);
     setCurveCursor(hoveredGalleryVisual ? 'pointer' : '');
 
@@ -1573,26 +1567,15 @@ async function startReferenceWorld(
       });
     }
 
-    if (pointerEffectsEnabled && pointerOverIdentity && wasPointerOverIdentity && speed > 0.08) {
-      const intensity = clamp(Math.pow(speed, 1.18) * 0.78, 0, 1);
-      deltaEuler.set(
-        clamp((deltaY / Math.max(1, canvasHeight)) * 6.6, -1.82, 1.82),
-        clamp((deltaX / Math.max(1, canvasWidth)) * 7.2, -2.1, 2.1),
-        clamp(((deltaX - deltaY) / Math.max(1, canvasWidth)) * 1.55, -0.46, 0.46),
-      );
-      deltaQuaternion.setFromEuler(deltaEuler);
-      targetQuaternion.premultiply(deltaQuaternion).normalize();
-      lastMotionTime = now;
-      pointerEnergy = Math.max(pointerEnergy, intensity);
-    }
-
     previousPointer.copy(pointer);
     lastPointerTime = now;
   };
 
   const onPointerLeave = () => {
     pointerInitialized = false;
-    pointerOverIdentity = false;
+    pointerNdc.set(0, 0);
+    filteredPointerNdc.set(0, 0);
+    pointerVelocityNdc.set(0, 0);
     hoveredGalleryVisual = null;
     setCurveCursor('');
   };
@@ -1611,8 +1594,8 @@ async function startReferenceWorld(
   let gizmoDragging = false;
   const gizmoPointer = new THREE.Vector2();
   const resetOrientation = () => {
-    targetQuaternion.identity();
     interactionQuaternion.identity();
+    hoverEuler.set(0, 0, 0);
     pointerEnergy = 0;
   };
   const beginGizmoDrag = (event: PointerEvent) => {
@@ -1627,9 +1610,8 @@ async function startReferenceWorld(
     const dy = event.clientY - gizmoPointer.y;
     deltaEuler.set(dy * 0.012, dx * 0.012, 0);
     deltaQuaternion.setFromEuler(deltaEuler);
-    targetQuaternion.premultiply(deltaQuaternion).normalize();
+    interactionQuaternion.premultiply(deltaQuaternion).normalize();
     gizmoPointer.set(event.clientX, event.clientY);
-    lastMotionTime = performance.now();
   };
   const releaseGizmo = (event: PointerEvent) => {
     if (!gizmoDragging) return;
@@ -1689,28 +1671,41 @@ async function startReferenceWorld(
     updateProjectScene(deltaSeconds);
 
     if (!coarsePointer) {
-      const pointerX = pointerOverIdentity ? (pointer.x / Math.max(1, canvasWidth)) * 2 - 1 : 0;
-      const pointerY = pointerOverIdentity ? -((pointer.y / Math.max(1, canvasHeight)) * 2 - 1) : 0;
-      targetCamera.set(pointerX * 0.5, 0.1 + pointerY * 0.5, 10);
-      if (!camera.position.equals(targetCamera)) {
-        camera.position.lerp(targetCamera, 1 - Math.exp(-3 * deltaSeconds));
-        camera.lookAt(0, 0, -0.2);
-        camera.updateMatrix();
+      // Match the reference KV response: a 10x/s pointer lerp, velocity-driven rotation,
+      // radial center attenuation, 0.01 rotation gain, and a 2x/s return force. The camera
+      // remains fixed; moving it here turned screen-space refraction into an unrelated lurch.
+      pointerVelocityNdc.copy(pointerNdc).sub(filteredPointerNdc);
+      filteredPointerNdc.addScaledVector(
+        pointerVelocityNdc,
+        Math.min(1, deltaSeconds * 10),
+      );
+      const hoverWeight =
+        renderedGalleryPresence < 0.18
+          ? Math.max(0, 1 - pointerNdc.length() * 1.5)
+          : 0;
+      if (pointerEffectsEnabled && hoverWeight > 0) {
+        hoverEuler.set(
+          hoverEuler.x - pointerVelocityNdc.y * 0.01 * hoverWeight,
+          hoverEuler.y + pointerVelocityNdc.x * 0.01 * hoverWeight,
+          0,
+        );
       }
-
-      const idle = time - lastMotionTime > 72;
-      if (idle) {
-        targetQuaternion.slerp(identityQuaternion, 1 - Math.exp(-3.2 * deltaSeconds));
-      }
-      interactionQuaternion.slerp(targetQuaternion, 1 - Math.exp(-9 * deltaSeconds));
-      pointerEnergy *= Math.pow(0.91, deltaSeconds * 60);
+      const hoverRetention = Math.max(0, 1 - deltaSeconds);
+      hoverEuler.x *= hoverRetention;
+      hoverEuler.y *= hoverRetention;
+      deltaQuaternion.setFromEuler(hoverEuler);
+      interactionQuaternion.premultiply(deltaQuaternion).normalize();
+      interactionQuaternion.slerp(identityQuaternion, Math.min(1, deltaSeconds * 2));
+      pointerEnergy = Math.max(
+        pointerVelocityNdc.length() * hoverWeight,
+        pointerEnergy * Math.pow(0.91, deltaSeconds * 60),
+      );
       if (pointerEnergy < 0.0005) pointerEnergy = 0;
     }
 
     const galleryIdentityStage = smoothstep(0.18, 0.55, renderedGalleryPresence);
     let identityTransformChanged = false;
     if (!coarsePointer) {
-      if (renderedGalleryPresence > 0.18) targetQuaternion.identity();
       if (!appliedInteractionQuaternion.equals(interactionQuaternion)) {
         identity.quaternion.copy(identityBaseQuaternion).multiply(interactionQuaternion);
         appliedInteractionQuaternion.copy(interactionQuaternion);
