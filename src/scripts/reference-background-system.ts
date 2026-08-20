@@ -7,7 +7,6 @@ type OpeningPatternStep = {
   pattern: PatternIndex;
   transition: number;
   duration: number;
-  palette?: number;
 };
 
 export interface ReferenceBackgroundSystem {
@@ -923,84 +922,65 @@ export function createReferenceBackgroundSystem(
   let nextBlackoutAt = 0.8;
   let nextUvShiftAt = 0.4;
   let patternStep = 0;
-  let nextPatternAt = 2.6;
   let mobileDenseLayout = false;
-  const patternTimingRandom = createSeededRandom(0x7a11ce26);
-  const referenceHoldExtensions = [0, 0.3, 3] as const;
+  // Native 2560 x 1440 / 120 fps audit of all 17,401 frames from 0-145 seconds.
+  // Major states cut on the first changed source frame. Two recorded non-instant windows keep
+  // their spatial transition instead of being flattened into the old random/skip scheduler.
   const openingPatternSequence: OpeningPatternStep[] = [
-    { at: 2.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 5.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
-    { at: 12.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
-    { at: 17.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 18.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 19.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 20.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
-    { at: 25.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 29.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
-    { at: 31.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 34.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 35.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 38.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
-    { at: 40.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 41.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
-    { at: 42.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
-    { at: 43.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
-    { at: 44.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 46.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 48.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 49.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
-    { at: 50.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 52.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
-    { at: 53.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 54.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 55.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 57.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 59.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 61.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
-    { at: 62.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
-    { at: 63.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 64.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
-    { at: 65.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 67.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
-    { at: 69.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 72.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 74.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 75.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 76.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
-    { at: 77.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 78.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
-    { at: 80.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 82.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
-    { at: 83.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 84.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 85.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 88.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 92.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 95.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
-    { at: 96.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 97.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 98.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
-    { at: 100.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 101.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 102.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 103.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
-    { at: 108.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 110.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 111.6, pattern: 0 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 112.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 0 },
-    { at: 114.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 119.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
-    { at: 120.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 123.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 2 },
-    { at: 124.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 126.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
-    { at: 130.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 132.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
-    { at: 133.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 136.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 1 },
-    { at: 137.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
-    { at: 140.6, pattern: 1 as PatternIndex, transition: 1, duration: 0.30 },
-    { at: 143.6, pattern: 2 as PatternIndex, transition: 1, duration: 0.34, palette: 3 },
+    { at: 2.509733, pattern: 1, transition: 0, duration: 0 },
+    { at: 5.901378, pattern: 0, transition: 0, duration: 0 },
+    { at: 12.950733, pattern: 2, transition: 0, duration: 0 },
+    { at: 17.067878, pattern: 1, transition: 0, duration: 0 },
+    { at: 18.201589, pattern: 0, transition: 0, duration: 0 },
+    { at: 19.800611, pattern: 1, transition: 0, duration: 0 },
+    { at: 20.851556, pattern: 0, transition: 0, duration: 0 },
+    { at: 25.184444, pattern: 2, transition: 0, duration: 0 },
+    { at: 31.167189, pattern: 1, transition: 0, duration: 0 },
+    { at: 34.392411, pattern: 0, transition: 0, duration: 0 },
+    { at: 36.001011, pattern: 1, transition: 0, duration: 0 },
+    { at: 38.543133, pattern: 2, transition: 0, duration: 0 },
+    { at: 41.450322, pattern: 0, transition: 0, duration: 0 },
+    { at: 43.426156, pattern: 2, transition: 0, duration: 0 },
+    { at: 44.767378, pattern: 1, transition: 0, duration: 0 },
+    { at: 46.500889, pattern: 2, transition: 0, duration: 0 },
+    { at: 48.184056, pattern: 1, transition: 0, duration: 0 },
+    { at: 49.216867, pattern: 0, transition: 0, duration: 0 },
+    { at: 50.992878, pattern: 1, transition: 0, duration: 0 },
+    { at: 52.034000, pattern: 2, transition: 0, duration: 0 },
+    { at: 53.283956, pattern: 1, transition: 0, duration: 0 },
+    { at: 54.484178, pattern: 0, transition: 0, duration: 0 },
+    { at: 55.767333, pattern: 2, transition: 0, duration: 0 },
+    { at: 57.308900, pattern: 1, transition: 0, duration: 0 },
+    { at: 59.459100, pattern: 2, transition: 0, duration: 0 },
+    { at: 62.041722, pattern: 0, transition: 0, duration: 0 },
+    { at: 65.325156, pattern: 1, transition: 0, duration: 0 },
+    { at: 67.675811, pattern: 0, transition: 0, duration: 0 },
+    { at: 72.733633, pattern: 1, transition: 0, duration: 0 },
+    { at: 74.066767, pattern: 2, transition: 0, duration: 0 },
+    { at: 75.433778, pattern: 1, transition: 0, duration: 0 },
+    { at: 76.883522, pattern: 2, transition: 0, duration: 0 },
+    { at: 80.950589, pattern: 1, transition: 0, duration: 0 },
+    { at: 82.883833, pattern: 2, transition: 0, duration: 0 },
+    { at: 84.608511, pattern: 0, transition: 0, duration: 0 },
+    { at: 85.708456, pattern: 1, transition: 0, duration: 0 },
+    { at: 88.358433, pattern: 2, transition: 0, duration: 0 },
+    { at: 92.516378, pattern: 1, transition: 0, duration: 0 },
+    { at: 95.083378, pattern: 2, transition: 0, duration: 0 },
+    { at: 97.600311, pattern: 0, transition: 0, duration: 0 },
+    { at: 100.416644, pattern: 1, transition: 0, duration: 0 },
+    { at: 101.558344, pattern: 0, transition: 0, duration: 0 },
+    { at: 102.600000, pattern: 2, transition: 1, duration: 0.3 },
+    { at: 110.191256, pattern: 1, transition: 0, duration: 0 },
+    { at: 111.933189, pattern: 0, transition: 0, duration: 0 },
+    { at: 112.424778, pattern: 2, transition: 2, duration: 3 },
+    { at: 120.125278, pattern: 1, transition: 0, duration: 0 },
+    { at: 123.792144, pattern: 2, transition: 0, duration: 0 },
+    { at: 130.766111, pattern: 1, transition: 0, duration: 0 },
+    { at: 132.399511, pattern: 2, transition: 0, duration: 0 },
+    { at: 133.565989, pattern: 1, transition: 0, duration: 0 },
+    { at: 136.565944, pattern: 2, transition: 0, duration: 0 },
+    { at: 140.032767, pattern: 1, transition: 0, duration: 0 },
+    { at: 143.549678, pattern: 2, transition: 0, duration: 0 },
   ];
   const motifCycleStart = 5.2;
   const motifHoldDuration = 4.0;
@@ -1010,13 +990,7 @@ export function createReferenceBackgroundSystem(
     pattern: PatternIndex,
     transition: number,
     duration: number,
-    paletteMode = 0,
   ) => {
-    if (pattern === 0) {
-      colorPatternUniforms.uPaletteMode.value = paletteMode;
-    } else if (pattern === 2) {
-      violetPatternUniforms.uPaletteMode.value = paletteMode;
-    }
     currentPattern = nextPattern;
     nextPattern = pattern;
     tileUniforms.uPatternCurrent.value = patternTargets[currentPattern].texture;
@@ -1066,18 +1040,18 @@ export function createReferenceBackgroundSystem(
     tileUniforms.uProject.value = clampedProjectProgress;
     setProjectTexturePair(clampedProjectProgress);
 
-    while (elapsed >= nextPatternAt) {
-      const changeAt = nextPatternAt;
-      let step = openingPatternSequence[patternStep % openingPatternSequence.length]!;
+    while (
+      patternStep < openingPatternSequence.length &&
+      elapsed >= openingPatternSequence[patternStep]!.at
+    ) {
+      const step = openingPatternSequence[patternStep]!;
       patternStep += 1;
-      while (step.pattern === nextPattern) {
-        step = openingPatternSequence[patternStep % openingPatternSequence.length]!;
-        patternStep += 1;
-      }
-      const holdExtensionIndex = Math.floor(patternTimingRandom() * 3);
-      const holdExtension = referenceHoldExtensions[holdExtensionIndex] ?? 0;
-      beginPatternChange(changeAt, step.pattern, 0, 0, step.palette ?? 0);
-      nextPatternAt = changeAt + 1 + holdExtension + patternTimingRandom();
+      beginPatternChange(
+        step.at,
+        step.pattern,
+        step.transition,
+        step.duration,
+      );
     }
 
     const motifStep = Math.floor(Math.max(0, elapsed - motifCycleStart) / motifHoldDuration);
