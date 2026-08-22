@@ -251,7 +251,7 @@ const tileVertexShader = /* glsl */ `
     float uvSeed = floor(uUvShiftSeed * 5.0) / 5.0;
     vec2 uvShift = vec2(
       random(instanceId.xy + uvSeed),
-      random(instanceId.yz + uvSeed + 10.0)
+      random(instanceId.xy + uvSeed + 10.0)
     ) - 0.5;
     float shiftGate = step(random(instanceId.xy + uvSeed + 4.0), uUvShiftRate);
     uvShift *= uUvShiftPower * shiftGate;
@@ -796,10 +796,10 @@ export function createReferenceBackgroundSystem(
     uPatternMix: { value: 1 },
     uTransitionType: { value: 0 },
     uSymbolMode: { value: 0 },
-    uBlackoutRate: { value: 0.18 },
-    uBlackoutSeed: { value: 0.21 },
-    uUvShiftRate: { value: 0.14 },
-    uUvShiftSeed: { value: 0.37 },
+    uBlackoutRate: { value: 0 },
+    uBlackoutSeed: { value: 0 },
+    uUvShiftRate: { value: 0 },
+    uUvShiftSeed: { value: 0 },
     uUvShiftPower: { value: 0 },
     uSymbol: { value: symbolTexture },
     uWordmark: { value: wordmarkTexture },
@@ -919,8 +919,17 @@ export function createReferenceBackgroundSystem(
   let transitionStart = 0;
   let transitionDuration = 0;
   let nextLayoutAt = 4;
-  let nextBlackoutAt = 0.8;
-  let nextUvShiftAt = 0.4;
+  let nextBlackoutAt = 0;
+  let blackoutSeedFrom = 0;
+  let blackoutSeedTarget = 0;
+  let blackoutSeedStartedAt = 0;
+  let nextUvShiftAt = 0;
+  let uvShiftPowerFrom = 0;
+  let uvShiftPowerTarget = 0;
+  let uvShiftPowerStartedAt = 0;
+  let uvShiftSeedFrom = 0;
+  let uvShiftSeedTarget = 0;
+  let uvShiftSeedStartedAt = 0;
   let patternStep = 0;
   let mobileDenseLayout = false;
   // Native 2560 x 1440 / 120 fps audit of all 17,401 frames from 0-145 seconds.
@@ -982,8 +991,28 @@ export function createReferenceBackgroundSystem(
     { at: 140.032767, pattern: 1, transition: 0, duration: 0 },
     { at: 143.549678, pattern: 2, transition: 0, duration: 0 },
   ];
-  const motifCycleStart = 5.2;
-  const motifHoldDuration = 4.0;
+  const linearAnimationValue = (
+    from: number,
+    target: number,
+    startedAt: number,
+    duration: number,
+    elapsed: number,
+  ) => {
+    const progress = THREE.MathUtils.clamp((elapsed - startedAt) / duration, 0, 1);
+    return THREE.MathUtils.lerp(from, target, progress);
+  };
+
+  const cubicOutAnimationValue = (
+    from: number,
+    target: number,
+    startedAt: number,
+    duration: number,
+    elapsed: number,
+  ) => {
+    const progress = THREE.MathUtils.clamp((elapsed - startedAt) / duration, 0, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    return THREE.MathUtils.lerp(from, target, eased);
+  };
 
   const beginPatternChange = (
     elapsed: number,
@@ -1054,12 +1083,6 @@ export function createReferenceBackgroundSystem(
       );
     }
 
-    const motifStep = Math.floor(Math.max(0, elapsed - motifCycleStart) / motifHoldDuration);
-    const symbolMode = elapsed < motifCycleStart ? 0 : motifStep % 2 === 0 ? 2 : 1;
-    if (tileUniforms.uSymbolMode.value !== symbolMode) {
-      tileUniforms.uSymbolMode.value = symbolMode;
-    }
-
     if (transitionDuration > 0) {
       const progress = THREE.MathUtils.clamp(
         (elapsed - transitionStart) / transitionDuration,
@@ -1079,17 +1102,68 @@ export function createReferenceBackgroundSystem(
     }
 
     const params = patternParams[nextPattern];
-    if (elapsed >= nextBlackoutAt) {
+    while (elapsed >= nextBlackoutAt) {
+      const eventAt = nextBlackoutAt;
+      tileUniforms.uSymbolMode.value = Math.floor(random() * 3);
       tileUniforms.uBlackoutRate.value = params.blackout + random() * params.blackoutRange;
-      tileUniforms.uBlackoutSeed.value = random();
-      nextBlackoutAt = elapsed + 1;
+      blackoutSeedFrom = linearAnimationValue(
+        blackoutSeedFrom,
+        blackoutSeedTarget,
+        blackoutSeedStartedAt,
+        0.3,
+        eventAt,
+      );
+      blackoutSeedTarget = random();
+      blackoutSeedStartedAt = eventAt;
+      random(); // The reference evaluates its zero-width interval jitter on every callback.
+      nextBlackoutAt = eventAt + 1;
     }
-    if (elapsed >= nextUvShiftAt) {
+    tileUniforms.uBlackoutSeed.value = linearAnimationValue(
+      blackoutSeedFrom,
+      blackoutSeedTarget,
+      blackoutSeedStartedAt,
+      0.3,
+      elapsed,
+    );
+
+    while (elapsed >= nextUvShiftAt) {
+      const eventAt = nextUvShiftAt;
       tileUniforms.uUvShiftRate.value = params.uvShift;
-      tileUniforms.uUvShiftPower.value = params.uvShift > 0 ? random() : 0;
-      tileUniforms.uUvShiftSeed.value = random();
-      nextUvShiftAt = elapsed + params.uvIntervalMin + params.uvIntervalRange * random();
+      random(); // The reference evaluates its zero-width UV-rate jitter on every callback.
+      uvShiftPowerFrom = cubicOutAnimationValue(
+        uvShiftPowerFrom,
+        uvShiftPowerTarget,
+        uvShiftPowerStartedAt,
+        0.8,
+        eventAt,
+      );
+      uvShiftPowerTarget = random();
+      uvShiftPowerStartedAt = eventAt;
+      uvShiftSeedFrom = linearAnimationValue(
+        uvShiftSeedFrom,
+        uvShiftSeedTarget,
+        uvShiftSeedStartedAt,
+        0.3,
+        eventAt,
+      );
+      uvShiftSeedTarget = random();
+      uvShiftSeedStartedAt = eventAt;
+      nextUvShiftAt = eventAt + params.uvIntervalMin + params.uvIntervalRange * random();
     }
+    tileUniforms.uUvShiftPower.value = cubicOutAnimationValue(
+      uvShiftPowerFrom,
+      uvShiftPowerTarget,
+      uvShiftPowerStartedAt,
+      0.8,
+      elapsed,
+    );
+    tileUniforms.uUvShiftSeed.value = linearAnimationValue(
+      uvShiftSeedFrom,
+      uvShiftSeedTarget,
+      uvShiftSeedStartedAt,
+      0.3,
+      elapsed,
+    );
 
     // Shade only the visible procedural pattern, plus its predecessor during the brief transition.
     // Once the project rail fully owns the chamber, both it and the shared noise target freeze.
