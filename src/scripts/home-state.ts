@@ -114,7 +114,10 @@ if (meltSection) motionSectionObserver?.observe(meltSection);
 if (curveSection) motionSectionObserver?.observe(curveSection);
 
 function usesStageRail() {
-  return !reduceMotion;
+  // Reduced motion must preserve the authored stage. Replacing the rail with a document-flow
+  // card grid exposed every DOM fallback over the still-live WebGL chamber and produced a wholly
+  // different, overlapping design. Motion preference changes timing, not composition.
+  return true;
 }
 
 function syncCurveStage() {
@@ -292,23 +295,34 @@ function updateAll(timestamp = performance.now()) {
 
   if (curveSection && curveNearViewport && usesStageRail() && curveCards.length) {
     const previousProgress = renderedCurveProgress;
-    // Match the reference's two-stage works rail exactly: first smooth the section trigger at
-    // 10/s, then bias the nearest project stop 60/40 and smooth that result at 5/s.
-    renderedCurveTrigger +=
-      (targetCurveTrigger - renderedCurveTrigger) * Math.min(1, deltaSeconds * 10);
+    // Match the reference's two-stage works rail exactly. Reduced-motion users retain the same
+    // composed stage but follow the native scroll position directly, without temporal easing.
+    if (reduceMotion) {
+      renderedCurveTrigger = targetCurveTrigger;
+    } else {
+      renderedCurveTrigger +=
+        (targetCurveTrigger - renderedCurveTrigger) * Math.min(1, deltaSeconds * 10);
+    }
     const continuousProgress = renderedCurveTrigger * (curveCards.length + 1);
     const nearestProjectStop = Math.round(continuousProgress);
     const targetCurveProgress =
       nearestProjectStop - (nearestProjectStop - continuousProgress) * 0.4;
-    renderedCurveProgress +=
-      (targetCurveProgress - renderedCurveProgress) * Math.min(1, deltaSeconds * 5);
+    if (reduceMotion) {
+      renderedCurveProgress = targetCurveProgress;
+    } else {
+      renderedCurveProgress +=
+        (targetCurveProgress - renderedCurveProgress) * Math.min(1, deltaSeconds * 5);
+    }
     if (Math.abs(targetCurveProgress - renderedCurveProgress) < 0.0005) {
       renderedCurveProgress = targetCurveProgress;
     }
-    const instantaneousVelocity =
-      (renderedCurveProgress - previousProgress) / Math.max(deltaSeconds, 1 / 240);
-    renderedCurveVelocity +=
-      (instantaneousVelocity - renderedCurveVelocity) * (1 - Math.exp(-8 * deltaSeconds));
+    const instantaneousVelocity = reduceMotion
+      ? 0
+      : (renderedCurveProgress - previousProgress) / Math.max(deltaSeconds, 1 / 240);
+    renderedCurveVelocity = reduceMotion
+      ? 0
+      : renderedCurveVelocity +
+        (instantaneousVelocity - renderedCurveVelocity) * (1 - Math.exp(-8 * deltaSeconds));
     renderCurve(renderedCurveProgress);
     setActiveProject(Math.floor(renderedCurveProgress - 0.5));
   }

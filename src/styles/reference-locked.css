@@ -945,45 +945,4 @@ html[data-reference-surface='light'] .reference-contact-pill:focus-visible {
   .reference-boot-progress::after {
     animation-duration: 1ms;
   }
-
-  .curve-work,
-  .curve-work[data-enhanced='true'] {
-    height: auto;
-    min-height: auto;
-    padding: 7rem 1rem 4rem;
-  }
-
-  .curve-work-sticky,
-  .curve-work[data-enhanced='true'] .curve-work-sticky {
-    height: auto;
-    min-height: auto;
-    overflow: visible;
-    position: relative;
-  }
-
-  .curve-track {
-    display: grid;
-    gap: 1rem;
-    position: relative;
-  }
-
-  .curve-work[data-webgl-gallery='true'] .curve-card,
-  .curve-card {
-    clip: auto;
-    clip-path: none;
-    height: auto;
-    left: auto;
-    opacity: 1;
-    pointer-events: auto;
-    position: relative;
-    top: auto;
-    transform: none;
-    white-space: normal;
-    width: 100%;
-  }
-
-  .curve-work-detail,
-  .curve-controls {
-    display: none;
-  }
 }
