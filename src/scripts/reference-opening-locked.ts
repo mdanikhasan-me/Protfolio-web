@@ -1323,7 +1323,6 @@ async function startReferenceWorld(
   const identityQuaternion = new THREE.Quaternion();
   const interactionQuaternion = new THREE.Quaternion();
   const deltaQuaternion = new THREE.Quaternion();
-  const deltaEuler = new THREE.Euler();
   const hoverEuler = new THREE.Euler();
   const pointer = new THREE.Vector2();
   const previousPointer = new THREE.Vector2();
@@ -1337,6 +1336,12 @@ async function startReferenceWorld(
   let hoveredGalleryVisual: GalleryVisual | null = null;
   let lastPointerTime = performance.now();
   let pointerEnergy = 0;
+  let gizmoDragging = false;
+  const gizmoPointerStart = new THREE.Vector2();
+  const gizmoDragNormalized = new THREE.Vector2();
+  const gizmoEulerStart = new THREE.Euler();
+  const gizmoEulerTarget = new THREE.Euler();
+  const gizmoAngleLimit = THREE.MathUtils.degToRad(28);
   let revealStart = performance.now();
   let animationFrame = 0;
   let lastFrame = performance.now();
@@ -1557,7 +1562,9 @@ async function startReferenceWorld(
     hoveredGalleryVisual = galleryVisualAt(event.clientX, event.clientY);
     setCurveCursor(hoveredGalleryVisual ? 'pointer' : '');
 
-    if (fluid) {
+    // A captured controller drag is an orientation command, not a scene-fluid pointer impulse.
+    // Feeding its unbounded screen travel into both systems produced the recorded TV-like flash.
+    if (fluid && !gizmoDragging) {
       fluid.update({
         x: event.clientX / Math.max(1, canvasWidth),
         y: 1 - event.clientY / Math.max(1, canvasHeight),
@@ -1591,33 +1598,73 @@ async function startReferenceWorld(
   addEventListener('click', onGalleryClick);
   addEventListener('resize', requestResize, { passive: true });
 
-  let gizmoDragging = false;
-  const gizmoPointer = new THREE.Vector2();
   const resetOrientation = () => {
     interactionQuaternion.identity();
     hoverEuler.set(0, 0, 0);
     pointerEnergy = 0;
+    pointerInitialized = false;
+    fluid?.update({ x: 0.5, y: 0.5, active: false });
   };
   const beginGizmoDrag = (event: PointerEvent) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
     gizmoDragging = true;
-    gizmoPointer.set(event.clientX, event.clientY);
+    gizmoPointerStart.set(event.clientX, event.clientY);
+    gizmoEulerStart.setFromQuaternion(interactionQuaternion, 'XYZ');
+    gizmoEulerStart.set(
+      clamp(gizmoEulerStart.x, -gizmoAngleLimit, gizmoAngleLimit),
+      clamp(gizmoEulerStart.y, -gizmoAngleLimit, gizmoAngleLimit),
+      0,
+      'XYZ',
+    );
+    hoverEuler.set(0, 0, 0);
+    pointerEnergy = 0;
+    pointerInitialized = false;
+    fluid?.update({
+      x: event.clientX / Math.max(1, canvasWidth),
+      y: 1 - event.clientY / Math.max(1, canvasHeight),
+      active: false,
+    });
     rotationGizmo?.setPointerCapture(event.pointerId);
     if (rotationGizmo) rotationGizmo.dataset.dragging = 'true';
   };
   const moveGizmo = (event: PointerEvent) => {
     if (!gizmoDragging) return;
-    const dx = event.clientX - gizmoPointer.x;
-    const dy = event.clientY - gizmoPointer.y;
-    deltaEuler.set(dy * 0.012, dx * 0.012, 0);
-    deltaQuaternion.setFromEuler(deltaEuler);
-    interactionQuaternion.premultiply(deltaQuaternion).normalize();
-    gizmoPointer.set(event.clientX, event.clientY);
+    const dragRange = Math.max(160, Math.min(canvasWidth, canvasHeight) * 0.24);
+    gizmoDragNormalized.set(
+      (event.clientX - gizmoPointerStart.x) / dragRange,
+      (event.clientY - gizmoPointerStart.y) / dragRange,
+    );
+    if (gizmoDragNormalized.lengthSq() > 1) gizmoDragNormalized.normalize();
+    gizmoEulerTarget.set(
+      clamp(
+        gizmoEulerStart.x + gizmoDragNormalized.y * gizmoAngleLimit,
+        -gizmoAngleLimit,
+        gizmoAngleLimit,
+      ),
+      clamp(
+        gizmoEulerStart.y + gizmoDragNormalized.x * gizmoAngleLimit,
+        -gizmoAngleLimit,
+        gizmoAngleLimit,
+      ),
+      0,
+      'XYZ',
+    );
+    interactionQuaternion.setFromEuler(gizmoEulerTarget).normalize();
   };
   const releaseGizmo = (event: PointerEvent) => {
     if (!gizmoDragging) return;
     gizmoDragging = false;
-    rotationGizmo?.releasePointerCapture(event.pointerId);
+    if (rotationGizmo?.hasPointerCapture(event.pointerId)) {
+      rotationGizmo.releasePointerCapture(event.pointerId);
+    }
     rotationGizmo?.removeAttribute('data-dragging');
+    pointerInitialized = false;
+    fluid?.update({
+      x: event.clientX / Math.max(1, canvasWidth),
+      y: 1 - event.clientY / Math.max(1, canvasHeight),
+      active: false,
+    });
   };
   if (!coarsePointer) {
     addEventListener('pointermove', onPointerMove, { passive: true });
@@ -1674,33 +1721,40 @@ async function startReferenceWorld(
       // Match the reference KV response: a 10x/s pointer lerp, velocity-driven rotation,
       // radial center attenuation, 0.01 rotation gain, and a 2x/s return force. The camera
       // remains fixed; moving it here turned screen-space refraction into an unrelated lurch.
-      pointerVelocityNdc.copy(pointerNdc).sub(filteredPointerNdc);
-      filteredPointerNdc.addScaledVector(
-        pointerVelocityNdc,
-        Math.min(1, deltaSeconds * 10),
-      );
-      const hoverWeight =
-        renderedGalleryPresence < 0.18
-          ? Math.max(0, 1 - pointerNdc.length() * 1.5)
-          : 0;
-      if (pointerEffectsEnabled && hoverWeight > 0) {
-        hoverEuler.set(
-          hoverEuler.x - pointerVelocityNdc.y * 0.01 * hoverWeight,
-          hoverEuler.y + pointerVelocityNdc.x * 0.01 * hoverWeight,
-          0,
+      if (gizmoDragging) {
+        filteredPointerNdc.copy(pointerNdc);
+        pointerVelocityNdc.set(0, 0);
+        hoverEuler.set(0, 0, 0);
+        pointerEnergy = 0;
+      } else {
+        pointerVelocityNdc.copy(pointerNdc).sub(filteredPointerNdc);
+        filteredPointerNdc.addScaledVector(
+          pointerVelocityNdc,
+          Math.min(1, deltaSeconds * 10),
         );
+        const hoverWeight =
+          renderedGalleryPresence < 0.18
+            ? Math.max(0, 1 - pointerNdc.length() * 1.5)
+            : 0;
+        if (pointerEffectsEnabled && hoverWeight > 0) {
+          hoverEuler.set(
+            hoverEuler.x - pointerVelocityNdc.y * 0.01 * hoverWeight,
+            hoverEuler.y + pointerVelocityNdc.x * 0.01 * hoverWeight,
+            0,
+          );
+        }
+        const hoverRetention = Math.max(0, 1 - deltaSeconds);
+        hoverEuler.x *= hoverRetention;
+        hoverEuler.y *= hoverRetention;
+        deltaQuaternion.setFromEuler(hoverEuler);
+        interactionQuaternion.premultiply(deltaQuaternion).normalize();
+        interactionQuaternion.slerp(identityQuaternion, Math.min(1, deltaSeconds * 2));
+        pointerEnergy = Math.max(
+          pointerVelocityNdc.length() * hoverWeight,
+          pointerEnergy * Math.pow(0.91, deltaSeconds * 60),
+        );
+        if (pointerEnergy < 0.0005) pointerEnergy = 0;
       }
-      const hoverRetention = Math.max(0, 1 - deltaSeconds);
-      hoverEuler.x *= hoverRetention;
-      hoverEuler.y *= hoverRetention;
-      deltaQuaternion.setFromEuler(hoverEuler);
-      interactionQuaternion.premultiply(deltaQuaternion).normalize();
-      interactionQuaternion.slerp(identityQuaternion, Math.min(1, deltaSeconds * 2));
-      pointerEnergy = Math.max(
-        pointerVelocityNdc.length() * hoverWeight,
-        pointerEnergy * Math.pow(0.91, deltaSeconds * 60),
-      );
-      if (pointerEnergy < 0.0005) pointerEnergy = 0;
     }
 
     const galleryIdentityStage = smoothstep(0.18, 0.55, renderedGalleryPresence);
@@ -1762,7 +1816,7 @@ async function startReferenceWorld(
       const nextState =
         renderedGalleryPresence > 0.55
           ? `WORK ${String(Math.round(renderedGalleryProgress) + 1).padStart(2, '0')}`
-          : pointerEnergy > 0.04
+          : gizmoDragging || pointerEnergy > 0.04
             ? 'MOVING'
             : 'REST';
       if (stateReadout.textContent !== nextState) stateReadout.textContent = nextState;
