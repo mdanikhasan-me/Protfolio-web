@@ -8,20 +8,207 @@ const smoothstep = (minimum: number, maximum: number, value: number) => {
   const normalized = clamp((value - minimum) / Math.max(0.00001, maximum - minimum));
   return normalized * normalized * (3 - 2 * normalized);
 };
+const sigmoidEasing6 = (value: number) => {
+  const normalized = clamp(value);
+  const exponential = Math.exp(-6 * (2 * normalized - 1));
+  const endpoint = Math.exp(-6);
+  return (
+    1 + ((1 - exponential) / (1 + exponential)) * ((1 + endpoint) / (1 - endpoint))
+  ) * 0.5;
+};
 
 const section = document.querySelector<HTMLElement>('[data-reference-opening]');
 const world = document.querySelector<HTMLElement>('[data-reference-world]');
 const canvas = world?.querySelector<HTMLCanvasElement>('[data-reference-canvas]');
-const boot = world?.querySelector<HTMLElement>('[data-reference-boot]');
 const curveSection = document.querySelector<HTMLElement>('[data-curve-work]');
 const meltSection = document.querySelector<HTMLElement>('[data-melt-section]');
-const stateReadout = section?.querySelector<HTMLElement>('[data-reference-state]');
-const quaternionReadout = section?.querySelector<HTMLElement>('[data-reference-fold]');
-const resetButton = section?.querySelector<HTMLButtonElement>('[data-reference-reset]');
-const rotationGizmo = section?.querySelector<HTMLButtonElement>('[data-reference-gizmo]');
+const stateReadout = world?.querySelector<HTMLElement>('[data-reference-state]');
+const quaternionReadout = world?.querySelector<HTMLElement>('[data-reference-fold]');
+const resetButton = world?.querySelector<HTMLButtonElement>('[data-reference-reset]');
+const rotationGizmo = world?.querySelector<HTMLButtonElement>('[data-reference-gizmo]');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarsePointer = matchMedia('(hover: none) and (pointer: coarse)').matches;
-const pointerEffectsEnabled = !reducedMotion && !coarsePointer;
+const pointerEffectsEnabled = !coarsePointer;
+const pointerMotionIntensity = reducedMotion ? 0.35 : 1;
+const captureParameters = new URLSearchParams(window.location.search);
+const deterministicCaptureMode = captureParameters.get('__capture') === '1';
+const parseCaptureDimension = (name: string, fallback: number) => {
+  const value = Number(captureParameters.get(name));
+  return Number.isInteger(value) && value >= 320 && value <= 4096 ? value : fallback;
+};
+const captureWidth = parseCaptureDimension('__captureWidth', 2560);
+const captureHeight = parseCaptureDimension('__captureHeight', 1440);
+const REFERENCE_CAPTURE_FPS = 120;
+const REFERENCE_TOTAL_PICTURES = 32_607;
+const parseCaptureInteger = (name: string, fallback: number, minimum: number, maximum: number) => {
+  const value = Number(captureParameters.get(name));
+  return Number.isInteger(value) && value >= minimum && value <= maximum ? value : fallback;
+};
+const captureFirstPicture = parseCaptureInteger(
+  '__captureFirstPicture',
+  1,
+  1,
+  REFERENCE_TOTAL_PICTURES,
+);
+const captureLastPicture = parseCaptureInteger(
+  '__captureLastPicture',
+  REFERENCE_TOTAL_PICTURES,
+  captureFirstPicture,
+  REFERENCE_TOTAL_PICTURES,
+);
+const captureRangePictures = captureLastPicture - captureFirstPicture + 1;
+const captureBatchSize = parseCaptureInteger('__captureBatchSize', 4, 1, 8);
+const capturePointerSweep =
+  deterministicCaptureMode && captureParameters.get('__capturePointer') === 'sweep';
+const captureNoiseOffsetRaw = captureParameters.get('__captureNoiseOffset');
+const captureNoiseOffsetParameter =
+  captureNoiseOffsetRaw === null ? Number.NaN : Number(captureNoiseOffsetRaw);
+const captureNoiseTimeOffset =
+  deterministicCaptureMode && Number.isFinite(captureNoiseOffsetParameter)
+    ? Math.max(0, captureNoiseOffsetParameter)
+    : undefined;
+const captureGalleryRaw = captureParameters.get('__captureGallery');
+const captureGalleryParameter = captureGalleryRaw === null ? Number.NaN : Number(captureGalleryRaw);
+const captureGallerySweep = deterministicCaptureMode && captureGalleryRaw === 'sweep';
+const captureGalleryProgressOverride =
+  deterministicCaptureMode && Number.isFinite(captureGalleryParameter)
+    ? clamp(captureGalleryParameter, 0, 10)
+    : null;
+const captureGalleryMotionSchedule = [
+  0, 0.002191, 0.002229, 0.005391, 0.008741, 0.012507, 0.012522, 0.016708,
+  0.021635, 0.027059, 0.027087, 0.033244, 0.040513, 0.049145, 0.049179, 0.058503,
+  0.058539, 0.067795, 0.078618, 0.08813, 0.088156, 0.097817, 0.107711, 0.120475,
+  0.120503, 0.134169, 0.147394, 0.161366, 0.16139, 0.175386, 0.190491, 0.205317,
+  0.220016, 0.220738, 0.23766, 0.25499, 0.255027, 0.271132, 0.289137, 0.30532,
+  0.305359, 0.321871, 0.337916, 0.355948, 0.355978, 0.373839, 0.391673, 0.409629,
+  0.409666, 0.424523, 0.441011, 0.457626, 0.457656, 0.473861, 0.47387, 0.489837,
+  0.489913, 0.508152, 0.527498, 0.54268, 0.542695, 0.558742, 0.573085, 0.573808,
+  0.587847, 0.587895, 0.602132, 0.620267, 0.640699, 0.640734, 0.658302, 0.673841,
+  0.691891, 0.691975, 0.708567, 0.724524, 0.724568, 0.740529, 0.740556, 0.756912,
+  0.756953, 0.756955, 0.775228, 0.790129, 0.80498, 0.805004, 0.825168, 0.837547,
+  0.848841, 0.859531, 0.87033, 0.87837, 0.888869, 0.889267, 0.896854, 0.906622,
+  0.915552, 0.915565, 0.926203, 0.926218, 0.933727, 0.939802, 0.939808, 0.949121,
+  0.955431, 0.961458, 0.965282, 0.965299, 0.969435, 0.975403, 0.978157, 0.98184,
+  0.981859, 0.984574, 0.987552, 0.99092, 0.993958, 0.993976, 0.998142, 1,
+] as const;
+const captureGalleryScheduledProgress = (picture: number) => {
+  const index = clamp(
+    picture - 17_374,
+    0,
+    captureGalleryMotionSchedule.length - 1,
+  );
+  const cadence = captureGalleryMotionSchedule[Math.round(index)] ?? 0;
+  return THREE.MathUtils.lerp(0.02, 4.25, cadence);
+};
+const captureTypographyOnly =
+  deterministicCaptureMode && captureParameters.get('__captureTypographyOnly') === '1';
+const captureWordRefractionRaw = captureParameters.get('__captureWordRefraction');
+const captureWordRefractionParameter =
+  captureWordRefractionRaw === null ? Number.NaN : Number(captureWordRefractionRaw);
+const captureWordRefractionOverride =
+  deterministicCaptureMode && Number.isFinite(captureWordRefractionParameter)
+    ? clamp(captureWordRefractionParameter, 0, 1)
+    : null;
+
+type ReferenceCaptureBridge = {
+  readonly canvas: HTMLCanvasElement;
+  readonly fps: number;
+  readonly height: number;
+  readonly totalPictures: number;
+  readonly width: number;
+  readPixels: (target?: Uint8Array<ArrayBuffer>) => Uint8Array<ArrayBuffer>;
+  renderPicture: (picture: number) => {
+    backgroundState: string;
+    height: number;
+    picture: number;
+    width: number;
+  };
+};
+
+const captureSinkParameter = captureParameters.get('__captureSink');
+const captureSessionParameter = captureParameters.get('__captureSession');
+const captureRawRgba = captureParameters.get('__captureFormat') === 'rgba';
+const captureReleaseAfterFinish = captureParameters.get('__captureReleaseAfter') === '1';
+
+const startNativePngCapture = async (
+  bridge: ReferenceCaptureBridge,
+  openingElement: HTMLElement,
+) => {
+  if (!captureSinkParameter || !captureSessionParameter) return;
+  const sink = new URL(captureSinkParameter);
+  if (sink.protocol !== 'http:' || !['127.0.0.1', 'localhost'].includes(sink.hostname)) {
+    throw new Error('The native capture sink must be a local HTTP endpoint');
+  }
+  if (!/^[a-z0-9][a-z0-9-]{2,80}$/i.test(captureSessionParameter)) {
+    throw new Error('The native capture session name is invalid');
+  }
+
+  const request = async (path: string, body?: BodyInit) => {
+    const response = await fetch(new URL(path, sink), {
+      ...(body ? { body } : {}),
+      method: 'POST',
+    });
+    const result = (await response.json()) as { error?: string };
+    if (!response.ok) throw new Error(result.error ?? `Capture sink rejected ${path}`);
+    return result;
+  };
+  const pngBlob = () =>
+    new Promise<Blob>((resolve, reject) => {
+      bridge.canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error('Canvas PNG encoding failed'))),
+        'image/png',
+      );
+    });
+
+  const session = encodeURIComponent(captureSessionParameter);
+  openingElement.dataset.captureState = 'STARTING';
+  openingElement.dataset.captureProgress = `${captureFirstPicture - 1}/${bridge.totalPictures}`;
+  await request(
+    `/start?session=${session}&expected=${captureRangePictures}&width=${bridge.width}&height=${bridge.height}&fps=${bridge.fps}`,
+  );
+  openingElement.dataset.captureState = 'EXTRACTING';
+
+  if (captureRawRgba) {
+    const rawBytes = bridge.width * bridge.height * 4;
+    for (
+      let localFirstPicture = 1;
+      localFirstPicture <= captureRangePictures;
+      localFirstPicture += captureBatchSize
+    ) {
+      const count = Math.min(
+        captureBatchSize,
+        captureRangePictures - localFirstPicture + 1,
+      );
+      const batch = new Uint8Array(new ArrayBuffer(rawBytes * count));
+      for (let offset = 0; offset < count; offset += 1) {
+        const sourcePicture = captureFirstPicture + localFirstPicture + offset - 1;
+        bridge.renderPicture(sourcePicture);
+        bridge.readPixels(
+          new Uint8Array(batch.buffer, offset * rawBytes, rawBytes),
+        );
+      }
+      await request(
+        `/batch?session=${session}&picture=${localFirstPicture}&count=${count}`,
+        batch.buffer,
+      );
+      const sourceLastPicture = captureFirstPicture + localFirstPicture + count - 2;
+      openingElement.dataset.captureProgress = `${sourceLastPicture}/${bridge.totalPictures}`;
+    }
+  } else {
+    for (let localPicture = 1; localPicture <= captureRangePictures; localPicture += 1) {
+      const sourcePicture = captureFirstPicture + localPicture - 1;
+      bridge.renderPicture(sourcePicture);
+      await request(`/frame?session=${session}&picture=${localPicture}`, await pngBlob());
+      openingElement.dataset.captureProgress = `${sourcePicture}/${bridge.totalPictures}`;
+    }
+  }
+
+  await request(`/finish?session=${session}`);
+  openingElement.dataset.captureState = 'INTEGRITY_VERIFIED';
+  if (captureReleaseAfterFinish) {
+    setTimeout(() => window.location.replace('about:blank'), 0);
+  }
+};
 
 type ProjectSource = {
   media: string;
@@ -404,9 +591,13 @@ const glassVertexShader = `
   varying vec2 vUv;
   varying vec3 vViewNormal;
   varying vec3 vViewPosition;
+  varying vec3 vObjectPosition;
+  varying vec3 vObjectNormal;
 
   void main() {
     vUv = uv;
+    vObjectPosition = position;
+    vObjectNormal = normalize(normal);
     vec4 viewPosition = modelViewMatrix * vec4(position, 1.0);
     vViewPosition = -viewPosition.xyz;
     vViewNormal = normalize(normalMatrix * normal);
@@ -424,10 +615,22 @@ const glassFragmentShader = `
   uniform float uRoughness;
   uniform float uNoiseScale;
   uniform vec3 uMaterialColor;
+  uniform vec3 uObjectBoundsMin;
+  uniform vec3 uObjectBoundsMax;
+  uniform float uSurfaceDetailScale;
 
   varying vec2 vUv;
   varying vec3 vViewNormal;
   varying vec3 vViewPosition;
+  varying vec3 vObjectPosition;
+  varying vec3 vObjectNormal;
+
+  vec4 triplanarNoise(vec3 coordinate, vec3 weight, vec2 offset) {
+    vec4 xProjection = texture2D(uNoise, coordinate.yz + offset);
+    vec4 yProjection = texture2D(uNoise, coordinate.xz + offset);
+    vec4 zProjection = texture2D(uNoise, coordinate.xy + offset);
+    return xProjection * weight.x + yProjection * weight.y + zProjection * weight.z;
+  }
 
   float random(vec2 coordinate) {
     return fract(sin(dot(coordinate, vec2(12.9898, 78.233))) * 43758.5453);
@@ -455,10 +658,22 @@ const glassFragmentShader = `
     vec2 screenUv = gl_FragCoord.xy / uResolution;
     vec3 viewNormal = normalize(vViewNormal);
     vec3 viewDirection = normalize(vViewPosition);
-    vec4 firstNoise = texture2D(uNoise, vUv * uNoiseScale);
-    vec4 secondNoise = texture2D(
-      uNoise,
-      vUv + (firstNoise.xy - 0.5) * 2.0
+    // The protected ANIK mesh has a deliberately much coarser UV atlas than the reference mesh.
+    // Generate only the stochastic roughness coordinate in object space so the material stays
+    // continuous while screen-space refraction, authored normals and geometry remain untouched.
+    vec3 objectExtent = max(uObjectBoundsMax - uObjectBoundsMin, vec3(0.0001));
+    vec3 objectCoordinate = (vObjectPosition - uObjectBoundsMin) / objectExtent;
+    vec3 triplanarWeight = pow(abs(normalize(vObjectNormal)), vec3(4.0));
+    triplanarWeight /= max(0.0001, triplanarWeight.x + triplanarWeight.y + triplanarWeight.z);
+    // The protected ANIK mesh has far fewer UV islands than the reference identity. Preserve the
+    // reference material equations, but raise only the generated roughness-field frequency so the
+    // transmitted word breaks into fine cloudy detail instead of broad painted-looking slabs.
+    vec3 scaledObjectCoordinate = objectCoordinate * uNoiseScale * uSurfaceDetailScale;
+    vec4 firstNoise = triplanarNoise(scaledObjectCoordinate, triplanarWeight, vec2(0.0));
+    vec4 secondNoise = triplanarNoise(
+      scaledObjectCoordinate,
+      triplanarWeight,
+      (firstNoise.xy - 0.5) * 2.0
     );
     float roughness = smoothstep(0.3, 0.8, secondNoise.y) * uRoughness;
     float refractPower = 0.10;
@@ -503,7 +718,7 @@ const glassFragmentShader = `
     color +=
       mix(color, environmentReflection, fresnelAmount * 0.9) *
       (1.0 - fresnelAmount);
-    color *= 1.2;
+    color *= 1.20;
     color *= uMaterialColor / 255.0;
     gl_FragColor = vec4(color, 1.0);
   }
@@ -533,7 +748,7 @@ const galleryFragmentShader = `
   uniform sampler2D uMap;
   uniform float uTextureAspect;
   uniform float uOpacity;
-  uniform float uVelocity;
+  uniform samplerCube uEnvironment;
 
   varying vec2 vUv;
   varying vec3 vViewNormal;
@@ -555,40 +770,26 @@ const galleryFragmentShader = `
 
   void main() {
     vec2 uv = coverUv(vUv, uTextureAspect);
-    float velocity = clamp(uVelocity * 0.0009, -0.004, 0.004);
     vec3 normal = normalize(vViewNormal);
     float frontDirection = dot(normal, vec3(0.0, 0.0, 1.0));
-    vec2 normalOffset = -normal.xy * 0.018 * smoothstep(0.82, 1.0, frontDirection);
-    vec2 centeredUv = (uv - 0.5 + vec2(velocity, 0.0)) * vec2(1.004, 1.006);
-    vec2 sharpUv = lensDistortion(centeredUv, 0.004) + 0.5 + normalOffset;
-    float imageEdge = smoothstep(
-      0.42,
-      0.92,
-      length((vUv - 0.5) * vec2(1.0, 1.72))
-    );
-    float chroma = (0.00022 + abs(velocity) * 0.18) * mix(0.24, 1.0, imageEdge);
-    vec3 color = vec3(
-      texture2D(uMap, sharpUv + vec2(chroma, 0.0)).r,
-      texture2D(uMap, sharpUv).g,
-      texture2D(uMap, sharpUv - vec2(chroma, 0.0)).b
-    );
-    float reflection = smoothstep(0.0, 0.2, reflect(-normalize(vViewPosition), normal).x);
-    color = mix(color, vec3(reflection), 0.018);
-    vec2 edgeDistance = min(vUv, 1.0 - vUv);
-    float nearestEdge = min(edgeDistance.x, edgeDistance.y);
-    float edgeWidth = max(fwidth(nearestEdge), 0.00065);
-    float silhouetteCoverage = smoothstep(0.0, edgeWidth * 1.25, nearestEdge);
-    float outerRim = 1.0 - smoothstep(edgeWidth * 0.45, edgeWidth * 1.65, nearestEdge);
-    float innerRim = 1.0 - smoothstep(
-      edgeWidth * 0.8,
-      edgeWidth * 1.8,
-      abs(nearestEdge - edgeWidth * 2.7)
-    );
-    float grazing = 1.0 - clamp(abs(frontDirection), 0.0, 1.0);
-    vec3 neutralGlass = vec3(0.11, 0.13, 0.15) + color * 0.045;
-    color += neutralGlass * outerRim * (0.34 + grazing * 0.24);
-    color += vec3(0.045, 0.052, 0.060) * innerRim * 0.32;
-    float opacity = uOpacity * silhouetteCoverage;
+    vec2 normalOffset = -normal.xy * 0.5 * smoothstep(0.8, 1.0, frontDirection);
+    vec3 color = vec3(0.0);
+    for (int index = 0; index < 4; index++) {
+      float sampleIndex = float(index) / 4.0;
+      vec2 centeredUv = (uv - 0.5) * vec2(1.17, 1.3);
+      float distortion = 0.1 + sampleIndex * 0.03;
+      color += vec3(
+        texture2D(uMap, lensDistortion(centeredUv, distortion + 0.10) + 0.5 + normalOffset).r,
+        texture2D(uMap, lensDistortion(centeredUv, distortion + 0.12) + 0.5 + normalOffset * 1.01).g,
+        texture2D(uMap, lensDistortion(centeredUv, distortion + 0.14) + 0.5 + normalOffset * 1.02).b
+      );
+    }
+    color /= 4.0;
+    color *= smoothstep(0.9, 0.49, length(vUv - 0.5));
+    vec3 reflectionDirection = reflect(-normalize(vViewPosition), normal);
+    vec3 environmentReflection = textureCube(uEnvironment, reflectionDirection).rgb;
+    color = mix(color, environmentReflection, 0.05);
+    float opacity = uOpacity;
     if (opacity < 0.012) discard;
     gl_FragColor = vec4(color, opacity);
   }
@@ -628,6 +829,31 @@ const bloomBlurFragmentShader = `
   }
 `;
 
+const sceneMixerFragmentShader = `
+  precision highp float;
+  varying vec2 vUv;
+  uniform sampler2D uScene;
+  uniform sampler2D uFluid;
+
+  void main() {
+    vec2 velocity = vec2(0.0);
+    float wake = 0.0;
+    #if POINTER_FX == 1
+    velocity = texture2D(uFluid, vUv).xy;
+    wake = length(velocity);
+    #endif
+
+    // The production reference distorts and energizes the fully composed main scene before
+    // thresholding it for bloom. Keeping this as its own pass is important: blooming the raw
+    // scene and adding the motion response later made the panel both dimmer and less cohesive.
+    vec2 sceneUv = vUv + velocity * 0.010;
+    vec3 color = texture2D(uScene, sceneUv).rgb;
+    color *= smoothstep(1.2, 0.0, length(vUv - 0.5));
+    color *= 1.0 + wake * 0.80;
+    gl_FragColor = vec4(color, 1.0);
+  }
+`;
+
 const compositeFragmentShader = `
   precision highp float;
   varying vec2 vUv;
@@ -636,89 +862,21 @@ const compositeFragmentShader = `
   uniform sampler2D uBloomTexture0;
   uniform sampler2D uBloomTexture1;
   uniform sampler2D uBloomTexture2;
-  uniform vec2 uResolution;
-  uniform float uTime;
-  uniform float uReveal;
-  uniform float uGallery;
-
-  vec3 fxaa(vec2 uv, out vec3 center) {
-    vec2 pixel = 1.0 / uResolution;
-    center = texture2D(uScene, uv).rgb;
-    vec3 northWest = texture2D(uScene, uv + vec2(-pixel.x, pixel.y)).rgb;
-    vec3 northEast = texture2D(uScene, uv + vec2(pixel.x, pixel.y)).rgb;
-    vec3 southWest = texture2D(uScene, uv + vec2(-pixel.x, -pixel.y)).rgb;
-    vec3 southEast = texture2D(uScene, uv + vec2(pixel.x, -pixel.y)).rgb;
-    vec3 luminance = vec3(0.299, 0.587, 0.114);
-    float centerLuma = dot(center, luminance);
-    float northWestLuma = dot(northWest, luminance);
-    float northEastLuma = dot(northEast, luminance);
-    float southWestLuma = dot(southWest, luminance);
-    float southEastLuma = dot(southEast, luminance);
-    float minimumLuma = min(
-      centerLuma,
-      min(min(northWestLuma, northEastLuma), min(southWestLuma, southEastLuma))
-    );
-    float maximumLuma = max(
-      centerLuma,
-      max(max(northWestLuma, northEastLuma), max(southWestLuma, southEastLuma))
-    );
-    vec2 direction;
-    direction.x = -((northWestLuma + northEastLuma) - (southWestLuma + southEastLuma));
-    direction.y = (northWestLuma + southWestLuma) - (northEastLuma + southEastLuma);
-    float directionReduce = max(
-      (northWestLuma + northEastLuma + southWestLuma + southEastLuma) * 0.03125,
-      0.0078125
-    );
-    float reciprocalMinimum =
-      1.0 / (min(abs(direction.x), abs(direction.y)) + directionReduce);
-    direction = clamp(direction * reciprocalMinimum, vec2(-8.0), vec2(8.0)) * pixel;
-    vec3 resultA = 0.5 * (
-      texture2D(uScene, uv + direction * (1.0 / 3.0 - 0.5)).rgb +
-      texture2D(uScene, uv + direction * (2.0 / 3.0 - 0.5)).rgb
-    );
-    vec3 resultB = resultA * 0.5 + 0.25 * (
-      texture2D(uScene, uv + direction * -0.5).rgb +
-      texture2D(uScene, uv + direction * 0.5).rgb
-    );
-    float resultLuma = dot(resultB, luminance);
-    if (resultLuma < minimumLuma || resultLuma > maximumLuma) return resultA;
-    return resultB;
-  }
 
   void main() {
     vec2 velocity = vec2(0.0);
-    float wake = 0.0;
     #if POINTER_FX == 1
     velocity = texture2D(uFluid, vUv).xy;
-    wake = min(length(velocity), 1.0);
     #endif
-    float galleryProtect = smoothstep(0.18, 0.82, uGallery);
-    float warpStrength = mix(0.0105, 0.0015, galleryProtect);
-    vec2 warpedUv = clamp(vUv - velocity * warpStrength, 0.001, 0.999);
-    vec3 color;
-    #if RETINA_DIRECT == 1
-    color = texture2D(uScene, warpedUv).rgb;
-    #else
-    if (galleryProtect >= 0.999) {
-      color = texture2D(uScene, warpedUv).rgb;
-    } else {
-      vec3 directColor;
-      vec3 antialiasedColor = fxaa(warpedUv, directColor);
-      color = mix(antialiasedColor, directColor, galleryProtect);
-    }
-    #endif
-
-    color *= smoothstep(1.2, 0.0, length(vUv - 0.5));
-    color *= 1.0 + wake * 0.80;
+    vec2 warpedUv = vUv - velocity * 0.001;
+    vec3 color = texture2D(uScene, warpedUv).rgb;
 
     vec3 bloomQuarter = texture2D(uBloomTexture0, warpedUv).rgb;
     vec3 bloomEighth = texture2D(uBloomTexture1, warpedUv).rgb;
     vec3 bloomSixteenth = texture2D(uBloomTexture2, warpedUv).rgb;
-    float bloomGain = mix(1.0, 0.42, galleryProtect);
     color +=
-      (bloomQuarter * 0.075 + bloomEighth * 0.15 + bloomSixteenth * 0.225) * bloomGain;
-    color *= mix(1.3, 1.08, galleryProtect);
-    color *= smoothstep(0.0, 1.0, uReveal);
+      bloomQuarter * 0.075 + bloomEighth * 0.15 + bloomSixteenth * 0.225;
+    color *= 1.30;
     gl_FragColor = vec4(color, 1.0);
   }
 `;
@@ -773,7 +931,7 @@ function createCurvedWallGeometry() {
   return geometry;
 }
 
-function createWordTexture(textureWidth = 4096) {
+function createWordTexture(textureWidth = 4096, withGlow = false) {
   const wordCanvas = document.createElement('canvas');
   wordCanvas.width = textureWidth;
   wordCanvas.height = Math.round(textureWidth / 4);
@@ -781,6 +939,10 @@ function createWordTexture(textureWidth = 4096) {
   if (!context) throw new Error('Unable to create environmental word texture');
   context.clearRect(0, 0, wordCanvas.width, wordCanvas.height);
   context.fillStyle = '#ffffff';
+  if (withGlow) {
+    context.shadowColor = 'rgba(255, 255, 255, 0.92)';
+    context.shadowBlur = Math.round(textureWidth * 0.012);
+  }
 
   // A single vector wordmark drives both the WebGL texture and the navigation.
   // Every adjacent pair uses the same 28-unit visible-edge gap.
@@ -838,10 +1000,6 @@ function loadStudioEnvironmentTexture() {
     new THREE.CubeTextureLoader().load(
       faces,
       (texture) => {
-        // The reference environment is authored in sRGB. Keeping that declaration is
-        // essential: treating those pixels as linear both shifts the surface color and
-        // exaggerates each cube face into the rectangular hover flash reported in QA.
-        texture.colorSpace = THREE.SRGBColorSpace;
         texture.generateMipmaps = true;
         texture.minFilter = THREE.LinearMipmapLinearFilter;
         texture.magFilter = THREE.LinearFilter;
@@ -1022,13 +1180,24 @@ async function loadIdentity(material: THREE.ShaderMaterial) {
     createGlbAttribute(document, source, binaryOffset, primitive.attributes.TEXCOORD_0),
   );
   geometry.setIndex(createGlbAttribute(document, source, binaryOffset, primitive.indices));
+  geometry.computeBoundingBox();
+  if (geometry.boundingBox) {
+    const boundsMinimum = material.uniforms.uObjectBoundsMin?.value;
+    const boundsMaximum = material.uniforms.uObjectBoundsMax?.value;
+    if (boundsMinimum instanceof THREE.Vector3) boundsMinimum.copy(geometry.boundingBox.min);
+    if (boundsMaximum instanceof THREE.Vector3) boundsMaximum.copy(geometry.boundingBox.max);
+  }
   const root = new THREE.Group();
   root.add(new THREE.Mesh(geometry, material));
   const bounds = new THREE.Box3().setFromObject(root);
   const size = bounds.getSize(new THREE.Vector3());
   const center = bounds.getCenter(new THREE.Vector3());
   root.position.sub(center);
-  root.scale.setScalar(5.08 / Math.max(size.y, 0.001));
+  root.position.y -= 0.18;
+  // The live reference's 0.3764301-unit logo mesh is displayed through a 3x mesh scale and a
+  // 4.3x parent scale: 0.3764301 * 3 * 4.3 = 4.856. Normalize the protected ANIK geometry to that
+  // same rendered height without altering its vertices or replacing the authored asset.
+  root.scale.setScalar(4.856 / Math.max(size.y, 0.001));
   root.traverse((child) => {
     if (child instanceof THREE.Mesh) {
       child.material = material;
@@ -1052,17 +1221,15 @@ async function startReferenceWorld(
   openingElement: HTMLElement,
   outputCanvas: HTMLCanvasElement,
 ) {
-  const phoneClassPointer = coarsePointer && Math.min(screen.width, screen.height) <= 500;
-  const pixelRatioCap = phoneClassPointer ? 2 : 1.5;
-  const initialPixelRatio = Math.min(devicePixelRatio, pixelRatioCap);
-  const retinaDirectSampling = phoneClassPointer && initialPixelRatio >= 2;
-  const requiredWordTextureWidth = Math.max(screen.width, screen.height) * initialPixelRatio;
-  const wordTextureWidth = coarsePointer
-    ? Math.min(4096, Math.max(2048, 2 ** Math.ceil(Math.log2(requiredWordTextureWidth))))
-    : 4096;
+  // The reference renders the main scene at the physical device-pixel ratio. Its background
+  // procedural textures use their own lower, fixed ratios, so the A, grid and typography never
+  // inherit a device-class quality ceiling.
+  const wordTextureWidth = 4096;
   const renderer = new THREE.WebGLRenderer({
     canvas: outputCanvas,
-    alpha: false,
+    // Keep the canvas transparent only until the first complete frame is ready so the authored
+    // chamber fallback remains visible instead of WebGL's default black drawing buffer.
+    alpha: true,
     antialias: false,
     powerPreference: 'high-performance',
     stencil: false,
@@ -1071,17 +1238,19 @@ async function startReferenceWorld(
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.NoToneMapping;
   renderer.toneMappingExposure = 1;
-  renderer.setClearColor(0x020109, 1);
+  renderer.setClearColor(0x020109, 0);
 
   const baseScene = new THREE.Scene();
   baseScene.background = new THREE.Color(0x020109);
+  const refractionTypographyScene = new THREE.Scene();
   const identityScene = new THREE.Scene();
   const galleryScene = new THREE.Scene();
   baseScene.matrixAutoUpdate = false;
+  refractionTypographyScene.matrixAutoUpdate = false;
   identityScene.matrixAutoUpdate = false;
   galleryScene.matrixAutoUpdate = false;
   const camera = new THREE.PerspectiveCamera(41, 1, 0.1, 50);
-  camera.position.set(0, 0.1, 10);
+  camera.position.set(0, 0, 9.5);
   camera.lookAt(0, 0, -0.2);
   camera.updateMatrix();
   camera.matrixAutoUpdate = false;
@@ -1103,17 +1272,25 @@ async function startReferenceWorld(
   wall.visible = false;
   baseScene.add(wall);
 
-  const openingBackground = createReferenceBackgroundSystem(renderer);
+  const openingBackground = createReferenceBackgroundSystem(renderer, captureNoiseTimeOffset);
   baseScene.add(openingBackground.group);
 
-  const heroWordBaseOpacity = phoneClassPointer ? 0.78 : 1;
+  // Keep ANIK as the large environmental word behind the refractive identity. The wall shader
+  // still supplies its smaller picture-indexed motifs, while this plane preserves the authored
+  // hero typography the user expects in the opening composition.
+  const heroWordBaseOpacity = 1;
   const heroWordPromise = Promise.resolve().then(() => {
+    const heroWordTexture = createWordTexture(wordTextureWidth);
     const heroWordMaterial = new THREE.MeshBasicMaterial({
-      map: createWordTexture(wordTextureWidth),
-      color: phoneClassPointer ? 0xffffff : 0xb8bcc6,
+      map: heroWordTexture,
+      // The reference emits one 1.5x word texture and lets the shared bloom pyramid create its
+      // halo. A second additive plane overexposed the object whenever that word was refracted.
+      color: new THREE.Color(1.5, 1.5, 1.5),
       transparent: true,
       alphaTest: 0.012,
-      opacity: heroWordBaseOpacity,
+      // ANIK belongs to the opening/home composition. updateProjectScene keeps it fully present
+      // at the top and removes it before the project rail owns the stage.
+      opacity: 0,
       depthTest: false,
       depthWrite: false,
       toneMapped: false,
@@ -1121,13 +1298,40 @@ async function startReferenceWorld(
     const heroWordGeometry = new THREE.PlaneGeometry(9.8, 2.45);
     heroWordGeometry.deleteAttribute('normal');
     const heroWord = new THREE.Mesh(heroWordGeometry, heroWordMaterial);
-    heroWord.position.set(0, -0.02, -2.1);
+    heroWord.position.set(-0.18, -0.17, -2.1);
     heroWord.frustumCulled = false;
     heroWord.updateMatrix();
     heroWord.matrixAutoUpdate = false;
-    heroWord.renderOrder = 10;
-    baseScene.add(heroWord);
-    return { heroWord, heroWordMaterial };
+    heroWord.renderOrder = -10;
+
+    // The crisp visible word stays in the final identity pass so it can bloom at full intensity.
+    identityScene.add(heroWord);
+
+    // Feed a separate SDR copy into the screen-space refraction target. The object therefore bends
+    // and reveals ANIK like the reference, while the broad HDR glyphs never enter the intermediate
+    // target that previously amplified pointer wake into rectangular white flash blocks.
+    const refractionWordMaterial = new THREE.MeshBasicMaterial({
+      map: heroWordTexture,
+      color: new THREE.Color(1, 1, 1),
+      transparent: true,
+      alphaTest: 0.012,
+      opacity: 0,
+      depthTest: false,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    const refractionWord = new THREE.Mesh(heroWordGeometry, refractionWordMaterial);
+    refractionWord.position.copy(heroWord.position);
+    refractionWord.frustumCulled = false;
+    refractionWord.updateMatrix();
+    refractionWord.matrixAutoUpdate = false;
+    refractionTypographyScene.add(refractionWord);
+    return {
+      heroWord,
+      heroWordMaterial,
+      refractionWord,
+      refractionWordMaterial,
+    };
   });
 
   const sceneDepthTexture = new THREE.DepthTexture(1, 1, THREE.UnsignedShortType);
@@ -1141,12 +1345,21 @@ async function startReferenceWorld(
     depthTexture: sceneDepthTexture,
   });
   const backgroundTarget = new THREE.WebGLRenderTarget(1, 1, {
-    type: THREE.HalfFloatType,
+    // The reference TransparentBufferRenderer copies the already-rendered main scene into the
+    // default 8-bit WebGLRenderTarget before the logo shader samples it. Keeping this target in
+    // half-float preserves over-range energy that the reference clamps here, which makes the
+    // refracted typography pool into broad opaque-looking patches instead of crisp glass detail.
+    type: THREE.UnsignedByteType,
     minFilter: THREE.LinearFilter,
     magFilter: THREE.LinearFilter,
     depthBuffer: true,
     depthTexture: backgroundDepthTexture,
   });
+  // Refraction deliberately samples beyond the screen edges. The live material wraps those
+  // samples back into the chamber; clamping them produces the solid rectangular edge slabs that
+  // appeared during pointer motion.
+  backgroundTarget.texture.wrapS = THREE.RepeatWrapping;
+  backgroundTarget.texture.wrapT = THREE.RepeatWrapping;
   const studioEnvironmentTexturePromise = loadStudioEnvironmentTexture();
   const glassUniforms = {
     uScene: { value: backgroundTarget.texture },
@@ -1156,6 +1369,9 @@ async function startReferenceWorld(
     uRoughness: { value: 0.1 },
     uNoiseScale: { value: 9 },
     uMaterialColor: { value: new THREE.Vector3(255, 255, 255) },
+    uObjectBoundsMin: { value: new THREE.Vector3(-1, -1, -1) },
+    uObjectBoundsMax: { value: new THREE.Vector3(1, 1, 1) },
+    uSurfaceDetailScale: { value: 3.25 },
   };
   const glassMaterial = new THREE.ShaderMaterial({
     uniforms: glassUniforms,
@@ -1169,7 +1385,7 @@ async function startReferenceWorld(
     .map((card) => {
       const desktopMedia = card.dataset.projectMedia ?? '';
       return {
-        media: phoneClassPointer ? desktopMedia.replace(/-1600\.webp$/, '-960.webp') : desktopMedia,
+        media: desktopMedia,
         route: card.dataset.projectRoute ?? '',
       };
     })
@@ -1183,9 +1399,12 @@ async function startReferenceWorld(
   const projectTextureLoader = new THREE.TextureLoader();
   const projectAnisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 4);
   const galleryVisuals: GalleryVisual[] = [];
-  const galleryVisualsPromise = Promise.all(
+  const galleryVisualsPromise = Promise.allSettled(
     projectSources.map(async (project) => {
-      const texture = await loadTexture(projectTextureLoader, project.media);
+      const [texture, projectEnvironmentTexture] = await Promise.all([
+        loadTexture(projectTextureLoader, project.media),
+        studioEnvironmentTexturePromise,
+      ]);
       texture.anisotropy = projectAnisotropy;
       texture.needsUpdate = true;
       const textureImage = texture.image as { width?: number; height?: number };
@@ -1196,50 +1415,57 @@ async function startReferenceWorld(
           uMap: { value: texture },
           uTextureAspect: { value: textureAspect },
           uOpacity: { value: 0 },
-          uVelocity: { value: 0 },
+          uEnvironment: { value: projectEnvironmentTexture },
         },
         vertexShader: galleryVertexShader,
         fragmentShader: galleryFragmentShader,
         transparent: true,
-        depthWrite: true,
-        side: THREE.DoubleSide,
+        // Project planes are the foreground rail. The identity remains visible around them, but
+        // must not punch through a selected card merely because its mesh is closer to the camera.
+        depthTest: false,
+        depthWrite: false,
+        side: THREE.FrontSide,
       });
       const mesh = new THREE.Mesh(galleryGeometry, material);
       mesh.visible = false;
       mesh.renderOrder = 30;
       return { mesh, material, route: project.route, texture };
     }),
-  );
+  ).then((results) => {
+    const visuals: GalleryVisual[] = [];
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        visuals.push(result.value);
+        return;
+      }
+      console.error(`Project texture failed to load: ${projectSources[index]?.media ?? 'unknown'}`, result.reason);
+    });
+    return visuals;
+  });
   const [
-    { heroWord, heroWordMaterial },
+    {
+      heroWord,
+      heroWordMaterial,
+      refractionWord,
+      refractionWordMaterial,
+    },
     identity,
-    loadedGalleryVisuals,
     studioEnvironmentTexture,
   ] = await Promise.all([
     heroWordPromise,
     identityPromise,
-    galleryVisualsPromise,
     studioEnvironmentTexturePromise,
   ]);
   glassUniforms.uEnvironment.value = studioEnvironmentTexture;
   const identityBaseScale = identity.scale.x;
   const identityBaseQuaternion = identity.quaternion.clone();
-  // The first rendered frame always normalizes the authored root to this origin. Set it once
-  // before rendering instead of rewriting the same transform on every animation frame.
-  identity.position.set(0, 0, 0);
+  // Keep the GLB bounds-centering offset established by loadIdentity. Resetting the root to the
+  // world origin discarded that authored correction and held the ANIK mark visibly too high.
   identity.updateMatrix();
   identity.matrixAutoUpdate = false;
   identityScene.add(identity);
-  openingBackground.setProjectTextures(loadedGalleryVisuals.map((visual) => visual.texture));
-  loadedGalleryVisuals.forEach((visual) => {
-    galleryGroup.add(visual.mesh);
-    galleryVisuals.push(visual);
-  });
-  const galleryMeshes = galleryVisuals.map((visual) => visual.mesh);
-  const galleryVisualByMesh = new Map<THREE.Object3D, GalleryVisual>(
-    galleryVisuals.map((visual) => [visual.mesh, visual]),
-  );
-  curveSection?.setAttribute('data-webgl-gallery', 'true');
+  const galleryMeshes: THREE.Object3D[] = [];
+  const galleryVisualByMesh = new Map<THREE.Object3D, GalleryVisual>();
 
   const postScene = new THREE.Scene();
   postScene.matrixAutoUpdate = false;
@@ -1247,16 +1473,61 @@ async function startReferenceWorld(
   postCamera.matrixAutoUpdate = false;
   const postGeometry = new THREE.PlaneGeometry(2, 2);
   postGeometry.deleteAttribute('normal');
+  // Match the reference TransparentBufferRenderer: copy the already-rendered half-float chamber
+  // through a full-screen shader into an ordinary 8-bit target. WebGL copyTextureToTexture is a
+  // storage copy and cannot reliably convert the source/destination render-target formats; on the
+  // current renderer that left the transmission buffer black.
+  const backgroundCopyMaterial = new THREE.ShaderMaterial({
+    uniforms: { uSource: { value: sceneTarget.texture } },
+    vertexShader: fullScreenVertexShader,
+    fragmentShader: `
+      precision highp float;
+      varying vec2 vUv;
+      uniform sampler2D uSource;
+
+      void main() {
+        gl_FragColor = texture2D(uSource, vUv);
+      }
+    `,
+    depthTest: false,
+    depthWrite: false,
+    toneMapped: false,
+  });
+  const backgroundCopyScene = new THREE.Scene();
+  backgroundCopyScene.matrixAutoUpdate = false;
+  const backgroundCopyQuad = new THREE.Mesh(postGeometry, backgroundCopyMaterial);
+  backgroundCopyQuad.frustumCulled = false;
+  backgroundCopyQuad.matrixAutoUpdate = false;
+  backgroundCopyScene.add(backgroundCopyQuad);
   const fluid = pointerEffectsEnabled
     ? new (await import('./reference-fluid')).ReferenceFluid(renderer)
     : null;
-  const bloomTargetOptions: THREE.RenderTargetOptions = {
+  const zeroVelocityTexture = new THREE.DataTexture(
+    new Uint8Array([0, 0, 0, 255]),
+    1,
+    1,
+    THREE.RGBAFormat,
+  );
+  zeroVelocityTexture.minFilter = THREE.NearestFilter;
+  zeroVelocityTexture.magFilter = THREE.NearestFilter;
+  zeroVelocityTexture.needsUpdate = true;
+  const mixedSceneTargetOptions: THREE.RenderTargetOptions = {
     type: THREE.HalfFloatType,
     minFilter: THREE.LinearFilter,
     magFilter: THREE.LinearFilter,
     depthBuffer: false,
   };
+  const bloomTargetOptions: THREE.RenderTargetOptions = {
+    // The live reference thresholds its half-float scene into ordinary 8-bit bloom targets.
+    // Preserving over-range values here over-energizes the blur and creates white flash blocks.
+    type: THREE.UnsignedByteType,
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.LinearFilter,
+    depthBuffer: false,
+  };
   const bloomScales = [4, 8, 16] as const;
+  // Keep the scene mixer in half-float; only the thresholded bloom pyramid is clamped to 8-bit.
+  const mixedSceneTarget = new THREE.WebGLRenderTarget(1, 1, mixedSceneTargetOptions);
   const bloomBrightTarget = new THREE.WebGLRenderTarget(1, 1, bloomTargetOptions);
   const bloomVerticalTargets = bloomScales.map(
     () => new THREE.WebGLRenderTarget(1, 1, bloomTargetOptions),
@@ -1267,8 +1538,8 @@ async function startReferenceWorld(
   const bloomScene = new THREE.Scene();
   bloomScene.matrixAutoUpdate = false;
   const bloomBrightUniforms = {
-    uScene: { value: sceneTarget.texture },
-    uThreshold: { value: 0.9 },
+    uScene: { value: mixedSceneTarget.texture },
+    uThreshold: { value: 0.90 },
   };
   const bloomBrightMaterial = new THREE.ShaderMaterial({
     uniforms: bloomBrightUniforms,
@@ -1293,22 +1564,33 @@ async function startReferenceWorld(
   bloomQuad.frustumCulled = false;
   bloomQuad.matrixAutoUpdate = false;
   bloomScene.add(bloomQuad);
-  const compositeUniforms = {
+  const sceneMixerUniforms = {
     uScene: { value: sceneTarget.texture },
-    uFluid: { value: fluid?.texture ?? sceneTarget.texture },
+    uFluid: { value: fluid?.texture ?? zeroVelocityTexture },
+  };
+  const sceneMixerMaterial = new THREE.ShaderMaterial({
+    defines: { POINTER_FX: pointerEffectsEnabled ? 1 : 0 },
+    uniforms: sceneMixerUniforms,
+    vertexShader: fullScreenVertexShader,
+    fragmentShader: sceneMixerFragmentShader,
+    depthTest: false,
+    depthWrite: false,
+  });
+  const sceneMixerScene = new THREE.Scene();
+  sceneMixerScene.matrixAutoUpdate = false;
+  const sceneMixerQuad = new THREE.Mesh(postGeometry, sceneMixerMaterial);
+  sceneMixerQuad.frustumCulled = false;
+  sceneMixerQuad.matrixAutoUpdate = false;
+  sceneMixerScene.add(sceneMixerQuad);
+  const compositeUniforms = {
+    uScene: { value: mixedSceneTarget.texture },
+    uFluid: { value: fluid?.texture ?? zeroVelocityTexture },
     uBloomTexture0: { value: bloomHorizontalTargets[0]!.texture },
     uBloomTexture1: { value: bloomHorizontalTargets[1]!.texture },
     uBloomTexture2: { value: bloomHorizontalTargets[2]!.texture },
-    uResolution: { value: new THREE.Vector2(1, 1) },
-    uTime: { value: 0 },
-    uReveal: { value: reducedMotion ? 1 : 0 },
-    uGallery: { value: 0 },
   };
   const compositeMaterial = new THREE.ShaderMaterial({
-    defines: {
-      POINTER_FX: pointerEffectsEnabled ? 1 : 0,
-      RETINA_DIRECT: retinaDirectSampling ? 1 : 0,
-    },
+    defines: { POINTER_FX: pointerEffectsEnabled ? 1 : 0 },
     uniforms: compositeUniforms,
     vertexShader: fullScreenVertexShader,
     fragmentShader: compositeFragmentShader,
@@ -1322,43 +1604,92 @@ async function startReferenceWorld(
 
   const identityQuaternion = new THREE.Quaternion();
   const interactionQuaternion = new THREE.Quaternion();
+  const composedIdentityQuaternion = new THREE.Quaternion();
   const deltaQuaternion = new THREE.Quaternion();
   const hoverEuler = new THREE.Euler();
+  const scrollAxis = new THREE.Vector3(0, 1, 0);
   const pointer = new THREE.Vector2();
   const previousPointer = new THREE.Vector2();
   const pointerNdc = new THREE.Vector2();
   const filteredPointerNdc = new THREE.Vector2();
   const pointerVelocityNdc = new THREE.Vector2();
+  const cameraPointerOffset = new THREE.Vector2();
   const raycaster = new THREE.Raycaster();
-  const appliedInteractionQuaternion = interactionQuaternion.clone();
+  const appliedIdentityQuaternion = interactionQuaternion.clone();
   let appliedIdentityScale = identity.scale.x;
   let pointerInitialized = false;
-  let hoveredGalleryVisual: GalleryVisual | null = null;
   let lastPointerTime = performance.now();
+  let hoveredGalleryVisual: GalleryVisual | null = null;
   let pointerEnergy = 0;
   let gizmoDragging = false;
-  const gizmoPointerStart = new THREE.Vector2();
-  const gizmoDragNormalized = new THREE.Vector2();
-  const gizmoEulerStart = new THREE.Euler();
-  const gizmoEulerTarget = new THREE.Euler();
-  const gizmoAngleLimit = THREE.MathUtils.degToRad(28);
+  const gizmoQuaternionStart = new THREE.Quaternion();
+  const gizmoDragStart = new THREE.Vector3();
+  const gizmoDragCurrent = new THREE.Vector3();
+  const gizmoDragDelta = new THREE.Quaternion();
+  const gizmoProjectedAxis = new THREE.Vector3();
+  const gizmoAxes = ([
+    ['x', new THREE.Vector3(1, 0, 0)],
+    ['y', new THREE.Vector3(0, 1, 0)],
+    ['z', new THREE.Vector3(0, 0, 1)],
+  ] as const).map(([name, vector]) => {
+    const group = rotationGizmo?.querySelector<SVGGElement>(`[data-reference-axis="${name}"]`);
+    return {
+      vector,
+      group,
+      line: group?.querySelector<SVGLineElement>('line') ?? null,
+      point: group?.querySelector<SVGCircleElement>('circle') ?? null,
+      label: group?.querySelector<SVGTextElement>('text') ?? null,
+    };
+  });
+  const updateQuaternionController = (quaternion: THREE.Quaternion) => {
+    gizmoAxes.forEach(({ vector, group, line, point, label }) => {
+      if (!group || !line || !point || !label) return;
+      gizmoProjectedAxis.copy(vector).applyQuaternion(quaternion);
+      const x = 36 + gizmoProjectedAxis.x * 25;
+      const y = 36 - gizmoProjectedAxis.y * 25;
+      const labelDistance = 4.5;
+      const labelX = x + gizmoProjectedAxis.x * labelDistance;
+      const labelY = y - gizmoProjectedAxis.y * labelDistance;
+      line.setAttribute('x2', x.toFixed(2));
+      line.setAttribute('y2', y.toFixed(2));
+      point.setAttribute('cx', x.toFixed(2));
+      point.setAttribute('cy', y.toFixed(2));
+      label.setAttribute('x', labelX.toFixed(2));
+      label.setAttribute('y', labelY.toFixed(2));
+      group.style.opacity = (0.58 + (gizmoProjectedAxis.z + 1) * 0.2).toFixed(3);
+    });
+  };
+  const projectPointerToGizmoSphere = (event: PointerEvent, target: THREE.Vector3) => {
+    const bounds = rotationGizmo?.getBoundingClientRect();
+    if (!bounds || bounds.width <= 0 || bounds.height <= 0) return target.set(0, 0, 1);
+    const x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
+    const y = 1 - ((event.clientY - bounds.top) / bounds.height) * 2;
+    const radiusSquared = x * x + y * y;
+    if (radiusSquared <= 1) return target.set(x, y, Math.sqrt(1 - radiusSquared));
+    const inverseLength = 1 / Math.sqrt(radiusSquared);
+    return target.set(x * inverseLength, y * inverseLength, 0);
+  };
+  updateQuaternionController(interactionQuaternion);
   let revealStart = performance.now();
   let animationFrame = 0;
   let lastFrame = performance.now();
-  const backgroundTimeParam = import.meta.env.DEV
-    ? new URLSearchParams(window.location.search).get('__backgroundTime')
+  const backgroundTimeParam = captureParameters.get('__backgroundTime');
+  const parsedBackgroundTime = backgroundTimeParam === null ? Number.NaN : Number(backgroundTimeParam);
+  const backgroundTimeOverride = Number.isFinite(parsedBackgroundTime) && parsedBackgroundTime >= 0
+    ? parsedBackgroundTime
     : null;
-  const backgroundTimeOverride = backgroundTimeParam === null ? null : Number(backgroundTimeParam);
   let currentGalleryProgress = 0;
   let renderedGalleryProgress = 0;
   let currentGalleryPresence = 0;
   let renderedGalleryPresence = 0;
+  let captureSourcePicture = 1;
   let galleryHasVisibleVisual = false;
   let galleryLayoutActive = false;
   let responsiveIdentityScale = identityBaseScale;
   let responsiveWordScale = 1;
   let worldInView = true;
   let surfaceUpdateFrame = 0;
+  let controllerUpdateElapsed = 0;
   let renderReady = false;
   let disposed = false;
   let canvasWidth = 0;
@@ -1366,6 +1697,13 @@ async function startReferenceWorld(
   let renderPixelRatio = 0;
   let resizeFrame = 0;
   let compactGallery = innerWidth <= 820;
+  let worksRotationWeight = 0;
+  let worksRotationFrom = 0;
+  let worksRotationGoal = 0;
+  let worksRotationElapsed = 1;
+  let smoothedLogoScrollVelocity = 0;
+  let captureBridge: ReferenceCaptureBridge | null = null;
+  let nativeCaptureStarted = false;
 
   const galleryVisualAt = (clientX: number, clientY: number) => {
     if (renderedGalleryPresence < 0.72) return null;
@@ -1390,10 +1728,15 @@ async function startReferenceWorld(
   };
 
   const updateProjectScene = (_deltaSeconds: number) => {
-    if (!curveSection || galleryVisuals.length === 0) return;
+    if (!curveSection) return;
     // home-state owns the reference's two-stage rail lerp so the DOM metadata, background,
     // and WebGL planes all consume one continuous project position instead of drifting apart.
-    currentGalleryProgress = referenceMotionState.curveProgress;
+    if (captureGallerySweep) {
+      currentGalleryProgress = captureGalleryScheduledProgress(captureSourcePicture);
+    } else {
+      currentGalleryProgress =
+        captureGalleryProgressOverride ?? referenceMotionState.curveProgress;
+    }
     renderedGalleryProgress = currentGalleryProgress;
     const galleryEntrance = Math.min(1, renderedGalleryProgress * 2);
     const galleryExit = Math.min(
@@ -1408,14 +1751,27 @@ async function startReferenceWorld(
     // plane had settled, which read as an unrelated flash during scroll and touch transitions.
     const projectTextureProgress = Math.max(0, renderedGalleryProgress - 1);
     wallUniforms.uProject.value = projectTextureProgress;
-    compositeUniforms.uGallery.value = renderedGalleryPresence;
-    const heroExit = smoothstep(0.04, 0.3, renderedGalleryPresence);
     const galleryProgress = renderedGalleryProgress;
-    const galleryVelocity = referenceMotionState.curveVelocity;
-    const heroWordOpacity = heroWordBaseOpacity * (1 - heroExit);
+    // The large ANIK word is an opening-only layer. Remove it early in the handoff so project
+    // cards never overlap it, while keeping the typography fully visible at the top of the page.
+    const heroWordPresence = captureGallerySweep
+      ? 0
+      : 1 - smoothstep(0.001, 0.015, renderedGalleryProgress);
+    const heroWordOpacity = heroWordBaseOpacity * heroWordPresence;
     if (heroWordMaterial.opacity !== heroWordOpacity) heroWordMaterial.opacity = heroWordOpacity;
+    // The visible word remains full-energy, but its hidden transmission copy must stay SDR. Feeding
+    // a full-white duplicate into a flatter protected mesh makes the A disappear into the glyphs;
+    // a restrained copy preserves readable ANIK refraction alongside the dark glass material.
+    const refractionWordOpacity =
+      heroWordOpacity * (captureWordRefractionOverride ?? 0.68);
+    if (refractionWordMaterial.opacity !== refractionWordOpacity) {
+      refractionWordMaterial.opacity = refractionWordOpacity;
+    }
     const heroWordVisible = heroWordOpacity > 0;
     if (heroWord.visible !== heroWordVisible) heroWord.visible = heroWordVisible;
+    if (refractionWord.visible !== heroWordVisible) refractionWord.visible = heroWordVisible;
+
+    if (galleryVisuals.length === 0) return;
 
     galleryHasVisibleVisual = false;
     if (galleryEntrance <= 0 || galleryExit <= 0) {
@@ -1443,17 +1799,18 @@ async function startReferenceWorld(
       if (visual.material.uniforms.uOpacity!.value !== visibility) {
         visual.material.uniforms.uOpacity!.value = visibility;
       }
-      if (visual.material.uniforms.uVelocity!.value !== galleryVelocity) {
-        visual.material.uniforms.uVelocity!.value = galleryVelocity;
-      }
       visual.mesh.renderOrder = 30 - Math.round(distance * 4);
     });
   };
 
   const resize = () => {
-    const width = Math.max(1, Math.round(outputCanvas.clientWidth || innerWidth));
-    const height = Math.max(1, Math.round(outputCanvas.clientHeight || innerHeight));
-    const pixelRatio = Math.min(devicePixelRatio, pixelRatioCap);
+    const width = deterministicCaptureMode
+      ? captureWidth
+      : Math.max(1, Math.round(outputCanvas.clientWidth || innerWidth));
+    const height = deterministicCaptureMode
+      ? captureHeight
+      : Math.max(1, Math.round(outputCanvas.clientHeight || innerHeight));
+    const pixelRatio = deterministicCaptureMode ? 1 : Math.min(1.5, devicePixelRatio);
     if (width === canvasWidth && height === canvasHeight && pixelRatio === renderPixelRatio) {
       return;
     }
@@ -1466,27 +1823,29 @@ async function startReferenceWorld(
     camera.aspect = width / height;
     camera.fov = width <= 820 ? 50 : 41;
     camera.updateProjectionMatrix();
-    openingBackground.resize(camera, width, height, pixelRatio);
+    openingBackground.resize(camera, width, height, Math.min(pixelRatio, 2));
     const desktopIdentityFit = clamp(Math.min(width / 1280, height / 820), 0.90, 1);
     responsiveIdentityScale =
       identityBaseScale *
       (width <= 820 ? clamp(camera.aspect / 0.74, 0.62, 0.94) : desktopIdentityFit);
     responsiveWordScale = width <= 820 ? clamp(camera.aspect * 1.28, 0.52, 0.64) : 1.5;
-    heroWord.scale.setScalar(responsiveWordScale);
+    const wordScaleX = width <= 820 ? responsiveWordScale : 1.74;
+    const wordScaleY = width <= 820 ? responsiveWordScale : 1.35;
+    heroWord.scale.set(wordScaleX, wordScaleY, 1);
     heroWord.updateMatrix();
-    galleryGroup.scale.setScalar(width <= 820 ? 0.54 : 0.6);
+    refractionWord.scale.set(wordScaleX, wordScaleY, 1);
+    refractionWord.updateMatrix();
+    galleryGroup.scale.setScalar(width <= 820 ? 0.54 : 0.72);
     galleryGroup.updateMatrix();
     const renderWidth = Math.max(1, outputCanvas.width);
     const renderHeight = Math.max(1, outputCanvas.height);
     sceneTarget.setSize(renderWidth, renderHeight);
     backgroundTarget.setSize(renderWidth, renderHeight);
-    // The first retained bloom level is quarter-resolution. Threshold directly into that
-    // footprint instead of paying for a full-resolution intermediate that is immediately
-    // downsampled by the first blur pass.
-    bloomBrightTarget.setSize(
-      Math.max(1, Math.ceil(renderWidth / bloomScales[0])),
-      Math.max(1, Math.ceil(renderHeight / bloomScales[0])),
-    );
+    mixedSceneTarget.setSize(renderWidth, renderHeight);
+    // Preserve sub-pixel highlights before the three blur levels downsample them. Thresholding
+    // directly at quarter resolution was cheaper, but it erased the small luminous details that
+    // make the reference panel and glass read as crisp rather than soft and underexposed.
+    bloomBrightTarget.setSize(renderWidth, renderHeight);
     bloomScales.forEach((scale, index) => {
       const bloomWidth = Math.max(1, Math.ceil(renderWidth / scale));
       const bloomHeight = Math.max(1, Math.ceil(renderHeight / scale));
@@ -1495,11 +1854,11 @@ async function startReferenceWorld(
     });
     renderer.initRenderTarget(sceneTarget);
     renderer.initRenderTarget(backgroundTarget);
+    renderer.initRenderTarget(mixedSceneTarget);
     renderer.initRenderTarget(bloomBrightTarget);
     bloomVerticalTargets.forEach((target) => renderer.initRenderTarget(target));
     bloomHorizontalTargets.forEach((target) => renderer.initRenderTarget(target));
     glassUniforms.uResolution.value.set(renderWidth, renderHeight);
-    compositeUniforms.uResolution.value.set(renderWidth, renderHeight);
     fluid?.resize(width, height);
   };
 
@@ -1509,12 +1868,14 @@ async function startReferenceWorld(
     renderer.clear(true, false, false);
     renderer.render(bloomScene, postCamera);
 
-    let inputTexture = bloomBrightTarget.texture;
     bloomScales.forEach((_scale, index) => {
       const verticalTarget = bloomVerticalTargets[index]!;
       const horizontalTarget = bloomHorizontalTargets[index]!;
       bloomQuad.material = bloomBlurMaterial;
-      bloomBlurUniforms.uInput.value = inputTexture;
+      // Each authored bloom level starts from the same thresholded scene. Cascading the quarter
+      // level into the eighth and then sixteenth over-softens the highlights and removes the crisp
+      // colored velocity that distinguishes the reference.
+      bloomBlurUniforms.uInput.value = bloomBrightTarget.texture;
       bloomBlurUniforms.uResolution.value.set(verticalTarget.width, verticalTarget.height);
       bloomBlurUniforms.uDirection.value.set(0, 1);
       renderer.setRenderTarget(verticalTarget);
@@ -1527,7 +1888,6 @@ async function startReferenceWorld(
       renderer.setRenderTarget(horizontalTarget);
       renderer.clear(true, false, false);
       renderer.render(bloomScene, postCamera);
-      inputTexture = horizontalTarget.texture;
     });
   };
 
@@ -1543,7 +1903,7 @@ async function startReferenceWorld(
   canvasResizeObserver?.observe(outputCanvas);
 
   const onPointerMove = (event: PointerEvent) => {
-    if (!worldInView || coarsePointer) return;
+    if (!worldInView || coarsePointer || capturePointerSweep) return;
     const now = performance.now();
     pointer.set(event.clientX, event.clientY);
     const normalizedX = (event.clientX / Math.max(1, canvasWidth)) * 2 - 1;
@@ -1561,21 +1921,71 @@ async function startReferenceWorld(
     const deltaY = pointer.y - previousPointer.y;
     hoveredGalleryVisual = galleryVisualAt(event.clientX, event.clientY);
     setCurveCursor(hoveredGalleryVisual ? 'pointer' : '');
-
-    // A captured controller drag is an orientation command, not a scene-fluid pointer impulse.
-    // Feeding its unbounded screen travel into both systems produced the recorded TV-like flash.
+    // Feed the wake from the actual pointer event. Re-injecting a smoothed residual on every RAF
+    // introduced a visible 100-200ms trail and kept adding energy after the hand had stopped.
     if (fluid && !gizmoDragging) {
       fluid.update({
         x: event.clientX / Math.max(1, canvasWidth),
         y: 1 - event.clientY / Math.max(1, canvasHeight),
-        deltaX: deltaX / Math.max(1, canvasWidth),
-        deltaY: -deltaY / Math.max(1, canvasHeight),
+        deltaX: (deltaX / Math.max(1, canvasWidth)) * pointerMotionIntensity,
+        deltaY: (-deltaY / Math.max(1, canvasHeight)) * pointerMotionIntensity,
         deltaTime: deltaTime / 1000,
       });
     }
-
     previousPointer.copy(pointer);
     lastPointerTime = now;
+  };
+
+  const capturePointerPosition = new THREE.Vector2(0.5, 0.5);
+  const capturePointerPrevious = new THREE.Vector2(0.5, 0.5);
+  const applyCapturePointerSweep = (picture: number) => {
+    if (!capturePointerSweep) return;
+
+    capturePointerPrevious.copy(capturePointerPosition);
+
+    if (picture <= 48) {
+      capturePointerPosition.set(0.5, 0.5);
+    } else if (picture <= 288) {
+      const phase = (picture - 49) / 239;
+      capturePointerPosition.set(
+        0.5 + Math.sin(phase * Math.PI * 8) * 0.32,
+        0.5 + Math.sin(phase * Math.PI * 6 + 0.7) * 0.22,
+      );
+    } else if (picture <= 360) {
+      const phase = (picture - 289) / 71;
+      capturePointerPosition.set(
+        0.5 + Math.sin(phase * Math.PI * 4) * (1 - phase) * 0.24,
+        0.5 + Math.cos(phase * Math.PI * 3) * (1 - phase) * 0.16,
+      );
+    } else {
+      capturePointerPosition.set(0.5, 0.5);
+    }
+
+    const pixelX = capturePointerPosition.x * canvasWidth;
+    const pixelY = capturePointerPosition.y * canvasHeight;
+    pointer.set(pixelX, pixelY);
+    pointerNdc.set(
+      capturePointerPosition.x * 2 - 1,
+      1 - capturePointerPosition.y * 2,
+    );
+
+    const capturePointerActive = picture > 48 && picture <= 360;
+    if (fluid && capturePointerActive) {
+      fluid.update({
+        x: capturePointerPosition.x,
+        y: 1 - capturePointerPosition.y,
+        deltaX: capturePointerPosition.x - capturePointerPrevious.x,
+        deltaY: capturePointerPrevious.y - capturePointerPosition.y,
+        deltaTime: 1 / REFERENCE_CAPTURE_FPS,
+      });
+    } else if (fluid) {
+      fluid.update({ x: 0, y: 0, active: false, space: 'ndc' });
+    }
+
+    if (!pointerInitialized) {
+      filteredPointerNdc.copy(pointerNdc);
+      pointerInitialized = true;
+    }
   };
 
   const onPointerLeave = () => {
@@ -1583,6 +1993,7 @@ async function startReferenceWorld(
     pointerNdc.set(0, 0);
     filteredPointerNdc.set(0, 0);
     pointerVelocityNdc.set(0, 0);
+    fluid?.update({ x: 0, y: 0, active: false, space: 'ndc' });
     hoveredGalleryVisual = null;
     setCurveCursor('');
   };
@@ -1609,14 +2020,8 @@ async function startReferenceWorld(
     if (event.button !== 0) return;
     event.preventDefault();
     gizmoDragging = true;
-    gizmoPointerStart.set(event.clientX, event.clientY);
-    gizmoEulerStart.setFromQuaternion(interactionQuaternion, 'XYZ');
-    gizmoEulerStart.set(
-      clamp(gizmoEulerStart.x, -gizmoAngleLimit, gizmoAngleLimit),
-      clamp(gizmoEulerStart.y, -gizmoAngleLimit, gizmoAngleLimit),
-      0,
-      'XYZ',
-    );
+    gizmoQuaternionStart.copy(interactionQuaternion);
+    projectPointerToGizmoSphere(event, gizmoDragStart);
     hoverEuler.set(0, 0, 0);
     pointerEnergy = 0;
     pointerInitialized = false;
@@ -1630,27 +2035,13 @@ async function startReferenceWorld(
   };
   const moveGizmo = (event: PointerEvent) => {
     if (!gizmoDragging) return;
-    const dragRange = Math.max(160, Math.min(canvasWidth, canvasHeight) * 0.24);
-    gizmoDragNormalized.set(
-      (event.clientX - gizmoPointerStart.x) / dragRange,
-      (event.clientY - gizmoPointerStart.y) / dragRange,
-    );
-    if (gizmoDragNormalized.lengthSq() > 1) gizmoDragNormalized.normalize();
-    gizmoEulerTarget.set(
-      clamp(
-        gizmoEulerStart.x + gizmoDragNormalized.y * gizmoAngleLimit,
-        -gizmoAngleLimit,
-        gizmoAngleLimit,
-      ),
-      clamp(
-        gizmoEulerStart.y + gizmoDragNormalized.x * gizmoAngleLimit,
-        -gizmoAngleLimit,
-        gizmoAngleLimit,
-      ),
-      0,
-      'XYZ',
-    );
-    interactionQuaternion.setFromEuler(gizmoEulerTarget).normalize();
+    event.preventDefault();
+    projectPointerToGizmoSphere(event, gizmoDragCurrent);
+    gizmoDragDelta.setFromUnitVectors(gizmoDragStart, gizmoDragCurrent);
+    interactionQuaternion
+      .copy(gizmoDragDelta)
+      .multiply(gizmoQuaternionStart)
+      .normalize();
   };
   const releaseGizmo = (event: PointerEvent) => {
     if (!gizmoDragging) return;
@@ -1709,18 +2100,32 @@ async function startReferenceWorld(
 
   const render = (time: number) => {
     animationFrame = 0;
-    if (disposed || document.hidden || !worldInView) return;
-    const deltaSeconds = Math.min(0.05, Math.max(1 / 240, (time - lastFrame) / 1000));
+    if (disposed || (!deterministicCaptureMode && (document.hidden || !worldInView))) return;
+    const deltaSeconds = Math.min(1 / 30, Math.max(1 / 240, (time - lastFrame) / 1000));
     lastFrame = time;
     const elapsed = Math.max(0, (time - revealStart) * 0.001);
     wallUniforms.uTime.value = elapsed;
-    compositeUniforms.uTime.value = elapsed;
     updateProjectScene(deltaSeconds);
 
+    const logoSection = captureGallerySweep ? 2 : referenceMotionState.logoSection;
+    const worksRotationTarget = logoSection === 0 ? 0 : 1;
+    if (worksRotationTarget !== worksRotationGoal) {
+      worksRotationFrom = worksRotationWeight;
+      worksRotationGoal = worksRotationTarget;
+      worksRotationElapsed = 0;
+    }
+    if (worksRotationElapsed < 1) {
+      worksRotationElapsed = Math.min(1, worksRotationElapsed + deltaSeconds);
+      worksRotationWeight = THREE.MathUtils.lerp(
+        worksRotationFrom,
+        worksRotationGoal,
+        sigmoidEasing6(worksRotationElapsed),
+      );
+    } else {
+      worksRotationWeight = worksRotationGoal;
+    }
+
     if (!coarsePointer) {
-      // Match the reference KV response: a 10x/s pointer lerp, velocity-driven rotation,
-      // radial center attenuation, 0.01 rotation gain, and a 2x/s return force. The camera
-      // remains fixed; moving it here turned screen-space refraction into an unrelated lurch.
       if (gizmoDragging) {
         filteredPointerNdc.copy(pointerNdc);
         pointerVelocityNdc.set(0, 0);
@@ -1732,41 +2137,83 @@ async function startReferenceWorld(
           pointerVelocityNdc,
           Math.min(1, deltaSeconds * 10),
         );
-        const hoverWeight =
-          renderedGalleryPresence < 0.18
-            ? Math.max(0, 1 - pointerNdc.length() * 1.5)
-            : 0;
-        if (pointerEffectsEnabled && hoverWeight > 0) {
-          hoverEuler.set(
-            hoverEuler.x - pointerVelocityNdc.y * 0.01 * hoverWeight,
-            hoverEuler.y + pointerVelocityNdc.x * 0.01 * hoverWeight,
-            0,
-          );
+        const hoverMultiplier = (logoSection === 0 ? 1 : 0.2) * pointerMotionIntensity;
+        const pointerReach = Math.max(0, 1 - pointerNdc.length() * 1.5);
+        const velocityMultiplier = 0.01 * pointerReach * hoverMultiplier;
+        if (pointerEffectsEnabled && velocityMultiplier > 0) {
+          hoverEuler.x -=
+            pointerVelocityNdc.y * velocityMultiplier * (1 - worksRotationWeight * 0.7);
+          hoverEuler.y += pointerVelocityNdc.x * velocityMultiplier;
         }
-        const hoverRetention = Math.max(0, 1 - deltaSeconds);
-        hoverEuler.x *= hoverRetention;
-        hoverEuler.y *= hoverRetention;
+        hoverEuler.x *= 1 - deltaSeconds;
+        hoverEuler.y *= 1 - deltaSeconds;
+        hoverEuler.z = 0;
         deltaQuaternion.setFromEuler(hoverEuler);
         interactionQuaternion.premultiply(deltaQuaternion).normalize();
-        interactionQuaternion.slerp(identityQuaternion, Math.min(1, deltaSeconds * 2));
         pointerEnergy = Math.max(
-          pointerVelocityNdc.length() * hoverWeight,
+          pointerVelocityNdc.length() * pointerReach,
           pointerEnergy * Math.pow(0.91, deltaSeconds * 60),
         );
         if (pointerEnergy < 0.0005) pointerEnergy = 0;
       }
     }
 
-    const galleryIdentityStage = smoothstep(0.18, 0.55, renderedGalleryPresence);
-    let identityTransformChanged = false;
-    if (!coarsePointer) {
-      if (!appliedInteractionQuaternion.equals(interactionQuaternion)) {
-        identity.quaternion.copy(identityBaseQuaternion).multiply(interactionQuaternion);
-        appliedInteractionQuaternion.copy(interactionQuaternion);
-        identityTransformChanged = true;
-      }
+    // The reference camera supplies half a world-unit of pointer parallax. Without it the
+    // screen-space texture barely travels across the A, even when the mesh itself rotates.
+    const cameraTargetX = coarsePointer ? 0 : pointerNdc.x * 0.5 * pointerMotionIntensity;
+    const cameraTargetY = coarsePointer ? 0 : pointerNdc.y * 0.5 * pointerMotionIntensity;
+    cameraPointerOffset.x = THREE.MathUtils.lerp(
+      cameraPointerOffset.x,
+      cameraTargetX,
+      Math.min(1, deltaSeconds * 3),
+    );
+    cameraPointerOffset.y = THREE.MathUtils.lerp(
+      cameraPointerOffset.y,
+      cameraTargetY,
+      Math.min(1, deltaSeconds * 3),
+    );
+    camera.position.set(
+      cameraPointerOffset.x,
+      cameraPointerOffset.y,
+      9.5 + worksRotationWeight * 0.5,
+    );
+    const referenceBaseFov = 35 + 18 / Math.max(0.2, camera.aspect);
+    camera.fov = referenceBaseFov - 4 * (1 - worksRotationWeight);
+    camera.lookAt(0, 0, 0);
+    camera.updateMatrix();
+    camera.updateProjectionMatrix();
+
+    const logoScrollVelocity = smoothedLogoScrollVelocity;
+    if (worksRotationWeight > 0.0001) {
+      const scrollMotionIntensity = reducedMotion ? 0.35 : 1;
+      const scrollAngle = (
+        -deltaSeconds * 0.5 * worksRotationWeight -
+        logoScrollVelocity * 0.001 * worksRotationWeight
+      ) * scrollMotionIntensity;
+      deltaQuaternion.setFromAxisAngle(scrollAxis, scrollAngle);
+      interactionQuaternion.premultiply(deltaQuaternion).normalize();
     }
-    const identityScale = responsiveIdentityScale * (1 - galleryIdentityStage * 0.12);
+    smoothedLogoScrollVelocity +=
+      (referenceMotionState.scrollVelocity - smoothedLogoScrollVelocity) *
+      Math.min(1, deltaSeconds * 5);
+    const returnForce = logoSection === 0 ? 2 : logoSection === 1 ? 0.4 : 0.1;
+    interactionQuaternion.slerp(
+      identityQuaternion,
+      THREE.MathUtils.clamp(deltaSeconds * returnForce * (1 - worksRotationWeight * 0.8), 0, 1),
+    );
+    composedIdentityQuaternion.copy(interactionQuaternion).normalize();
+    let identityTransformChanged = false;
+    if (!appliedIdentityQuaternion.equals(composedIdentityQuaternion)) {
+      identity.quaternion.copy(identityBaseQuaternion).multiply(composedIdentityQuaternion);
+      appliedIdentityQuaternion.copy(composedIdentityQuaternion);
+      controllerUpdateElapsed += deltaSeconds;
+      if (controllerUpdateElapsed >= 1 / 30) {
+        updateQuaternionController(composedIdentityQuaternion);
+        controllerUpdateElapsed = 0;
+      }
+      identityTransformChanged = true;
+    }
+    const identityScale = responsiveIdentityScale;
     if (appliedIdentityScale !== identityScale) {
       identity.scale.setScalar(identityScale);
       appliedIdentityScale = identityScale;
@@ -1776,6 +2223,7 @@ async function startReferenceWorld(
 
     if (fluid) {
       fluid.step(deltaSeconds);
+      sceneMixerUniforms.uFluid.value = fluid.texture;
       compositeUniforms.uFluid.value = fluid.texture;
     }
     openingBackground.group.visible = true;
@@ -1787,27 +2235,51 @@ async function startReferenceWorld(
     openingBackground.update(
       backgroundElapsed,
       fluid?.texture ?? null,
-      renderedGalleryPresence,
-      Math.max(0, renderedGalleryProgress - 1),
+      captureTypographyOnly ? 0 : renderedGalleryPresence,
+      Math.max(0, referenceMotionState.wallProjectProgress - 1),
+      captureGallerySweep
+        ? clamp(currentGalleryProgress / Math.max(1, galleryVisuals.length + 1))
+        : referenceMotionState.worksProgress,
     );
-    const reveal = reducedMotion ? 1 : clamp((time - revealStart) / 2600);
-    compositeUniforms.uReveal.value = smoothstep(0, 1, reveal);
-
-    // Render the expensive chamber once, then duplicate its exact color and depth buffers on the
-    // GPU. The two transparent layers retain their original order: identity first, gallery last.
+    if (backgroundTimeOverride !== null) {
+      const backgroundState = openingBackground.debugState();
+      openingElement.dataset.backgroundState = [
+        backgroundState.picture,
+        backgroundState.pattern,
+        backgroundState.symbolMode,
+        backgroundState.layoutIndex,
+      ].join(':');
+    }
+    // Render the chamber once, then duplicate that exact buffer for the A's screen-space
+    // refraction. The chamber itself supplies the reference-timed ANIK typography.
     renderer.setRenderTarget(sceneTarget);
     renderer.clear(true, true, false);
     renderer.render(baseScene, camera);
-    renderer.copyTextureToTexture(sceneTarget.texture, backgroundTarget.texture);
-
-    if (galleryHasVisibleVisual) {
+    const galleryRendersVisible = galleryHasVisibleVisual && !captureTypographyOnly;
+    if (galleryRendersVisible) {
       renderer.copyTextureToTexture(sceneDepthTexture, backgroundDepthTexture);
+    }
+    // The reference copies through a full-screen post-process pass, which also performs the
+    // half-float -> unsigned-byte conversion needed by its transparent buffer. Keep auto-clear off
+    // while adding the typography/gallery layers so they cannot erase the chamber underneath.
+    const autoClear = renderer.autoClear;
+    try {
+      renderer.autoClear = false;
       renderer.setRenderTarget(backgroundTarget);
-      renderer.render(galleryScene, camera);
+      renderer.render(backgroundCopyScene, postCamera);
+      if (refractionWord.visible) renderer.render(refractionTypographyScene, camera);
+    } finally {
+      renderer.autoClear = autoClear;
     }
     renderer.setRenderTarget(sceneTarget);
     renderer.render(identityScene, camera);
-    if (galleryHasVisibleVisual) renderer.render(galleryScene, camera);
+    if (galleryRendersVisible) renderer.render(galleryScene, camera);
+
+    // Reference pass order: scene mixer (fluid, vignette, wake) -> bloom threshold/blur ->
+    // final fluid correction, bloom accumulation and 1.30 display gain.
+    renderer.setRenderTarget(mixedSceneTarget);
+    renderer.clear(true, false, false);
+    renderer.render(sceneMixerScene, postCamera);
     renderReferenceBloom();
     renderer.setRenderTarget(null);
     renderer.render(postScene, postCamera);
@@ -1822,7 +2294,7 @@ async function startReferenceWorld(
       if (stateReadout.textContent !== nextState) stateReadout.textContent = nextState;
     }
     if (!coarsePointer && quaternionReadout) {
-      const quaternion = interactionQuaternion;
+      const quaternion = composedIdentityQuaternion;
       const nextQuaternion = `${quaternion.x.toFixed(2)} ${quaternion.y.toFixed(
         2,
       )} ${quaternion.z.toFixed(2)} ${quaternion.w.toFixed(2)}`;
@@ -1830,11 +2302,22 @@ async function startReferenceWorld(
         quaternionReadout.textContent = nextQuaternion;
       }
     }
-    if (worldInView && !document.hidden) animationFrame = requestAnimationFrame(render);
+    if (!deterministicCaptureMode && worldInView && !document.hidden) {
+      animationFrame = requestAnimationFrame(render);
+    }
   };
 
   const resumeRender = () => {
-    if (!renderReady || disposed || animationFrame || document.hidden || !worldInView) return;
+    if (
+      deterministicCaptureMode ||
+      !renderReady ||
+      disposed ||
+      animationFrame ||
+      document.hidden ||
+      !worldInView
+    ) {
+      return;
+    }
     lastFrame = performance.now();
     animationFrame = requestAnimationFrame(render);
   };
@@ -1855,22 +2338,120 @@ async function startReferenceWorld(
 
   resize();
   if (heroWordMaterial.map) renderer.initTexture(heroWordMaterial.map);
-  renderer.initTexture(studioEnvironmentTexture);
-  galleryVisuals.forEach((visual) => renderer.initTexture(visual.texture));
+    renderer.initTexture(studioEnvironmentTexture);
   await Promise.all([
     renderer.compileAsync(baseScene, camera),
+    renderer.compileAsync(refractionTypographyScene, camera),
     renderer.compileAsync(identityScene, camera),
-    renderer.compileAsync(galleryScene, camera),
+    renderer.compileAsync(sceneMixerScene, postCamera),
     renderer.compileAsync(postScene, postCamera),
   ]);
   worldElement.dataset.modelReady = 'true';
   openingElement.dataset.modelReady = 'true';
-  revealStart = performance.now();
-  worldElement.dataset.bootReady = 'true';
-  openingElement.dataset.bootReady = 'true';
-  if (boot) boot.dataset.ready = 'true';
   renderReady = true;
-  resumeRender();
+  if (deterministicCaptureMode) {
+    revealStart = 0;
+    lastFrame = 0;
+    captureBridge = {
+      canvas: outputCanvas,
+      fps: REFERENCE_CAPTURE_FPS,
+      height: captureHeight,
+      totalPictures: REFERENCE_TOTAL_PICTURES,
+      width: captureWidth,
+      readPixels: (target) => {
+        const pixels =
+          target ??
+          new Uint8Array(new ArrayBuffer(outputCanvas.width * outputCanvas.height * 4));
+        if (pixels.byteLength !== outputCanvas.width * outputCanvas.height * 4) {
+          throw new RangeError('Capture pixel target has the wrong byte length');
+        }
+        const context = renderer.getContext();
+        context.readPixels(
+          0,
+          0,
+          outputCanvas.width,
+          outputCanvas.height,
+          context.RGBA,
+          context.UNSIGNED_BYTE,
+          pixels,
+        );
+        return pixels;
+      },
+      renderPicture: (picture) => {
+        if (!Number.isInteger(picture) || picture < 1 || picture > REFERENCE_TOTAL_PICTURES) {
+          throw new RangeError(
+            `Capture picture must be an integer from 1 through ${REFERENCE_TOTAL_PICTURES}`,
+          );
+        }
+        const elapsedMilliseconds = ((picture - 1) * 1000) / REFERENCE_CAPTURE_FPS;
+        captureSourcePicture = picture;
+        lastFrame = elapsedMilliseconds - 1000 / REFERENCE_CAPTURE_FPS;
+        applyCapturePointerSweep(picture);
+        render(elapsedMilliseconds);
+        renderer.getContext().finish();
+        return {
+          backgroundState: openingElement.dataset.backgroundState ?? '',
+          height: outputCanvas.height,
+          picture,
+          width: outputCanvas.width,
+        };
+      },
+    };
+    (window as Window & { __referenceCapture?: ReferenceCaptureBridge }).__referenceCapture =
+      captureBridge;
+    openingElement.dataset.captureReady = 'true';
+    captureBridge.renderPicture(1);
+  } else {
+    revealStart = performance.now();
+    resumeRender();
+  }
+
+  void galleryVisualsPromise.then(async (loadedGalleryVisuals) => {
+    if (disposed) {
+      loadedGalleryVisuals.forEach((visual) => {
+        visual.material.dispose();
+        visual.texture.dispose();
+      });
+      return;
+    }
+
+    if (loadedGalleryVisuals.length !== projectSources.length) {
+      const message = `Project gallery loaded ${loadedGalleryVisuals.length}/${projectSources.length} textures`;
+      openingElement.dataset.galleryReady = 'false';
+      openingElement.dataset.galleryError = message;
+      console.error(message);
+      return;
+    }
+
+    openingBackground.setProjectTextures(loadedGalleryVisuals.map((visual) => visual.texture));
+    loadedGalleryVisuals.forEach((visual) => {
+      galleryGroup.add(visual.mesh);
+      galleryVisuals.push(visual);
+      galleryMeshes.push(visual.mesh);
+      galleryVisualByMesh.set(visual.mesh, visual);
+    });
+    if (loadedGalleryVisuals.length > 0) curveSection?.setAttribute('data-webgl-gallery', 'true');
+    try {
+      loadedGalleryVisuals.forEach((visual) => renderer.initTexture(visual.texture));
+      await renderer.compileAsync(galleryScene, camera);
+      if (disposed) return;
+      openingElement.dataset.galleryReady = 'true';
+      openingElement.dataset.galleryCount = `${loadedGalleryVisuals.length}/${projectSources.length}`;
+      if (deterministicCaptureMode && captureBridge && !nativeCaptureStarted) {
+        nativeCaptureStarted = true;
+        void startNativePngCapture(captureBridge, openingElement).catch((error) => {
+          openingElement.dataset.captureState = 'FAILED';
+          openingElement.dataset.captureError = error instanceof Error ? error.message : String(error);
+          console.error('Native PNG capture failed', error);
+        });
+      }
+    } catch (error) {
+      openingElement.dataset.galleryReady = 'false';
+      openingElement.dataset.galleryError =
+        error instanceof Error ? error.message : String(error);
+      console.error('Project gallery shader warm-up failed', error);
+    }
+  });
 
   const dispose = () => {
     if (disposed) return;
@@ -1894,8 +2475,11 @@ async function startReferenceWorld(
     removeEventListener('scroll', requestSurfaceChromeUpdate);
     setCurveCursor('');
     fluid?.dispose();
+    zeroVelocityTexture.dispose();
+    backgroundCopyMaterial.dispose();
     sceneTarget.dispose();
     backgroundTarget.dispose();
+    mixedSceneTarget.dispose();
     bloomBrightTarget.dispose();
     bloomVerticalTargets.forEach((target) => target.dispose());
     bloomHorizontalTargets.forEach((target) => target.dispose());
@@ -1906,6 +2490,7 @@ async function startReferenceWorld(
     heroWord.geometry.dispose();
     heroWordMaterial.map?.dispose();
     heroWordMaterial.dispose();
+    refractionWordMaterial.dispose();
     studioEnvironmentTexture.dispose();
     identity.traverse((child) => {
       if (child instanceof THREE.Mesh) child.geometry.dispose();
@@ -1919,6 +2504,7 @@ async function startReferenceWorld(
     postQuad.geometry.dispose();
     bloomBrightMaterial.dispose();
     bloomBlurMaterial.dispose();
+    sceneMixerMaterial.dispose();
     compositeMaterial.dispose();
     renderer.dispose();
     removeEventListener('pagehide', onPageHide);
@@ -1952,6 +2538,5 @@ if (section && world && canvas) {
     console.error('Reference world failed to initialize', error);
     section.dataset.modelError = 'true';
     world.dataset.modelError = 'true';
-    boot?.setAttribute('data-ready', 'true');
   });
 }

@@ -11,14 +11,15 @@ const smoothstep = (minimum: number, maximum: number, value: number) => {
 
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobileMotionQuery = matchMedia('(max-width: 820px), (hover: none) and (pointer: coarse)');
-const smoothScroller = reduceMotion
-  ? null
-  : new Lenis({
-      anchors: true,
-      lerp: 0.075,
-      smoothWheel: true,
-      wheelMultiplier: 0.66,
-    });
+// Motion preference changes temporal intensity, never the authored visual state. Keeping Lenis
+// alive also means the same Works trigger, wall projection, and quaternion timeline is consumed
+// in every tier; reduced motion merely removes the additional inertial interpolation.
+const smoothScroller = new Lenis({
+  anchors: true,
+  lerp: reduceMotion ? 1 : 0.1,
+  smoothWheel: !reduceMotion,
+  wheelMultiplier: 1,
+});
 
 const meltSection = document.querySelector<HTMLElement>('[data-melt-section]');
 const meltDisplacement = meltSection?.querySelector<SVGFEDisplacementMapElement>(
@@ -38,13 +39,13 @@ const previousButton = curveSection?.querySelector<HTMLButtonElement>('[data-cur
 const nextButton = curveSection?.querySelector<HTMLButtonElement>('[data-curve-next]');
 
 let activeProject = -1;
-let projectSwapTimer = 0;
 let targetMelt = 0;
 let renderedMelt = 0;
 let targetCurveTrigger = 0;
 let renderedCurveTrigger = 0;
 let renderedCurveProgress = 0;
 let renderedCurveVelocity = 0;
+let rawCurveProgress = 0;
 let lastMotionFrame = performance.now();
 let lastMeltValue = '';
 let lastMeltScale = '';
@@ -144,7 +145,7 @@ function syncMotionTier() {
 }
 
 function updateMelt() {
-  if (!meltSection || !meltNearViewport || reduceMotion) return;
+  if (!meltSection || !meltNearViewport) return;
   const top = meltDocumentTop - scrollY;
   const bottom = top + meltSectionHeight;
   if (bottom < -innerHeight * 0.25 || top > innerHeight * 1.25) return;
@@ -158,9 +159,11 @@ function renderMelt(band: number) {
   const mobileMotion = mobileMotionQuery.matches;
   const meltValue = band.toFixed(4);
   const displacementScale = String(Math.round(band * (mobileMotion ? 20 : 32)));
-  const turbulenceFrequency = `${(0.006 + band * (mobileMotion ? 0.001 : 0.0015)).toFixed(
-    4,
-  )} ${(0.014 + band * (mobileMotion ? 0.008 : 0.012)).toFixed(4)}`;
+  const turbulenceFrequency = `${(
+    0.006 + band * (mobileMotion ? 0.001 : 0.0015)
+  ).toFixed(4)} ${(
+    0.014 + band * (mobileMotion ? 0.008 : 0.012)
+  ).toFixed(4)}`;
   if (meltValue !== lastMeltValue) {
     meltSection.style.setProperty('--melt', meltValue);
     lastMeltValue = meltValue;
@@ -179,7 +182,6 @@ function setActiveProject(index: number) {
   if (!curveCards.length) return;
   const nextProject = Math.round(clamp(index, 0, curveCards.length - 1));
   if (nextProject === activeProject) return;
-  const previousProject = activeProject;
   activeProject = nextProject;
   const card = curveCards[activeProject];
   if (!card) return;
@@ -204,16 +206,8 @@ function setActiveProject(index: number) {
       ).padStart(2, '0')}`;
     }
   };
-  clearTimeout(projectSwapTimer);
-  if (previousProject < 0 || reduceMotion || !curveDetail) {
-    updateMetadata();
-  } else {
-    curveDetail.dataset.swapping = 'true';
-    projectSwapTimer = window.setTimeout(() => {
-      updateMetadata();
-      curveDetail.removeAttribute('data-swapping');
-    }, 120);
-  }
+  updateMetadata();
+  curveDetail?.removeAttribute('data-swapping');
   if (previousButton) previousButton.disabled = activeProject === 0;
   if (nextButton) nextButton.disabled = activeProject === curveCards.length - 1;
 }
@@ -274,6 +268,9 @@ function updateCurveTarget(measuredBounds?: SectionBounds) {
   targetCurveTrigger = clamp(
     (innerHeight - bounds.top) / Math.max(1, bounds.height + innerHeight),
   );
+  referenceMotionState.logoSection =
+    bounds.top >= innerHeight || bounds.bottom <= 0 ? 0 : bounds.top > 0 ? 1 : 2;
+  referenceMotionState.worksProgress = targetCurveTrigger;
 }
 
 function updateAll(timestamp = performance.now()) {
@@ -294,38 +291,30 @@ function updateAll(timestamp = performance.now()) {
   }
 
   if (curveSection && curveNearViewport && usesStageRail() && curveCards.length) {
-    const previousProgress = renderedCurveProgress;
-    // Match the reference's two-stage works rail exactly. Reduced-motion users retain the same
-    // composed stage but follow the native scroll position directly, without temporal easing.
-    if (reduceMotion) {
-      renderedCurveTrigger = targetCurveTrigger;
-    } else {
-      renderedCurveTrigger +=
-        (targetCurveTrigger - renderedCurveTrigger) * Math.min(1, deltaSeconds * 10);
-    }
+    const triggerBlend = Math.min(1, deltaSeconds * 10);
+    const firstStageResidual = targetCurveTrigger - renderedCurveTrigger;
+    renderedCurveTrigger += (targetCurveTrigger - renderedCurveTrigger) * triggerBlend;
     const continuousProgress = renderedCurveTrigger * (curveCards.length + 1);
+    rawCurveProgress = continuousProgress;
+    referenceMotionState.wallProjectProgress = rawCurveProgress;
     const nearestProjectStop = Math.round(continuousProgress);
     const targetCurveProgress =
       nearestProjectStop - (nearestProjectStop - continuousProgress) * 0.4;
-    if (reduceMotion) {
-      renderedCurveProgress = targetCurveProgress;
-    } else {
-      renderedCurveProgress +=
-        (targetCurveProgress - renderedCurveProgress) * Math.min(1, deltaSeconds * 5);
-    }
+    const progressBlend = Math.min(1, deltaSeconds * 5);
+    renderedCurveProgress += (targetCurveProgress - renderedCurveProgress) * progressBlend;
     if (Math.abs(targetCurveProgress - renderedCurveProgress) < 0.0005) {
       renderedCurveProgress = targetCurveProgress;
     }
-    const instantaneousVelocity = reduceMotion
-      ? 0
-      : (renderedCurveProgress - previousProgress) / Math.max(deltaSeconds, 1 / 240);
-    renderedCurveVelocity = reduceMotion
-      ? 0
-      : renderedCurveVelocity +
-        (instantaneousVelocity - renderedCurveVelocity) * (1 - Math.exp(-8 * deltaSeconds));
+    // The production shader consumes the residual of the first Works lerp, not a project-per-second
+    // derivative. Keeping this dimensionless prevents wheel-speed dependent card tearing.
+    const instantaneousVelocity = firstStageResidual * (curveCards.length + 1);
+    renderedCurveVelocity +=
+      (instantaneousVelocity - renderedCurveVelocity) *
+      Math.min(1, deltaSeconds * 5);
     renderCurve(renderedCurveProgress);
     setActiveProject(Math.floor(renderedCurveProgress - 0.5));
   }
+  referenceMotionState.scrollVelocity = Math.max(-30, Math.min(30, smoothScroller.velocity));
 }
 
 function selectProject(index: number) {
@@ -335,11 +324,10 @@ function selectProject(index: number) {
     const triggerProgress = (target + 1) / (curveCards.length + 1);
     const scrollTarget =
       curveDocumentTop - innerHeight + triggerProgress * (curveSectionHeight + innerHeight);
-    if (smoothScroller) {
-      smoothScroller.scrollTo(scrollTarget, { duration: 1.55 });
-    } else {
-      scrollTo({ top: scrollTarget, behavior: reduceMotion ? 'auto' : 'smooth' });
-    }
+    smoothScroller.scrollTo(
+      scrollTarget,
+      reduceMotion ? { immediate: true } : { duration: 1 },
+    );
     return;
   }
   curveCards[target]?.scrollIntoView({
@@ -389,6 +377,48 @@ if (curveSection && curveCards.length) {
   });
 }
 
+let worksSnapTimer = 0;
+let worksSnapInFlight = false;
+let lastWorksInputAt = 0;
+const snapWorksToNearestProject = () => {
+  worksSnapTimer = 0;
+  if (!curveSection || !curveCards.length || worksSnapInFlight || !curveNearViewport) return;
+  // Wait for Lenis and the wheel/trackpad stream to be genuinely idle. The earlier timeout was
+  // restarted by rendered scroll events, so a slow capture or a low-frequency wheel could begin a
+  // locked snap between two trusted impulses and pin the rail to project one.
+  if (smoothScroller.isScrolling !== false || performance.now() - lastWorksInputAt < 220) {
+    worksSnapTimer = window.setTimeout(snapWorksToNearestProject, 120);
+    return;
+  }
+  const bounds = readCurveBounds();
+  if (bounds.top > 0 || bounds.bottom < innerHeight) return;
+  const internalTravel = Math.max(1, curveSectionHeight - innerHeight);
+  const localProgress = clamp((scrollY - curveDocumentTop) / internalTravel);
+  const divisions = Math.max(1, curveCards.length - 1);
+  const snappedProgress = Math.round(localProgress * divisions) / divisions;
+  const scrollTarget = curveDocumentTop + snappedProgress * internalTravel;
+  if (Math.abs(scrollTarget - scrollY) < 1) return;
+  worksSnapInFlight = true;
+  smoothScroller.scrollTo(scrollTarget, {
+    ...(reduceMotion ? { immediate: true } : { duration: 1 }),
+    onComplete: () => {
+      worksSnapInFlight = false;
+    },
+  });
+};
+const unsubscribeWorksInput = smoothScroller.on('virtual-scroll', () => {
+  lastWorksInputAt = performance.now();
+  if (worksSnapInFlight) {
+    worksSnapInFlight = false;
+  }
+  clearTimeout(worksSnapTimer);
+});
+const unsubscribeWorksSnap = smoothScroller.on('scroll', () => {
+  if (worksSnapInFlight || !curveNearViewport || smoothScroller.isScrolling !== false) return;
+  clearTimeout(worksSnapTimer);
+  worksSnapTimer = window.setTimeout(snapWorksToNearestProject, reduceMotion ? 80 : 220);
+});
+
 addEventListener(
   'resize',
   () => {
@@ -425,7 +455,9 @@ addEventListener('pagehide', (event) => {
   smoothScrollAnimationFrame = 0;
   smoothScroller?.stop();
   if (event.persisted) return;
-  clearTimeout(projectSwapTimer);
+  clearTimeout(worksSnapTimer);
+  unsubscribeWorksSnap();
+  unsubscribeWorksInput();
   motionSectionObserver?.disconnect();
   motionSectionResizeObserver?.disconnect();
   smoothScroller?.destroy();

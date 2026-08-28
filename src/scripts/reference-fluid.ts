@@ -423,7 +423,9 @@ export class ReferenceFluid {
     this.pointerImpulse.x += signedPow(clamp(deltaX, -1, 1), POINTER_SPEED_EXPONENT);
     this.pointerImpulse.y += signedPow(clamp(deltaY, -1, 1), POINTER_SPEED_EXPONENT);
     this.pointerImpulse.clampScalar(-1, 1);
-    if (this.pointerImpulse.lengthSq() > 0) this.fieldActive = true;
+    if (this.pointerImpulse.lengthSq() > 0) {
+      this.fieldActive = true;
+    }
   }
 
   /**

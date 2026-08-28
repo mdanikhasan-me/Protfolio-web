@@ -746,15 +746,6 @@ h3 {
   html {
     scroll-behavior: auto;
   }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-  }
 }
 
 /* V5 home: one spatial room, one bounded type melt, one finite work curve. */
@@ -1651,15 +1642,10 @@ h3 {
 
 @media (prefers-reduced-motion: reduce) {
   .melt-chapter {
-    min-height: 100svh;
-  }
-
-  .melt-type-clean {
-    clip-path: none;
-    opacity: 1;
+    min-height: 210svh;
   }
 
   .melt-type-fluid {
-    display: none;
+    filter: url('#type-melt');
   }
 }
