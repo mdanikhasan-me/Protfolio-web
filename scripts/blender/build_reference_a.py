@@ -12,7 +12,7 @@ from mathutils import Vector
 ROOT = Path(__file__).resolve().parents[2]
 ASSET_DIR = ROOT / "assets" / "blender"
 PUBLIC_DIR = ROOT / "public" / "media" / "identity"
-REVIEW_DIR = ROOT / ".local-validation" / "reference-locked-v1" / "model-review"
+REVIEW_DIR = ROOT / ".reference-local" / "reference-locked-v1" / "model-review"
 
 
 def reset_scene() -> None:

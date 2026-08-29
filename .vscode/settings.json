@@ -1,8 +1,8 @@
 {
   "files.exclude": {
     "**/.astro": true,
-    "**/.local-validation": true,
-    "**/.local-validation": true,
+    "**/.reference-analysis": true,
+    "**/.reference-local": true,
     "**/coverage": true,
     "**/dist": true,
     "**/node_modules": true,
@@ -11,8 +11,8 @@
   },
   "search.exclude": {
     "**/.astro": true,
-    "**/.local-validation": true,
-    "**/.local-validation": true,
+    "**/.reference-analysis": true,
+    "**/.reference-local": true,
     "**/coverage": true,
     "**/dist": true,
     "**/node_modules": true,

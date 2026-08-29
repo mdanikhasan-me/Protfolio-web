@@ -38,11 +38,10 @@ lighthouse-reports/
 .pagefind-cache/
 artifacts/
 
-# local tooling local concept work, caches, renders, captures, and backups
-.local-validation/
-.local-validation/
-.local-validation-reference-analysis/
-.local-validation-tmp/
+# Local concept work, caches, renders, captures, and backups
+.reference-local/
+.reference-analysis/
+.tmp/
 
 # Local editor settings
 .vscode/

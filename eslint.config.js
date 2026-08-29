@@ -6,7 +6,7 @@ export default [
   {
     ignores: [
       '.astro/**',
-      '.local-validation/**',
+      '.reference-local/**',
       'coverage/**',
       'dist/**',
       'node_modules/**',
