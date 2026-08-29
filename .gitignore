@@ -41,3 +41,8 @@ artifacts/
 # local tooling local concept work, caches, renders, captures, and backups
 .local-validation/
 .local-validation/
+.local-validation-reference-analysis/
+.local-validation-tmp/
+
+# Local editor settings
+.vscode/
