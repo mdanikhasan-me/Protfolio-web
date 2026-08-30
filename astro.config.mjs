@@ -16,7 +16,7 @@ if (captureSinkOrigin) {
 }
 
 export default defineConfig({
-  site: 'https://mdanikhasan.com',
+  site: 'https://www.mdanikhasan.com',
   output: 'static',
   trailingSlash: 'always',
   server: {
