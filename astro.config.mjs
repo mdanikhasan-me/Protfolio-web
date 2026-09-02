@@ -19,6 +19,12 @@ export default defineConfig({
   site: 'https://www.mdanikhasan.com',
   output: 'static',
   trailingSlash: 'always',
+  // Keep bundled assets on the same origin so small font subsets satisfy font-src 'self'.
+  vite: {
+    build: {
+      assetsInlineLimit: 0,
+    },
+  },
   server: {
     allowedHosts: ['conflict-reading-drainage-dictionary.trycloudflare.com'],
   },

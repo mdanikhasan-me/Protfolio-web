@@ -6,6 +6,9 @@ export default [
   {
     ignores: [
       '.astro/**',
+      '.codex-local/**',
+      '.codex-reference-analysis/**',
+      '.codex-tmp/**',
       '.reference-local/**',
       'coverage/**',
       'dist/**',
