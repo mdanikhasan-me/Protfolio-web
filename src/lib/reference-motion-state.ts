@@ -3,6 +3,7 @@ export const referenceMotionState = {
   curveVelocity: 0,
   scrollVelocity: 0,
   worksProgress: 0,
+  worksOutroProgress: 0,
   wallProjectProgress: 0,
   curveDocumentTop: 0,
   curveBoundsHeight: 0,
