@@ -1,5 +1,9 @@
 dist/
 .astro/
+.codex-local/
+.codex-reference-analysis/
+.codex-tmp/
+.reference-local/
 node_modules/
 coverage/
 playwright-report/
