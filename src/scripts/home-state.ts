@@ -27,11 +27,19 @@ const meltDisplacement = meltSection?.querySelector<SVGFEDisplacementMapElement>
 );
 const meltTurbulence = meltSection?.querySelector<SVGFETurbulenceElement>('[data-melt-turbulence]');
 const curveSection = document.querySelector<HTMLElement>('[data-curve-work]');
+const openingSection = document.querySelector<HTMLElement>('[data-reference-opening]');
+const worksOutro = document.querySelector<HTMLElement>('[data-works-outro]');
+let worksOutroTop = 0;
+let worksOutroHeight = 1;
+const curveLeadIn = 0.35;
 const curveCards = Array.from(
   curveSection?.querySelectorAll<HTMLElement>('[data-curve-card]') ?? [],
 );
 const curveTitle = curveSection?.querySelector<HTMLElement>('[data-curve-title]');
 const curveDescription = curveSection?.querySelector<HTMLElement>('[data-curve-description]');
+const curveKind = curveSection?.querySelector<HTMLElement>('[data-curve-kind]');
+const curveDate = curveSection?.querySelector<HTMLTimeElement>('[data-curve-date]');
+const curveRole = curveSection?.querySelector<HTMLElement>('[data-curve-role]');
 const curveLink = curveSection?.querySelector<HTMLAnchorElement>('[data-curve-link]');
 const curveCount = curveSection?.querySelector<HTMLElement>('[data-curve-count]');
 const curveDetail = curveSection?.querySelector<HTMLElement>('.curve-work-detail');
@@ -64,10 +72,39 @@ let meltDocumentTop = 0;
 let meltSectionHeight = 0;
 let curveDocumentTop = 0;
 let curveSectionHeight = 0;
+const sectionRail = document.querySelector<HTMLElement>('[data-section-rail]');
+const sectionLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-section-link]')];
+const sectionLandmarks = [null, curveSection, meltSection,
+  document.querySelector<HTMLElement>('.vision-chapter'),
+  document.querySelector<HTMLElement>('.home-writing')];
+let sectionStarts = [0, 0, 0, 0, 0];
+let contactStart = Infinity;
+let railActive = -1;
+function updateSectionRail() {
+  let active = 0;
+  sectionStarts.forEach((top, index) => { if (scrollY + innerHeight * 0.35 >= top) active = index; });
+  if (active !== railActive) {
+    sectionLinks.forEach((link, index) => {
+      if (index === active) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+    railActive = active;
+  }
+  if (sectionRail) sectionRail.dataset.hidden = String(scrollY + innerHeight * 0.5 >= contactStart);
+}
 const curveViewportBounds: SectionBounds = { top: 0, bottom: 0, height: 0 };
 
 function measureMotionSections() {
   const pageY = scrollY;
+  if (worksOutro) {
+    const bounds = worksOutro.getBoundingClientRect();
+    worksOutroTop = pageY + bounds.top;
+    worksOutroHeight = bounds.height;
+  }
+  sectionStarts = sectionLandmarks.map(element => element ? pageY + element.getBoundingClientRect().top : 0);
+  const contact = document.querySelector<HTMLElement>('.home-contact');
+  contactStart = contact ? pageY + contact.getBoundingClientRect().top : Infinity;
+  updateSectionRail();
   if (meltSection) {
     const bounds = meltSection.getBoundingClientRect();
     meltDocumentTop = pageY + bounds.top;
@@ -199,6 +236,12 @@ function setActiveProject(index: number) {
   const updateMetadata = () => {
     if (curveTitle) curveTitle.textContent = card.dataset.projectTitle ?? '';
     if (curveDescription) curveDescription.textContent = card.dataset.projectDescription ?? '';
+    if (curveKind) curveKind.textContent = card.dataset.projectKind ?? '';
+    if (curveDate) {
+      curveDate.dateTime = card.dataset.projectUpdated ?? '';
+      curveDate.textContent = (card.dataset.projectUpdated ?? '').replaceAll('-', '.');
+    }
+    if (curveRole) curveRole.textContent = card.dataset.projectRole ?? '';
     if (curveLink && card.dataset.projectRoute) curveLink.href = card.dataset.projectRoute;
     if (curveCount) {
       curveCount.textContent = `${String(activeProject + 1).padStart(2, '0')} / ${String(
@@ -218,6 +261,7 @@ function renderCurve(progress: number) {
   const exit = Math.min(1, (curveCards.length + 1 - progress) * 2);
   const sectionPresence = clamp(Math.min(entrance, exit));
   const curvePresence = sectionPresence.toFixed(4);
+  curveSection.dataset.railActive = String(sectionPresence > 0.02);
   if (curvePresence !== lastCurvePresence) {
     curveSection.style.setProperty('--curve-presence', curvePresence);
     lastCurvePresence = curvePresence;
@@ -266,10 +310,10 @@ function updateCurveTarget(measuredBounds?: SectionBounds) {
   const bounds = measuredBounds ?? readCurveBounds();
   // The reference works trigger runs from `top bottom` through `bottom top`.
   targetCurveTrigger = clamp(
-    (innerHeight - bounds.top) / Math.max(1, bounds.height + innerHeight),
+    (innerHeight * curveLeadIn - bounds.top) / Math.max(1, bounds.height + innerHeight * curveLeadIn),
   );
   referenceMotionState.logoSection =
-    bounds.top >= innerHeight || bounds.bottom <= 0 ? 0 : bounds.top > 0 ? 1 : 2;
+    bounds.bottom <= 0 || scrollY < innerHeight * 0.18 ? 0 : bounds.top > 0 ? 1 : 2;
   referenceMotionState.worksProgress = targetCurveTrigger;
 }
 
@@ -277,6 +321,8 @@ function updateAll(timestamp = performance.now()) {
   const deltaSeconds = Math.min(0.05, Math.max(1 / 240, (timestamp - lastMotionFrame) / 1_000));
   lastMotionFrame = timestamp;
   updateMelt();
+  openingSection?.style.setProperty('--opening-ui-presence',
+    String(1 - smoothstep(0.55, 1.05, scrollY / Math.max(1, innerHeight))));
   const curveBounds =
     curveSection && curveNearViewport && usesStageRail() && curveCards.length
       ? readCurveBounds()
@@ -323,7 +369,7 @@ function selectProject(index: number) {
   if (usesStageRail()) {
     const triggerProgress = (target + 1) / (curveCards.length + 1);
     const scrollTarget =
-      curveDocumentTop - innerHeight + triggerProgress * (curveSectionHeight + innerHeight);
+      curveDocumentTop - innerHeight * curveLeadIn + triggerProgress * (curveSectionHeight + innerHeight * curveLeadIn);
     smoothScroller.scrollTo(
       scrollTarget,
       reduceMotion ? { immediate: true } : { duration: 1 },
@@ -392,11 +438,13 @@ const snapWorksToNearestProject = () => {
   }
   const bounds = readCurveBounds();
   if (bounds.top > 0 || bounds.bottom < innerHeight) return;
-  const internalTravel = Math.max(1, curveSectionHeight - innerHeight);
-  const localProgress = clamp((scrollY - curveDocumentTop) / internalTravel);
-  const divisions = Math.max(1, curveCards.length - 1);
-  const snappedProgress = Math.round(localProgress * divisions) / divisions;
-  const scrollTarget = curveDocumentTop + snappedProgress * internalTravel;
+  // Snap to the same stops used by the renderer and arrow controls. A second,
+  // section-internal progress scale snapped between cards and fought wheel input.
+  const trigger = (innerHeight * curveLeadIn - bounds.top) / (curveSectionHeight + innerHeight * curveLeadIn);
+  const stop = Math.round(trigger * (curveCards.length + 1));
+  if (stop < 1 || stop > curveCards.length) return;
+  const scrollTarget = curveDocumentTop - innerHeight * curveLeadIn +
+    (stop / (curveCards.length + 1)) * (curveSectionHeight + innerHeight * curveLeadIn);
   if (Math.abs(scrollTarget - scrollY) < 1) return;
   worksSnapInFlight = true;
   smoothScroller.scrollTo(scrollTarget, {
@@ -436,6 +484,8 @@ const smoothScrollFrame = (time: number) => {
   smoothScrollAnimationFrame = 0;
   if (!motionLoopRunning) return;
   smoothScroller?.raf(time);
+  referenceMotionState.worksOutroProgress = clamp((scrollY + innerHeight - worksOutroTop) / Math.max(1, worksOutroHeight));
+  updateSectionRail();
   if (meltNearViewport || curveNearViewport) {
     updateAll(time);
   } else {

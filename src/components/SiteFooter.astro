@@ -4,29 +4,75 @@ import { SITE } from '../config/site';
 const year = new Date().getUTCFullYear();
 ---
 
-<footer class="site-footer">
-  <div class="shell footer-grid">
-    <div>
-      <p class="eyebrow">MD Anik Hasan</p>
-      <p class="footer-statement">Website and custom software development from {SITE.location}.</p>
-    </div>
+<footer class="site-footer studio-footer" data-studio-footer>
+  <div class="footer-construction" aria-hidden="true"></div>
+  <a class="footer-brand" href="/" aria-label={`${SITE.name}, home`}>
+    <svg class="footer-drafting" viewBox="0 0 787.842 209" aria-hidden="true">
+      {[2.282, 78, 171.42, 200.277, 207.884].map((y, index) => <path pathLength="1" style={`--line-delay:${index * 70}ms`} d={`M-180 ${y} H968`} />)}
+      {[0,118.541,237.133,265.132,474.33,502.343,546.44,574.436,787.842].map((x, index) => <path pathLength="1" style={`--line-delay:${index * 45 + 120}ms`} d={`M${x} -180 V389`} />)}
+      <path pathLength="1" style="--line-delay:140ms" d="M-70 330 L188 -118 M49 -118 L306 330" />
+      <path pathLength="1" style="--line-delay:280ms" d="M235 -40 L490 248 M552 232 L810 -18 M636 70 L819 241" />
+    </svg>
+    <svg class="footer-wordmark" viewBox="0 0 787.842 209" aria-hidden="true">
+          <path
+            fill-rule="evenodd"
+            d="M0 207.884h43.617l4.407-7.607h141.084l4.408 7.607h43.617L118.541 2.282 0 207.884Zm64.691-36.464 53.901-93.47 53.9 93.47H64.691Z"
+          ></path>
+          <g transform="translate(238.794 207.884) scale(.299423 -.299423)">
+            <path
+              d="M87.965 0V686.661h138.389l340.486-373.925q9.687-8.913 23.243-24.426t27.626-31.443q14.069-15.93 23.269-27.852l6.852.035q-.591 18.834-1.452 42.977t-.861 41.413v373.221H786.68V0H650.465L308.996 377.438q-19.4 20.304-41.169 45.913t-34.186 39.79l-6.252-.034q.591-13.131 1.165-37.943t.574-55.108V0H87.965Z"
+            ></path>
+          </g>
+          <g transform="translate(476.005 207.884) scale(.299423 -.299423)">
+            <path d="M87.965 0v686.661h147.258V0H87.965Z"></path>
+          </g>
+          <g transform="translate(548.098 207.884) scale(.299423 -.299423)">
+            <path
+              d="M87.965 0v686.661h147.258V340.174l372.025 346.487h187.788L493.368 403.904 800.688 0H617.466L387.978 309.854 235.223 182.985V0H87.965Z"
+            ></path>
+          </g>
+        </svg></a>
+  <div class="footer-bottom">
     <nav aria-label="Footer navigation">
+      <a href="/">Top</a>
       <a href="/work/">Work</a>
       <a href="/services/">Services</a>
       <a href="/writing/">Writing</a>
       <a href="/about/">About</a>
       <a href="/contact/">Contact</a>
       <a href="/search/">Search</a>
-      <a href="/privacy/">Privacy</a>
     </nav>
-    <div class="footer-social">
+    <nav class="footer-social" aria-label="Social links">
       <a href={`mailto:${SITE.email}`}>Email</a>
       <a href={SITE.discord} rel="me">Discord</a>
       <a href={SITE.linkedin}>LinkedIn</a>
       <a href={SITE.github}>GitHub</a>
       <a href={SITE.x}>X</a>
       <a href={SITE.facebook}>Facebook</a>
+    </nav>
+    <div class="footer-inquiry">
+      <a href="/contact/">Contact <span aria-hidden="true">↗</span></a>
+      <a href="/hire/">Work together <span aria-hidden="true">↗</span></a>
+      <a class="footer-privacy" href="/privacy/">Privacy</a>
     </div>
   </div>
-  <p class="shell fine-print">© {year} {SITE.name}. No analytics or advertising trackers.</p>
+  <p class="footer-copyright">© {year} {SITE.name}</p>
 </footer>
+
+<script>
+  const footer = document.querySelector<HTMLElement>('[data-studio-footer]');
+  if (footer) {
+    footer.querySelectorAll<SVGPathElement>('.footer-wordmark path').forEach((path, index) => {
+      path.setAttribute('pathLength', '1');
+      path.style.setProperty('--letter-delay', `${index * 100}ms`);
+    });
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting) {
+        footer.dataset.revealed = 'true';
+        observer.disconnect();
+      }
+    }, { threshold: 0.3 });
+    observer.observe(footer);
+    addEventListener('pagehide', () => observer.disconnect(), { once: true });
+  }
+</script>

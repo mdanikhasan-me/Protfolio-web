@@ -1,0 +1,6 @@
+/* One stylesheet entry fixes cascade order across Astro's shared/page chunks. */
+@import './global.css';
+@import './reference-locked.css';
+@import './home-chapters.css';
+@import './studio-pages.css';
+@import './studio-footer.css';

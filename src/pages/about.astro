@@ -1,5 +1,4 @@
 ---
-import PageHero from '../components/PageHero.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { profilePageSchema } from '../lib/schema';
 ---
@@ -9,14 +8,31 @@ import { profilePageSchema } from '../lib/schema';
   description="MD Anik Hasan is a Computer Science and Engineering student at United International University who builds full-stack web products, custom software, and Boilabin."
   schema={profilePageSchema()}
 >
-  <PageHero
-    eyebrow="About"
-    title="Most of my time goes into building things that have to work."
-    intro="I’m Anik, a Computer Science and Engineering student at United International University, the founder of Boilabin, and a full-stack web and software developer in Dhaka."
-    workshop="Builder Profile"
-  />
+  <section class="about-composition" aria-labelledby="about-title">
+    <h1 id="about-title">About</h1>
+    <article class="prose about-story">
+      <p class="about-label">Hey.</p>
+      <p class="about-lead">I’m 22. I make websites and software. There’s also a language model in the works, so that keeps me busy.</p>
 
-  <div class="content-layout">
+      <p class="studio-bengali" lang="bn">নতুন কিছু বানাতে মজা লাগে। এই সাইটে সেগুলোই রাখছি।</p>
+      <p>
+        I built Boilabin and run it too. SoctuKit and the UIU Discord Bot are mine as well.
+        You can find them all in <a href="/work/">Works</a>.
+      </p>
+      <p>
+        Salty Potato AI is the language model. I’m building the tokenizer, training setup, and
+        desktop app myself. It’s still in progress.
+      </p>
+
+      <p>
+        I’m into projects that give me something new to try. If you have an idea for one,
+        I’m happy to hear it.
+      </p>
+
+      <p>
+        <a href="/contact/">Get in touch ↗</a>
+      </p>
+
     <aside class="content-rail" aria-label="Profile summary">
       <div>
         <p class="rail-label">Based in</p>
@@ -27,50 +43,10 @@ import { profilePageSchema } from '../lib/schema';
         <p>Computer Science and Engineering at UIU</p>
       </div>
       <div>
-        <p class="rail-label">Available for</p>
-        <p>Full-stack web and custom software projects</p>
+        <p class="rail-label">Currently building</p>
+        <p>Boilabin, SoctuKit, UIU Discord Bot, and Salty Potato AI</p>
       </div>
     </aside>
-
-    <article class="prose">
-      <h2>Three things take up most of my time</h2>
-      <p>
-        Right now, my work falls into three buckets: running Boilabin, taking on web and software
-        projects, and studying Computer Science and Engineering at United International University.
-      </p>
-      <p>
-        Boilabin is the biggest one. I started it in Bangladesh and built the product from top to
-        bottom: the storefront, backend, and the systems keeping accounts, listings, and orders
-        moving. I’m still the person running it and improving it day to day.
-      </p>
-      <p>
-        The rest of my work sits around that. I build full-stack websites and web applications, and
-        I make custom desktop software or automation when a project needs something outside a
-        browser entirely. SoctuKit, the UIU Discord Bot, and Salty Potato AI each show a different
-        part of that work.
-      </p>
-
-      <h2>I do not stop at “technically works”</h2>
-      <p>
-        If an interaction feels clumsy or an edge case has been ignored, I keep working until the
-        result feels right, not merely functional. That sometimes means I spend longer on the small
-        details than expected. I have made my peace with that.
-      </p>
-      <p>
-        I also care about the parts most people never see: loading behavior, failure states, local
-        data, installation, deployment, and whether the product is still understandable six months
-        after it ships.
-      </p>
-
-      <h2>Say hello</h2>
-      <p>
-        Outside the work, I’m easy to talk to. If you have a project in mind, or even just a useful
-        technical question, reach out.
-      </p>
-      <p>
-        <a href="/hire/">Tell me about a project</a> or
-        <a href="/contact/">choose a contact route</a>.
-      </p>
     </article>
-  </div>
+  </section>
 </BaseLayout>

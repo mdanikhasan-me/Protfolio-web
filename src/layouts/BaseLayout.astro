@@ -1,9 +1,10 @@
 ---
 import SiteFooter from '../components/SiteFooter.astro';
 import SiteHeader from '../components/SiteHeader.astro';
+import StudioHeader from '../components/StudioHeader.astro';
 import { SITE } from '../config/site';
 import type { SchemaNode } from '../lib/schema';
-import '../styles/global.css';
+import '../styles/site.css';
 
 interface Props {
   title?: string;
@@ -42,6 +43,7 @@ const personSchema = {
 const schemaNodes = [personSchema, ...(Array.isArray(schema) ? schema : [schema])];
 const routeParts = canonicalPath.split('/').filter(Boolean);
 const section = routeParts[0] ?? 'home';
+const studioPage = ['work', 'writing', 'about', 'services', 'contact'].includes(section);
 ---
 
 <!doctype html>
@@ -79,17 +81,20 @@ const section = routeParts[0] ?? 'home';
     <slot name="head" />
   </head>
   <body
-    class={bodyClass}
+    class:list={[bodyClass, { 'studio-page': studioPage }]}
     data-section={section}
     data-pagefind-ignore={noindex ? 'all' : undefined}
   >
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="site-frame">
-      {!hideHeader && <SiteHeader />}
+      {!hideHeader && (studioPage ? <StudioHeader /> : <SiteHeader />)}
       <main id="main-content" tabindex="-1" data-pagefind-body={!noindex ? true : undefined}>
         <slot />
       </main>
       <SiteFooter />
+      <script>
+        import '../scripts/navigation-hover';
+      </script>
     </div>
   </body>
 </html>
