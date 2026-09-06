@@ -1,46 +1,46 @@
 ---
 import { getCollection } from 'astro:content';
-import PageHero from '../../components/PageHero.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const projects = (await getCollection('projects', ({ data }) => !data.draft)).sort(
   (a, b) => a.data.order - b.data.order,
 );
+const media: Record<string, string> = { boilabin: 'boilabin-preview', soctukit: 'soctukit', 'uiu-discord-bot': 'uiu-discord-bot', 'salty-potato-ai': 'salty-potato-ai' };
+const categories = [...new Set(projects.map(project => project.data.kind))];
 ---
 
 <BaseLayout
   title="Selected Software and Website Projects | MD Anik Hasan"
   description="Boilabin, SoctuKit, UIU Discord Bot, and Salty Potato AI: selected web, desktop, automation, and language-model work by MD Anik Hasan."
 >
-  <PageHero
-    eyebrow="Selected work"
-    title="A few things I’ve built and continue to work on."
-    intro="Some are products I run, some are focused tools, and one is an experiment still very much in progress. Each page explains what the project actually does."
-    workshop="Project Archive"
-  />
-
-  <section class="collection-list" aria-labelledby="project-list-title">
-    <h2 id="project-list-title">Selected projects</h2>
-    <ol>
-      {
-        projects.map((project) => (
-          <li>
-            <p class="list-index">{String(project.data.order).padStart(2, '0')}</p>
-            <div>
-              <p class="workshop-label">
-                {project.data.workshop} · {project.data.status}
-              </p>
-              <h3>
-                <a href={project.data.route}>{project.data.title}</a>
-              </h3>
-              <p>{project.data.description}</p>
-              <p class="list-meta">
-                {project.data.kind} · {project.data.role}
-              </p>
-            </div>
-          </li>
-        ))
-      }
-    </ol>
+  <section class="work-archive" aria-labelledby="archive-title">
+    <aside class="archive-rail">
+      <h1 id="archive-title">Works</h1>
+      <p lang="bn">নির্বাচিত কাজ</p>
+      <div class="archive-filters" aria-label="Filter projects">
+        <button type="button" data-project-filter="all" aria-pressed="true">All <small>[{projects.length}]</small></button>
+        {categories.map(category => <button type="button" data-project-filter={category} aria-pressed="false">{category}<small>[{projects.filter(p => p.data.kind === category).length}]</small></button>)}
+      </div>
+    </aside>
+    <div class="archive-grid">
+      {projects.map(project => (
+        <article class="archive-card" data-project-kind={project.data.kind}>
+          <a href={project.data.route}>
+            <img src={`/media/projects/${media[project.id]}-960.webp`} width="960" height="540" alt={`${project.data.title} project preview`} loading="lazy" />
+            <p>{project.data.status} · {project.data.kind}</p>
+            <h2>{project.data.title}</h2>
+          </a>
+          <div class="archive-description">{project.data.description}</div>
+        </article>
+      ))}
+    </div>
   </section>
+  <script>
+    const filters = document.querySelectorAll<HTMLButtonElement>('[data-project-filter]');
+    const cards = document.querySelectorAll<HTMLElement>('[data-project-kind]');
+    filters.forEach(button => button.addEventListener('click', () => {
+      filters.forEach(filter => filter.setAttribute('aria-pressed', String(filter === button)));
+      cards.forEach(card => { card.hidden = button.dataset.projectFilter !== 'all' && card.dataset.projectKind !== button.dataset.projectFilter; });
+    }));
+  </script>
 </BaseLayout>
