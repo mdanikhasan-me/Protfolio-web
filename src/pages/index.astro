@@ -1,14 +1,10 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import WorkHolds from '../components/WorkHolds.astro';
+import MissionChapter from '../components/MissionChapter.astro';
 import { SITE } from '../config/site';
 import { websiteSchema } from '../lib/schema';
-import '../styles/reference-locked.css';
 
-const services = (await getCollection('services', ({ data }) => !data.draft))
-  .filter((entry) => ['website-development', 'custom-software-development'].includes(entry.id))
-  .sort((a, b) => a.data.order - b.data.order);
 const projects = (await getCollection('projects', ({ data }) => !data.draft)).sort(
   (a, b) => a.data.order - b.data.order,
 );
@@ -82,16 +78,18 @@ const mediaBase: Record<string, string> = {
     </details>
   </nav>
 
+  <nav class="section-rail" aria-label="Page sections" data-section-rail>
+    <a href="#home-title" data-section-link="top" aria-current="location"><span>Top</span></a>
+    <a href="#selected-work" data-section-link="works"><span>Works</span></a>
+    <a href="#mission-title" data-section-link="about"><span>About</span></a>
+    <a href="#evidence-title" data-section-link="vision"><span>Vision</span></a>
+    <a href="#route-ledger-title" data-section-link="writing"><span>Writing</span></a>
+  </nav>
   <div class="reference-world" data-reference-world>
-    <div class="reference-world-scene" aria-hidden="true">
+    <div class="reference-world-scene">
       <canvas class="reference-model" data-reference-canvas aria-hidden="true"></canvas>
-    </div>
-
-    <section class="reference-opening" aria-labelledby="home-title" data-reference-opening>
-      <div class="reference-opening-stage">
-        <div class="reference-opening-ui">
           <div class="reference-telemetry reference-telemetry-right">
-            <p>Identity assembly / A-01</p>
+            <p>Identity / Quaternion</p>
             <dl>
               <div><dt>STATE</dt><dd data-reference-state>REST</dd></div>
               <div class="reference-quaternion">
@@ -106,24 +104,50 @@ const mediaBase: Record<string, string> = {
               data-reference-gizmo
               aria-label="Drag to rotate the identity sculpture"
             >
-              <span class="reference-axis-ring"></span>
-              <span class="reference-axis reference-axis-x">X</span>
-              <span class="reference-axis reference-axis-y">Y</span>
-              <span class="reference-axis reference-axis-z">Z</span>
-              <i></i>
+              <svg viewBox="0 0 72 72" aria-hidden="true">
+                <circle class="gizmo-orbit" cx="36" cy="36" r="28" />
+                {(['nx', 'ny', 'nz', 'x', 'y', 'z'] as const).map((axis) => <g data-reference-axis={axis} class={`gizmo-axis gizmo-axis-${axis}`}>
+                  <line x1="36" y1="36" x2="36" y2="36" />
+                  <circle cx="36" cy="36" r="5" />
+                  <text x="36" y="36" text-anchor="middle" dominant-baseline="middle">{axis.startsWith('n') ? '' : axis.toUpperCase()}</text>
+                </g>)}
+                <circle cx="36" cy="36" r="3" fill="white" />
+              </svg>
             </button>
             <button type="button" data-reference-reset>Reset quaternion</button>
           </div>
 
+    </div>
+
+    <section class="reference-opening" aria-labelledby="home-title" data-reference-opening>
+      <div class="reference-opening-stage">
+        <div class="reference-opening-ui">
+
           <div class="reference-intro">
-            <span>Full-stack web + software developer</span>
-            <p>I build web and software products, including Boilabin, the marketplace I run.</p>
+            <p class="sr-only">I build web and software products, including Boilabin, the marketplace I run.</p>
+            <fieldset class="material-controls">
+              <legend>Identity Material</legend>
+              <label>roughness <input data-material-roughness type="range" min="0" max="0.4" step="0.01" value="0.1" /><output data-material-roughness-value>0.10</output></label>
+              <label>noiseScale <input data-material-noise type="range" min="1" max="20" step="0.1" value="9" /><output data-material-noise-value>9.0</output></label>
+              <div class="material-color-row">
+                <span>color</span>
+                <button class="material-color-toggle" type="button" data-color-toggle aria-expanded="false" aria-controls="material-color-panel" aria-label="Edit sculpture color"><i data-color-swatch></i><output data-material-color-value>{'{r: 255, g: 255, b: 255}'}</output></button>
+                <input data-material-color type="hidden" value="#ffffff" />
+              </div>
+              <div class="material-color-panel" id="material-color-panel" data-color-panel hidden>
+                <div class="color-saturation" data-color-saturation role="group" aria-label="Saturation and brightness"><i data-color-cursor></i></div>
+                <input class="color-hue" data-color-hue type="range" min="0" max="360" value="0" aria-label="Color hue" />
+                <div class="color-channels"><span>RGB</span>{['Red', 'Green', 'Blue'].map((channel) => <input data-color-channel type="number" min="0" max="255" value="255" aria-label={channel} />)}</div>
+              </div>
+            </fieldset>
           </div>
 
-          <div class="reference-feed" aria-hidden="true">
-            <span>Currently</span>
-            <p>Founder / Boilabin</p>
-            <p>Portfolio system / 2026</p>
+          <div class="reference-feed">
+            <span>Writing</span>
+            {articles.map((article) => <a href={`/writing/${article.id}/`}>
+              <time datetime={article.data.publishedAt.toISOString()}>{article.data.publishedAt.toISOString().slice(0, 10).replaceAll('-', '.')}</time>
+              <span lang="bn">{article.id.includes('university') ? 'বিশ্ববিদ্যালয়ের নোটিশ থেকে ডিসকর্ড বট' : 'শুরু থেকে একটি ভাষা মডেল তৈরির গল্প'}</span>
+            </a>)}
           </div>
 
           <div class="reference-progress" aria-hidden="true">
@@ -132,9 +156,6 @@ const mediaBase: Record<string, string> = {
             <span>Rest</span>
           </div>
 
-          <a class="reference-more-works" href="#selected-work" data-reference-more>
-            More works <span aria-hidden="true">&nearr;</span>
-          </a>
         </div>
 
         <div class="reference-opening-copy">
@@ -170,6 +191,9 @@ const mediaBase: Record<string, string> = {
                 data-project-route={project.data.route}
                 data-project-tone={project.id}
                 data-project-status={project.data.status}
+                data-project-kind={project.data.kind}
+                data-project-updated={project.data.updatedAt.toISOString().slice(0, 10)}
+                data-project-role={project.data.role}
                 data-project-media={`${mediaBase[project.id]}-1600.webp`}
               >
                 <a href={project.data.route}>
@@ -201,8 +225,13 @@ const mediaBase: Record<string, string> = {
         <div class="curve-work-detail" aria-live="polite">
           <span data-curve-count>01 / {String(projects.length).padStart(2, '0')}</span>
           <div>
+            <time class="curve-project-date" data-curve-date datetime={leadProject.data.updatedAt.toISOString().slice(0, 10)} aria-label="Project updated">{leadProject.data.updatedAt.toISOString().slice(0, 10).replaceAll('-', '.')}</time>
             <h3 data-curve-title>{leadProject.data.title}</h3>
             <p data-curve-description>{leadProject.data.description}</p>
+            <ul class="curve-project-tags" aria-label="Project details">
+              <li data-curve-kind>{leadProject.data.kind}</li>
+              <li data-curve-role>{leadProject.data.role}</li>
+            </ul>
           </div>
           <a data-curve-link href={leadProject.data.route}
             >Open project <span aria-hidden="true">&nearr;</span></a
@@ -213,52 +242,38 @@ const mediaBase: Record<string, string> = {
           <button type="button" data-curve-previous aria-label="Previous project">&larr;</button>
           <button type="button" data-curve-next aria-label="Next project">&rarr;</button>
         </div>
+        <a class="curve-more-works" href="/work/">More Works <span aria-hidden="true">↗</span></a>
       </div>
     </section>
+    <section class="works-outro" data-works-outro aria-label="Transition to About"></section>
+    <div class="world-handoff-space" aria-hidden="true"></div>
   </div>
 
-  <WorkHolds />
+  <div class="light-chapters" data-light-chapters>
+    <div class="light-scene"><canvas data-light-canvas aria-hidden="true"></canvas></div>
+    <MissionChapter />
 
-  <section class="evidence-chapter" aria-labelledby="evidence-title">
-    <div class="evidence-index" aria-hidden="true">03</div>
+  <section class="evidence-chapter vision-chapter" aria-labelledby="evidence-title">
+   <div class="vision-stage">
+    <div class="evidence-index" aria-hidden="true">VISION</div>
     <div class="evidence-heading">
-      <p>The parts behind the interface matter too</p>
-      <h2 id="evidence-title">I build the whole product, not just the first impression.</h2>
+      <h2 id="evidence-title" lang="bn"><span>ভালো লাগে বলেই</span><br /><span>এত সময় দিই।</span></h2>
     </div>
     <div class="evidence-copy">
       <p>
-        I’m Anik, a Computer Science and Engineering student at United International University.
-        Most of my time outside class goes into Boilabin and the other web and software products
-        shown here.
+        I like seeing an idea turn into<br />something I can actually use.
       </p>
-      <a href="/work/">Open the complete work index</a>
+      <a href="/work/">Things I’ve been making ↗</a>
     </div>
+   </div>
   </section>
+  </div>
 
-  <section class="route-ledger" aria-labelledby="route-ledger-title">
-    <h2 class="sr-only" id="route-ledger-title">Services and stories</h2>
+  <section class="route-ledger home-writing" aria-labelledby="route-ledger-title">
+    <h2 class="sr-only" id="route-ledger-title">Writing</h2>
     <div class="route-ledger-label">
-      <p>Two kinds of work land on my desk</p>
-      <span>04 / Services</span>
-    </div>
-    <ol>
-      {
-        services.map((service, index) => (
-          <li>
-            <a href={`/services/${service.id}/`}>
-              <small>{String(index + 1).padStart(2, '0')}</small>
-              <strong>{service.data.title}</strong>
-              <span>{service.data.intro}</span>
-              <i aria-hidden="true">&nearr;</i>
-            </a>
-          </li>
-        ))
-      }
-    </ol>
-
-    <div class="route-ledger-label route-ledger-label-stories">
       <p>Notes from work I can explain first-hand</p>
-      <span>05 / Stories</span>
+      <span>04 / Writing</span>
     </div>
     <ol>
       {
@@ -308,21 +323,14 @@ const mediaBase: Record<string, string> = {
         </figure>
       </div>
 
-      <div class="home-contact-routes">
-        <a href={`mailto:${SITE.email}`}>
-          <span>{SITE.email}</span>
-          <strong>Send email <span aria-hidden="true">&nearr;</span></strong>
-        </a>
-        <a href={SITE.discord} rel="me">
-          <span>Discord</span>
-          <strong>Open chat <span aria-hidden="true">&nearr;</span></strong>
-        </a>
-      </div>
+
     </div>
   </section>
 
   <script>
     import '../scripts/reference-opening-locked';
     import '../scripts/home-state';
+    import '../scripts/material-color-picker';
+    import '../scripts/light-chapters';
   </script>
 </BaseLayout>
