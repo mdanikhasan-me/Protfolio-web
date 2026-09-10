@@ -22,6 +22,9 @@ const REFERENCE_OPENING_PICTURES = 32_607;
 // p6245 warm-red chapter without changing the live shader's authored color math.
 const REFERENCE_NOISE_TIME_OFFSET = 70.5;
 const captureLayoutRaw = new URLSearchParams(location.search).get('__captureLayout');
+const captureMotifParameters = new URLSearchParams(location.search);
+const compareUncorrectedMotifs = captureMotifParameters.get('__capture') === '1' &&
+  captureMotifParameters.get('__captureUncorrectedMotifs') === '1';
 const captureLayoutParsed = captureLayoutRaw === null ? Number.NaN : Number(captureLayoutRaw);
 const captureLayoutOverride =
   Number.isInteger(captureLayoutParsed) && captureLayoutParsed >= 0 && captureLayoutParsed <= 3
@@ -32,6 +35,8 @@ export interface ReferenceBackgroundSystem {
   group: THREE.Group;
   noiseTexture: THREE.Texture;
   setProjectTextures: (textures: readonly THREE.Texture[]) => void;
+  setWorksTitle: (texture: THREE.Texture, progress: number) => void;
+  setOutro: (progress: number) => void;
   update: (
     elapsed: number,
     fluidTexture: THREE.Texture | null,
@@ -233,9 +238,13 @@ const tileVertexShader = /* glsl */ `
   varying vec2 vWorksUvCurrent;
   varying vec2 vWorksUvNext;
   varying float vDisplayWorks;
+  varying vec2 vTitleScreenUv;
+  varying float vMotifAspect;
 
   uniform vec2 uScale;
   uniform float uPatternMix;
+  uniform float uOutro;
+  uniform float uMotifAspectBlend;
   uniform float uTransitionType;
   uniform float uBlackoutRate;
   uniform float uBlackoutSeed;
@@ -261,6 +270,10 @@ const tileVertexShader = /* glsl */ `
 
   void main() {
     vec3 localPosition = position;
+    // In the flat outro, UVs still span each tile from 0..1 while the physical
+    // tile can be rectangular. Compensate only that chapter's symbol samples.
+    vMotifAspect = mix(1.0, instanceScale.x * uScale.x /
+      max(0.0001, instanceScale.y * uScale.y * 1.5), uOutro * uMotifAspectBlend);
     float transition = uPatternMix;
 
     if (uTransitionType < 0.5) {
@@ -297,6 +310,7 @@ const tileVertexShader = /* glsl */ `
     );
     vec4 screenClip = projectionMatrix * modelViewMatrix * vec4(screenFlatPosition * 0.5, 1.0);
     vec2 projectedScreenUv = screenClip.xy / screenClip.w * 0.5 + 0.5;
+    vTitleScreenUv = projectedScreenUv;
     vec2 screenUv = projectedScreenUv + uvShift;
     vec2 worksUvShift = vec2(0.0, random(instanceId.yz) - 0.5);
     float worksPage = uWorksPage;
@@ -321,6 +335,9 @@ const tileVertexShader = /* glsl */ `
       -cos(theta) * radius
     );
     curvedPosition.z += localPosition.z;
+    vec3 flatOutroPosition = vec3(flatPosition.x * uScale.x * 2.0,
+      flatPosition.y * uScale.y * 1.5 * 2.0, -radius + localPosition.z);
+    curvedPosition = mix(curvedPosition, flatOutroPosition, uOutro);
 
     vUv = uv;
     vGlobalUv = globalUv;
@@ -345,6 +362,8 @@ const tileFragmentShader = /* glsl */ `
   varying vec2 vWorksUvCurrent;
   varying vec2 vWorksUvNext;
   varying float vDisplayWorks;
+  varying vec2 vTitleScreenUv;
+  varying float vMotifAspect;
 
   uniform float uTime;
   uniform float uSymbolMode;
@@ -366,6 +385,8 @@ const tileFragmentShader = /* glsl */ `
   uniform float uProjectTextureReady;
   uniform float uScreenAspectRatio;
   uniform vec2 uScreenResolution;
+  uniform sampler2D uWorksTitle;
+  uniform float uWorksTitleProgress;
 
   float random(vec2 value) {
     return fract(sin(dot(value, vec2(12.9898, 78.233))) * 43758.5453);
@@ -401,6 +422,9 @@ const tileFragmentShader = /* glsl */ `
     vec3 currentPattern = texture2D(uPatternCurrent, vScreenUv).rgb;
     vec3 nextPattern = texture2D(uPatternNext, vScreenUv).rgb;
     vec3 displayColor = mix(currentPattern, nextPattern, vPatternMix);
+    float titleVisibility = smoothstep(0.1, 0.3, uWorksTitleProgress) *
+      (1.0 - smoothstep(0.9, 1.0, uWorksTitleProgress));
+    displayColor *= 1.0 - titleVisibility * 0.5;
     displayColor *= 1.0 - vBlackout;
 
     vec2 currentProjectUv = projectCoverUv(vWorksUvCurrent, uProjectCurrentAspect);
@@ -452,7 +476,7 @@ const tileFragmentShader = /* glsl */ `
     } else {
       logoUv = vUv;
       logoUv -= 0.5;
-      logoUv.x /= WORDMARK_ASPECT;
+      logoUv.x *= vMotifAspect / WORDMARK_ASPECT;
       logoUv += 0.5;
       logoUv.y -= uTime * 0.5 * vInstanceId.x;
       logoUv.y = fract(logoUv.y);
@@ -475,7 +499,7 @@ const tileFragmentShader = /* glsl */ `
     float logoWeight = step(0.50, logo) * logoBounds;
     // Identity typography belongs only to the opening. Project cards and their color field take
     // over in Works; retaining repeated glyphs there made the rail look like a second homepage.
-    logoWeight *= 1.0 - uGallery;
+    logoWeight *= (1.0 - uGallery) * (1.0 - titleVisibility);
     // The production wall applies the same 0.20 identity gain in all three display modes. The
     // visibility difference comes from atlas layout, not a brighter wordmark-only multiplier.
     float logoGain = 0.20;
@@ -483,6 +507,20 @@ const tileFragmentShader = /* glsl */ `
     displayColor += vec3(logoWeight * logoGain * galleryLogoScale * (1.0 - vBlackout));
 
     displayColor *= smoothstep(1.9, 0.1, length(vUv - 0.5));
+    // Project the title into the actual curved, segmented wall so its pattern,
+    // LED texture and perspective remain visible through the lettering.
+    // Pattern UV jitter belongs to the animated tiles. Applying it to typography
+    // sheared individual letters whenever the stochastic pattern state changed.
+    vec2 titleUv = (vTitleScreenUv - 0.5) * max(1.0, 1.6 / uScreenAspectRatio);
+    titleUv.x *= uScreenAspectRatio;
+    float tilt = 0.15;
+    titleUv = mat2(cos(tilt), sin(tilt), -sin(tilt), cos(tilt)) * titleUv;
+    titleUv *= vec2(1.2, 4.5);
+    titleUv.x += 0.18 - uWorksTitleProgress * 0.3;
+    titleUv += 0.5;
+    float titleBounds = step(0.0, titleUv.x) * step(titleUv.x, 1.0) *
+      step(0.0, titleUv.y) * step(titleUv.y, 1.0);
+    float titleInk = texture2D(uWorksTitle, titleUv).a * titleBounds * titleVisibility;
 
     vec2 dotUv = fract(vGlobalUv * 414.0) - 0.5;
     float dotMask = smoothstep(0.50, 0.20, length(dotUv));
@@ -503,6 +541,7 @@ const tileFragmentShader = /* glsl */ `
       vPatternMix
     );
     color *= mix(paletteCalibration, vec3(1.0), uGallery);
+    color += vec3(titleInk * mix(dotMask, 1.0, 0.60) * chamberFade * vFrontFace * 0.38);
     gl_FragColor = vec4(color, 1.0);
   }
 `;
@@ -512,6 +551,7 @@ const gridVertexShader = /* glsl */ `
 
   varying vec2 vUv;
   uniform vec2 uScale;
+  uniform float uOutro;
 
   const float PI = 3.14159265359;
 
@@ -524,6 +564,8 @@ const gridVertexShader = /* glsl */ `
       flatPosition.y * uScale.y * 1.5,
       -cos(theta) * radius
     );
+    curvedPosition = mix(curvedPosition, vec3(flatPosition.x * uScale.x * 2.0,
+      flatPosition.y * uScale.y * 1.5 * 2.0, -radius), uOutro);
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(curvedPosition, 1.0);
   }
@@ -553,6 +595,7 @@ const crossVertexShader = /* glsl */ `
   attribute vec2 instancePosition;
   varying vec2 vUv;
   uniform vec2 uScale;
+  uniform float uOutro;
 
   const float PI = 3.14159265359;
 
@@ -573,6 +616,9 @@ const crossVertexShader = /* glsl */ `
     vec3 curvedPosition = position * 0.15;
     curvedPosition.xz *= rotate2d(-theta);
     curvedPosition += anchorPosition;
+    vec3 flatOutroPosition = position * 0.15 + vec3(instancePosition.x * uScale.x * 2.0,
+      instancePosition.y * uScale.y * 1.5 * 2.0, -radius);
+    curvedPosition = mix(curvedPosition, flatOutroPosition, uOutro);
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(curvedPosition, 1.0);
   }
@@ -796,9 +842,9 @@ function createPatternTarget(
 // overdriving an individual palette and changing its color relationships.
 const patternGains = [0.50, 0.50, 0.50] as const;
 const patternPaletteCalibrations = [
-  new THREE.Vector3(0.6186, 1.2032, 0.9502),
   new THREE.Vector3(1.0, 1.0, 1.0),
-  new THREE.Vector3(0.6186, 1.2032, 0.9502),
+  new THREE.Vector3(1.0, 1.0, 1.0),
+  new THREE.Vector3(1.0, 1.0, 1.0),
 ] as const;
 
 const openingDisplayGainForPicture = (picture: number, pattern: PatternIndex) => {
@@ -885,9 +931,12 @@ export function createReferenceBackgroundSystem(
   proceduralScene.add(proceduralMesh);
 
   const scaleUniform = { value: new THREE.Vector2(13, 13) };
+  const outroUniform = { value: 0 };
   const tileUniforms = {
     uTime: { value: 0 },
     uScale: scaleUniform,
+    uOutro: outroUniform,
+    uMotifAspectBlend: { value: compareUncorrectedMotifs ? 0 : 1 },
     uPatternCurrent: { value: patternTargets[2].texture },
     uPatternNext: { value: patternTargets[2].texture },
     uPatternMix: { value: 1 },
@@ -916,6 +965,8 @@ export function createReferenceBackgroundSystem(
     uProjectCount: { value: 4 },
     uScreenAspectRatio: { value: 16 / 9 },
     uScreenResolution: { value: new THREE.Vector2(1, 1) },
+    uWorksTitle: { value: blackTexture as THREE.Texture },
+    uWorksTitleProgress: { value: 0 },
   };
   const tileMaterial = new THREE.ShaderMaterial({
     uniforms: tileUniforms,
@@ -938,7 +989,7 @@ export function createReferenceBackgroundSystem(
 
   const gridGeometry = new THREE.PlaneGeometry(1, 1, 64, 64);
   const gridMaterial = new THREE.ShaderMaterial({
-    uniforms: { uScale: scaleUniform, uFluid: tileUniforms.uFluid },
+    uniforms: { uScale: scaleUniform, uFluid: tileUniforms.uFluid, uOutro: outroUniform },
     vertexShader: gridVertexShader,
     fragmentShader: gridFragmentShader,
     transparent: true,
@@ -953,7 +1004,7 @@ export function createReferenceBackgroundSystem(
 
   const crossGeometry = createCrossGeometry();
   const crossMaterial = new THREE.ShaderMaterial({
-    uniforms: { uScale: scaleUniform },
+    uniforms: { uScale: scaleUniform, uOutro: outroUniform },
     vertexShader: crossVertexShader,
     fragmentShader: crossFragmentShader,
     transparent: true,
@@ -1096,7 +1147,7 @@ export function createReferenceBackgroundSystem(
     { picture: 16805, pattern: 1, transition: 0, duration: 0 },
     { picture: 17227, pattern: 2, transition: 0, duration: 0 },
     { picture: 17430, pattern: 1, transition: 0, duration: 0 },
-    { picture: 17682, pattern: 2, transition: 0, duration: 0 },
+    { picture: 17682, pattern: 0, transition: 0, duration: 0 },
     { picture: 17698, pattern: 0, transition: 0, duration: 0 },
     { picture: 17813, pattern: 2, transition: 0, duration: 0 },
     { picture: 18015, pattern: 0, transition: 0, duration: 0 },
@@ -1414,8 +1465,13 @@ export function createReferenceBackgroundSystem(
     // stochastic state used by the later monochrome chapters. Reusing the 29% blackout here made
     // p302 about twelve percentage points too dark even after its luminance matched. Correct the
     // coverage only for the exact p302-p397 interval; p398 returns to the recorded settled state.
-    const openingBlackoutRate =
-      openingPicture >= 302 && openingPicture < 398 && nextPattern === 1
+    // The return-home monochrome chapter releases its panel blackouts in one frame
+    // at p17578. Keep this correction local to the observed chapter; later layouts
+    // retain their existing blackout schedule.
+    const homeBlackoutRelease = openingPicture >= 17578 && openingPicture < 17682;
+    const openingBlackoutRate = homeBlackoutRelease
+      ? 0
+      : openingPicture >= 302 && openingPicture < 398 && nextPattern === 1
         ? 0.12
         : 0.2909043020;
     tileUniforms.uBlackoutRate.value = openingBlackoutRate * stochasticPattern;
@@ -1496,6 +1552,11 @@ export function createReferenceBackgroundSystem(
     group,
     noiseTexture: noiseTarget.texture,
     setProjectTextures,
+    setWorksTitle: (texture, progress) => {
+      tileUniforms.uWorksTitle.value = texture;
+      tileUniforms.uWorksTitleProgress.value = progress;
+    },
+    setOutro: progress => { outroUniform.value = THREE.MathUtils.smoothstep(progress, 0.18, 0.85); },
     update,
     resize,
     debugState,
