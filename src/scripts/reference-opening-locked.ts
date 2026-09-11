@@ -8,14 +8,6 @@ const smoothstep = (minimum: number, maximum: number, value: number) => {
   const normalized = clamp((value - minimum) / Math.max(0.00001, maximum - minimum));
   return normalized * normalized * (3 - 2 * normalized);
 };
-const sigmoidEasing6 = (value: number) => {
-  const normalized = clamp(value);
-  const exponential = Math.exp(-6 * (2 * normalized - 1));
-  const endpoint = Math.exp(-6);
-  return (
-    1 + ((1 - exponential) / (1 + exponential)) * ((1 + endpoint) / (1 - endpoint))
-  ) * 0.5;
-};
 
 const section = document.querySelector<HTMLElement>('[data-reference-opening]');
 const world = document.querySelector<HTMLElement>('[data-reference-world]');
@@ -38,6 +30,14 @@ const parseCaptureDimension = (name: string, fallback: number) => {
 };
 const captureWidth = parseCaptureDimension('__captureWidth', 2560);
 const captureHeight = parseCaptureDimension('__captureHeight', 1440);
+// Capture dimensions are CSS pixels. Keep the historical 1x default while allowing
+// the reference recording's measured 1.5x scale without upscaling a 1x canvas.
+const requestedCapturePixelRatio = Number(captureParameters.get('__capturePixelRatio'));
+const capturePixelRatio =
+  Number.isFinite(requestedCapturePixelRatio) &&
+  requestedCapturePixelRatio >= 1 && requestedCapturePixelRatio <= 1.5
+    ? requestedCapturePixelRatio
+    : 1;
 const REFERENCE_CAPTURE_FPS = 120;
 const REFERENCE_TOTAL_PICTURES = 32_607;
 const parseCaptureInteger = (name: string, fallback: number, minimum: number, maximum: number) => {
@@ -112,6 +112,9 @@ const captureWordRefractionOverride =
 
 type ReferenceCaptureBridge = {
   readonly canvas: HTMLCanvasElement;
+  readonly cssWidth: number;
+  readonly cssHeight: number;
+  readonly pixelRatio: number;
   readonly fps: number;
   readonly height: number;
   readonly totalPictures: number;
@@ -671,7 +674,7 @@ const glassFragmentShader = `
     vec3 scaledObjectCoordinate = objectCoordinate * uNoiseScale * uSurfaceDetailScale;
     vec4 firstNoise = triplanarNoise(scaledObjectCoordinate, triplanarWeight, vec2(0.0));
     vec4 secondNoise = triplanarNoise(
-      scaledObjectCoordinate,
+      objectCoordinate * uSurfaceDetailScale,
       triplanarWeight,
       (firstNoise.xy - 0.5) * 2.0
     );
@@ -715,9 +718,9 @@ const glassFragmentShader = `
       uEnvironment,
       reflect(viewDirection, viewNormal)
     ).rgb;
-    color +=
-      mix(color, environmentReflection, fresnelAmount * 0.9) *
-      (1.0 - fresnelAmount);
+    // Reflection replaces a portion of the transmitted light. Adding another
+    // near-complete transmission copy clipped the broad front faces to white.
+    color = mix(color, environmentReflection, fresnelAmount * 0.9);
     color *= 1.20;
     color *= uMaterialColor / 255.0;
     gl_FragColor = vec4(color, 1.0);
@@ -728,6 +731,7 @@ const galleryVertexShader = `
   varying vec2 vUv;
   varying vec3 vViewNormal;
   varying vec3 vViewPosition;
+  varying float vFrontFace;
 
   void main() {
     vUv = uv;
@@ -735,7 +739,8 @@ const galleryVertexShader = `
     float curveAngle = curvedPosition.x / 4.0 * 3.14159265 / 2.0 * 0.5;
     curvedPosition.z += cos(curveAngle) * 1.5 - 1.0;
     float curveSlope = -sin(curveAngle) * 1.5 * 3.14159265 / 16.0;
-    vec3 curvedNormal = normalize(vec3(-curveSlope, 0.0, 1.0));
+    vec3 curvedNormal = normalize(vec3(normal.x - curveSlope * normal.z, normal.y, normal.z));
+    vFrontFace = abs(normal.z);
     vec4 viewPosition = modelViewMatrix * vec4(curvedPosition, 1.0);
     vViewPosition = -viewPosition.xyz;
     vViewNormal = normalize(normalMatrix * curvedNormal);
@@ -749,10 +754,12 @@ const galleryFragmentShader = `
   uniform float uTextureAspect;
   uniform float uOpacity;
   uniform samplerCube uEnvironment;
+  uniform float uHover;
 
   varying vec2 vUv;
   varying vec3 vViewNormal;
   varying vec3 vViewPosition;
+  varying float vFrontFace;
 
   vec2 coverUv(vec2 uv, float textureAspect) {
     const float meshAspect = 1.77777778;
@@ -764,34 +771,40 @@ const galleryFragmentShader = `
     return uv;
   }
 
-  vec2 lensDistortion(vec2 coordinate, float amount) {
-    return coordinate * (1.0 - amount * dot(coordinate, coordinate));
-  }
-
   void main() {
     vec2 uv = coverUv(vUv, uTextureAspect);
-    vec3 normal = normalize(vViewNormal);
-    float frontDirection = dot(normal, vec3(0.0, 0.0, 1.0));
-    vec2 normalOffset = -normal.xy * 0.5 * smoothstep(0.8, 1.0, frontDirection);
-    vec3 color = vec3(0.0);
-    for (int index = 0; index < 4; index++) {
-      float sampleIndex = float(index) / 4.0;
-      vec2 centeredUv = (uv - 0.5) * vec2(1.17, 1.3);
-      float distortion = 0.1 + sampleIndex * 0.03;
-      color += vec3(
-        texture2D(uMap, lensDistortion(centeredUv, distortion + 0.10) + 0.5 + normalOffset).r,
-        texture2D(uMap, lensDistortion(centeredUv, distortion + 0.12) + 0.5 + normalOffset * 1.01).g,
-        texture2D(uMap, lensDistortion(centeredUv, distortion + 0.14) + 0.5 + normalOffset * 1.02).b
-      );
+    // Curvature belongs to the mesh. Keep the artwork's samples registered and its
+    // colors unlit; restrict the glass reflection to the thin physical-looking rim.
+    float edgeDistance = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
+    float bevel = 1.0 - smoothstep(0.0, 0.024, edgeDistance);
+    vec2 centeredUv = uv - 0.5;
+    float lensEdge = smoothstep(0.18, 0.52, length(centeredUv));
+    float viewBend = 1.0 - abs(dot(normalize(vViewPosition), normalize(vViewNormal)));
+    vec2 lensOffset = centeredUv * dot(centeredUv, centeredUv) *
+      lensEdge * (0.04 + viewBend * 0.025);
+    vec2 bevelOffset = centeredUv * bevel * (0.003 + uHover * 0.002);
+    // Refraction bends toward the image interior. Outward sampling with mirrored
+    // wrapping repeated the first/last image columns along the glass perimeter.
+    vec2 glassUv = clamp(uv - lensOffset + bevelOffset, vec2(0.001), vec2(0.999));
+    vec2 dispersion = centeredUv * bevel * (0.0015 + viewBend * 0.001);
+    vec3 color = vec3(
+      texture2D(uMap, clamp(glassUv - dispersion, vec2(0.001), vec2(0.999))).r,
+      texture2D(uMap, glassUv).g,
+      texture2D(uMap, clamp(glassUv + dispersion, vec2(0.001), vec2(0.999))).b
+    );
+    float rim = 1.0 - smoothstep(0.0, 0.003, edgeDistance);
+    vec3 reflectionDirection = reflect(-normalize(vViewPosition), normalize(vViewNormal));
+    vec3 reflection = textureCube(uEnvironment, reflectionDirection).rgb;
+    color = mix(color, reflection, rim * (0.24 + uHover * 0.18));
+    if (vFrontFace < 0.5) {
+      vec3 edgeArt = texture2D(uMap, vec2(0.985 - vViewNormal.x * 0.02, uv.y)).rgb;
+      float grazing = pow(1.0 - abs(dot(normalize(vViewPosition), normalize(vViewNormal))), 3.0);
+      color = mix(edgeArt, reflection, 0.32 + grazing * 0.35);
     }
-    color /= 4.0;
-    color *= smoothstep(0.9, 0.49, length(vUv - 0.5));
-    vec3 reflectionDirection = reflect(-normalize(vViewPosition), normal);
-    vec3 environmentReflection = textureCube(uEnvironment, reflectionDirection).rgb;
-    color = mix(color, environmentReflection, 0.05);
     float opacity = uOpacity;
     if (opacity < 0.012) discard;
     gl_FragColor = vec4(color, opacity);
+    #include <colorspace_fragment>
   }
 `;
 
@@ -862,6 +875,8 @@ const compositeFragmentShader = `
   uniform sampler2D uBloomTexture0;
   uniform sampler2D uBloomTexture1;
   uniform sampler2D uBloomTexture2;
+  uniform float uBoot;
+  uniform float uAspect;
 
   void main() {
     vec2 velocity = vec2(0.0);
@@ -869,6 +884,17 @@ const compositeFragmentShader = `
     velocity = texture2D(uFluid, vUv).xy;
     #endif
     vec2 warpedUv = vUv - velocity * 0.001;
+    float reveal = 1.0;
+    if (uBoot < 0.999) {
+      vec2 radial = vUv - 0.5;
+      if (uAspect > 1.0) radial.y /= uAspect;
+      else radial.x *= uAspect;
+      float ring = smoothstep(0.0, 0.2 + uBoot * 0.7, uBoot * 1.4 - length(radial));
+      vec2 direction = radial / max(length(radial), 0.0001);
+      warpedUv = (warpedUv - 0.5) * (0.5 + uBoot * 0.5) + 0.5;
+      warpedUv -= sin(ring * 3.14159265) * direction * 0.1;
+      reveal = smoothstep(0.0, 0.5, ring);
+    }
     vec3 color = texture2D(uScene, warpedUv).rgb;
 
     vec3 bloomQuarter = texture2D(uBloomTexture0, warpedUv).rgb;
@@ -877,7 +903,7 @@ const compositeFragmentShader = `
     color +=
       bloomQuarter * 0.075 + bloomEighth * 0.15 + bloomSixteenth * 0.225;
     color *= 1.30;
-    gl_FragColor = vec4(color, 1.0);
+    gl_FragColor = vec4(color * reveal, 1.0);
   }
 `;
 
@@ -928,6 +954,29 @@ function createCurvedWallGeometry() {
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
   geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+  return geometry;
+}
+
+function createGalleryGlassGeometry() {
+  // RoundedBoxGeometry concentrates its tessellation at the corners and leaves
+  // the broad front as two triangles. Keep a regular face grid for curved cards.
+  const geometry = new THREE.BoxGeometry(8, 4.5, 0.10, 64, 16, 2);
+  const positions = geometry.getAttribute('position');
+  const normals = geometry.getAttribute('normal');
+  const point = new THREE.Vector3();
+  const core = new THREE.Vector3();
+  const direction = new THREE.Vector3();
+  const radius = 0.05;
+  for (let i = 0; i < positions.count; i += 1) {
+    point.fromBufferAttribute(positions, i);
+    core.set(THREE.MathUtils.clamp(point.x, -3.95, 3.95),
+      THREE.MathUtils.clamp(point.y, -2.20, 2.20), 0);
+    direction.copy(point).sub(core).normalize();
+    point.copy(core).addScaledVector(direction, radius);
+    positions.setXYZ(i, point.x, point.y, point.z);
+    normals.setXYZ(i, direction.x, direction.y, direction.z);
+  }
+  geometry.computeBoundingSphere();
   return geometry;
 }
 
@@ -1334,15 +1383,11 @@ async function startReferenceWorld(
     };
   });
 
-  const sceneDepthTexture = new THREE.DepthTexture(1, 1, THREE.UnsignedShortType);
-  const backgroundDepthTexture = new THREE.DepthTexture(1, 1, THREE.UnsignedShortType);
-
   const sceneTarget = new THREE.WebGLRenderTarget(1, 1, {
     type: THREE.HalfFloatType,
     minFilter: THREE.LinearFilter,
     magFilter: THREE.LinearFilter,
     depthBuffer: true,
-    depthTexture: sceneDepthTexture,
   });
   const backgroundTarget = new THREE.WebGLRenderTarget(1, 1, {
     // The reference TransparentBufferRenderer copies the already-rendered main scene into the
@@ -1352,8 +1397,8 @@ async function startReferenceWorld(
     type: THREE.UnsignedByteType,
     minFilter: THREE.LinearFilter,
     magFilter: THREE.LinearFilter,
-    depthBuffer: true,
-    depthTexture: backgroundDepthTexture,
+    // This buffer contains only a full-screen color copy and depth-disabled type.
+    depthBuffer: false,
   });
   // Refraction deliberately samples beyond the screen edges. The live material wraps those
   // samples back into the chamber; clamping them produces the solid rectangular edge slabs that
@@ -1379,6 +1424,26 @@ async function startReferenceWorld(
     fragmentShader: glassFragmentShader,
     transparent: true,
   });
+  const materialControlDisposers: Array<() => void> = [];
+  const bindMaterialControl = (selector: string, outputSelector: string, apply: (value: string) => string) => {
+    const input = document.querySelector<HTMLInputElement>(selector);
+    const output = document.querySelector<HTMLOutputElement>(outputSelector);
+    if (!input) return;
+    const update = () => { const text = apply(input.value); if (output) output.value = text; };
+    input.addEventListener('input', update);
+    materialControlDisposers.push(() => input.removeEventListener('input', update));
+  };
+  bindMaterialControl('[data-material-roughness]', '[data-material-roughness-value]', value => {
+    glassUniforms.uRoughness.value = Number(value); return Number(value).toFixed(2);
+  });
+  bindMaterialControl('[data-material-noise]', '[data-material-noise-value]', value => {
+    glassUniforms.uNoiseScale.value = Number(value); return Number(value).toFixed(1);
+  });
+  bindMaterialControl('[data-material-color]', '[data-material-color-value]', value => {
+    const rgb = Number.parseInt(value.slice(1), 16);
+    glassUniforms.uMaterialColor.value.set((rgb >> 16) & 255, (rgb >> 8) & 255, rgb & 255);
+    return `{r: ${(rgb >> 16) & 255}, g: ${(rgb >> 8) & 255}, b: ${rgb & 255}}`;
+  });
   const identityPromise = loadIdentity(glassMaterial);
 
   const projectSources = Array.from(document.querySelectorAll<HTMLElement>('[data-curve-card]'))
@@ -1394,8 +1459,7 @@ async function startReferenceWorld(
   galleryGroup.position.set(0, 0, 0);
   galleryGroup.matrixAutoUpdate = false;
   galleryScene.add(galleryGroup);
-  const galleryGeometry = new THREE.PlaneGeometry(8, 4.5, 32, 8);
-  galleryGeometry.deleteAttribute('normal');
+  const galleryGeometry = createGalleryGlassGeometry();
   const projectTextureLoader = new THREE.TextureLoader();
   const projectAnisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 4);
   const galleryVisuals: GalleryVisual[] = [];
@@ -1406,6 +1470,7 @@ async function startReferenceWorld(
         studioEnvironmentTexturePromise,
       ]);
       texture.anisotropy = projectAnisotropy;
+      texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
       texture.needsUpdate = true;
       const textureImage = texture.image as { width?: number; height?: number };
       const textureAspect =
@@ -1415,6 +1480,7 @@ async function startReferenceWorld(
           uMap: { value: texture },
           uTextureAspect: { value: textureAspect },
           uOpacity: { value: 0 },
+          uHover: { value: 0 },
           uEnvironment: { value: projectEnvironmentTexture },
         },
         vertexShader: galleryVertexShader,
@@ -1464,6 +1530,22 @@ async function startReferenceWorld(
   identity.updateMatrix();
   identity.matrixAutoUpdate = false;
   identityScene.add(identity);
+  // The reference has an explicit WORKS chapter between the opening and cards.
+  // Use authored typography behind the protected identity, never an HTML overlay.
+  await document.fonts.load('700 160px "Archivo Variable"');
+  const worksCanvas = document.createElement('canvas');
+  worksCanvas.width = 2048;
+  worksCanvas.height = 512;
+  const worksContext = worksCanvas.getContext('2d');
+  if (!worksContext) throw new Error('Unable to create Works title texture');
+  worksContext.fillStyle = '#ffffff';
+  worksContext.font = '700 420px "Archivo Variable"';
+  worksContext.textAlign = 'center';
+  worksContext.textBaseline = 'middle';
+  worksContext.fillText('WORKS', 1024, 276, 1960);
+  const worksTexture = new THREE.CanvasTexture(worksCanvas);
+  worksTexture.colorSpace = THREE.SRGBColorSpace;
+  let worksTitleProgress = 0;
   const galleryMeshes: THREE.Object3D[] = [];
   const galleryVisualByMesh = new Map<THREE.Object3D, GalleryVisual>();
 
@@ -1588,6 +1670,8 @@ async function startReferenceWorld(
     uBloomTexture0: { value: bloomHorizontalTargets[0]!.texture },
     uBloomTexture1: { value: bloomHorizontalTargets[1]!.texture },
     uBloomTexture2: { value: bloomHorizontalTargets[2]!.texture },
+    uBoot: { value: 1 },
+    uAspect: { value: innerWidth / Math.max(1, innerHeight) },
   };
   const compositeMaterial = new THREE.ShaderMaterial({
     defines: { POINTER_FX: pointerEffectsEnabled ? 1 : 0 },
@@ -1607,9 +1691,9 @@ async function startReferenceWorld(
   const composedIdentityQuaternion = new THREE.Quaternion();
   const deltaQuaternion = new THREE.Quaternion();
   const hoverEuler = new THREE.Euler();
-  const scrollAxis = new THREE.Vector3(0, 1, 0);
-  const pointer = new THREE.Vector2();
-  const previousPointer = new THREE.Vector2();
+  const fluidPointer = new THREE.Vector2();
+  const fluidVelocity = new THREE.Vector2();
+  const fluidResidual = new THREE.Vector2();
   const pointerNdc = new THREE.Vector2();
   const filteredPointerNdc = new THREE.Vector2();
   const pointerVelocityNdc = new THREE.Vector2();
@@ -1618,7 +1702,6 @@ async function startReferenceWorld(
   const appliedIdentityQuaternion = interactionQuaternion.clone();
   let appliedIdentityScale = identity.scale.x;
   let pointerInitialized = false;
-  let lastPointerTime = performance.now();
   let hoveredGalleryVisual: GalleryVisual | null = null;
   let pointerEnergy = 0;
   let gizmoDragging = false;
@@ -1628,6 +1711,9 @@ async function startReferenceWorld(
   const gizmoDragDelta = new THREE.Quaternion();
   const gizmoProjectedAxis = new THREE.Vector3();
   const gizmoAxes = ([
+    ['nx', new THREE.Vector3(-1, 0, 0)],
+    ['ny', new THREE.Vector3(0, -1, 0)],
+    ['nz', new THREE.Vector3(0, 0, -1)],
     ['x', new THREE.Vector3(1, 0, 0)],
     ['y', new THREE.Vector3(0, 1, 0)],
     ['z', new THREE.Vector3(0, 0, 1)],
@@ -1647,7 +1733,7 @@ async function startReferenceWorld(
       gizmoProjectedAxis.copy(vector).applyQuaternion(quaternion);
       const x = 36 + gizmoProjectedAxis.x * 25;
       const y = 36 - gizmoProjectedAxis.y * 25;
-      const labelDistance = 4.5;
+      const labelDistance = 0;
       const labelX = x + gizmoProjectedAxis.x * labelDistance;
       const labelY = y - gizmoProjectedAxis.y * labelDistance;
       line.setAttribute('x2', x.toFixed(2));
@@ -1671,6 +1757,7 @@ async function startReferenceWorld(
   };
   updateQuaternionController(interactionQuaternion);
   let revealStart = performance.now();
+  const startupEnabled = !reducedMotion && !deterministicCaptureMode && scrollY < 1;
   let animationFrame = 0;
   let lastFrame = performance.now();
   const backgroundTimeParam = captureParameters.get('__backgroundTime');
@@ -1697,11 +1784,6 @@ async function startReferenceWorld(
   let renderPixelRatio = 0;
   let resizeFrame = 0;
   let compactGallery = innerWidth <= 820;
-  let worksRotationWeight = 0;
-  let worksRotationFrom = 0;
-  let worksRotationGoal = 0;
-  let worksRotationElapsed = 1;
-  let smoothedLogoScrollVelocity = 0;
   let captureBridge: ReferenceCaptureBridge | null = null;
   let nativeCaptureStarted = false;
 
@@ -1727,7 +1809,7 @@ async function startReferenceWorld(
     if (curveSection && curveSection.style.cursor !== cursor) curveSection.style.cursor = cursor;
   };
 
-  const updateProjectScene = (_deltaSeconds: number) => {
+  const updateProjectScene = (deltaSeconds: number) => {
     if (!curveSection) return;
     // home-state owns the reference's two-stage rail lerp so the DOM metadata, background,
     // and WebGL planes all consume one continuous project position instead of drifting apart.
@@ -1754,9 +1836,16 @@ async function startReferenceWorld(
     const galleryProgress = renderedGalleryProgress;
     // The large ANIK word is an opening-only layer. Remove it early in the handoff so project
     // cards never overlap it, while keeping the typography fully visible at the top of the page.
+    const openingScroll = scrollY / Math.max(1, innerHeight);
     const heroWordPresence = captureGallerySweep
       ? 0
-      : 1 - smoothstep(0.001, 0.015, renderedGalleryProgress);
+      : (1 - smoothstep(0.001, 0.015, renderedGalleryProgress)) *
+        (1 - smoothstep(0.85, 1.25, openingScroll));
+    const worksTarget = openingScroll < 1.65
+      ? clamp((openingScroll - 0.95) / 0.7) * 0.65
+      : 0.65 + smoothstep(2.25, 2.65, openingScroll) * 0.35;
+    worksTitleProgress = THREE.MathUtils.lerp(worksTitleProgress, worksTarget, 1 - Math.exp(-3 * deltaSeconds));
+    openingBackground.setWorksTitle(worksTexture, worksTitleProgress);
     const heroWordOpacity = heroWordBaseOpacity * heroWordPresence;
     if (heroWordMaterial.opacity !== heroWordOpacity) heroWordMaterial.opacity = heroWordOpacity;
     // The visible word remains full-energy, but its hidden transmission copy must stay SDR. Feeding
@@ -1787,6 +1876,11 @@ async function startReferenceWorld(
     }
     galleryLayoutActive = true;
     galleryVisuals.forEach((visual, index) => {
+      visual.material.uniforms.uHover!.value = THREE.MathUtils.lerp(
+        visual.material.uniforms.uHover!.value as number,
+        hoveredGalleryVisual === visual ? 1 : 0,
+        1 - Math.exp(-10 * deltaSeconds),
+      );
       const offset = index + 1 - galleryProgress;
       const distance = Math.abs(offset);
       const visibility = (1 - smoothstep(0.8, 2.5, distance)) * galleryEntrance * galleryExit;
@@ -1810,7 +1904,7 @@ async function startReferenceWorld(
     const height = deterministicCaptureMode
       ? captureHeight
       : Math.max(1, Math.round(outputCanvas.clientHeight || innerHeight));
-    const pixelRatio = deterministicCaptureMode ? 1 : Math.min(1.5, devicePixelRatio);
+    const pixelRatio = deterministicCaptureMode ? capturePixelRatio : Math.min(1.5, devicePixelRatio);
     if (width === canvasWidth && height === canvasHeight && pixelRatio === renderPixelRatio) {
       return;
     }
@@ -1835,7 +1929,7 @@ async function startReferenceWorld(
     heroWord.updateMatrix();
     refractionWord.scale.set(wordScaleX, wordScaleY, 1);
     refractionWord.updateMatrix();
-    galleryGroup.scale.setScalar(width <= 820 ? 0.54 : 0.72);
+    galleryGroup.scale.setScalar(width <= 820 ? 0.54 : 0.96);
     galleryGroup.updateMatrix();
     const renderWidth = Math.max(1, outputCanvas.width);
     const renderHeight = Math.max(1, outputCanvas.height);
@@ -1904,36 +1998,18 @@ async function startReferenceWorld(
 
   const onPointerMove = (event: PointerEvent) => {
     if (!worldInView || coarsePointer || capturePointerSweep) return;
-    const now = performance.now();
-    pointer.set(event.clientX, event.clientY);
     const normalizedX = (event.clientX / Math.max(1, canvasWidth)) * 2 - 1;
     const normalizedY = -((event.clientY / Math.max(1, canvasHeight)) * 2 - 1);
     pointerNdc.set(normalizedX, normalizedY);
     if (!pointerInitialized) {
-      previousPointer.copy(pointer);
       filteredPointerNdc.copy(pointerNdc);
+      fluidPointer.copy(pointerNdc);
+      fluidVelocity.set(0, 0);
       pointerInitialized = true;
-      lastPointerTime = now;
       return;
     }
-    const deltaTime = Math.max(8, now - lastPointerTime);
-    const deltaX = pointer.x - previousPointer.x;
-    const deltaY = pointer.y - previousPointer.y;
     hoveredGalleryVisual = galleryVisualAt(event.clientX, event.clientY);
     setCurveCursor(hoveredGalleryVisual ? 'pointer' : '');
-    // Feed the wake from the actual pointer event. Re-injecting a smoothed residual on every RAF
-    // introduced a visible 100-200ms trail and kept adding energy after the hand had stopped.
-    if (fluid && !gizmoDragging) {
-      fluid.update({
-        x: event.clientX / Math.max(1, canvasWidth),
-        y: 1 - event.clientY / Math.max(1, canvasHeight),
-        deltaX: (deltaX / Math.max(1, canvasWidth)) * pointerMotionIntensity,
-        deltaY: (-deltaY / Math.max(1, canvasHeight)) * pointerMotionIntensity,
-        deltaTime: deltaTime / 1000,
-      });
-    }
-    previousPointer.copy(pointer);
-    lastPointerTime = now;
   };
 
   const capturePointerPosition = new THREE.Vector2(0.5, 0.5);
@@ -1961,9 +2037,6 @@ async function startReferenceWorld(
       capturePointerPosition.set(0.5, 0.5);
     }
 
-    const pixelX = capturePointerPosition.x * canvasWidth;
-    const pixelY = capturePointerPosition.y * canvasHeight;
-    pointer.set(pixelX, pixelY);
     pointerNdc.set(
       capturePointerPosition.x * 2 - 1,
       1 - capturePointerPosition.y * 2,
@@ -1993,6 +2066,7 @@ async function startReferenceWorld(
     pointerNdc.set(0, 0);
     filteredPointerNdc.set(0, 0);
     pointerVelocityNdc.set(0, 0);
+    fluidVelocity.set(0, 0);
     fluid?.update({ x: 0, y: 0, active: false, space: 'ndc' });
     hoveredGalleryVisual = null;
     setCurveCursor('');
@@ -2017,7 +2091,7 @@ async function startReferenceWorld(
     fluid?.update({ x: 0.5, y: 0.5, active: false });
   };
   const beginGizmoDrag = (event: PointerEvent) => {
-    if (event.button !== 0) return;
+    if (event.button !== 0 || scrollY >= innerHeight * 1.25) return;
     event.preventDefault();
     gizmoDragging = true;
     gizmoQuaternionStart.copy(interactionQuaternion);
@@ -2060,12 +2134,13 @@ async function startReferenceWorld(
   if (!coarsePointer) {
     addEventListener('pointermove', onPointerMove, { passive: true });
     addEventListener('pointerleave', onPointerLeave, { passive: true });
-    resetButton?.addEventListener('click', resetOrientation);
-    rotationGizmo?.addEventListener('pointerdown', beginGizmoDrag);
-    rotationGizmo?.addEventListener('pointermove', moveGizmo);
-    rotationGizmo?.addEventListener('pointerup', releaseGizmo);
-    rotationGizmo?.addEventListener('pointercancel', releaseGizmo);
   }
+  resetButton?.addEventListener('click', resetOrientation);
+  rotationGizmo?.addEventListener('pointerdown', beginGizmoDrag);
+  rotationGizmo?.addEventListener('pointermove', moveGizmo);
+  rotationGizmo?.addEventListener('pointerup', releaseGizmo);
+  rotationGizmo?.addEventListener('pointercancel', releaseGizmo);
+  rotationGizmo?.addEventListener('lostpointercapture', releaseGizmo);
 
   const updateSurfaceChrome = () => {
     if (!meltSection) return;
@@ -2104,28 +2179,30 @@ async function startReferenceWorld(
     const deltaSeconds = Math.min(1 / 30, Math.max(1 / 240, (time - lastFrame) / 1000));
     lastFrame = time;
     const elapsed = Math.max(0, (time - revealStart) * 0.001);
+    compositeUniforms.uBoot.value = startupEnabled ? smoothstep(0, 3, elapsed) : 1;
+    compositeUniforms.uAspect.value = canvasWidth / Math.max(1, canvasHeight);
     wallUniforms.uTime.value = elapsed;
     updateProjectScene(deltaSeconds);
 
-    const logoSection = captureGallerySweep ? 2 : referenceMotionState.logoSection;
-    const worksRotationTarget = logoSection === 0 ? 0 : 1;
-    if (worksRotationTarget !== worksRotationGoal) {
-      worksRotationFrom = worksRotationWeight;
-      worksRotationGoal = worksRotationTarget;
-      worksRotationElapsed = 0;
+    const outroProgress = referenceMotionState.worksOutroProgress;
+    // Let the final project clear and the front-facing A settle before wall zoom.
+    openingBackground.setOutro(smoothstep(0.45, 1, outroProgress));
+    const inWorksOutro = outroProgress > 0;
+    // User-directed rotation belongs only to the opening. The project rail and
+    // wall keep animating, but neither scrolling nor time spins the identity.
+    const rotationEnabled = !captureGallerySweep && !inWorksOutro && scrollY < innerHeight * 1.25;
+    if (rotationGizmo) {
+      rotationGizmo.disabled = !rotationEnabled;
+      rotationGizmo.title = rotationEnabled ? 'Drag to rotate' : 'Rotation is available at the top';
     }
-    if (worksRotationElapsed < 1) {
-      worksRotationElapsed = Math.min(1, worksRotationElapsed + deltaSeconds);
-      worksRotationWeight = THREE.MathUtils.lerp(
-        worksRotationFrom,
-        worksRotationGoal,
-        sigmoidEasing6(worksRotationElapsed),
-      );
-    } else {
-      worksRotationWeight = worksRotationGoal;
+    if (!rotationEnabled) {
+      gizmoDragging = false;
+      rotationGizmo?.removeAttribute('data-dragging');
+      hoverEuler.set(0, 0, 0);
+      pointerVelocityNdc.set(0, 0);
+      pointerEnergy = 0;
     }
-
-    if (!coarsePointer) {
+    if (!coarsePointer && rotationEnabled) {
       if (gizmoDragging) {
         filteredPointerNdc.copy(pointerNdc);
         pointerVelocityNdc.set(0, 0);
@@ -2137,12 +2214,12 @@ async function startReferenceWorld(
           pointerVelocityNdc,
           Math.min(1, deltaSeconds * 10),
         );
-        const hoverMultiplier = (logoSection === 0 ? 1 : 0.2) * pointerMotionIntensity;
+        const hoverMultiplier = pointerMotionIntensity;
         const pointerReach = Math.max(0, 1 - pointerNdc.length() * 1.5);
         const velocityMultiplier = 0.01 * pointerReach * hoverMultiplier;
         if (pointerEffectsEnabled && velocityMultiplier > 0) {
           hoverEuler.x -=
-            pointerVelocityNdc.y * velocityMultiplier * (1 - worksRotationWeight * 0.7);
+            pointerVelocityNdc.y * velocityMultiplier;
           hoverEuler.y += pointerVelocityNdc.x * velocityMultiplier;
         }
         hoverEuler.x *= 1 - deltaSeconds;
@@ -2160,8 +2237,8 @@ async function startReferenceWorld(
 
     // The reference camera supplies half a world-unit of pointer parallax. Without it the
     // screen-space texture barely travels across the A, even when the mesh itself rotates.
-    const cameraTargetX = coarsePointer ? 0 : pointerNdc.x * 0.5 * pointerMotionIntensity;
-    const cameraTargetY = coarsePointer ? 0 : pointerNdc.y * 0.5 * pointerMotionIntensity;
+    const cameraTargetX = coarsePointer ? 0 : pointerNdc.x * 0.5 * pointerMotionIntensity * (1 - outroProgress);
+    const cameraTargetY = coarsePointer ? 0 : pointerNdc.y * 0.5 * pointerMotionIntensity * (1 - outroProgress);
     cameraPointerOffset.x = THREE.MathUtils.lerp(
       cameraPointerOffset.x,
       cameraTargetX,
@@ -2172,35 +2249,30 @@ async function startReferenceWorld(
       cameraTargetY,
       Math.min(1, deltaSeconds * 3),
     );
+    // The camera pullback must happen during the visible typography handoff,
+    // not finish on the earlier rotation trigger while the name still holds.
+    const openingPullback = smoothstep(0.35, 1.25, scrollY / Math.max(1, innerHeight));
+    const cameraStageMix = openingPullback * (1 - smoothstep(0, 0.35, outroProgress));
     camera.position.set(
       cameraPointerOffset.x,
       cameraPointerOffset.y,
-      9.5 + worksRotationWeight * 0.5,
+      9.5 + cameraStageMix * 0.5,
     );
     const referenceBaseFov = 35 + 18 / Math.max(0.2, camera.aspect);
-    camera.fov = referenceBaseFov - 4 * (1 - worksRotationWeight);
+    camera.fov = referenceBaseFov - 4 * (1 - cameraStageMix);
     camera.lookAt(0, 0, 0);
     camera.updateMatrix();
     camera.updateProjectionMatrix();
 
-    const logoScrollVelocity = smoothedLogoScrollVelocity;
-    if (worksRotationWeight > 0.0001) {
-      const scrollMotionIntensity = reducedMotion ? 0.35 : 1;
-      const scrollAngle = (
-        -deltaSeconds * 0.5 * worksRotationWeight -
-        logoScrollVelocity * 0.001 * worksRotationWeight
-      ) * scrollMotionIntensity;
-      deltaQuaternion.setFromAxisAngle(scrollAxis, scrollAngle);
-      interactionQuaternion.premultiply(deltaQuaternion).normalize();
+    const returnForce = rotationEnabled ? 2 : 12;
+    // A captured drag owns the orientation until release. Returning toward rest here
+    // erodes a stationary held pose even though no new pointer input was received.
+    if (!gizmoDragging) {
+      interactionQuaternion.slerp(
+        identityQuaternion,
+        THREE.MathUtils.clamp(deltaSeconds * returnForce, 0, 1),
+      );
     }
-    smoothedLogoScrollVelocity +=
-      (referenceMotionState.scrollVelocity - smoothedLogoScrollVelocity) *
-      Math.min(1, deltaSeconds * 5);
-    const returnForce = logoSection === 0 ? 2 : logoSection === 1 ? 0.4 : 0.1;
-    interactionQuaternion.slerp(
-      identityQuaternion,
-      THREE.MathUtils.clamp(deltaSeconds * returnForce * (1 - worksRotationWeight * 0.8), 0, 1),
-    );
     composedIdentityQuaternion.copy(interactionQuaternion).normalize();
     let identityTransformChanged = false;
     if (!appliedIdentityQuaternion.equals(composedIdentityQuaternion)) {
@@ -2222,6 +2294,18 @@ async function startReferenceWorld(
     if (identityTransformChanged) identity.updateMatrix();
 
     if (fluid) {
+      if (!deterministicCaptureMode && pointerInitialized && !gizmoDragging && pointerEffectsEnabled) {
+        // Match the reference's two-stage pointer filter: position 10/s,
+        // velocity 20/s. Feed NDC residual once per displayed frame.
+        fluidResidual.copy(pointerNdc).sub(fluidPointer);
+        fluidPointer.addScaledVector(fluidResidual, Math.min(1, deltaSeconds * 10));
+        fluidVelocity.lerp(fluidResidual, Math.min(1, deltaSeconds * 20));
+        fluid.update({
+          x: fluidPointer.x, y: fluidPointer.y, space: 'ndc',
+          deltaX: fluidVelocity.x * pointerMotionIntensity,
+          deltaY: fluidVelocity.y * pointerMotionIntensity,
+        });
+      }
       fluid.step(deltaSeconds);
       sceneMixerUniforms.uFluid.value = fluid.texture;
       compositeUniforms.uFluid.value = fluid.texture;
@@ -2256,9 +2340,6 @@ async function startReferenceWorld(
     renderer.clear(true, true, false);
     renderer.render(baseScene, camera);
     const galleryRendersVisible = galleryHasVisibleVisual && !captureTypographyOnly;
-    if (galleryRendersVisible) {
-      renderer.copyTextureToTexture(sceneDepthTexture, backgroundDepthTexture);
-    }
     // The reference copies through a full-screen post-process pass, which also performs the
     // half-float -> unsigned-byte conversion needed by its transparent buffer. Keep auto-clear off
     // while adding the typography/gallery layers so they cannot erase the chamber underneath.
@@ -2273,7 +2354,6 @@ async function startReferenceWorld(
     }
     renderer.setRenderTarget(sceneTarget);
     renderer.render(identityScene, camera);
-    if (galleryRendersVisible) renderer.render(galleryScene, camera);
 
     // Reference pass order: scene mixer (fluid, vignette, wake) -> bloom threshold/blur ->
     // final fluid correction, bloom accumulation and 1.30 display gain.
@@ -2283,6 +2363,10 @@ async function startReferenceWorld(
     renderReferenceBloom();
     renderer.setRenderTarget(null);
     renderer.render(postScene, postCamera);
+    // The scene's fluid warp, bloom and display gain belong to the chamber and A.
+    // Composite the curved artwork afterward so whites do not clip and colors do
+    // not change with pointer velocity. autoClear remains false for this overlay.
+    if (galleryRendersVisible) renderer.render(galleryScene, camera);
 
     if (!coarsePointer && stateReadout) {
       const nextState =
@@ -2354,10 +2438,13 @@ async function startReferenceWorld(
     lastFrame = 0;
     captureBridge = {
       canvas: outputCanvas,
+      cssWidth: captureWidth,
+      cssHeight: captureHeight,
+      pixelRatio: capturePixelRatio,
       fps: REFERENCE_CAPTURE_FPS,
-      height: captureHeight,
+      height: outputCanvas.height,
       totalPictures: REFERENCE_TOTAL_PICTURES,
-      width: captureWidth,
+      width: outputCanvas.width,
       readPixels: (target) => {
         const pixels =
           target ??
@@ -2471,6 +2558,7 @@ async function startReferenceWorld(
     rotationGizmo?.removeEventListener('pointermove', moveGizmo);
     rotationGizmo?.removeEventListener('pointerup', releaseGizmo);
     rotationGizmo?.removeEventListener('pointercancel', releaseGizmo);
+    rotationGizmo?.removeEventListener('lostpointercapture', releaseGizmo);
     removeEventListener('resize', requestSurfaceChromeUpdate);
     removeEventListener('scroll', requestSurfaceChromeUpdate);
     setCurveCursor('');
@@ -2491,11 +2579,13 @@ async function startReferenceWorld(
     heroWordMaterial.map?.dispose();
     heroWordMaterial.dispose();
     refractionWordMaterial.dispose();
+    worksTexture.dispose();
     studioEnvironmentTexture.dispose();
     identity.traverse((child) => {
       if (child instanceof THREE.Mesh) child.geometry.dispose();
     });
     glassMaterial.dispose();
+    materialControlDisposers.forEach(disposeControl => disposeControl());
     galleryGeometry.dispose();
     galleryVisuals.forEach((visual) => {
       visual.material.dispose();
