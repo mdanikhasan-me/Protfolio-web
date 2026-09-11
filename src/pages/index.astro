@@ -106,12 +106,13 @@ const mediaBase: Record<string, string> = {
             >
               <svg viewBox="0 0 72 72" aria-hidden="true">
                 <circle class="gizmo-orbit" cx="36" cy="36" r="28" />
+                <circle class="gizmo-orbit" cx="36" cy="36" r="30" />
+                {['xy','xz','yz'].map(plane => <path class="gizmo-orbit" data-reference-orbit={plane} />)}
                 {(['nx', 'ny', 'nz', 'x', 'y', 'z'] as const).map((axis) => <g data-reference-axis={axis} class={`gizmo-axis gizmo-axis-${axis}`}>
                   <line x1="36" y1="36" x2="36" y2="36" />
                   <circle cx="36" cy="36" r="5" />
                   <text x="36" y="36" text-anchor="middle" dominant-baseline="middle">{axis.startsWith('n') ? '' : axis.toUpperCase()}</text>
                 </g>)}
-                <circle cx="36" cy="36" r="3" fill="white" />
               </svg>
             </button>
             <button type="button" data-reference-reset>Reset quaternion</button>

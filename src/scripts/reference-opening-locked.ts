@@ -718,10 +718,9 @@ const glassFragmentShader = `
       uEnvironment,
       reflect(viewDirection, viewNormal)
     ).rgb;
-    // Reflection replaces a portion of the transmitted light. Adding another
-    // near-complete transmission copy clipped the broad front faces to white.
-    color = mix(color, environmentReflection, fresnelAmount * 0.9);
-    color *= 1.20;
+    // Preserve the reference's transmitted-light contribution. Replacing it
+    // with the environment made colored faces dull even over vivid wall panels.
+    color += mix(color, environmentReflection, fresnelAmount * 0.9) * (1.0 - fresnelAmount);
     color *= uMaterialColor / 255.0;
     gl_FragColor = vec4(color, 1.0);
   }
@@ -1546,6 +1545,7 @@ async function startReferenceWorld(
   const worksTexture = new THREE.CanvasTexture(worksCanvas);
   worksTexture.colorSpace = THREE.SRGBColorSpace;
   let worksTitleProgress = 0;
+  let openingWordPresence = 1;
   const galleryMeshes: THREE.Object3D[] = [];
   const galleryVisualByMesh = new Map<THREE.Object3D, GalleryVisual>();
 
@@ -1727,7 +1727,21 @@ async function startReferenceWorld(
       label: group?.querySelector<SVGTextElement>('text') ?? null,
     };
   });
+  const gizmoOrbits = (['xy', 'xz', 'yz'] as const).map(plane => ({
+    plane, path: rotationGizmo?.querySelector<SVGPathElement>(`[data-reference-orbit="${plane}"]`),
+  }));
   const updateQuaternionController = (quaternion: THREE.Quaternion) => {
+    gizmoOrbits.forEach(({plane,path}) => {
+      if (!path) return;
+      let d = '';
+      for (let step = 0; step <= 48; step += 1) {
+        const angle = step / 48 * Math.PI * 2;
+        const a = Math.cos(angle), b = Math.sin(angle);
+        gizmoProjectedAxis.set(plane === 'yz' ? 0 : a, plane === 'xz' ? 0 : plane === 'yz' ? a : b, plane === 'xy' ? 0 : b).applyQuaternion(quaternion);
+        d += `${step ? 'L' : 'M'}${(36 + gizmoProjectedAxis.x * 25).toFixed(2)} ${(36 - gizmoProjectedAxis.y * 25).toFixed(2)}`;
+      }
+      path.setAttribute('d', d);
+    });
     gizmoAxes.forEach(({ vector, group, line, point, label }) => {
       if (!group || !line || !point || !label) return;
       gizmoProjectedAxis.copy(vector).applyQuaternion(quaternion);
@@ -1837,10 +1851,12 @@ async function startReferenceWorld(
     // The large ANIK word is an opening-only layer. Remove it early in the handoff so project
     // cards never overlap it, while keeping the typography fully visible at the top of the page.
     const openingScroll = scrollY / Math.max(1, innerHeight);
-    const heroWordPresence = captureGallerySweep
-      ? 0
-      : (1 - smoothstep(0.001, 0.015, renderedGalleryProgress)) *
-        (1 - smoothstep(0.85, 1.25, openingScroll));
+    const openingWordTarget = captureGallerySweep || openingScroll >= 0.95 || renderedGalleryProgress > 0.015 ? 0 : 1;
+    // Finish the short handoff even when the wheel stops. Binding opacity to a
+    // fractional scroll position stranded the title and its reflections at gray.
+    openingWordPresence += (openingWordTarget - openingWordPresence) * (1 - Math.exp(-12 * deltaSeconds));
+    if (Math.abs(openingWordTarget - openingWordPresence) < 0.001) openingWordPresence = openingWordTarget;
+    const heroWordPresence = openingWordPresence;
     const worksTarget = openingScroll < 1.65
       ? clamp((openingScroll - 0.95) / 0.7) * 0.65
       : 0.65 + smoothstep(2.25, 2.65, openingScroll) * 0.35;
@@ -2188,8 +2204,8 @@ async function startReferenceWorld(
     // Let the final project clear and the front-facing A settle before wall zoom.
     openingBackground.setOutro(smoothstep(0.45, 1, outroProgress));
     const inWorksOutro = outroProgress > 0;
-    // User-directed rotation belongs only to the opening. The project rail and
-    // wall keep animating, but neither scrolling nor time spins the identity.
+    // Pointer rotation belongs to the opening. Beyond it, a small deterministic
+    // scroll pose replaces idle spin; reversing scroll restores the same pose.
     const rotationEnabled = !captureGallerySweep && !inWorksOutro && scrollY < innerHeight * 1.25;
     if (rotationGizmo) {
       rotationGizmo.disabled = !rotationEnabled;
@@ -2237,8 +2253,8 @@ async function startReferenceWorld(
 
     // The reference camera supplies half a world-unit of pointer parallax. Without it the
     // screen-space texture barely travels across the A, even when the mesh itself rotates.
-    const cameraTargetX = coarsePointer ? 0 : pointerNdc.x * 0.5 * pointerMotionIntensity * (1 - outroProgress);
-    const cameraTargetY = coarsePointer ? 0 : pointerNdc.y * 0.5 * pointerMotionIntensity * (1 - outroProgress);
+    const cameraTargetX = coarsePointer || !rotationEnabled ? 0 : pointerNdc.x * 0.5 * pointerMotionIntensity;
+    const cameraTargetY = coarsePointer || !rotationEnabled ? 0 : pointerNdc.y * 0.5 * pointerMotionIntensity;
     cameraPointerOffset.x = THREE.MathUtils.lerp(
       cameraPointerOffset.x,
       cameraTargetX,
@@ -2265,11 +2281,14 @@ async function startReferenceWorld(
     camera.updateProjectionMatrix();
 
     const returnForce = rotationEnabled ? 2 : 12;
+    const scrollRotation = (smoothstep(1.25, 2.45, scrollY / Math.max(1, innerHeight)) * 0.16 +
+      clamp(referenceMotionState.wallProjectProgress / 5) * 0.60) * (1 - smoothstep(0, 0.35, outroProgress));
+    if (!rotationEnabled) deltaQuaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -scrollRotation);
     // A captured drag owns the orientation until release. Returning toward rest here
     // erodes a stationary held pose even though no new pointer input was received.
     if (!gizmoDragging) {
       interactionQuaternion.slerp(
-        identityQuaternion,
+        rotationEnabled ? identityQuaternion : deltaQuaternion,
         THREE.MathUtils.clamp(deltaSeconds * returnForce, 0, 1),
       );
     }

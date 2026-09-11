@@ -322,7 +322,8 @@ function updateAll(timestamp = performance.now()) {
   lastMotionFrame = timestamp;
   updateMelt();
   openingSection?.style.setProperty('--opening-ui-presence',
-    String(1 - smoothstep(0.55, 1.05, scrollY / Math.max(1, innerHeight))));
+    scrollY < innerHeight * 0.95 ? '1' : '0');
+  if (openingSection) openingSection.dataset.openingActive = String(scrollY < innerHeight * 0.95);
   const curveBounds =
     curveSection && curveNearViewport && usesStageRail() && curveCards.length
       ? readCurveBounds()

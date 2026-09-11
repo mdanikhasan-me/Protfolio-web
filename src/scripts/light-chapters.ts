@@ -16,19 +16,23 @@ async function startLightChapters(root: HTMLElement, canvas: HTMLCanvasElement, 
   const camera = new THREE.OrthographicCamera(-6.2,6.2,3.2,-3.2,.1,100);
   camera.position.z = 10;
   const fluid = new ReferenceFluid(renderer, innerWidth, innerHeight);
-  const backgroundUniforms = { uSize: { value: new THREE.Vector2() }, uFluid: { value: fluid.texture } };
+  const backgroundUniforms = { uSize: { value: new THREE.Vector2() }, uFluid: { value: fluid.texture }, uScroll: { value: scrollY / innerHeight } };
   const backgroundMaterial = new THREE.ShaderMaterial({
     depthTest: false, depthWrite: false, uniforms: backgroundUniforms,
     vertexShader: 'varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.999,1.0);}',
     fragmentShader: `
-      varying vec2 vUv; uniform vec2 uSize; uniform sampler2D uFluid;
+      varying vec2 vUv; uniform vec2 uSize; uniform sampler2D uFluid; uniform float uScroll;
       void main(){
         vec2 wake=texture2D(uFluid,vUv).xy;
         vec2 uv=vUv+wake*.01;
         vec2 pixel=uv*uSize;
-        vec2 cell=abs(fract(pixel/26.0)-.5)*26.0;
+        float spacing=max(uSize.x,uSize.y)/64.0;
+        vec2 gridPixel=pixel-vec2(0.0,uScroll*1.5*spacing);
+        vec2 cell=abs(fract(gridPixel/spacing)-.5)*spacing;
         float grid=1.0-smoothstep(.35,.95,min(cell.x,cell.y));
-        vec2 cross=abs(mod(pixel+104.0,208.0)-104.0);
+        float crossSpacing=spacing*8.0;
+        vec2 crossPixel=pixel-vec2(0.0,uScroll*.1*max(uSize.x,uSize.y));
+        vec2 cross=abs(mod(crossPixel+crossSpacing*.5,crossSpacing)-crossSpacing*.5);
         float marks=(1.0-smoothstep(.4,1.0,cross.x))*(1.0-step(8.0,cross.y));
         marks=max(marks,(1.0-smoothstep(.4,1.0,cross.y))*(1.0-step(8.0,cross.x)));
         vec3 color=vec3(.875,.910,.918);
@@ -96,7 +100,8 @@ async function startLightChapters(root: HTMLElement, canvas: HTMLCanvasElement, 
   root.dataset.lightReady = 'true';
   let active = false, frame = 0, last = performance.now(), stopped = false;
   let rootTop = 0, rootHeight = 0, visionTop = 0;
-  const pointer = new THREE.Vector2(.5,.5), previous = pointer.clone();
+  const pointer = new THREE.Vector2(), filteredPointer = new THREE.Vector2();
+  const velocity = new THREE.Vector2(), residual = new THREE.Vector2();
   let pointerPrimed = false;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const events = new AbortController();
@@ -109,16 +114,23 @@ async function startLightChapters(root: HTMLElement, canvas: HTMLCanvasElement, 
   function render(time:number) {
     frame=0;if(stopped || !active || document.hidden) return;
     const dt=Math.min(.033,(time-last)/1000);last=time;
+    backgroundUniforms.uScroll.value += (scrollY / innerHeight - backgroundUniforms.uScroll.value) * Math.min(1,dt*5);
     const travel=(scrollY-visionTop)/innerHeight;
     const tilt=smooth(-.75,.25,travel), zoom=smooth(.5,1.65,travel);
-    const scale=1+zoom*(reduced?.45:2.9);
+    const scale=1+zoom*2.9;
     identity.rotation.set(-tilt*.10-zoom*.2,tilt*.236+zoom*.785,0);
     identity.scale.setScalar(scale);identity.position.set(zoom*.65,-.05,0);
     uniforms.uTime.value=time/1000;uniforms.uReveal.value=tilt;
-    vision.style.setProperty('--vision-blur',`${zoom*(reduced?0:7)}px`);
+    vision.style.setProperty('--vision-blur',`${zoom*7}px`);
     vision.style.setProperty('--vision-copy-opacity',String(1-zoom*.7));
+    if(pointerPrimed) {
+      residual.copy(pointer).sub(filteredPointer);
+      filteredPointer.addScaledVector(residual,Math.min(1,dt*10));
+      velocity.lerp(residual,Math.min(1,dt*20));
+      fluid.update({x:filteredPointer.x,y:filteredPointer.y,space:'ndc',deltaX:velocity.x*(reduced?.35:1),deltaY:velocity.y*(reduced?.35:1)});
+    }
     fluid.step(dt);renderer.render(scene,camera);
-    if(scrollY>rootTop-innerHeight*.28 && scrollY<rootTop+rootHeight-innerHeight*.2) document.documentElement.dataset.referenceSurface='light';
+    if(scrollY>rootTop-innerHeight*.28) document.documentElement.dataset.referenceSurface=scrollY<rootTop+rootHeight-innerHeight*.2?'light':'dark';
     frame=requestAnimationFrame(render);
   }
   function resume(){if(!frame && active && !stopped && !document.hidden){last=performance.now();frame=requestAnimationFrame(render);}}
@@ -127,9 +139,9 @@ async function startLightChapters(root: HTMLElement, canvas: HTMLCanvasElement, 
   addEventListener('resize',measure,{passive:true,signal:events.signal});
   addEventListener('pointermove',event=>{
     if(!active || event.pointerType==='touch')return;
-    pointer.set(event.clientX/innerWidth,1-event.clientY/innerHeight);
-    if(pointerPrimed)fluid.update({x:pointer.x,y:pointer.y,deltaX:(pointer.x-previous.x)*(reduced?.35:1),deltaY:(pointer.y-previous.y)*(reduced?.35:1)});
-    previous.copy(pointer);pointerPrimed=true;
+    pointer.set(event.clientX/innerWidth*2-1,1-event.clientY/innerHeight*2);
+    if(!pointerPrimed)filteredPointer.copy(pointer);
+    pointerPrimed=true;
   },{passive:true,signal:events.signal});
   document.addEventListener('visibilitychange',resume,{signal:events.signal});
   addEventListener('pageshow',()=>{stopped=false;resume();},{signal:events.signal});
