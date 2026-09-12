@@ -52,7 +52,8 @@ html[data-reference-surface='light'] .home-v5 .reference-contact-pill { border-c
 }
 @media (prefers-reduced-motion: reduce) { .mission-identity { transform: none; } }
 
-.light-chapters { position: relative; background: #dfe8e9; }
+.light-chapters { position: relative; background: #dfe8e9; isolation: isolate; overflow: clip; }
+.home-writing { position: relative; z-index: 1; }
 .light-scene { height: 100svh; position: sticky; top: 0; margin-bottom: -100svh; pointer-events: none; }
 .light-scene canvas { display: block; width: 100%; height: 100%; }
 .light-chapters[data-light-ready] .mission-identity { visibility: hidden; }

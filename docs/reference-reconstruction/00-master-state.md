@@ -123,6 +123,14 @@ hashes, all-frame comparison, and performance trace.
 
 ## Active work
 
+- **Latest September 30 state:** read [the continuation ledger](2026-09-30-scroll-repair.md),
+  especially its final section, before relying on older behavior descriptions below. User now
+  explicitly requests pointer rotation only in the opening; automatic Works/scroll rotation has
+  been removed under that instruction, not as a performance shortcut. New light-chapter WebGL,
+  material picker, Contact composition, startup radial reveal, and footer construction animation
+  are implemented locally. First light-chapter rainbow/fragmented-outline versions were rejected
+  and corrected. Full reference parity and native performance remain unproven.
+
 - **Current Sept 30 continuation:** user rejected the combined layout, then clarified the exact
   intro/title/card sequence and later approved the first sequence while requesting corner UI
   refinement. The pale project-stage regression was reproduced and fixed through explicit CSS

@@ -180,3 +180,114 @@ No 100% match or full performance acceptance is claimed. Preserve protected GLB 
   title/illustration. These requests are open, not silently dropped.
 - Light-stage before capture saved as `light-sequence-before`; source rollback snapshots saved.
   Implementation was paused to prioritize the user's newly reported broken drag control.
+
+## Current handoff after the afternoon continuation
+
+Current instructions override the earlier automatic rotation behavior: the user explicitly says
+the identity should rotate only with the pointer at the top. `top-only-rotation/report.json`
+records one successful top pointer rotation and three unchanged orientations at actual scrollY
+1600, 2895, and 6600, with no errors. The controller remains visible but is disabled outside the
+opening and explains that state in its title. Project rail and wall/material animation continue.
+The light-chapter scripted tilt/close-up remains the separately requested Vision choreography.
+
+### Implemented, with bounded evidence
+
+- Opening travel increased to 280svh and outro to 240svh. Camera pullback now follows opening
+  scroll 0.35..1.25 viewports, rather than finishing on an earlier rotation trigger. WORKS has a
+  hold between entrance and exit; card lead-in remains consistent across scroll, buttons and snap.
+  `coupled-pullback-after` has continuous forward/reverse capture and 17 sampled screenshots;
+  four individually inspected. This is not native-rate parity evidence.
+- Found the persistent gray title/UI bug: scroll-bound opacity stranded the site at intermediate
+  values when the user stopped. ANIK now completes a short time-eased handoff at 0.95 viewports;
+  the opening UI is full-opacity while visible. `opening-contrast-after/report.json` verifies
+  opacity 1 at scrollY 0/648/800, hidden at 950/1449, and restored at 652. Two screenshots reviewed.
+- Custom dark material picker replaces native color popup: saturation/value drag, hue slider,
+  numeric RGB channels, outside click and Escape. `material-picker-after` changes red then restores
+  white, closes via Escape, zero page errors. Hue gradient initially lost a specificity contest;
+  fixed with `input.color-hue`, confirmed computed rainbow gradient and height 5px plus screenshot
+  `opening-contrast-after/picker-gradient-fixed.png`. Panel expands inline upward with its parent
+  anchored near the bottom, rather than browser popup. Lowercase color label restored.
+- Gizmo now draws three quaternion-projected orbit rings plus the double circular perimeter;
+  removed white center dot that hid the Z label. Its hit-area/held-drag fixes remain.
+- Background palette calibration is provisionally neutral RGB rather than red 0.6186 / green
+  1.2032 / blue 0.9502. `palette-neutral-before/after`: 24 simulated pictures p1598..1621; after
+  24 decoded/23 transitions/zero errors, last pair visually inspected. This restores warm/violet
+  chroma but is NOT an aligned all-frame reference comparison. Earlier calibration statistics
+  do not establish acceptance of this new candidate.
+- A surface energy now uses the reference additive transmission/environment expression instead
+  of replacing transmission with a dark environment mix. `surface-energy-before/after`: 24 PNGs
+  each, last pair inspected; brighter colored material retained provisionally. The attempted audit
+  output collided with an older report and did not overwrite it; rerun to a unique report name.
+  Surface mapping/refraction and highlight quality still differ from reference.
+- Opening pointer fluid feed now follows filtered NDC position at 10/s and filtered residual at
+  20/s once per frame, matching inspected reference behavior; event-only injection was weak and
+  discontinuous. `reference-pointer-study`, `current-pointer-before`, `current-pointer-filtered`
+  contain continuous slow/fast/stop input captures. Three after screenshots inspected, no page
+  errors. Strength and native timing remain provisional. Deterministic capture keeps its explicit
+  input path and is not equivalent to this real-input test.
+- New `light-chapters.ts`: lazy WebGL renderer, protected GLB clone, orthographic projection,
+  depth-mask plus expanded back-face outline, side-only moving noise/color, Vision tilt and large
+  close-up with text blur. Background uses fine grid/cross marks and pointer fluid. First candidate
+  used EdgesGeometry and rainbow on all sides: REJECTED by user; missing contour and excessive
+  rainbow are not accepted versions. Corrected `light-projection-after` has complete About contour,
+  colored left side and close-up; three frames inspected, six-position forward/reverse capture
+  records zero page errors. Some contour joins, exact side material and framing still need parity.
+- Light grid and cross marks now scroll at different reference-derived rates (grid 1.5 cells per
+  viewport scroll, crosses 0.1 world-size per viewport) with 5/s easing. `light-grid-scroll-after`
+  records forward/reverse positions. Pointer feed now uses the same two-stage filtering, producing
+  visible grid deformation and light wake. `light-pointer-filtered`: rest/moving/stop screenshots
+  inspected. Its source hash was read after a subsequent reduced-motion/header-lifecycle edit,
+  so it is NOT valid source provenance for that capture; actual served build was the preceding
+  light-pointer build. Fresh final capture must supersede it.
+- Reduced-motion light stage keeps scroll composition/zoom and material; reduces pointer force
+  only. Header returns to dark-scene styling after light-stage exit. Latest build passed.
+- Startup uses a 3-second expanding radial distortion/reveal based on reference final compositor;
+  no random rotational shake. Skipped for reduced motion, deterministic replay, and restored
+  nonzero scroll. `startup-radial-after`: eight sampled PNGs plus video, four inspected, zero
+  page errors. Entrance still lacks reference's loading-logo construction layer and is not exact.
+- Footer construction has 17 staggered drafting paths and four normalized wordmark outlines,
+  then staggered fill. `footer-construction-after`: seven sampled PNGs plus video, three inspected.
+  Static inline delay attributes triggered CSP errors; replaced by data attributes and JS style
+  properties. Do not weaken CSP. `opening-color-current.partial/FAILED.json` retains 120 PNGs
+  from the failed CSP capture; they are not an accepted capture.
+- Dedicated Contact page is now a short personal two-column composition with bilingual note,
+  email and Discord destinations, and compact links to preserved project/collaboration routes.
+  `reference-footer-contact/contact-local-before.png`, `contact-local-after.png`, and
+  `contact-report.json` record before/after and actual hrefs; after visually inspected. Ref Contact
+  screenshot must be `contact-settled.png`; earlier `contact.png` caught a loading transition.
+- User rejected generic/professional Bengali copy repeatedly, then explicitly said to use the
+  current copy for now and prioritize visual work. Current mission: “নতুন কিছু বানাতে মজা লাগে।
+  আপনার মাথায় কোনো আইডিয়া থাকলে, শুনতে চাই।” Vision: “ভালো লাগে বলেই এত সময় দিই।” About now
+  uses short personal English copy, age 22 supplied by user, projects, with university/location
+  in facts below. Stop proposing more unsolicited slogans.
+
+### Evidence boundaries and remaining work
+
+All new videos are isolated Chrome/Playwright diagnostics, usually encoded at 25fps. They are
+not verified native 120fps recordings. Full 32,607-frame latest-build parity, complete individual
+visual review, reduced-motion runtime proof, native CPU/GPU/VRAM/frame pacing, and mobile
+acceptance remain OPEN. The archived native corpus begins after projects; its first frame must
+not be used as a homepage-opening composition target. Align reference state/input, not just time.
+
+Still unresolved: precise opening background sequence/color placement; A material/reflection
+detail and highlights; exact card glass edge/refraction polish; whole-site pointer consistency;
+light-stage material/contour and exit; reference loading construction; remaining interior-page
+motion/layout; final all-frame/native performance gates. Retain all these in the task scope.
+`full-review-latest` is the in-progress current-build continuous forward/reverse and route check.
+
+Protected GLB hash reverified unchanged. No commit, push, deployment, or workflow edit.
+
+Latest verification update: `full-review-latest` completed with unchanged source/build hashes
+during capture, no page/console errors (the known ignored meta frame-ancestors warning excluded),
+16 forward/reverse stops, and five routes returning 200 without horizontal overflow. Video has
+870 decoded frames at 25fps, 1690x872; six stage screenshots individually inspected, not all 870
+frames. `reduced-light-latest/vision.png` individually reviewed: requested reduced motion retains
+the outlined 3D composition and colored side, no page errors. Native performance is not measured.
+`surface-energy-current-integrity.json` now audits the correct 24-frame material candidate:
+24 decoded, 23 adjacent transitions, zero errors. Only its final before/after pair was visually
+reviewed. Do not confuse that integrity report with full reference/material acceptance.
+
+Final hue-strip correction was visually verified and computed as a seven-stop rainbow gradient,
+5px high. `opening-contrast-after/picker-gradient-fixed.png` shows it with the updated orbit rings.
+Light grid scroll and filtered pointer are retained provisionally; exact reference force, contour
+joins, lighting and color field still need comparison. Keep preview at http://127.0.0.1:4321/.
