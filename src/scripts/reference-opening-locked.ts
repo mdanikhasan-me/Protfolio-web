@@ -13,7 +13,6 @@ const section = document.querySelector<HTMLElement>('[data-reference-opening]');
 const world = document.querySelector<HTMLElement>('[data-reference-world]');
 const canvas = world?.querySelector<HTMLCanvasElement>('[data-reference-canvas]');
 const curveSection = document.querySelector<HTMLElement>('[data-curve-work]');
-const meltSection = document.querySelector<HTMLElement>('[data-melt-section]');
 const stateReadout = world?.querySelector<HTMLElement>('[data-reference-state]');
 const quaternionReadout = world?.querySelector<HTMLElement>('[data-reference-fold]');
 const resetButton = world?.querySelector<HTMLButtonElement>('[data-reference-reset]');
@@ -1690,6 +1689,7 @@ async function startReferenceWorld(
   const interactionQuaternion = new THREE.Quaternion();
   const composedIdentityQuaternion = new THREE.Quaternion();
   const deltaQuaternion = new THREE.Quaternion();
+  const scrollRotationAxis = new THREE.Vector3(0, 1, 0);
   const hoverEuler = new THREE.Euler();
   const fluidPointer = new THREE.Vector2();
   const fluidVelocity = new THREE.Vector2();
@@ -1789,7 +1789,6 @@ async function startReferenceWorld(
   let responsiveIdentityScale = identityBaseScale;
   let responsiveWordScale = 1;
   let worldInView = true;
-  let surfaceUpdateFrame = 0;
   let controllerUpdateElapsed = 0;
   let renderReady = false;
   let disposed = false;
@@ -2158,37 +2157,6 @@ async function startReferenceWorld(
   rotationGizmo?.addEventListener('pointercancel', releaseGizmo);
   rotationGizmo?.addEventListener('lostpointercapture', releaseGizmo);
 
-  const updateSurfaceChrome = () => {
-    if (!meltSection) return;
-    let boundsTop: number;
-    let boundsBottom: number;
-    if (referenceMotionState.meltBoundsHeight > 0) {
-      boundsTop = referenceMotionState.meltDocumentTop - scrollY;
-      boundsBottom = boundsTop + referenceMotionState.meltBoundsHeight;
-    } else {
-      const bounds = meltSection.getBoundingClientRect();
-      boundsTop = bounds.top;
-      boundsBottom = bounds.bottom;
-    }
-    const onLight = boundsTop < innerHeight * 0.28 && boundsBottom > 0;
-    const nextSurface = onLight ? 'light' : 'dark';
-    if (document.documentElement.dataset.referenceSurface !== nextSurface) {
-      document.documentElement.dataset.referenceSurface = nextSurface;
-    }
-  };
-
-  const requestSurfaceChromeUpdate = () => {
-    if (surfaceUpdateFrame) return;
-    surfaceUpdateFrame = requestAnimationFrame(() => {
-      surfaceUpdateFrame = 0;
-      updateSurfaceChrome();
-    });
-  };
-
-  addEventListener('scroll', requestSurfaceChromeUpdate, { passive: true });
-  addEventListener('resize', requestSurfaceChromeUpdate, { passive: true });
-  updateSurfaceChrome();
-
   const render = (time: number) => {
     animationFrame = 0;
     if (disposed || (!deterministicCaptureMode && (document.hidden || !worldInView))) return;
@@ -2283,7 +2251,7 @@ async function startReferenceWorld(
     const returnForce = rotationEnabled ? 2 : 12;
     const scrollRotation = (smoothstep(1.25, 2.45, scrollY / Math.max(1, innerHeight)) * 0.16 +
       clamp(referenceMotionState.wallProjectProgress / 5) * 0.60) * (1 - smoothstep(0, 0.35, outroProgress));
-    if (!rotationEnabled) deltaQuaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -scrollRotation);
+    if (!rotationEnabled) deltaQuaternion.setFromAxisAngle(scrollRotationAxis, -scrollRotation);
     // A captured drag owns the orientation until release. Returning toward rest here
     // erodes a stationary held pose even though no new pointer input was received.
     if (!gizmoDragging) {
@@ -2344,7 +2312,7 @@ async function startReferenceWorld(
         ? clamp(currentGalleryProgress / Math.max(1, galleryVisuals.length + 1))
         : referenceMotionState.worksProgress,
     );
-    if (backgroundTimeOverride !== null) {
+    if (backgroundTimeOverride !== null || captureParameters.get('__inspectScene') === '1') {
       const backgroundState = openingBackground.debugState();
       openingElement.dataset.backgroundState = [
         backgroundState.picture,
@@ -2563,7 +2531,6 @@ async function startReferenceWorld(
     if (disposed) return;
     disposed = true;
     cancelAnimationFrame(animationFrame);
-    cancelAnimationFrame(surfaceUpdateFrame);
     cancelAnimationFrame(resizeFrame);
     worldObserver.disconnect();
     canvasResizeObserver?.disconnect();
@@ -2578,8 +2545,6 @@ async function startReferenceWorld(
     rotationGizmo?.removeEventListener('pointerup', releaseGizmo);
     rotationGizmo?.removeEventListener('pointercancel', releaseGizmo);
     rotationGizmo?.removeEventListener('lostpointercapture', releaseGizmo);
-    removeEventListener('resize', requestSurfaceChromeUpdate);
-    removeEventListener('scroll', requestSurfaceChromeUpdate);
     setCurveCursor('');
     fluid?.dispose();
     zeroVelocityTexture.dispose();
@@ -2626,16 +2591,13 @@ async function startReferenceWorld(
       return;
     }
     cancelAnimationFrame(animationFrame);
-    cancelAnimationFrame(surfaceUpdateFrame);
     cancelAnimationFrame(resizeFrame);
     animationFrame = 0;
-    surfaceUpdateFrame = 0;
     resizeFrame = 0;
   };
   const onPageShow = (event: PageTransitionEvent) => {
     if (!event.persisted || disposed) return;
     resize();
-    updateSurfaceChrome();
     resumeRender();
   };
   addEventListener('pagehide', onPageHide);

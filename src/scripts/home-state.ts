@@ -79,6 +79,12 @@ const sectionLandmarks = [null, curveSection, meltSection,
   document.querySelector<HTMLElement>('.home-writing')];
 let sectionStarts = [0, 0, 0, 0, 0];
 let contactStart = Infinity;
+const contactStage = document.querySelector<HTMLElement>('.home-contact-stage');
+let contactStageTop = Infinity;
+let contactStageHeight = 0;
+const lightChapters = document.querySelector<HTMLElement>('[data-light-chapters]');
+let lightTop = Infinity;
+let lightBottom = Infinity;
 let railActive = -1;
 function updateSectionRail() {
   let active = 0;
@@ -96,6 +102,11 @@ const curveViewportBounds: SectionBounds = { top: 0, bottom: 0, height: 0 };
 
 function measureMotionSections() {
   const pageY = scrollY;
+  if (lightChapters) {
+    const bounds = lightChapters.getBoundingClientRect();
+    lightTop = pageY + bounds.top;
+    lightBottom = pageY + bounds.bottom;
+  }
   if (worksOutro) {
     const bounds = worksOutro.getBoundingClientRect();
     worksOutroTop = pageY + bounds.top;
@@ -104,6 +115,11 @@ function measureMotionSections() {
   sectionStarts = sectionLandmarks.map(element => element ? pageY + element.getBoundingClientRect().top : 0);
   const contact = document.querySelector<HTMLElement>('.home-contact');
   contactStart = contact ? pageY + contact.getBoundingClientRect().top : Infinity;
+  if (contactStage) {
+    const bounds = contactStage.getBoundingClientRect();
+    contactStageTop = pageY + bounds.top;
+    contactStageHeight = bounds.height;
+  }
   updateSectionRail();
   if (meltSection) {
     const bounds = meltSection.getBoundingClientRect();
@@ -487,6 +503,13 @@ const smoothScrollFrame = (time: number) => {
   smoothScroller?.raf(time);
   referenceMotionState.worksOutroProgress = clamp((scrollY + innerHeight - worksOutroTop) / Math.max(1, worksOutroHeight));
   updateSectionRail();
+  if (contactStage && scrollY + innerHeight > contactStart) {
+    const clip = Math.max(0, Math.min(contactStageHeight, 104 - (contactStageTop - scrollY)));
+    contactStage.style.setProperty('--contact-clip-top', `${clip}px`);
+  }
+  const headerSampleY = scrollY + 64;
+  const surface = headerSampleY >= lightTop && headerSampleY < lightBottom ? 'light' : 'dark';
+  if (document.documentElement.dataset.referenceSurface !== surface) document.documentElement.dataset.referenceSurface = surface;
   if (meltNearViewport || curveNearViewport) {
     updateAll(time);
   } else {
@@ -526,6 +549,12 @@ addEventListener('pageshow', (event) => {
 document
   .querySelectorAll<HTMLDetailsElement>('.mobile-navigation, .reference-mobile-menu')
   .forEach((navigation) => {
+    navigation.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && navigation.open) {
+        navigation.open = false;
+        navigation.querySelector<HTMLElement>('summary')?.focus();
+      }
+    });
     navigation.querySelectorAll('a').forEach((link) => {
       link.addEventListener('click', () => {
         navigation.open = false;
