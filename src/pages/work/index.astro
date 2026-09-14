@@ -5,13 +5,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 const projects = (await getCollection('projects', ({ data }) => !data.draft)).sort(
   (a, b) => a.data.order - b.data.order,
 );
-const media: Record<string, string> = { boilabin: 'boilabin-preview', soctukit: 'soctukit', 'uiu-discord-bot': 'uiu-discord-bot', 'salty-potato-ai': 'salty-potato-ai' };
+const media: Record<string, string> = { boilabin: 'boilabin-preview', soctukit: 'soctukit', 'uiu-discord-bot': 'uiu-discord-bot', 'salty-potato-ai': 'salty-steak' };
 const categories = [...new Set(projects.map(project => project.data.kind))];
 ---
 
 <BaseLayout
   title="Selected Software and Website Projects | MD Anik Hasan"
-  description="Boilabin, SoctuKit, UIU Discord Bot, and Salty Potato AI: selected web, desktop, automation, and language-model work by MD Anik Hasan."
+  description="Boilabin, SoctuKit, UIU Discord Bot, and Salty Steak: selected web, desktop, automation, and language-model work by MD Anik Hasan."
 >
   <section class="work-archive" aria-labelledby="archive-title">
     <aside class="archive-rail">

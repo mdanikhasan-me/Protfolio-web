@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import ProjectDetail from '../../components/ProjectDetail.astro';
 
 const project = (await getCollection('projects')).find((entry) => entry.id === 'salty-potato-ai');
-if (!project) throw new Error('Salty Potato AI content is missing.');
+if (!project) throw new Error('Salty Steak content is missing.');
 ---
 
 <ProjectDetail project={project} />

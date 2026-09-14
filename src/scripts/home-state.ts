@@ -20,6 +20,9 @@ const smoothScroller = new Lenis({
   smoothWheel: !reduceMotion,
   wheelMultiplier: 1,
 });
+addEventListener('portfolio:reload-top', () => {
+  smoothScroller.scrollTo(0, { immediate: true, force: true });
+});
 
 const meltSection = document.querySelector<HTMLElement>('[data-melt-section]');
 const meltDisplacement = meltSection?.querySelector<SVGFEDisplacementMapElement>(
