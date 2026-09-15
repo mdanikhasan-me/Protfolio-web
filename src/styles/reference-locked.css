@@ -158,20 +158,7 @@ html[data-reference-surface='light'] .reference-contact-pill:focus-visible {
 .world-handoff-space { height: 100svh; pointer-events: none; }
 
 .reference-world-scene {
-  background:
-    radial-gradient(
-      circle at 50% 46%,
-      rgb(32 34 112 / 72%) 0,
-      rgb(12 13 55 / 82%) 36%,
-      transparent 68%
-    ),
-    linear-gradient(rgb(100 111 190 / 10%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(100 111 190 / 10%) 1px, transparent 1px), #05051b;
-  background-size:
-    auto,
-    clamp(3rem, 5.8vw, 7rem) clamp(3rem, 5.8vw, 7rem),
-    clamp(3rem, 5.8vw, 7rem) clamp(3rem, 5.8vw, 7rem),
-    auto;
+  background: #000;
   height: 100svh;
   inset: 0 0 auto;
   overflow: hidden;
@@ -188,6 +175,11 @@ html[data-reference-surface='light'] .reference-contact-pill:focus-visible {
   position: absolute;
   width: 100%;
   z-index: 1;
+}
+
+/* Do not expose a placeholder chamber or an uninitialized orientation widget. */
+.reference-world:not([data-frame-ready='true']):not([data-model-error='true']) :is(.reference-opening-ui, .reference-telemetry-right) {
+  visibility: hidden;
 }
 
 .reference-opening {
