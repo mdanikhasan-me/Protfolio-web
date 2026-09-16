@@ -39,6 +39,9 @@ lighthouse-reports/
 artifacts/
 
 # Local concept work, caches, renders, captures, and backups
+.codex-local/
+.codex-reference-analysis/
+.codex-tmp/
 .reference-local/
 .reference-analysis/
 .tmp/

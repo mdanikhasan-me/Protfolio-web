@@ -99,7 +99,8 @@ function updateSectionRail() {
     });
     railActive = active;
   }
-  if (sectionRail) sectionRail.dataset.hidden = String(scrollY + innerHeight * 0.5 >= contactStart);
+  const hidden = String(scrollY + innerHeight * 0.5 >= contactStart);
+  if (sectionRail && sectionRail.dataset.hidden !== hidden) sectionRail.dataset.hidden = hidden;
 }
 const curveViewportBounds: SectionBounds = { top: 0, bottom: 0, height: 0 };
 
@@ -280,7 +281,8 @@ function renderCurve(progress: number) {
   const exit = Math.min(1, (curveCards.length + 1 - progress) * 2);
   const sectionPresence = clamp(Math.min(entrance, exit));
   const curvePresence = sectionPresence.toFixed(4);
-  curveSection.dataset.railActive = String(sectionPresence > 0.02);
+  const railVisible = String(sectionPresence > 0.02);
+  if (curveSection.dataset.railActive !== railVisible) curveSection.dataset.railActive = railVisible;
   if (curvePresence !== lastCurvePresence) {
     curveSection.style.setProperty('--curve-presence', curvePresence);
     lastCurvePresence = curvePresence;
@@ -340,14 +342,16 @@ function updateAll(timestamp = performance.now()) {
   const deltaSeconds = Math.min(0.05, Math.max(1 / 240, (timestamp - lastMotionFrame) / 1_000));
   lastMotionFrame = timestamp;
   updateMelt();
-  openingSection?.style.setProperty('--opening-ui-presence',
-    scrollY < innerHeight * 0.95 ? '1' : '0');
-  if (openingSection) openingSection.dataset.openingActive = String(scrollY < innerHeight * 0.95);
+  const openingActive = scrollY < innerHeight * 0.95;
+  if (openingSection && openingSection.dataset.openingActive !== String(openingActive)) {
+    openingSection.style.setProperty('--opening-ui-presence', openingActive ? '1' : '0');
+    openingSection.dataset.openingActive = String(openingActive);
+  }
   const curveBounds =
-    curveSection && curveNearViewport && usesStageRail() && curveCards.length
+    curveSection && usesStageRail() && curveCards.length
       ? readCurveBounds()
       : undefined;
-  if (curveNearViewport) updateCurveTarget(curveBounds);
+  updateCurveTarget(curveBounds);
 
   if (meltNearViewport) {
     const meltBlend = 1 - Math.exp(-12 * deltaSeconds);
@@ -356,7 +360,14 @@ function updateAll(timestamp = performance.now()) {
     renderMelt(renderedMelt);
   }
 
-  if (curveSection && curveNearViewport && usesStageRail() && curveCards.length) {
+  if (curveSection && usesStageRail() && curveCards.length) {
+    // A native jump can skip the observer's entire active interval. Clear the
+    // departed rail state from actual document position, never observer history.
+    if (!curveNearViewport && (targetCurveTrigger === 0 || targetCurveTrigger === 1)) {
+      renderedCurveTrigger = targetCurveTrigger;
+      renderedCurveProgress = targetCurveTrigger * (curveCards.length + 1);
+      renderedCurveVelocity = 0;
+    }
     const triggerBlend = Math.min(1, deltaSeconds * 10);
     const firstStageResidual = targetCurveTrigger - renderedCurveTrigger;
     renderedCurveTrigger += (targetCurveTrigger - renderedCurveTrigger) * triggerBlend;
@@ -446,9 +457,33 @@ if (curveSection && curveCards.length) {
 let worksSnapTimer = 0;
 let worksSnapInFlight = false;
 let lastWorksInputAt = 0;
+let wheelOwnsSnap = false;
+const nativeScrollEvents = new AbortController();
+const yieldToNativeScroll = () => {
+  wheelOwnsSnap = false;
+  clearTimeout(worksSnapTimer);
+  worksSnapInFlight = false;
+  smoothScroller.scrollTo(scrollY, { immediate: true, force: true });
+};
+addEventListener('pointerdown', event => {
+  if (event.button === 1 || event.clientX >= document.documentElement.clientWidth) yieldToNativeScroll();
+}, { passive: true, signal: nativeScrollEvents.signal });
+addEventListener('keydown', event => {
+  if (['Home','End','PageUp','PageDown','ArrowUp','ArrowDown',' '].includes(event.key) &&
+      !(event.target instanceof HTMLElement && event.target.closest('input,textarea,select,[contenteditable="true"]'))) yieldToNativeScroll();
+}, { signal: nativeScrollEvents.signal });
+addEventListener('scroll', () => {
+  // Lenis's own writes round by at most one pixel. A larger discrepancy is a
+  // browser-native scroll source (autoscroll, scrollbar drag, anchor or keyboard).
+  if (Math.abs(scrollY - smoothScroller.animatedScroll) > 2) yieldToNativeScroll();
+  else if (smoothScroller.isScrolling === 'native') {
+    wheelOwnsSnap = false;
+    clearTimeout(worksSnapTimer);
+  }
+}, { passive: true, signal: nativeScrollEvents.signal });
 const snapWorksToNearestProject = () => {
   worksSnapTimer = 0;
-  if (!curveSection || !curveCards.length || worksSnapInFlight || !curveNearViewport) return;
+  if (!wheelOwnsSnap || !curveSection || !curveCards.length || worksSnapInFlight || !curveNearViewport) return;
   // Wait for Lenis and the wheel/trackpad stream to be genuinely idle. The earlier timeout was
   // restarted by rendered scroll events, so a slow capture or a low-frequency wheel could begin a
   // locked snap between two trusted impulses and pin the rail to project one.
@@ -475,6 +510,7 @@ const snapWorksToNearestProject = () => {
   });
 };
 const unsubscribeWorksInput = smoothScroller.on('virtual-scroll', () => {
+  wheelOwnsSnap = true;
   lastWorksInputAt = performance.now();
   if (worksSnapInFlight) {
     worksSnapInFlight = false;
@@ -482,7 +518,7 @@ const unsubscribeWorksInput = smoothScroller.on('virtual-scroll', () => {
   clearTimeout(worksSnapTimer);
 });
 const unsubscribeWorksSnap = smoothScroller.on('scroll', () => {
-  if (worksSnapInFlight || !curveNearViewport || smoothScroller.isScrolling !== false) return;
+  if (!wheelOwnsSnap || worksSnapInFlight || !curveNearViewport || smoothScroller.isScrolling !== false) return;
   clearTimeout(worksSnapTimer);
   worksSnapTimer = window.setTimeout(snapWorksToNearestProject, reduceMotion ? 80 : 220);
 });
@@ -508,16 +544,13 @@ const smoothScrollFrame = (time: number) => {
   updateSectionRail();
   if (contactStage && scrollY + innerHeight > contactStart) {
     const clip = Math.max(0, Math.min(contactStageHeight, 104 - (contactStageTop - scrollY)));
-    contactStage.style.setProperty('--contact-clip-top', `${clip}px`);
+    const value = `${clip}px`;
+    if (contactStage.style.getPropertyValue('--contact-clip-top') !== value) contactStage.style.setProperty('--contact-clip-top', value);
   }
   const headerSampleY = scrollY + 64;
   const surface = headerSampleY >= lightTop && headerSampleY < lightBottom ? 'light' : 'dark';
   if (document.documentElement.dataset.referenceSurface !== surface) document.documentElement.dataset.referenceSurface = surface;
-  if (meltNearViewport || curveNearViewport) {
-    updateAll(time);
-  } else {
-    lastMotionFrame = time;
-  }
+  updateAll(time);
   smoothScrollAnimationFrame = requestAnimationFrame(smoothScrollFrame);
 };
 const startMotionLoop = () => {
@@ -535,6 +568,7 @@ addEventListener('pagehide', (event) => {
   clearTimeout(worksSnapTimer);
   unsubscribeWorksSnap();
   unsubscribeWorksInput();
+  nativeScrollEvents.abort();
   motionSectionObserver?.disconnect();
   motionSectionResizeObserver?.disconnect();
   smoothScroller?.destroy();
