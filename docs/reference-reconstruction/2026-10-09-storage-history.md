@@ -61,10 +61,10 @@ Backups outside the repository:
 - `history-original.json`, `history-plan.json`, and `history-result.json`: original
   messages, replacements, source snapshots, and old-to-new commit mapping.
 
-Only the active published branch is to be updated. Local rejected attempts and
-the immutable baseline remain available under their original refs. The push uses
-an explicit lease against the fetched remote tip, so an intervening remote update
-cannot be silently overwritten.
+The active published branch was updated to `9a09b782` using an explicit lease
+against `47eea062`. Remote verification matched the prepared 228-commit history.
+GitHub Pages run `37859757542` completed successfully. Local rejected attempts and
+the immutable baseline remain available under their original refs.
 
 ## Current checks
 
@@ -80,3 +80,26 @@ Protected GLB SHA-256 remains
 `04FCA919EBF33F69F31133B68401721186C6A5EFB61E92A6CBD0035E74B8CD6E`.
 Full current/reference frame comparison, exact material parity, native performance,
 and final desktop/mobile acceptance remain open.
+
+## Color control continuation
+
+The closed material control clipped the last 17 pixels of its RGB readout at
+390, 1366, 1691, and 1920 CSS pixels. Opening the picker expanded the fieldset,
+so its width also jumped during use. Set the fieldset width from 250 to 276 pixels,
+matching the existing picker width plus its left margin. No material, geometry,
+animation, or controller source changed.
+
+Before evidence: `D:/Portfolio Evidence/current-20261009/controls-before/`.
+Narrow rollback: `reference-locked.controls-before.css` in the maintenance folder.
+After evidence: `controls-after/` and `controls-after-settled/` under the same D:
+root. Reports record source/build hashes, browser version, and capture timestamps.
+The latter waits past the three-second startup distortion before taking screenshots.
+These captures measure control layout; they are not aligned material comparisons.
+
+All four widths show the complete readout when closed, open, and closed with
+Escape. No horizontal page overflow or browser errors. The settled desktop closed
+and mobile open screenshots were individually inspected, along with the connected
+Edge opening and picker interaction. Other widths have DOM geometry checks and
+retained screenshots, not a claim of individual visual review. The fresh build
+passed with the same existing Vite warnings. Decision: retain this scoped fix.
+Full reference parity and native performance acceptance remain open.
