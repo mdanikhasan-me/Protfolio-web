@@ -23,6 +23,7 @@ const REFERENCE_OPENING_PICTURES = 32_607;
 const REFERENCE_NOISE_TIME_OFFSET = 70.5;
 const captureLayoutRaw = new URLSearchParams(location.search).get('__captureLayout');
 const captureMotifParameters = new URLSearchParams(location.search);
+const recordedReplay = captureMotifParameters.get('__capture') === '1';
 const compareUncorrectedMotifs = captureMotifParameters.get('__capture') === '1' &&
   captureMotifParameters.get('__captureUncorrectedMotifs') === '1';
 const captureLayoutParsed = captureLayoutRaw === null ? Number.NaN : Number(captureLayoutRaw);
@@ -63,7 +64,7 @@ const fullScreenVertexShader = /* glsl */ `
   }
 `;
 
-const noiseFragmentShader = /* glsl */ `
+export const noiseFragmentShader = /* glsl */ `
   precision highp float;
 
   varying vec2 vUv;
@@ -1082,11 +1083,18 @@ export function createReferenceBackgroundSystem(
   let layoutStep = 0;
   let symbolStep = 0;
   let patternStep = 0;
+  const symbolRandom = createSeededRandom(0x4e414d45);
+  let nextLiveSymbolTime = 0;
+  const patternRandom = createSeededRandom(0x50414e4c);
+  let nextLivePatternTime = 0;
+  let nextLiveLayoutTime = 4;
+  const panelRandom = createSeededRandom(0x4c454453);
+  let liveBlackout = 0, blackoutStart = 0, blackoutFrom = 0, blackoutTo = 0;
+  let nextLiveUvTime = 0, uvStart = 0, uvPowerFrom = 0, uvPowerTo = 0, uvHashFrom = 0, uvHashTo = 0;
   let mobileDenseLayout = false;
-  // Native 2560 x 1440 / 120 fps audit of all 17,373 opening pictures; picture 17,374
-  // is the first frame of the works rail.
-  // Major states cut on the first changed source frame. Two recorded non-instant windows keep
-  // their spatial transition instead of being flattened into the old random/skip scheduler.
+  // Historical recorded-event reconstruction, used only by explicit capture replay.
+  // These local indices are not homepage section boundaries: the archived native
+  // recording starts in Works. Live rendering uses independent timers below.
   const openingPatternSequence: OpeningPatternStep[] = [
     { picture: 302, pattern: 1, transition: 0, duration: 0 },
     { picture: 709, pattern: 0, transition: 0, duration: 0 },
@@ -1282,9 +1290,7 @@ export function createReferenceBackgroundSystem(
     { picture: 17227, mode: 3 },
     { picture: 17430, mode: 2 },
   ];
-  // Picture 17,374 is the first frame where the reference leaves the opening for the works rail.
-  // Keep the complete opening chronology alive when somebody remains at the top of the page;
-  // otherwise the finite forensic schedule would stop on its final palette and look frozen.
+  // Bound the recorded schedule. Live timers also restart after this interval.
   const openingLoopDuration = REFERENCE_OPENING_PICTURES / REFERENCE_FPS;
   let previousOpeningElapsed = 0;
   let previousProjectElapsed = 0;
@@ -1319,6 +1325,10 @@ export function createReferenceBackgroundSystem(
     patternStep = 0;
     layoutStep = 0;
     symbolStep = 0;
+    nextLiveSymbolTime = 0;
+    nextLivePatternTime = 0;
+    nextLiveLayoutTime = 4;
+    nextLiveUvTime = 0;
     tileUniforms.uPatternCurrent.value = patternTargets[2].texture;
     tileUniforms.uPatternNext.value = patternTargets[2].texture;
     tileUniforms.uPaletteCalibrationCurrent.value.copy(patternPaletteCalibrations[2]);
@@ -1401,7 +1411,7 @@ export function createReferenceBackgroundSystem(
     tileUniforms.uWorksPage.value = THREE.MathUtils.euclideanModulo(renderedProjectProgress, 1);
     setProjectTexturePair(renderedProjectProgress);
 
-    while (
+    while (recordedReplay &&
       patternStep < openingPatternSequence.length &&
       openingPicture >= openingPatternSequence[patternStep]!.picture
     ) {
@@ -1415,6 +1425,14 @@ export function createReferenceBackgroundSystem(
         step.duration,
       );
     }
+    if (!recordedReplay && elapsed >= nextLivePatternTime) {
+      const pattern = Math.floor(patternRandom() * 3) as PatternIndex;
+      const opening = window.scrollY < window.innerHeight * 0.95;
+      const transition = opening ? Math.floor(patternRandom() * 3) : 0;
+      const duration = [0, 0.3, 3][transition]!;
+      beginPatternChange(elapsed, pattern, transition, duration);
+      nextLivePatternTime = elapsed + duration + 1 + patternRandom();
+    }
 
     if (transitionDuration > 0) {
       const progress = THREE.MathUtils.clamp(
@@ -1425,7 +1443,7 @@ export function createReferenceBackgroundSystem(
       tileUniforms.uPatternMix.value = progress;
     }
 
-    while (
+    while (recordedReplay &&
       layoutStep < openingLayoutSequencePictures.length &&
       openingPicture >= openingLayoutSequencePictures[layoutStep]!
     ) {
@@ -1436,6 +1454,14 @@ export function createReferenceBackgroundSystem(
         : quadtreeGeometries;
       tileMesh.geometry = activeGeometries[layoutIndex] ?? activeGeometries[0]!;
     }
+    if (!recordedReplay && elapsed >= nextLiveLayoutTime) {
+      if (window.scrollY < window.innerHeight * 0.95) {
+        layoutIndex = Math.floor(patternRandom() * quadtreeGeometries.length);
+        const layouts = mobileDenseLayout ? mobileQuadtreeGeometries : quadtreeGeometries;
+        tileMesh.geometry = layouts[layoutIndex]!;
+      }
+      nextLiveLayoutTime = elapsed + 4;
+    }
     if (captureLayoutOverride !== null) {
       const activeGeometries = mobileDenseLayout
         ? mobileQuadtreeGeometries
@@ -1443,23 +1469,30 @@ export function createReferenceBackgroundSystem(
       tileMesh.geometry = activeGeometries[captureLayoutOverride] ?? activeGeometries[0]!;
     }
 
-    tileUniforms.uDisplayGain.value = openingDisplayGainForPicture(
-      openingPicture,
-      nextPattern,
-    );
-    while (
-      symbolStep < openingSymbolSequence.length &&
-      openingPicture >= openingSymbolSequence[symbolStep]!.picture
-    ) {
-      tileUniforms.uSymbolMode.value = openingSymbolSequence[symbolStep]!.mode;
-      symbolStep += 1;
+    tileUniforms.uDisplayGain.value = recordedReplay
+      ? openingDisplayGainForPicture(openingPicture,nextPattern)
+      : patternGains[nextPattern];
+    if (recordedReplay) {
+      while (
+        symbolStep < openingSymbolSequence.length &&
+        openingPicture >= openingSymbolSequence[symbolStep]!.picture
+      ) {
+        tileUniforms.uSymbolMode.value = openingSymbolSequence[symbolStep]!.mode;
+        symbolStep += 1;
+      }
+    } else if (elapsed >= nextLiveSymbolTime) {
+      // Reference logo layouts reroll on the one-second blackout timer. Mode 3
+      // belongs only to the recorded reconstruction; it must not blank live names.
+      tileUniforms.uSymbolMode.value = Math.floor(symbolRandom() * 3);
+      nextLiveSymbolTime = elapsed + 1;
+      liveBlackout = nextPattern === 0 ? 0 : panelRandom() * 0.5;
+      blackoutFrom = tileUniforms.uBlackoutSeed.value;
+      blackoutTo = panelRandom();
+      blackoutStart = elapsed;
     }
 
-    // The source site drives these two effects from independent random timers. Re-running those
-    // timers invents new panel blackouts and UV jumps that are absent from the locked recording
-    // (for example the former p21/p24/p32 discontinuities). Hold the exact settled seeded state
-    // measured at p36 between the picture-indexed pattern/layout/identity events above. Pattern 0
-    // has no blackout or UV-shift effect in the production parameter set.
+    // Keep locked replay's measured seed values separate from live timer behavior.
+    // Pattern 0 has no blackout or UV-shift effect in the reference parameter set.
     const stochasticPattern = nextPattern === 0 ? 0 : 1;
     // The first binary chapter contains materially more illuminated wall area than the settled
     // stochastic state used by the later monochrome chapters. Reusing the 29% blackout here made
@@ -1474,11 +1507,28 @@ export function createReferenceBackgroundSystem(
       : openingPicture >= 302 && openingPicture < 398 && nextPattern === 1
         ? 0.12
         : 0.2909043020;
-    tileUniforms.uBlackoutRate.value = openingBlackoutRate * stochasticPattern;
-    tileUniforms.uBlackoutSeed.value = 0.3519695295 * stochasticPattern;
-    tileUniforms.uUvShiftRate.value = 0.50 * stochasticPattern;
-    tileUniforms.uUvShiftPower.value = 0.1749866440 * stochasticPattern;
-    tileUniforms.uUvShiftSeed.value = 0.9130476599 * stochasticPattern;
+    if (recordedReplay) {
+      tileUniforms.uBlackoutRate.value = openingBlackoutRate * stochasticPattern;
+      tileUniforms.uBlackoutSeed.value = 0.3519695295 * stochasticPattern;
+      tileUniforms.uUvShiftRate.value = 0.50 * stochasticPattern;
+      tileUniforms.uUvShiftPower.value = 0.1749866440 * stochasticPattern;
+      tileUniforms.uUvShiftSeed.value = 0.9130476599 * stochasticPattern;
+    } else {
+      if (elapsed >= nextLiveUvTime) {
+        uvPowerFrom = tileUniforms.uUvShiftPower.value;
+        uvHashFrom = tileUniforms.uUvShiftSeed.value;
+        uvPowerTo = panelRandom();
+        uvHashTo = panelRandom();
+        uvStart = elapsed;
+        tileUniforms.uUvShiftRate.value = 0.5 * stochasticPattern;
+        nextLiveUvTime = elapsed + (stochasticPattern ? 0.1 + panelRandom() * 5 : 0.2 + panelRandom() * 0.5);
+      }
+      tileUniforms.uBlackoutRate.value = liveBlackout;
+      tileUniforms.uBlackoutSeed.value = THREE.MathUtils.lerp(blackoutFrom,blackoutTo,THREE.MathUtils.clamp((elapsed-blackoutStart)/0.3,0,1));
+      const powerProgress=THREE.MathUtils.clamp((elapsed-uvStart)/0.8,0,1);
+      tileUniforms.uUvShiftPower.value = THREE.MathUtils.lerp(uvPowerFrom,uvPowerTo,1-Math.pow(1-powerProgress,3));
+      tileUniforms.uUvShiftSeed.value = THREE.MathUtils.lerp(uvHashFrom,uvHashTo,THREE.MathUtils.clamp((elapsed-uvStart)/0.3,0,1));
+    }
 
     // The noise field and active 512x288 pattern must both advance in Works. Project colors only
     // tint the authored wall; freezing the active pattern here erased the recorded monochrome and

@@ -123,6 +123,17 @@ hashes, all-frame comparison, and performance trace.
 
 ## Active work
 
+- **October 1 live-sequence continuation:** [live sequence ledger](2026-10-01-live-sequence.md).
+  Live name/pattern/panel timers are now separated from forensic replay; normal browsing no longer
+  inherits name-blanking mode 3 or frozen stochastic seeds. Vision has a derived continuous front
+  contour and a shared-noise side material candidate. Exact material and native parity gates remain open.
+
+- **Latest section-boundary work:** [boundary audit](2026-09-30-boundary-audit.md). User clarified
+  pointer reaction only at top, subtle deterministic scroll rotation elsewhere (no idle spin).
+  Fixed light canvas covering Writing, reordered footer to reference link-first hierarchy with
+  continuous interior grid, centralized header contrast, prepared Vision shaders before entry,
+  and fitted portrait camera/typography. Four-width checks are diagnostics, not full parity.
+
 - **Latest September 30 state:** read [the continuation ledger](2026-09-30-scroll-repair.md),
   especially its final section, before relying on older behavior descriptions below. User now
   explicitly requests pointer rotation only in the opening; automatic Works/scroll rotation has
