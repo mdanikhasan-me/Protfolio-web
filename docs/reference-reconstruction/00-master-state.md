@@ -123,6 +123,14 @@ hashes, all-frame comparison, and performance trace.
 
 ## Active work
 
+- **October 9 pointer response correction:** read
+  [the input response record](2026-10-09-pointer-response.md). Removed the reduced-motion
+  penalty on direct pointer input and corrected refresh-dependent rotation accumulation.
+  Numerical checks cover 30/60/120/144/240 Hz; reduced and normal input agree in ordered
+  replay. Six normal-mode frames remain pixel-identical to the prior build. Eight scroll
+  regressions pass. The user's overall smoothness complaint is not closed by these checks;
+  no native FPS improvement or reference parity is claimed.
+
 - **October 9 storage/history continuation:** read
   [the storage and history record](2026-10-09-storage-history.md). The complete
   portfolio scratch evidence now lives on the D: SSD; original C: paths are
