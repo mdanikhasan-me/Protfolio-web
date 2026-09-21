@@ -1,5 +1,5 @@
 ---
-import { SITE } from '../config/site';
+import { SITE, SOCIAL_PROFILES } from '../config/site';
 
 const year = new Date().getUTCFullYear();
 ---
@@ -20,10 +20,7 @@ const year = new Date().getUTCFullYear();
     <nav class="footer-social" aria-label="Social links">
       <a href={`mailto:${SITE.email}`}>Email</a>
       <a href={SITE.discord} rel="me">Discord</a>
-      <a href={SITE.linkedin}>LinkedIn</a>
-      <a href={SITE.github}>GitHub</a>
-      <a href={SITE.x}>X</a>
-      <a href={SITE.facebook}>Facebook</a>
+      {SOCIAL_PROFILES.map(profile => <a href={profile.href} rel="me">{profile.label}</a>)}
     </nav>
     <div class="footer-inquiry">
       <a href="/contact/">Contact <span aria-hidden="true">↗</span></a>
