@@ -77,6 +77,19 @@ const studioPage = ['work', 'writing', 'about', 'services', 'contact'].includes(
       href="/rss.xml"
     />
     <title>{title}</title>
+    <script is:inline>
+      // Disable the browser's saved-scroll restoration before it can run on reload.
+      // Direct anchor navigation and back/forward visits retain their usual behavior.
+      if (performance.getEntriesByType('navigation')[0]?.type === 'reload') {
+        history.scrollRestoration = 'manual';
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        window.addEventListener('pageshow', (event) => {
+          if (event.persisted) return;
+          window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+          window.dispatchEvent(new Event('portfolio:reload-top'));
+        }, { once: true });
+      }
+    </script>
     <script is:inline type="application/ld+json" set:html={JSON.stringify(schemaNodes)} />
     <slot name="head" />
   </head>

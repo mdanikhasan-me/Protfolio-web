@@ -16,11 +16,11 @@ const content = `# ${SITE.name}
 - [Boilabin](${SITE.origin}/work/boilabin/): ecommerce marketplace founded, built, and currently run by MD Anik Hasan.
 - [SoctuKit](${SITE.origin}/work/soctukit/): native Windows social-media automation product.
 - [UIU Discord Bot](${SITE.origin}/work/uiu-discord-bot/): Python and Discord automation for UIU notices and university information.
-- [Salty Potato AI](${SITE.origin}/lab/salty-potato-ai/): in-development language-model system and desktop software.
+- [Salty Steak](${SITE.origin}/lab/salty-potato-ai/): in-development language-model system and desktop software.
 
 ## Boundaries
 
-Boilabin's private code, customer data, suppliers, and operational details are not published. Salty Potato AI is in development, not production-ready or a benchmark claim.
+Boilabin's private code, customer data, suppliers, and operational details are not published. Salty Steak is in development, not production-ready or a benchmark claim.
 `;
 
 export const GET: APIRoute = () =>

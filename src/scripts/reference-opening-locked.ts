@@ -793,6 +793,15 @@ const galleryFragmentShader = `
     float rim = 1.0 - smoothstep(0.0, 0.003, edgeDistance);
     vec3 reflectionDirection = reflect(-normalize(vViewPosition), normalize(vViewNormal));
     vec3 reflection = textureCube(uEnvironment, reflectionDirection).rgb;
+    // The reference retains a subtle reflection across the entire front, with
+    // gentle corner falloff. Edge-only reflection made the center read as paper.
+    float cornerFalloff = 1.0 - smoothstep(0.49, 0.90, length(vUv - 0.5));
+    color *= cornerFalloff;
+    vec3 displayColor = mix(color * 12.92, 1.055 * pow(max(color, vec3(0.0)), vec3(1.0 / 2.4)) - 0.055,
+      step(vec3(0.0031308), color));
+    displayColor = mix(displayColor, vec3(smoothstep(0.0, 0.2, reflectionDirection.x)), 0.05);
+    color = mix(displayColor / 12.92, pow((displayColor + 0.055) / 1.055, vec3(2.4)),
+      step(vec3(0.04045), displayColor));
     color = mix(color, reflection, rim * (0.24 + uHover * 0.18));
     if (vFrontFace < 0.5) {
       vec3 edgeArt = texture2D(uMap, vec2(0.985 - vViewNormal.x * 0.02, uv.y)).rgb;

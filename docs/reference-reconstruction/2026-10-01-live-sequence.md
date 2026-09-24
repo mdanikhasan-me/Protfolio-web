@@ -53,3 +53,35 @@ Exact material mapping/highlights, card edge refraction, live sequence event ali
 GPU/CPU/VRAM/frame pacing, complete 32,607-frame current/reference review, and mobile acceptance.
 Keep the user's latest rule: top pointer rotation, subtle position-bound scroll pose elsewhere,
 no idle spin, protected homepage contact title/illustration and GLB, no push/deploy without request.
+
+## Follow-up checks
+
+- Video counts: single contour 302 frames; symbol validation 321; pattern validation 582; panel
+  timers validation 577. All encoded at 25fps, 1690x872. These counts come from ffprobe decoding;
+  only the separately stated screenshots have individual visual review. No native 120fps claim.
+- `vision-display-current` is the 1.3 gain candidate after capture; primary inspected its Vision
+  frame. Six scroll positions, no page errors. Side colors remain a provisional match, not final.
+- Corrected stale comments that mislabeled archived frame 1 as homepage opening. Replay retains
+  original values; new normal runtime uses separate seeded timers. Seeded randomness supports
+  repeatable testing but cannot reproduce independent reference sessions event-for-event.
+- Added diagnostic-only `__inspectScene=1` telemetry (picture/pattern/symbol/layout), which does
+  not enable simulated replay. Live capture observes this alongside actual pointer/scroll input.
+- Card material follow-up retains curved geometry and bounded UV sampling; now includes the
+  reference's subtle five-percent front reflection and corner falloff. Before evidence is
+  `glass-reflection-before`; after build passed and `glass-reflection-after` is being reviewed.
+
+Card reflection decision: the first linear-space blend was visibly too milky and is rejected.
+The retained version converts to display space for the reference's five-percent blend and back
+before output conversion. `glass-display-reflection-after` records next/reverse/hover input with
+zero page errors; primary individually inspected front and second project. Full glass parity is
+still open. `glass-reflection-after` is rejected visual evidence, not the final material.
+
+Vision gain after capture is `vision-display-current`; primary viewed the Vision frame. Side
+UV is generated from the protected mesh depth/height because the source side-screen geometry is
+different. Thus matching reference shader sampling does not establish equivalent UV mapping.
+
+Final four-width follow-up `oct1-responsive-regression` passed: 390/768/1366/1920 widths, seven
+boundary stops each, five routes each, zero recorded runtime/console errors and zero document
+overflow; build unchanged throughout. Primary inspected 390 Vision and 1920 Writing-entry images.
+The capture contains 28 sampled screenshots and continuous video; no all-frame visual acceptance.
+No large evidence placed in production; no push/deploy; protected GLB hash rechecked.
