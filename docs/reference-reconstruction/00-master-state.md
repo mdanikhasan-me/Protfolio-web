@@ -123,6 +123,18 @@ hashes, all-frame comparison, and performance trace.
 
 ## Active work
 
+- **October 9 dark project reflections:** read
+  [the wall exposure record](2026-10-09-project-wall.md). Dark project art now gets
+  bounded exposure in its derived wall texture. Four projects were checked in both
+  directions; Boilabin's existing exposure is preserved. This is a visibility
+  improvement, not full reference parity. Earlier opening pose/depth findings are
+  recorded in [the shape record](2026-10-09-shape.md); texture parity remains open.
+
+- **October 9 search visibility:** read
+  [the Search Console record](2026-10-09-search-audit.md). The www property is verified,
+  seven social profiles share the same Person identity, and the homepage indexing
+  request was accepted. Sitemap processing and the Instagram connection remain open.
+
 - **October 9 pointer response correction:** read
   [the input response record](2026-10-09-pointer-response.md). Removed the reduced-motion
   penalty on direct pointer input and corrected refresh-dependent rotation accumulation.

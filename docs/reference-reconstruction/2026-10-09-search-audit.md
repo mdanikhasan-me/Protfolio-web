@@ -63,6 +63,25 @@ basic profile information, then opens an Instagram flow with forced authenticati
 the separate logged-in homepage does not skip that login. Fresh sign-in is pending
 with the owner. Do not claim the Instagram Search Console property is connected.
 
+Follow-up: the owner confirms correct Edge-managed credentials and reports that
+both password and Facebook login fail. Browser console inspection found an actual
+HTTP 429 from Instagram's `/ajax/bulk-route-definitions/` request during this flow.
+This supports throttling of part of the login flow, not a wrong-password diagnosis;
+it does not prove the cause of every prior failure. Stop repeated attempts, preserve
+the signed-in session, and retry the connection after the service restriction clears.
+
+Google's live sitemap inspection at 12:57 (Asia/Dhaka) returned "URL is available
+to Google", crawl allowed Yes, page fetch Successful, indexing allowed Yes. Both
+sitemap files return HTTP 200 XML; the child contains 21 URLs. The separate Sitemaps
+report has not yet processed successfully. Do not request indexing of the XML file.
+
+After deployment of the identity and pointer updates (GitHub Actions 37896142300,
+success), the live homepage contains the seven-profile identity markup. Google
+accepted the homepage Request indexing action and placed it in its crawl queue.
+This is a recrawl request, not a confirmed new crawl or ranking improvement.
+Screenshots: `search-console-sitemap-live.jpg` and
+`search-console-indexing-requested.jpg` under the evidence root above.
+
 ## Website identity
 
 Use one canonical Person ID (`https://www.mdanikhasan.com/#person`) for the profile,

@@ -1058,6 +1058,47 @@ export function createReferenceBackgroundSystem(
       // The production pass first resamples into a square target, then restores the original
       // aspect while the wall samples it. Cropping here would apply the cover transform twice.
       context.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
+      // The wall's LED mask and falloff are tuned for bright artwork. Dark UI previews need
+      // exposure in this derived light field or their colors disappear behind the cards.
+      // Do this once on load, independently for each image, so scrolling cannot pump exposure.
+      const field = context.getImageData(0, 0, canvas.width, canvas.height);
+      const valueHistogram = new Uint32Array(256);
+      let totalValue = 0;
+      for (let offset = 0; offset < field.data.length; offset += 4) {
+        const value = Math.max(field.data[offset]!, field.data[offset + 1]!, field.data[offset + 2]!);
+        valueHistogram[value] = valueHistogram[value]! + 1;
+        totalValue += value;
+      }
+      const meanValue = totalValue / (255 * canvas.width * canvas.height);
+      let exposure = 1;
+      if (meanValue > 0 && meanValue < 0.5) {
+        let lower = 1;
+        let upper = 6;
+        // Solve against the actual histogram, since a linear average-based gain still leaves
+        // charcoal UI artwork almost black after the wall's falloff. Bound the shadow lift.
+        for (let iteration = 0; iteration < 12; iteration += 1) {
+          exposure = (lower + upper) * 0.5;
+          let exposedValue = 0;
+          for (let value = 1; value < valueHistogram.length; value += 1) {
+            const normalized = value / 255;
+            exposedValue += valueHistogram[value]! * normalized /
+              (normalized + (1 - normalized) / exposure);
+          }
+          if (exposedValue / (canvas.width * canvas.height) < 0.5) lower = exposure;
+          else upper = exposure;
+        }
+      }
+      if (exposure > 1) {
+        for (let offset = 0; offset < field.data.length; offset += 4) {
+          const value = Math.max(field.data[offset]!, field.data[offset + 1]!, field.data[offset + 2]!) / 255;
+          // A shared RGB gain preserves hue; this shoulder keeps white at white without clipping.
+          const gain = 1 / (value + (1 - value) / exposure);
+          field.data[offset] = field.data[offset]! * gain;
+          field.data[offset + 1] = field.data[offset + 1]! * gain;
+          field.data[offset + 2] = field.data[offset + 2]! * gain;
+        }
+        context.putImageData(field, 0, 0);
+      }
       const colorTexture = new THREE.CanvasTexture(canvas);
       colorTexture.colorSpace = THREE.NoColorSpace;
       colorTexture.minFilter = THREE.LinearFilter;
