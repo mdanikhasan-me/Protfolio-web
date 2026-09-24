@@ -123,6 +123,10 @@ hashes, all-frame comparison, and performance trace.
 
 ## Active work
 
+- **Latest content request:** [Salty Steak update](2026-10-01-salty-steak-update.md): supplied
+  image now used for Salty Steak, second project; refresh-to-top verified in connected Edge.
+  Existing project URL preserved. This does not close the prior visual/performance audit.
+
 - **October 1 live-sequence continuation:** [live sequence ledger](2026-10-01-live-sequence.md).
   Live name/pattern/panel timers are now separated from forensic replay; normal browsing no longer
   inherits name-blanking mode 3 or frozen stochastic seeds. Vision has a derived continuous front

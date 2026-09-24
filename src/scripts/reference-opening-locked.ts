@@ -1283,8 +1283,8 @@ async function startReferenceWorld(
   const wordTextureWidth = 4096;
   const renderer = new THREE.WebGLRenderer({
     canvas: outputCanvas,
-    // Keep the canvas transparent only until the first complete frame is ready so the authored
-    // chamber fallback remains visible instead of WebGL's default black drawing buffer.
+    // The initial transparent buffer reveals a neutral black stage while assets
+    // compile; the first rendered scene replaces it without a placeholder-grid flash.
     alpha: true,
     antialias: false,
     powerPreference: 'high-performance',
@@ -2363,6 +2363,11 @@ async function startReferenceWorld(
     // Composite the curved artwork afterward so whites do not clip and colors do
     // not change with pointer velocity. autoClear remains false for this overlay.
     if (galleryRendersVisible) renderer.render(galleryScene, camera);
+    // Reveal scene controls only after the compositor has drawn visible content.
+    // Shader compilation alone does not mean a canvas frame has been presented.
+    if (worldElement.dataset.frameReady !== 'true' && compositeUniforms.uBoot.value >= 0.25) {
+      worldElement.dataset.frameReady = 'true';
+    }
 
     if (!coarsePointer && stateReadout) {
       const nextState =
