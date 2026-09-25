@@ -670,9 +670,8 @@ const glassFragmentShader = `
     vec3 objectCoordinate = (vObjectPosition - uObjectBoundsMin) / objectExtent;
     vec3 triplanarWeight = pow(abs(normalize(vObjectNormal)), vec3(4.0));
     triplanarWeight /= max(0.0001, triplanarWeight.x + triplanarWeight.y + triplanarWeight.z);
-    // The protected ANIK mesh has far fewer UV islands than the reference identity. Preserve the
-    // reference material equations, but raise only the generated roughness-field frequency so the
-    // transmitted word breaks into fine cloudy detail instead of broad painted-looking slabs.
+    // Keep the generated roughness coordinates near the measured reference UV density.
+    // An additional frequency multiplier breaks cloudy refraction into dense surface speckles.
     vec3 scaledObjectCoordinate = objectCoordinate * uNoiseScale * uSurfaceDetailScale;
     vec4 firstNoise = triplanarNoise(scaledObjectCoordinate, triplanarWeight, vec2(0.0));
     vec4 secondNoise = triplanarNoise(
@@ -1429,7 +1428,7 @@ async function startReferenceWorld(
     uMaterialColor: { value: new THREE.Vector3(255, 255, 255) },
     uObjectBoundsMin: { value: new THREE.Vector3(-1, -1, -1) },
     uObjectBoundsMax: { value: new THREE.Vector3(1, 1, 1) },
-    uSurfaceDetailScale: { value: 3.25 },
+    uSurfaceDetailScale: { value: 1 },
   };
   const glassMaterial = new THREE.ShaderMaterial({
     uniforms: glassUniforms,

@@ -123,6 +123,10 @@ hashes, all-frame comparison, and performance trace.
 
 ## Active work
 
+- **October 9 surface frequency:** the later controlled experiment in
+  [the shape record](2026-10-09-shape.md) retains detail scale 1.0 provisionally.
+  240 simulated frames passed integrity/controller audits; 6 were individually
+  reviewed. This reduces dense speckling, without establishing full surface parity.
 - **October 9 dark project reflections:** read
   [the wall exposure record](2026-10-09-project-wall.md). Dark project art now gets
   bounded exposure in its derived wall texture. Four projects were checked in both
