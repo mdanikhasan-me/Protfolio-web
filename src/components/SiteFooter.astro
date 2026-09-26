@@ -5,8 +5,6 @@ const year = new Date().getUTCFullYear();
 ---
 
 <footer class="site-footer studio-footer" data-studio-footer>
-  <div class="footer-construction" aria-hidden="true"></div>
-
   <div class="footer-bottom">
     <nav aria-label="Footer navigation">
       <a href="/">Top</a>
@@ -31,10 +29,10 @@ const year = new Date().getUTCFullYear();
   <p class="footer-copyright">© {year} {SITE.name}</p>
   <a class="footer-brand" href="/" aria-label={`${SITE.name}, home`}>
     <svg class="footer-drafting" viewBox="0 0 787.842 209" aria-hidden="true">
-      {[2.282, 78, 171.42, 200.277, 207.884].map((y, index) => <path pathLength="1" data-line-delay={index * 70} d={`M-180 ${y} H968`} />)}
-      {[0,118.541,237.133,265.132,474.33,502.343,546.44,574.436,787.842].map((x, index) => <path pathLength="1" data-line-delay={index * 45 + 120} d={`M${x} -180 V389`} />)}
-      <path pathLength="1" data-line-delay="140" d="M-70 330 L188 -118 M49 -118 L306 330" />
-      <path pathLength="1" data-line-delay="280" d="M235 -40 L490 248 M552 232 L810 -18 M636 70 L819 241" />
+      {[2.282, 78, 171.42, 200.277, 207.884].map((y, index) => <path class="footer-guide-horizontal" pathLength="1" data-line-delay={index * 55} d={`M-90 ${y} H878`} />)}
+      {[0,118.541,237.133,265.132,306.568,433.544,474.33,502.343,546.44,574.436,618.531,787.842].map((x, index) => <path class="footer-guide-vertical" pathLength="1" data-line-delay={index * 35} d={`M${x} -45 V254`} />)}
+      <path class="footer-guide-diagonal" pathLength="1" data-line-delay="180" d="M-26 253 L145 -44 M92 -44 L263 253" />
+      <path class="footer-guide-diagonal" pathLength="1" data-line-delay="260" d="M38 253 L145 68 M92 68 L199 253" />
     </svg>
     <svg class="footer-wordmark" viewBox="0 0 787.842 209" aria-hidden="true">
           <path
@@ -60,6 +58,7 @@ const year = new Date().getUTCFullYear();
 <script>
   const footer = document.querySelector<HTMLElement>('[data-studio-footer]');
   if (footer) {
+    const brand = footer.querySelector<HTMLElement>('.footer-brand');
     footer.querySelectorAll<SVGPathElement>('[data-line-delay]').forEach(path => {
       path.style.setProperty('--line-delay', `${path.dataset.lineDelay ?? 0}ms`);
     });
@@ -67,13 +66,16 @@ const year = new Date().getUTCFullYear();
       path.setAttribute('pathLength', '1');
       path.style.setProperty('--letter-delay', `${index * 100}ms`);
     });
+    // Observe the artwork, not the links above it, so the drawing isn't over
+    // before the visitor reaches it. Reset only after it leaves the viewport.
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry?.isIntersecting) {
+      if (entry && entry.intersectionRatio >= 0.3) {
         footer.dataset.revealed = 'true';
-        observer.disconnect();
+      } else if (entry && !entry.isIntersecting) {
+        delete footer.dataset.revealed;
       }
-    }, { threshold: 0.3 });
-    observer.observe(footer);
+    }, { threshold: [0, 0.3] });
+    if (brand) observer.observe(brand);
     addEventListener('pagehide', () => observer.disconnect(), { once: true });
   }
 </script>
