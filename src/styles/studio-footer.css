@@ -11,31 +11,58 @@
   padding: 80px 3% 0;
   position: relative;
 }
-.footer-brand { display: block; margin: 28px 0 0; color: inherit; position: relative; }
+.footer-ending { position: relative; background: #000; }
+.footer-brand { display: block; margin: clamp(40px, 3vw, 64px) 0 0; color: inherit; position: relative; }
 .footer-brand svg { display: block; width: 100%; height: auto; overflow: visible; }
-.footer-brand .footer-wordmark path { fill: transparent; stroke: currentColor; stroke-width: .7; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; }
-.studio-footer[data-revealed] .footer-wordmark path { animation: footer-draw 2200ms cubic-bezier(.22,.61,.36,1) calc(650ms + var(--letter-delay,0ms)) both; }
-.footer-brand .footer-drafting { position: absolute; inset: 0; pointer-events: none; }
-.footer-drafting path { fill: none; stroke: #c6c8cc; stroke-width: .75; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }
-.footer-guide-vertical { --guide-x: 24px; --guide-y: 0px; }
-.footer-guide-vertical:nth-child(even) { --guide-x: -24px; }
-.footer-guide-horizontal { --guide-x: 0px; --guide-y: 14px; }
-.footer-guide-diagonal { --guide-x: -12px; --guide-y: 8px; }
-.studio-footer[data-revealed] .footer-drafting path { animation: footer-construct 3000ms cubic-bezier(.22,.61,.36,1) var(--line-delay,0ms) both; }
-@keyframes footer-draw {
-  0% { stroke-dashoffset: 1; fill: transparent; }
-  55% { stroke-dashoffset: 0; fill: transparent; }
-  100% { stroke-dashoffset: 0; fill: currentColor; }
+.footer-wordmark-outline { fill: none; stroke: currentColor; stroke-width: .7; opacity: 0; }
+.footer-wordmark-fill, .footer-monogram { fill: currentColor; stroke: none; }
+.footer-brand .footer-drafting { display: none; position: absolute; inset: 0; pointer-events: none; }
+.footer-drafting path { fill: none; stroke: #929292; stroke-width: .65; vector-effect: non-scaling-stroke; opacity: 0; }
+
+/* The home outro is a screen of its own. The link footer shares its last
+   screen, as in the reference; it does not sit above an oversized logo. */
+.footer-outro { height: 200vh; position: relative; color: #fff; }
+.footer-outro-screen { position: sticky; top: 0; height: 100vh; overflow: clip; isolation: isolate; }
+.footer-outro .footer-brand { position: absolute; width: 86.2%; left: 6.9%; top: 50%; transform: translateY(-50%); margin: 0; }
+.footer-outro .footer-drafting { display: block; }
+.footer-outro .footer-wordmark { position: relative; }
+.footer-outro-field { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.footer-outro .footer-wordmark-fill { stroke: currentColor; stroke-width: 3.38132; }
+.footer-outro[data-outro-ready] .footer-monogram { transform: translateX(381.4335px); }
+.footer-outro[data-playing] .footer-monogram { animation: footer-monogram-slide 1000ms linear(0.00000000,0.00000050,0.00000400,0.00001350,0.00003200,0.00006250,0.00010800,0.00017150,0.00025600,0.00036450,0.00050000,0.00066550,0.00086400,0.00109850,0.00137200,0.00168750,0.00204800,0.00245650,0.00291600,0.00342950,0.00400000,0.00463050,0.00532400,0.00608350,0.00691200,0.00781250,0.00878800,0.00984150,0.01097600,0.01219450,0.01350000,0.01489550,0.01638400,0.01796850,0.01965200,0.02143750,0.02332800,0.02532650,0.02743600,0.02965950,0.03200000,0.03446050,0.03704400,0.03975350,0.04259200,0.04556250,0.04866800,0.05191150,0.05529600,0.05882450,0.06250000,0.06632550,0.07030400,0.07443850,0.07873200,0.08318750,0.08780800,0.09259650,0.09755600,0.10268950,0.10800000,0.11349050,0.11916400,0.12502350,0.13107200,0.13731250,0.14374800,0.15038150,0.15721600,0.16425450,0.17150000,0.17895550,0.18662400,0.19450850,0.20261200,0.21093750,0.21948800,0.22826650,0.23727600,0.24651950,0.25600000,0.26572050,0.27568400,0.28589350,0.29635200,0.30706250,0.31802800,0.32925150,0.34073600,0.35248450,0.36450000,0.37678550,0.38934400,0.40217850,0.41529200,0.42868750,0.44236800,0.45633650,0.47059600,0.48514950,0.50000000,0.51485050,0.52940400,0.54366350,0.55763200,0.57131250,0.58470800,0.59782150,0.61065600,0.62321450,0.63550000,0.64751550,0.65926400,0.67074850,0.68197200,0.69293750,0.70364800,0.71410650,0.72431600,0.73427950,0.74400000,0.75348050,0.76272400,0.77173350,0.78051200,0.78906250,0.79738800,0.80549150,0.81337600,0.82104450,0.82850000,0.83574550,0.84278400,0.84961850,0.85625200,0.86268750,0.86892800,0.87497650,0.88083600,0.88650950,0.89200000,0.89731050,0.90244400,0.90740350,0.91219200,0.91681250,0.92126800,0.92556150,0.92969600,0.93367450,0.93750000,0.94117550,0.94470400,0.94808850,0.95133200,0.95443750,0.95740800,0.96024650,0.96295600,0.96553950,0.96800000,0.97034050,0.97256400,0.97467350,0.97667200,0.97856250,0.98034800,0.98203150,0.98361600,0.98510450,0.98650000,0.98780550,0.98902400,0.99015850,0.99121200,0.99218750,0.99308800,0.99391650,0.99467600,0.99536950,0.99600000,0.99657050,0.99708400,0.99754350,0.99795200,0.99831250,0.99862800,0.99890150,0.99913600,0.99933450,0.99950000,0.99963550,0.99974400,0.99982850,0.99989200,0.99993750,0.99996800,0.99998650,0.99999600,0.99999950,1.00000000) both; }
+.footer-outro[data-outro-ready] .footer-wordmark-fill { opacity: 0; }
+@keyframes footer-monogram-slide { from { transform: translateX(381.4335px); } to { transform: translateX(-.237034px); } }
+.footer-outro[data-playing] .footer-wordmark-outline { animation: footer-outline 600.600576ms linear 1334.567851ms both; }
+.footer-outro[data-playing] .footer-wordmark-fill { animation: footer-fill 734.067476ms linear 2001.901824ms both; }
+.footer-outro .footer-drafting path { stroke: #919191; stroke-width: .527315; vector-effect: none; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.footer-outro .footer-drafting .footer-guide-left { stroke-width: 0.6116852984602404; }
+.footer-outro .footer-drafting .footer-guide-right { stroke-width: 0.664416789706813; }
+.footer-outro[data-playing] .footer-guide-vertical { animation: footer-vertical-draw 734.067ms cubic-bezier(.333,0,.667,1) 100ms both, footer-vertical-fade 3069.737ms linear 100ms both; }
+.footer-outro[data-playing] .footer-guide-horizontal { animation: footer-vertical-draw 734.067ms cubic-bezier(.333,0,.667,1) 533.767ms both, footer-vertical-fade 3069.737ms linear 100ms both; }
+.footer-outro[data-playing] .footer-guide-diagonal { animation: footer-vertical-draw 600.6ms cubic-bezier(.333,0,.667,1) 834.067ms both, footer-vertical-fade 3069.737ms linear 100ms both; }
+.footer-outro[data-outro-ready] .footer-wordmark-outline { stroke-dasharray: 1; stroke-dashoffset: -1; stroke-width: 1.690660; }
+@keyframes footer-outline {
+  from { stroke-dashoffset: -1; opacity: 1; }
+  to { stroke-dashoffset: 0; opacity: 1; }
 }
-@keyframes footer-construct {
-  0% { stroke-dashoffset: 1; opacity: 0; transform: translate(var(--guide-x),var(--guide-y)); }
-  18% { opacity: .6; }
-  45%,65% { stroke-dashoffset: 0; opacity: .6; transform: translate(0,0); }
-  100% { stroke-dashoffset: 0; opacity: 0; transform: translate(0,0); }
+@keyframes footer-fill { from { opacity: 0; } to { opacity: 1; } }
+@keyframes footer-vertical-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes footer-vertical-fade {
+  0%, 78.26087% { opacity: 1; }
+  84.78261% { opacity: .5; }
+  100% { opacity: 0; }
 }
+.footer-ending-home .studio-footer { position: absolute; bottom: 0; width: 100%; background: transparent; padding: 50px 36px 2px; }
+.footer-ending-home .footer-bottom { gap: 40px; align-items: start; }
+.footer-ending-home { --footer-link-size: 14px; }
+.footer-ending-home .footer-inquiry { gap: 16px; }
+.footer-ending-home .footer-copyright { margin-top: 35px; }
+.home-v5[data-footer-active] .reference-global-nav { visibility: hidden; transform: translateY(-150%); }
+.home-v5[data-footer-active] .section-rail { visibility: hidden; }
+.home-v5[data-footer-active] .reference-global-nav:focus-within { visibility: visible; transform: none; }
 .footer-bottom { align-items: end; display: grid; gap: 36px; grid-template-columns: 160px 1fr auto; }
 .studio-footer .footer-bottom nav { display: grid; gap: 12px 28px; grid-template-columns: repeat(2,max-content); }
-.studio-footer .footer-bottom a { color: inherit; font: 12px/1.5 var(--mono); text-decoration: none; transition: opacity 180ms; }
+.studio-footer .footer-bottom a { color: inherit; font: var(--footer-link-size, 12px)/1.5 var(--mono); text-decoration: none; transition: opacity 180ms; }
 .studio-footer .footer-bottom a:hover { opacity: .6; }
 .studio-footer .footer-social { justify-self: start; color: #95949c; }
 .footer-inquiry { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; justify-content: end; }
@@ -51,7 +78,19 @@
   .footer-inquiry { grid-column: 1 / -1; justify-content: start; }
   .studio-footer .footer-bottom nav { grid-template-columns: 1fr; }
 }
+@media (max-width: 700px) {
+  .footer-outro { height: auto; aspect-ratio: 1.7; }
+  .footer-outro-screen { position: relative; height: 100%; }
+  .footer-ending-home .studio-footer { position: relative; padding: 40px 6% 16px; }
+}
+@media (min-width: 701px) and (max-height: 640px) {
+  .footer-outro .footer-brand { top: 35%; width: min(86.2%, 210vh); left: 50%; transform: translate(-50%, -50%); }
+}
 @media (prefers-reduced-motion: reduce) {
-  .studio-footer .footer-brand .footer-wordmark path { fill: currentColor; stroke-dashoffset: 0; animation: none; }
-  .studio-footer .footer-brand .footer-drafting path { fill: none; stroke-dashoffset: 0; opacity: .28; animation: none; transform: none; }
+  /* Keep the finished composition and illumination. Replace spatial travel
+     with a brief reveal; never leave the identity at its centered-A state. */
+  .footer-outro[data-outro-ready] .footer-monogram { transform: none; transition: none; animation: none; }
+  .footer-outro[data-playing] .footer-wordmark-fill { animation: footer-fill 200ms linear both; }
+  .footer-outro[data-playing] .footer-wordmark-outline { animation: none; opacity: 0; }
+  .footer-outro[data-playing] .footer-drafting path { animation: none; opacity: .16; stroke-dashoffset: 0; transform: none; }
 }

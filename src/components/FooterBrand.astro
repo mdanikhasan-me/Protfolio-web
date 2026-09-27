@@ -1,0 +1,62 @@
+---
+import { SITE } from '../config/site';
+interface Props { outro?: boolean }
+const { outro = false } = Astro.props;
+const width = outro ? 1000 : 787.842;
+const spacing = (width - 787.842) / 3;
+const edges = [0,237.133,265.132+spacing,306.568+spacing,433.544+spacing,474.33+spacing,502.343+spacing*2,546.44+spacing*2,574.436+spacing*3,618.531+spacing*3,width];
+// Reference trim paths start/end beyond the square animation's visible crop.
+// Convert that travel to this wordmark's coordinate system, not viewport edges.
+const guideScale = 1000 / (1100 * .862);
+const guideTop = 104.5 - 960.5 * guideScale;
+const guideBottom = 104.5 + 960.5 * guideScale;
+const guideX = (x: number) => 500 + (x - 550) * guideScale;
+const horizontalStart = guideX(548.833 + 960 * .58);
+const horizontalEnd = guideX(548.833 - 961 * .58);
+// Four construction rays around A. Separate paths preserve each trim direction.
+const diagonalPath = (px: number, py: number, angle: number, sx: number, sy: number, ax = 0, ay = 0, reverse = false) => {
+  const radians = angle * Math.PI / 180;
+  const points = (reverse ? [960, -961] : [-961, 960]).map(x => {
+    const dx = (x - ax) * sx;
+    const dy = (-136 - ay) * sy;
+    return `${guideX(px + dx * Math.cos(radians) - dy * Math.sin(radians))} ${104.5 + (py + dx * Math.sin(radians) + dy * Math.cos(radians) - 550) * guideScale}`;
+  });
+  return `M${points[0]} L${points[1]}`;
+};
+const diagonals = [
+  { d: diagonalPath(310, 629.382, -60, -1.16, 1.16, 0, 0, true), width: .5 * 1.16 * guideScale },
+  { d: diagonalPath(269, 629.382, -60, -1.16, 1.16, 0, 0, true), width: .5 * 1.16 * guideScale },
+  { d: diagonalPath(822, 1598.407, 60, 1.26, 1.26, 965.874, -145.67), width: .5 * 1.26 * guideScale },
+  { d: diagonalPath(863.5, 1598.407, 60, 1.26, 1.26, 965.874, -145.67), width: .5 * 1.26 * guideScale },
+];
+---
+  <a class="footer-brand" href="/" aria-label={`${SITE.name}, home`}>
+    <svg class="footer-drafting" viewBox={`0 0 ${width} 209`} aria-hidden="true">
+      {[2.282, 77.95, 171.42, 207.884].map(y => <path class="footer-guide-horizontal" pathLength="1" d={`M${horizontalStart} ${y} H${horizontalEnd}`} />)}
+      {edges.map(x => <path class="footer-guide-vertical" pathLength="1" d={`M${x} ${guideTop} V${guideBottom}`} />)}
+      {diagonals.map((line, index) => <path class:list={["footer-guide-diagonal", index < 2 ? "footer-guide-left" : "footer-guide-right"]} pathLength="1" d={line.d} />)}
+    </svg>
+    <svg class="footer-wordmark" viewBox={`0 0 ${width} 209`} aria-hidden="true">
+      <defs><g id="footer-anik-shapes">
+          <path
+            pathLength="1" vector-effect={outro ? "none" : "non-scaling-stroke"} fill-rule="evenodd"
+            d="M0 207.884h43.617l4.407-7.607h141.084l4.408 7.607h43.617L118.541 2.282 0 207.884Zm64.691-36.464 53.901-93.47 53.9 93.47H64.691Z"
+          ></path>
+          </g><g id="footer-anik-rest">
+          <g transform={`translate(${238.794 + spacing} 207.884) scale(.299423 -.299423)`}>
+            <path pathLength="1" vector-effect={outro ? "none" : "non-scaling-stroke"} d="M87.965 0V686.661h138.389l340.486-373.925q9.687-8.913 23.243-24.426t27.626-31.443q14.069-15.93 23.269-27.852l6.852.035q-.591 18.834-1.452 42.977t-.861 41.413v373.221H786.68V0H650.465L308.996 377.438q-19.4 20.304-41.169 45.913t-34.186 39.79l-6.252-.034q.591-13.131 1.165-37.943t.574-55.108V0H87.965Z"
+            ></path>
+          </g>
+          <g transform={`translate(${476.005 + spacing * 2} 207.884) scale(.299423 -.299423)`}>
+            <path pathLength="1" vector-effect={outro ? "none" : "non-scaling-stroke"} d="M87.965 0v686.661h147.258V0H87.965Z"></path>
+          </g>
+          <g transform={`translate(${548.098 + spacing * 3} 207.884) scale(.299423 -.299423)`}>
+            <path pathLength="1" vector-effect={outro ? "none" : "non-scaling-stroke"} d="M87.965 0v686.661h147.258V340.174l372.025 346.487h187.788L493.368 403.904 800.688 0H617.466L387.978 309.854 235.223 182.985V0H87.965Z"
+            ></path>
+          </g>
+      </g></defs>
+      <use class="footer-monogram" href="#footer-anik-shapes" />
+      <use class="footer-wordmark-outline" href="#footer-anik-rest" />
+      <use class="footer-wordmark-fill" href="#footer-anik-rest" />
+    </svg>
+  </a>

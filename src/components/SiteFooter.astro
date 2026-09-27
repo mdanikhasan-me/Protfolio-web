@@ -1,9 +1,18 @@
 ---
+import FooterBrand from './FooterBrand.astro';
 import { SITE, SOCIAL_PROFILES } from '../config/site';
 
+const home = Astro.url.pathname === '/';
 const year = new Date().getUTCFullYear();
 ---
 
+<div class:list={['footer-ending', { 'footer-ending-home': home }]}>
+  {home && <div class="footer-outro" data-footer-outro aria-label="ANIK">
+    <div class="footer-outro-screen">
+      <canvas class="footer-outro-field" aria-hidden="true"></canvas>
+      <FooterBrand outro />
+    </div>
+  </div>}
 <footer class="site-footer studio-footer" data-studio-footer>
   <div class="footer-bottom">
     <nav aria-label="Footer navigation">
@@ -27,55 +36,11 @@ const year = new Date().getUTCFullYear();
     </div>
   </div>
   <p class="footer-copyright">© {year} {SITE.name}</p>
-  <a class="footer-brand" href="/" aria-label={`${SITE.name}, home`}>
-    <svg class="footer-drafting" viewBox="0 0 787.842 209" aria-hidden="true">
-      {[2.282, 78, 171.42, 200.277, 207.884].map((y, index) => <path class="footer-guide-horizontal" pathLength="1" data-line-delay={index * 55} d={`M-90 ${y} H878`} />)}
-      {[0,118.541,237.133,265.132,306.568,433.544,474.33,502.343,546.44,574.436,618.531,787.842].map((x, index) => <path class="footer-guide-vertical" pathLength="1" data-line-delay={index * 35} d={`M${x} -45 V254`} />)}
-      <path class="footer-guide-diagonal" pathLength="1" data-line-delay="180" d="M-26 253 L145 -44 M92 -44 L263 253" />
-      <path class="footer-guide-diagonal" pathLength="1" data-line-delay="260" d="M38 253 L145 68 M92 68 L199 253" />
-    </svg>
-    <svg class="footer-wordmark" viewBox="0 0 787.842 209" aria-hidden="true">
-          <path
-            fill-rule="evenodd"
-            d="M0 207.884h43.617l4.407-7.607h141.084l4.408 7.607h43.617L118.541 2.282 0 207.884Zm64.691-36.464 53.901-93.47 53.9 93.47H64.691Z"
-          ></path>
-          <g transform="translate(238.794 207.884) scale(.299423 -.299423)">
-            <path
-              d="M87.965 0V686.661h138.389l340.486-373.925q9.687-8.913 23.243-24.426t27.626-31.443q14.069-15.93 23.269-27.852l6.852.035q-.591 18.834-1.452 42.977t-.861 41.413v373.221H786.68V0H650.465L308.996 377.438q-19.4 20.304-41.169 45.913t-34.186 39.79l-6.252-.034q.591-13.131 1.165-37.943t.574-55.108V0H87.965Z"
-            ></path>
-          </g>
-          <g transform="translate(476.005 207.884) scale(.299423 -.299423)">
-            <path d="M87.965 0v686.661h147.258V0H87.965Z"></path>
-          </g>
-          <g transform="translate(548.098 207.884) scale(.299423 -.299423)">
-            <path
-              d="M87.965 0v686.661h147.258V340.174l372.025 346.487h187.788L493.368 403.904 800.688 0H617.466L387.978 309.854 235.223 182.985V0H87.965Z"
-            ></path>
-          </g>
-        </svg></a>
+  {!home && <FooterBrand />}
+
 </footer>
 
+</div>
 <script>
-  const footer = document.querySelector<HTMLElement>('[data-studio-footer]');
-  if (footer) {
-    const brand = footer.querySelector<HTMLElement>('.footer-brand');
-    footer.querySelectorAll<SVGPathElement>('[data-line-delay]').forEach(path => {
-      path.style.setProperty('--line-delay', `${path.dataset.lineDelay ?? 0}ms`);
-    });
-    footer.querySelectorAll<SVGPathElement>('.footer-wordmark path').forEach((path, index) => {
-      path.setAttribute('pathLength', '1');
-      path.style.setProperty('--letter-delay', `${index * 100}ms`);
-    });
-    // Observe the artwork, not the links above it, so the drawing isn't over
-    // before the visitor reaches it. Reset only after it leaves the viewport.
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry && entry.intersectionRatio >= 0.3) {
-        footer.dataset.revealed = 'true';
-      } else if (entry && !entry.isIntersecting) {
-        delete footer.dataset.revealed;
-      }
-    }, { threshold: [0, 0.3] });
-    if (brand) observer.observe(brand);
-    addEventListener('pagehide', () => observer.disconnect(), { once: true });
-  }
+  import '../scripts/footer-outro';
 </script>
