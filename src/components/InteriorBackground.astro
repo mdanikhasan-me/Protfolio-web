@@ -1,0 +1,15 @@
+<canvas class="interior-background" aria-hidden="true"></canvas>
+<script>
+  import { createInteriorBackground } from '../scripts/interior-background';
+  const canvas = document.querySelector<HTMLCanvasElement>('.interior-background');
+  if (canvas) {
+    try {
+      const background = createInteriorBackground(canvas);
+      window.addEventListener('pagehide', () => background.suspend(true));
+      window.addEventListener('pageshow', () => background.suspend(false));
+    } catch (error) {
+      canvas.hidden = true;
+      console.error('Interior background could not start', error);
+    }
+  }
+</script>

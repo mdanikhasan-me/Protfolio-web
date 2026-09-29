@@ -2,6 +2,7 @@
 import SiteFooter from '../components/SiteFooter.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import StudioHeader from '../components/StudioHeader.astro';
+import InteriorBackground from '../components/InteriorBackground.astro';
 import { SITE } from '../config/site';
 import { personSchema, type SchemaNode } from '../lib/schema';
 import '../styles/site.css';
@@ -89,6 +90,7 @@ const studioPage = ['work', 'writing', 'about', 'services', 'contact'].includes(
     data-pagefind-ignore={noindex ? 'all' : undefined}
   >
     <a class="skip-link" href="#main-content">Skip to main content</a>
+    {studioPage && <InteriorBackground />}
     <div class="site-frame">
       {!hideHeader && (studioPage ? <StudioHeader /> : <SiteHeader />)}
       <main id="main-content" tabindex="-1" data-pagefind-body={!noindex ? true : undefined}>
