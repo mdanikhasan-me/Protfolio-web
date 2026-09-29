@@ -125,6 +125,7 @@ async function startLightChapters(root: HTMLElement, canvas: HTMLCanvasElement, 
   });
   let active = false, frame = 0, last = performance.now(), stopped = false;
   let visionTop = 0;
+  let lastBlur = '', lastCopyOpacity = '';
   const pointer = new THREE.Vector2(), filteredPointer = new THREE.Vector2();
   const velocity = new THREE.Vector2(), residual = new THREE.Vector2();
   let pointerPrimed = false;
@@ -152,8 +153,9 @@ async function startLightChapters(root: HTMLElement, canvas: HTMLCanvasElement, 
     identity.rotation.set(-tilt*.10-zoom*.2,tilt*.236+zoom*.785,0);
     identity.scale.setScalar(scale);identity.position.set(zoom*.65,-.05,0);
     uniforms.uTime.value=time/1000;uniforms.uReveal.value=tilt;
-    vision.style.setProperty('--vision-blur',`${zoom*7}px`);
-    vision.style.setProperty('--vision-copy-opacity',String(1-zoom*.7));
+    const blur=`${zoom*7}px`, copyOpacity=String(1-zoom*.7);
+    if(blur!==lastBlur){vision.style.setProperty('--vision-blur',blur);lastBlur=blur;}
+    if(copyOpacity!==lastCopyOpacity){vision.style.setProperty('--vision-copy-opacity',copyOpacity);lastCopyOpacity=copyOpacity;}
     if(pointerPrimed) {
       residual.copy(pointer).sub(filteredPointer);
       filteredPointer.addScaledVector(residual,Math.min(1,dt*10));
