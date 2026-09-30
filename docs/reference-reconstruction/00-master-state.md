@@ -123,6 +123,23 @@ hashes, all-frame comparison, and performance trace.
 
 ## Active work
 
+- **October 9 storage/history continuation:** read
+  [the storage and history record](2026-10-09-storage-history.md). The complete
+  portfolio scratch evidence now lives on the D: SSD; original C: paths are
+  junctions. All 50,499 relocated files passed SHA-256 verification and the
+  32,607-frame reference analysis passed revalidation. Historical messages are
+  being simplified with original dates preserved; recovered work uses requested
+  September author dates with actual source timestamps documented separately.
+  Fresh build and eight scroll checks pass. Full parity remains open.
+
+- **October 1 native scroll and performance:** read
+  [the scroll/performance ledger](2026-10-01-native-scroll-performance.md).
+  Fixed stale project state after native upward scrolling and snapping competing with native
+  scroll input. Connected Edge middle-button autoscroll reaches the actual opening. Eight
+  normal/reduced-motion browser regressions pass. Redundant DOM writes are reduced; no effects,
+  shader quality, or motion are removed. A camera cache experiment was rejected after one
+  differing replay frame and narrowly reverted. Full native frame pacing and parity remain open.
+
 - **Latest content request:** [Salty Steak update](2026-10-01-salty-steak-update.md): supplied
   image now used for Salty Steak, second project; refresh-to-top verified in connected Edge.
   Existing project URL preserved. This does not close the prior visual/performance audit.
