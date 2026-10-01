@@ -26,5 +26,10 @@ const current = Astro.url.pathname;
   <nav aria-label="Primary navigation">
     {links.map(([label, href]) => <a href={href} aria-current={current.startsWith(href!) ? 'page' : undefined}>{label}</a>)}
   </nav>
-  <a class="studio-contact" href="/contact/">Contact ↗</a>
+  <a class="studio-contact" href="/contact/">
+    <span class="contact-label-track">
+      <span class="contact-label">Contact <span aria-hidden="true">&nearr;</span></span>
+      <span class="contact-label-hover" aria-hidden="true">Contact &nearr;</span>
+    </span>
+  </a>
 </header>
