@@ -1172,8 +1172,7 @@ h3 {
 }
 
 .evidence-heading p,
-.route-ledger-label,
-.home-contact-kicker {
+.route-ledger-label {
   font-family: var(--mono);
   font-size: 0.62rem;
   letter-spacing: 0.08em;
@@ -1282,10 +1281,7 @@ h3 {
 }
 
 .home-contact {
-  background:
-    radial-gradient(circle at 76% 42%, rgba(95, 71, 167, 0.11), transparent 33%),
-    radial-gradient(circle at 8% 62%, rgba(237, 48, 36, 0.045), transparent 28%),
-    #030405;
+  background: #000;
   color: #f3f2ed;
   isolation: isolate;
   min-height: 100svh;
@@ -1294,6 +1290,7 @@ h3 {
 }
 
 .home-contact::before {
+  display: none;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
@@ -1332,39 +1329,103 @@ h3 {
   z-index: 3;
 }
 
-.home-contact-kicker {
-  color: #b6abff;
-  margin: 0;
+.home-contact-invitation {
+  color: #edf3f4;
+  display: block;
+  text-decoration: none;
 }
 
-.home-contact-kicker-rule {
-  background: var(--v5-red);
-  display: block;
-  height: 2px;
-  margin-top: 1.05rem;
-  width: 2.25rem;
+.home-contact-invitation:focus-visible {
+  outline: 1px solid #b6dbdf;
+  outline-offset: 12px;
 }
 
 .home-contact-title {
-  font-family: 'Fredoka Variable', var(--body);
-  font-size: clamp(4.4rem, 7.35vw, 8.35rem);
+  font-family: var(--display-alt);
+  font-size: clamp(3.2rem, 6.2vw, 8rem);
   font-variation-settings:
-    'wdth' 100,
-    'wght' 660;
-  font-weight: 660;
-  letter-spacing: -0.065em;
-  line-height: 0.88;
-  margin: clamp(2.5rem, 7vh, 5.5rem) 0 0;
+    'wdth' 82,
+    'wght' 550;
+  font-weight: 550;
+  letter-spacing: -0.055em;
+  line-height: 1.02;
+  margin: 0;
+  text-transform: uppercase;
 }
 
-.home-contact-title span {
+.home-contact-line,
+.home-contact-line > span {
   display: block;
   white-space: nowrap;
 }
 
-.home-contact-title .home-contact-period {
-  color: #ff5f57;
-  display: inline;
+.home-contact-line {
+  overflow: clip;
+  padding-bottom: 0.06em;
+}
+
+.home-contact-line-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px #b6c8cc;
+  transition: color 240ms ease;
+}
+
+.home-contact-invitation:is(:hover, :focus-visible) .home-contact-line-outline {
+  color: #b6dbdf;
+}
+
+.home-contact-action {
+  align-items: center;
+  border-bottom: 1px solid #b6c8cc40;
+  display: flex;
+  font: 12px/1.5 var(--mono);
+  justify-content: space-between;
+  letter-spacing: 0.025em;
+  margin-top: clamp(1.75rem, 4vh, 3rem);
+  max-width: 23rem;
+  padding-bottom: 1rem;
+}
+
+.home-contact-arrow {
+  align-items: center;
+  border: 1px solid #b6c8cc80;
+  border-radius: 50%;
+  display: flex;
+  font-size: 20px;
+  height: 44px;
+  justify-content: center;
+  transition: transform 240ms ease, background-color 240ms ease, color 240ms ease;
+  width: 44px;
+}
+
+.home-contact-invitation:is(:hover, :focus-visible) .home-contact-arrow {
+  background: #b6dbdf;
+  color: #000;
+  transform: rotate(45deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .home-contact-copy[data-reveal='pending'] .home-contact-line > span {
+    transform: translateY(110%) skewY(3deg);
+  }
+
+  .home-contact-copy[data-reveal='visible'] .home-contact-line > span {
+    animation: contact-line-enter 780ms cubic-bezier(0.22, 0.76, 0.2, 1) both;
+  }
+
+  .home-contact-copy[data-reveal='visible'] .home-contact-line:nth-child(2) > span {
+    animation-delay: 90ms;
+  }
+}
+
+@keyframes contact-line-enter {
+  from { transform: translateY(110%) skewY(3deg); }
+  to { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-contact-line-outline,
+  .home-contact-arrow { transition: none; }
 }
 
 .home-contact-visual {
@@ -1612,15 +1673,12 @@ h3 {
     padding: 1.5rem 0 0;
   }
 
-  .home-contact-kicker-rule {
-    margin-top: 0.8rem;
+  .home-contact-title {
+    font-size: clamp(2.5rem, 10.5vw, 6rem);
   }
 
-  .home-contact-title {
-    font-size: clamp(3.2rem, 14.5vw, 6rem);
-    letter-spacing: -0.06em;
-    line-height: 0.9;
-    margin-top: clamp(1.75rem, 5vh, 3rem);
+  .home-contact-action {
+    max-width: 19rem;
   }
 
   .home-contact-visual {

@@ -20,6 +20,12 @@ const mediaBase: Record<string, string> = {
   'uiu-discord-bot': '/media/projects/uiu-discord-bot',
   'salty-potato-ai': '/media/projects/salty-steak',
 };
+const projectAnnotations: Record<string, string> = {
+  boilabin: 'নিজের উদ্যোগ, নিজের হাতে তৈরি অনলাইন দোকান।',
+  'salty-potato-ai': 'নিজের কম্পিউটারে চলা এআই ও কাজের সরঞ্জাম।',
+  soctukit: 'উইন্ডোজের দৈনন্দিন কাজ সহজ করার সরঞ্জাম।',
+  'uiu-discord-bot': 'বিশ্ববিদ্যালয়ের নোটিশ সরাসরি ডিসকর্ডে।',
+};
 ---
 
 <BaseLayout bodyClass="home-page home-v5" schema={websiteSchema()} hideHeader>
@@ -62,7 +68,10 @@ const mediaBase: Record<string, string> = {
       <a href="/services/">Services</a>
     </span>
     <a class="reference-contact-pill" href="/contact/">
-      Contact <span aria-hidden="true">&nearr;</span>
+      <span class="contact-label-track">
+        <span class="contact-label">Contact <span aria-hidden="true">&nearr;</span></span>
+        <span class="contact-label-hover" aria-hidden="true">Contact &nearr;</span>
+      </span>
     </a>
     <details class="reference-mobile-menu">
       <summary aria-label="Open navigation"><span aria-hidden="true"></span></summary>
@@ -83,7 +92,6 @@ const mediaBase: Record<string, string> = {
     <a href="#selected-work" data-section-link="works"><span>Works</span></a>
     <a href="#mission-title" data-section-link="about"><span>About</span></a>
     <a href="#evidence-title" data-section-link="vision"><span>Vision</span></a>
-    <a href="#route-ledger-title" data-section-link="writing"><span>Writing</span></a>
   </nav>
   <div class="reference-world" data-reference-world>
     <div class="reference-world-scene">
@@ -104,14 +112,17 @@ const mediaBase: Record<string, string> = {
               data-reference-gizmo
               aria-label="Drag to rotate the identity sculpture"
             >
-              <svg viewBox="0 0 72 72" aria-hidden="true">
-                <circle class="gizmo-orbit" cx="36" cy="36" r="28" />
-                <circle class="gizmo-orbit" cx="36" cy="36" r="30" />
-                {['xy','xz','yz'].map(plane => <path class="gizmo-orbit" data-reference-orbit={plane} />)}
+              <svg viewBox="0 0 136 136" aria-hidden="true">
+                {['xy','xz','yz'].map(plane => <g>
+                  <path class="gizmo-orbit" data-reference-orbit={plane} />
+                  <path class="gizmo-hit" data-reference-ring={plane} />
+                </g>)}
+                <circle class="gizmo-orbit gizmo-outer" cx="68" cy="68" r="55.83148" />
+                <circle class="gizmo-hit" data-reference-ring="outer" cx="68" cy="68" r="55.83148" />
                 {(['nx', 'ny', 'nz', 'x', 'y', 'z'] as const).map((axis) => <g data-reference-axis={axis} class={`gizmo-axis gizmo-axis-${axis}`}>
-                  <line x1="36" y1="36" x2="36" y2="36" />
-                  <circle cx="36" cy="36" r="5" />
-                  <text x="36" y="36" text-anchor="middle" dominant-baseline="middle">{axis.startsWith('n') ? '' : axis.toUpperCase()}</text>
+                  <line x1="68" y1="68" x2="68" y2="68" />
+                  <circle cx="68" cy="68" r="8" />
+                  <text x="68" y="68" text-anchor="middle" dy="4">{axis.startsWith('n') ? `-${axis.slice(1).toUpperCase()}` : axis.toUpperCase()}</text>
                 </g>)}
               </svg>
             </button>
@@ -193,7 +204,8 @@ const mediaBase: Record<string, string> = {
                 data-project-tone={project.id}
                 data-project-status={project.data.status}
                 data-project-kind={project.data.kind}
-                data-project-updated={project.data.updatedAt.toISOString().slice(0, 10)}
+                data-project-updated={project.data.firstRecordedAt.toISOString().slice(0, 10)}
+                data-project-annotation={projectAnnotations[project.id]}
                 data-project-role={project.data.role}
                 data-project-media={`${mediaBase[project.id]}-1600.webp`}
               >
@@ -226,7 +238,10 @@ const mediaBase: Record<string, string> = {
         <div class="curve-work-detail" aria-live="polite">
           <span data-curve-count>01 / {String(projects.length).padStart(2, '0')}</span>
           <div>
-            <time class="curve-project-date" data-curve-date datetime={leadProject.data.updatedAt.toISOString().slice(0, 10)} aria-label="Project updated">{leadProject.data.updatedAt.toISOString().slice(0, 10).replaceAll('-', '.')}</time>
+            <div class="curve-project-dateline">
+              <time class="curve-project-date" data-curve-date datetime={leadProject.data.firstRecordedAt.toISOString().slice(0, 10)} title="Earliest recorded repository commit">{leadProject.data.firstRecordedAt.toISOString().slice(0, 10).replaceAll('-', '.')}</time>
+              <span class="curve-project-annotation" data-curve-annotation lang="bn">{projectAnnotations[leadProject.id]}</span>
+            </div>
             <h3 data-curve-title>{leadProject.data.title}</h3>
             <p data-curve-description>{leadProject.data.description}</p>
             <ul class="curve-project-tags" aria-label="Project details">
@@ -270,38 +285,19 @@ const mediaBase: Record<string, string> = {
   </section>
   </div>
 
-  <section class="route-ledger home-writing" aria-labelledby="route-ledger-title">
-    <h2 class="sr-only" id="route-ledger-title">Writing</h2>
-    <div class="route-ledger-label">
-      <p>Notes from work I can explain first-hand</p>
-      <span>04 / Writing</span>
-    </div>
-    <ol>
-      {
-        articles.map((article, index) => (
-          <li>
-            <a href={`/writing/${article.id}/`}>
-              <small>{String(index + 1).padStart(2, '0')}</small>
-              <strong>{article.data.title}</strong>
-              <span>{article.data.description}</span>
-              <i aria-hidden="true">&nearr;</i>
-            </a>
-          </li>
-        ))
-      }
-    </ol>
-  </section>
-
   <section class="home-contact" aria-labelledby="home-contact-title">
     <div class="home-contact-sticky">
       <div class="home-contact-stage">
         <div class="home-contact-copy">
-          <p class="home-contact-kicker">Have a project in mind?</p>
-          <span class="home-contact-kicker-rule" aria-hidden="true"></span>
-          <h2 class="home-contact-title" id="home-contact-title">
-            <span>Send me</span>
-            <span>a message<span class="home-contact-period">.</span></span>
-          </h2>
+          <a class="home-contact-invitation" href="/contact/" aria-labelledby="home-contact-title">
+            <h2 class="home-contact-title" id="home-contact-title">
+              <span class="home-contact-line"><span>Send me</span></span>
+              <span class="home-contact-line home-contact-line-outline"><span>a message.</span></span>
+            </h2>
+            <span class="home-contact-action" aria-hidden="true">
+              <span>Let's talk</span><span class="home-contact-arrow">&nearr;</span>
+            </span>
+          </a>
         </div>
 
         <figure class="home-contact-visual" aria-hidden="true">
@@ -333,5 +329,6 @@ const mediaBase: Record<string, string> = {
     import '../scripts/home-state';
     import '../scripts/material-color-picker';
     import '../scripts/light-chapters';
+    import '../scripts/contact-invitation';
   </script>
 </BaseLayout>

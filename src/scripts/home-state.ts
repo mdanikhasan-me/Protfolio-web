@@ -42,6 +42,7 @@ const curveTitle = curveSection?.querySelector<HTMLElement>('[data-curve-title]'
 const curveDescription = curveSection?.querySelector<HTMLElement>('[data-curve-description]');
 const curveKind = curveSection?.querySelector<HTMLElement>('[data-curve-kind]');
 const curveDate = curveSection?.querySelector<HTMLTimeElement>('[data-curve-date]');
+const curveAnnotation = curveSection?.querySelector<HTMLElement>('[data-curve-annotation]');
 const curveRole = curveSection?.querySelector<HTMLElement>('[data-curve-role]');
 const curveLink = curveSection?.querySelector<HTMLAnchorElement>('[data-curve-link]');
 const curveCount = curveSection?.querySelector<HTMLElement>('[data-curve-count]');
@@ -78,9 +79,8 @@ let curveSectionHeight = 0;
 const sectionRail = document.querySelector<HTMLElement>('[data-section-rail]');
 const sectionLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-section-link]')];
 const sectionLandmarks = [null, curveSection, meltSection,
-  document.querySelector<HTMLElement>('.vision-chapter'),
-  document.querySelector<HTMLElement>('.home-writing')];
-let sectionStarts = [0, 0, 0, 0, 0];
+  document.querySelector<HTMLElement>('.vision-chapter')];
+let sectionStarts = sectionLandmarks.map(() => 0);
 let contactStart = Infinity;
 const contactStage = document.querySelector<HTMLElement>('.home-contact-stage');
 let contactStageTop = Infinity;
@@ -261,6 +261,7 @@ function setActiveProject(index: number) {
       curveDate.dateTime = card.dataset.projectUpdated ?? '';
       curveDate.textContent = (card.dataset.projectUpdated ?? '').replaceAll('-', '.');
     }
+    if (curveAnnotation) curveAnnotation.textContent = card.dataset.projectAnnotation ?? '';
     if (curveRole) curveRole.textContent = card.dataset.projectRole ?? '';
     if (curveLink && card.dataset.projectRoute) curveLink.href = card.dataset.projectRoute;
     if (curveCount) {
