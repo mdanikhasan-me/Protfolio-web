@@ -275,6 +275,11 @@ const tileVertexShader = /* glsl */ `
     // tile can be rectangular. Compensate only that chapter's symbol samples.
     vMotifAspect = mix(1.0, instanceScale.x * uScale.x /
       max(0.0001, instanceScale.y * uScale.y * 1.5), uOutro * uMotifAspectBlend);
+    float inset = 1.0 - 0.003 * pow(2.0, instanceDepth);
+    localPosition.xy *= inset;
+    localPosition.xy *= instanceScale;
+    // Pattern projection remains on the unrotated tile while its geometry flips.
+    vec3 texturePosition = localPosition + instancePosition;
     float transition = uPatternMix;
 
     if (uTransitionType < 0.5) {
@@ -283,13 +288,9 @@ const tileVertexShader = /* glsl */ `
       vPatternMix = step(instanceId.x, transition);
     } else {
       float sweep = smoothstep(0.0, 1.0, -(instancePosition.x + 0.5) + transition * 2.0);
-      vPatternMix = 1.0 - pow(1.0 - sweep, 3.0);
+      vPatternMix = sweep == 1.0 ? 1.0 : 1.0 - pow(2.0, -10.0 * sweep);
       localPosition.xz *= rotate2d(vPatternMix * PI * 2.0);
     }
-
-    float inset = 1.0 - 0.003 * pow(2.0, instanceDepth);
-    localPosition.xy *= inset;
-    localPosition.xy *= instanceScale;
 
     vec2 globalUv = instancePosition.xy + vec2(0.5) + (uv - 0.5) * instanceScale;
     float uvSeed = floor(uUvShiftSeed * 5.0) / 5.0;
@@ -305,11 +306,12 @@ const tileVertexShader = /* glsl */ `
 
     vec2 flatPosition = localPosition.xy + instancePosition.xy;
     vec3 screenFlatPosition = vec3(
-      flatPosition.x * uScale.x,
-      flatPosition.y * uScale.y,
-      localPosition.z
+      texturePosition.x * uScale.x,
+      texturePosition.y * uScale.y,
+      texturePosition.z
     );
-    vec4 screenClip = projectionMatrix * modelViewMatrix * vec4(screenFlatPosition * 0.5, 1.0);
+    vec4 screenView = modelViewMatrix * vec4(screenFlatPosition * 0.5, 1.0);
+    vec4 screenClip = projectionMatrix * screenView;
     vec2 projectedScreenUv = screenClip.xy / screenClip.w * 0.5 + 0.5;
     vTitleScreenUv = projectedScreenUv;
     vec2 screenUv = projectedScreenUv + uvShift;
@@ -330,12 +332,12 @@ const tileVertexShader = /* glsl */ `
     vEmitSide = length(texture2D(uFluid, projectedScreenUv).xy);
     float theta = flatPosition.x * PI;
     float radius = uScale.x * 0.5;
-    vec3 curvedPosition = vec3(
-      sin(theta) * radius,
-      flatPosition.y * uScale.y * 1.5,
-      -cos(theta) * radius
-    );
-    curvedPosition.z += localPosition.z;
+    vec3 curvedPosition = vec3(flatPosition, localPosition.z);
+    curvedPosition.x *= 0.0;
+    curvedPosition.xz *= rotate2d(PI * 0.5);
+    curvedPosition.z -= radius;
+    curvedPosition.y *= uScale.y * 1.5;
+    curvedPosition.xz *= rotate2d(-theta);
     vec3 flatOutroPosition = vec3(flatPosition.x * uScale.x * 2.0,
       flatPosition.y * uScale.y * 1.5 * 2.0, -radius + localPosition.z);
     curvedPosition = mix(curvedPosition, flatOutroPosition, uOutro);
@@ -345,7 +347,8 @@ const tileVertexShader = /* glsl */ `
     vScreenUv = screenUv;
     vFrontFace = abs(normal.z);
     vInstanceId = instanceId;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(curvedPosition, 1.0);
+    vec4 viewPosition = modelViewMatrix * vec4(curvedPosition, 1.0);
+    gl_Position = projectionMatrix * viewPosition;
   }
 `;
 
@@ -523,7 +526,7 @@ const tileFragmentShader = /* glsl */ `
       step(0.0, titleUv.y) * step(titleUv.y, 1.0);
     float titleInk = texture2D(uWorksTitle, titleUv).a * titleBounds * titleVisibility;
 
-    vec2 dotUv = fract(vGlobalUv * 414.0) - 0.5;
+    vec2 dotUv = fract(vGlobalUv * 1800.0 * vec2(1.0) * 0.23) - 0.5;
     float dotMask = smoothstep(0.50, 0.20, length(dotUv));
     displayColor *= mix(dotMask, 1.0, 0.60) * 0.90;
 
@@ -1469,7 +1472,9 @@ export function createReferenceBackgroundSystem(
     if (!recordedReplay && elapsed >= nextLivePatternTime) {
       const pattern = Math.floor(patternRandom() * 3) as PatternIndex;
       const opening = window.scrollY < window.innerHeight * 0.95;
-      const transition = opening ? Math.floor(patternRandom() * 3) : 0;
+      // Live playback excludes the paper-like tile flip rejected by the owner.
+      // The historical capture schedule above remains intact for comparisons.
+      const transition = opening ? Math.floor(patternRandom() * 2) : 0;
       const duration = [0, 0.3, 3][transition]!;
       beginPatternChange(elapsed, pattern, transition, duration);
       nextLivePatternTime = elapsed + duration + 1 + patternRandom();
@@ -1584,8 +1589,12 @@ export function createReferenceBackgroundSystem(
     height: number,
     pixelRatio: number,
   ) => {
-    const distance = Math.abs(camera.position.z);
-    const frustumHeight = 2 * distance * Math.tan(THREE.MathUtils.degToRad(camera.fov) * 0.5);
+    // The reference sizes the chamber from the base camera, before opening zoom
+    // and pointer parallax. Using the current camera shrinks the wall and makes
+    // its grid/panels change scale depending on when a resize happens.
+    const baseDistance = 10;
+    const baseFov = 35 + 18 / camera.aspect;
+    const frustumHeight = 2 * baseDistance * Math.tan(THREE.MathUtils.degToRad(baseFov) * 0.5);
     const frustumWidth = frustumHeight * camera.aspect;
     const scale = Math.max(frustumWidth, frustumHeight);
     scaleUniform.value.set(scale, scale);
