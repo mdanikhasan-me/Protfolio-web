@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { referenceMotionState } from '../lib/reference-motion-state';
 import { advancePointerRotation, pointerBlend } from '../lib/pointer-rotation';
+import { createQuaternionDisplaySync } from '../lib/quaternion-display';
 import { createReferenceBackgroundSystem } from './reference-background-system';
 
 const clamp = (value: number, minimum = 0, maximum = 1) =>
@@ -18,6 +19,7 @@ const stateReadout = world?.querySelector<HTMLElement>('[data-reference-state]')
 const quaternionReadout = world?.querySelector<HTMLElement>('[data-reference-fold]');
 const resetButton = world?.querySelector<HTMLButtonElement>('[data-reference-reset]');
 const rotationGizmo = world?.querySelector<HTMLButtonElement>('[data-reference-gizmo]');
+const controllerPanel = world?.querySelector<HTMLElement>('.reference-telemetry-right');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarsePointer = matchMedia('(hover: none) and (pointer: coarse)').matches;
 const pointerEffectsEnabled = !coarsePointer;
@@ -1721,9 +1723,13 @@ async function startReferenceWorld(
   let pointerEnergy = 0;
   let gizmoDragging = false;
   const gizmoQuaternionStart = new THREE.Quaternion();
-  const gizmoDragStart = new THREE.Vector3();
-  const gizmoDragCurrent = new THREE.Vector3();
   const gizmoDragDelta = new THREE.Quaternion();
+  const gizmoRotationAxis = new THREE.Vector3();
+  const gizmoLastPointer = new THREE.Vector2();
+  let gizmoRing = '';
+  let gizmoStartAngle = 0;
+  let gizmoReverseAngle = false;
+  let gizmoAutoFrame = 0;
   const gizmoProjectedAxis = new THREE.Vector3();
   const gizmoAxes = ([
     ['nx', new THREE.Vector3(-1, 0, 0)],
@@ -1735,6 +1741,8 @@ async function startReferenceWorld(
   ] as const).map(([name, vector]) => {
     const group = rotationGizmo?.querySelector<SVGGElement>(`[data-reference-axis="${name}"]`);
     return {
+      name,
+      depth: 0,
       vector,
       group,
       line: group?.querySelector<SVGLineElement>('line') ?? null,
@@ -1744,24 +1752,34 @@ async function startReferenceWorld(
   });
   const gizmoOrbits = (['xy', 'xz', 'yz'] as const).map(plane => ({
     plane, path: rotationGizmo?.querySelector<SVGPathElement>(`[data-reference-orbit="${plane}"]`),
+    hit: rotationGizmo?.querySelector<SVGPathElement>(`[data-reference-ring="${plane}"]`),
   }));
+  // Reference projector: 30-degree perspective, camera at z=5, 136-square viewport.
+  const gizmoProjectionScale = 68 / Math.tan(Math.PI / 12);
+  const gizmoDepthOrder = [...gizmoAxes];
+  let previousGizmoDepthOrder = '';
   const updateQuaternionController = (quaternion: THREE.Quaternion) => {
-    gizmoOrbits.forEach(({plane,path}) => {
+    gizmoOrbits.forEach(({plane,path,hit}) => {
       if (!path) return;
       let d = '';
-      for (let step = 0; step <= 48; step += 1) {
-        const angle = step / 48 * Math.PI * 2;
+      for (let step = 0; step <= 64; step += 1) {
+        const angle = step / 64 * Math.PI * 2;
         const a = Math.cos(angle), b = Math.sin(angle);
         gizmoProjectedAxis.set(plane === 'yz' ? 0 : a, plane === 'xz' ? 0 : plane === 'yz' ? a : b, plane === 'xy' ? 0 : b).applyQuaternion(quaternion);
-        d += `${step ? 'L' : 'M'}${(36 + gizmoProjectedAxis.x * 25).toFixed(2)} ${(36 - gizmoProjectedAxis.y * 25).toFixed(2)}`;
+        const scale = gizmoProjectionScale / (5 - gizmoProjectedAxis.z);
+        d += `${step ? 'L' : 'M'}${(68 + gizmoProjectedAxis.x * scale).toFixed(3)} ${(68 - gizmoProjectedAxis.y * scale).toFixed(3)}`;
       }
       path.setAttribute('d', d);
+      hit?.setAttribute('d', d);
     });
-    gizmoAxes.forEach(({ vector, group, line, point, label }) => {
+    gizmoAxes.forEach((axis) => {
+      const { vector, group, line, point, label } = axis;
       if (!group || !line || !point || !label) return;
-      gizmoProjectedAxis.copy(vector).applyQuaternion(quaternion);
-      const x = 36 + gizmoProjectedAxis.x * 25;
-      const y = 36 - gizmoProjectedAxis.y * 25;
+      gizmoProjectedAxis.copy(vector).multiplyScalar(0.7).applyQuaternion(quaternion);
+      axis.depth = gizmoProjectedAxis.z;
+      const scale = gizmoProjectionScale / (5 - gizmoProjectedAxis.z);
+      const x = 68 + gizmoProjectedAxis.x * scale;
+      const y = 68 - gizmoProjectedAxis.y * scale;
       const labelDistance = 0;
       const labelX = x + gizmoProjectedAxis.x * labelDistance;
       const labelY = y - gizmoProjectedAxis.y * labelDistance;
@@ -1771,20 +1789,16 @@ async function startReferenceWorld(
       point.setAttribute('cy', y.toFixed(2));
       label.setAttribute('x', labelX.toFixed(2));
       label.setAttribute('y', labelY.toFixed(2));
-      group.style.opacity = (0.58 + (gizmoProjectedAxis.z + 1) * 0.2).toFixed(3);
     });
-  };
-  const projectPointerToGizmoSphere = (event: PointerEvent, target: THREE.Vector3) => {
-    const bounds = rotationGizmo?.getBoundingClientRect();
-    if (!bounds || bounds.width <= 0 || bounds.height <= 0) return target.set(0, 0, 1);
-    const x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
-    const y = 1 - ((event.clientY - bounds.top) / bounds.height) * 2;
-    const radiusSquared = x * x + y * y;
-    if (radiusSquared <= 1) return target.set(x, y, Math.sqrt(1 - radiusSquared));
-    const inverseLength = 1 / Math.sqrt(radiusSquared);
-    return target.set(x * inverseLength, y * inverseLength, 0);
+    gizmoDepthOrder.sort((a, b) => a.depth - b.depth);
+    const order = gizmoDepthOrder.map(axis => axis.name).join(',');
+    if (order !== previousGizmoDepthOrder) {
+      gizmoDepthOrder.forEach(({group}) => { if (group) group.parentElement?.appendChild(group); });
+      previousGizmoDepthOrder = order;
+    }
   };
   updateQuaternionController(interactionQuaternion);
+  const syncQuaternionController = createQuaternionDisplaySync(interactionQuaternion, updateQuaternionController);
   let revealStart = performance.now();
   const startupEnabled = !reducedMotion && !deterministicCaptureMode && scrollY < 1;
   let animationFrame = 0;
@@ -1804,7 +1818,9 @@ async function startReferenceWorld(
   let responsiveIdentityScale = identityBaseScale;
   let responsiveWordScale = 1;
   let worldInView = true;
-  let controllerUpdateElapsed = 0;
+  let worldIntersects = true;
+  let worldVisibleEnd = Number.POSITIVE_INFINITY;
+  const followingChapter = document.querySelector<HTMLElement>('[data-light-chapters]');
   let renderReady = false;
   let disposed = false;
   let canvasWidth = 0;
@@ -1928,6 +1944,12 @@ async function startReferenceWorld(
   };
 
   const resize = () => {
+    // The world includes a viewport of overlap behind the opaque About chapter.
+    // Cache its actual visible end during layout work, not on each scroll/frame.
+    worldVisibleEnd = followingChapter
+      ? followingChapter.getBoundingClientRect().top + scrollY
+      : Number.POSITIVE_INFINITY;
+    updateWorldVisibility();
     const width = deterministicCaptureMode
       ? captureWidth
       : Math.max(1, Math.round(outputCanvas.clientWidth || innerWidth));
@@ -1971,8 +1993,9 @@ async function startReferenceWorld(
     // make the reference panel and glass read as crisp rather than soft and underexposed.
     bloomBrightTarget.setSize(renderWidth, renderHeight);
     bloomScales.forEach((scale, index) => {
-      const bloomWidth = Math.max(1, Math.ceil(renderWidth / scale));
-      const bloomHeight = Math.max(1, Math.ceil(renderHeight / scale));
+      // Match PostProcessPass.resize: fractional bloom dimensions round down.
+      const bloomWidth = Math.max(1, Math.floor(renderWidth / scale));
+      const bloomHeight = Math.max(1, Math.floor(renderHeight / scale));
       bloomVerticalTargets[index]!.setSize(bloomWidth, bloomHeight);
       bloomHorizontalTargets[index]!.setSize(bloomWidth, bloomHeight);
     });
@@ -1996,10 +2019,10 @@ async function startReferenceWorld(
       const verticalTarget = bloomVerticalTargets[index]!;
       const horizontalTarget = bloomHorizontalTargets[index]!;
       bloomQuad.material = bloomBlurMaterial;
-      // Each authored bloom level starts from the same thresholded scene. Cascading the quarter
-      // level into the eighth and then sixteenth over-softens the highlights and removes the crisp
-      // colored velocity that distinguishes the reference.
-      bloomBlurUniforms.uInput.value = bloomBrightTarget.texture;
+      // Each reference bloom level continues from the preceding horizontal blur.
+      bloomBlurUniforms.uInput.value = index === 0
+        ? bloomBrightTarget.texture
+        : bloomHorizontalTargets[index - 1]!.texture;
       bloomBlurUniforms.uResolution.value.set(verticalTarget.width, verticalTarget.height);
       bloomBlurUniforms.uDirection.value.set(0, 1);
       renderer.setRenderTarget(verticalTarget);
@@ -2025,6 +2048,7 @@ async function startReferenceWorld(
   const canvasResizeObserver =
     'ResizeObserver' in window ? new ResizeObserver(requestResize) : null;
   canvasResizeObserver?.observe(outputCanvas);
+  canvasResizeObserver?.observe(worldElement);
 
   const onPointerMove = (event: PointerEvent) => {
     if (!worldInView || coarsePointer || capturePointerSweep) return;
@@ -2114,6 +2138,9 @@ async function startReferenceWorld(
   addEventListener('resize', requestResize, { passive: true });
 
   const resetOrientation = () => {
+    cancelAnimationFrame(gizmoAutoFrame);
+    gizmoAutoFrame = 0;
+    identityQuaternion.identity();
     interactionQuaternion.identity();
     hoverEuler.set(0, 0, 0);
     pointerEnergy = 0;
@@ -2123,9 +2150,42 @@ async function startReferenceWorld(
   const beginGizmoDrag = (event: PointerEvent) => {
     if (event.button !== 0 || scrollY >= innerHeight * 1.25) return;
     event.preventDefault();
+    cancelAnimationFrame(gizmoAutoFrame);
+    gizmoAutoFrame = 0;
+    const target = event.target instanceof Element ? event.target : null;
+    const axis = target?.closest<SVGGElement>('[data-reference-axis]')?.dataset.referenceAxis;
+    if (axis && target?.tagName.toLowerCase() === 'circle') {
+      const half = Math.SQRT1_2;
+      const poses: Record<string, [number, number, number, number]> = {
+        x: [0, -half, 0, half], nx: [0, half, 0, half],
+        y: [half, 0, 0, half], ny: [-half, 0, 0, half],
+        z: [0, 0, 0, 1], nz: [0, 1, 0, 0],
+      };
+      const pose = poses[axis];
+      if (!pose) return;
+      gizmoQuaternionStart.copy(interactionQuaternion);
+      identityQuaternion.set(...pose);
+      const start = performance.now();
+      const snap = (time: number) => {
+        const t = clamp((time - start) / 300);
+        const r = 1 - t;
+        interactionQuaternion.slerpQuaternions(gizmoQuaternionStart, identityQuaternion, 1 - r ** 6 * (7 - 6 * r));
+        if (t < 1) gizmoAutoFrame = requestAnimationFrame(snap);
+        else gizmoAutoFrame = 0;
+      };
+      gizmoAutoFrame = requestAnimationFrame(snap);
+      pointerInitialized = false;
+      pointerEnergy = 0;
+      return;
+    }
     gizmoDragging = true;
+    gizmoRing = target?.closest<SVGElement>('[data-reference-ring]')?.dataset.referenceRing ?? '';
     gizmoQuaternionStart.copy(interactionQuaternion);
-    projectPointerToGizmoSphere(event, gizmoDragStart);
+    const bounds = rotationGizmo!.getBoundingClientRect();
+    gizmoLastPointer.set(event.clientX, event.clientY);
+    gizmoStartAngle = Math.atan2(event.clientY - bounds.top - bounds.height / 2, event.clientX - bounds.left - bounds.width / 2);
+    gizmoRotationAxis.set(gizmoRing === 'yz' ? 1 : 0, gizmoRing === 'xz' ? 1 : 0, gizmoRing === 'xy' || gizmoRing === 'outer' ? 1 : 0);
+    gizmoReverseAngle = gizmoRing === 'outer' || gizmoProjectedAxis.copy(gizmoRotationAxis).applyQuaternion(gizmoQuaternionStart).z > 0;
     hoverEuler.set(0, 0, 0);
     pointerEnergy = 0;
     pointerInitialized = false;
@@ -2135,31 +2195,65 @@ async function startReferenceWorld(
       active: false,
     });
     rotationGizmo?.setPointerCapture(event.pointerId);
-    if (rotationGizmo) rotationGizmo.dataset.dragging = 'true';
+    if (rotationGizmo) {
+      rotationGizmo.dataset.dragging = 'true';
+      rotationGizmo.dataset.ring = gizmoRing;
+    }
   };
   const moveGizmo = (event: PointerEvent) => {
-    if (!gizmoDragging) return;
+    if (!gizmoDragging) {
+      const target = event.target instanceof Element ? event.target : null;
+      if (rotationGizmo) rotationGizmo.dataset.ring = target?.closest<SVGElement>('[data-reference-ring]')?.dataset.referenceRing ?? '';
+      return;
+    }
     event.preventDefault();
-    projectPointerToGizmoSphere(event, gizmoDragCurrent);
-    gizmoDragDelta.setFromUnitVectors(gizmoDragStart, gizmoDragCurrent);
-    interactionQuaternion
-      .copy(gizmoDragDelta)
-      .multiply(gizmoQuaternionStart)
-      .normalize();
+    const bounds = rotationGizmo!.getBoundingClientRect();
+    if (gizmoRing) {
+      const angle = Math.atan2(event.clientY - bounds.top - bounds.height / 2, event.clientX - bounds.left - bounds.width / 2);
+      let delta = Math.atan2(Math.sin(angle - gizmoStartAngle), Math.cos(angle - gizmoStartAngle));
+      if (gizmoReverseAngle) delta = -delta;
+      gizmoDragDelta.setFromAxisAngle(gizmoRotationAxis, delta);
+      interactionQuaternion.copy(gizmoQuaternionStart);
+      if (gizmoRing === 'outer') interactionQuaternion.premultiply(gizmoDragDelta);
+      else interactionQuaternion.multiply(gizmoDragDelta);
+    } else {
+      const dx = (event.clientX - gizmoLastPointer.x) * 136 / bounds.width;
+      const dy = (event.clientY - gizmoLastPointer.y) * 136 / bounds.height;
+      const distance = Math.hypot(dx, dy);
+      if (distance) {
+        gizmoRotationAxis.set(dy / distance, dx / distance, 0);
+        gizmoDragDelta.setFromAxisAngle(gizmoRotationAxis, distance / 68);
+        interactionQuaternion.premultiply(gizmoDragDelta);
+      }
+      gizmoLastPointer.set(event.clientX, event.clientY);
+    }
+    interactionQuaternion.normalize();
   };
   const releaseGizmo = (event: PointerEvent) => {
     if (!gizmoDragging) return;
     gizmoDragging = false;
+    identityQuaternion.copy(interactionQuaternion);
     if (rotationGizmo?.hasPointerCapture(event.pointerId)) {
       rotationGizmo.releasePointerCapture(event.pointerId);
     }
     rotationGizmo?.removeAttribute('data-dragging');
+    rotationGizmo?.removeAttribute('data-ring');
     pointerInitialized = false;
     fluid?.update({
       x: event.clientX / Math.max(1, canvasWidth),
       y: 1 - event.clientY / Math.max(1, canvasHeight),
       active: false,
     });
+  };
+  const leaveGizmo = () => { if (!gizmoDragging) rotationGizmo?.removeAttribute('data-ring'); };
+  const keyGizmo = (event: KeyboardEvent) => {
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key) || rotationGizmo?.disabled) return;
+    event.preventDefault();
+    cancelAnimationFrame(gizmoAutoFrame);
+    gizmoAutoFrame = 0;
+    gizmoRotationAxis.set(event.key === 'ArrowUp' ? 1 : event.key === 'ArrowDown' ? -1 : 0, event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0, 0);
+    interactionQuaternion.premultiply(gizmoDragDelta.setFromAxisAngle(gizmoRotationAxis, Math.PI / 16)).normalize();
+    identityQuaternion.copy(interactionQuaternion);
   };
   if (!coarsePointer) {
     addEventListener('pointermove', onPointerMove, { passive: true });
@@ -2168,6 +2262,8 @@ async function startReferenceWorld(
   resetButton?.addEventListener('click', resetOrientation);
   rotationGizmo?.addEventListener('pointerdown', beginGizmoDrag);
   rotationGizmo?.addEventListener('pointermove', moveGizmo);
+  rotationGizmo?.addEventListener('pointerleave', leaveGizmo);
+  rotationGizmo?.addEventListener('keydown', keyGizmo);
   rotationGizmo?.addEventListener('pointerup', releaseGizmo);
   rotationGizmo?.addEventListener('pointercancel', releaseGizmo);
   rotationGizmo?.addEventListener('lostpointercapture', releaseGizmo);
@@ -2190,7 +2286,14 @@ async function startReferenceWorld(
     // Pointer rotation belongs to the opening. Beyond it, a small deterministic
     // scroll pose replaces idle spin; reversing scroll restores the same pose.
     const rotationEnabled = !captureGallerySweep && !inWorksOutro && scrollY < innerHeight * 1.25;
-    if (rotationGizmo) {
+    if (controllerPanel && controllerPanel.hidden === rotationEnabled) {
+      // The user's top-only rule follows the existing opening interaction
+      // boundary. Hide the readout and Reset as well as the disabled gizmo.
+      controllerPanel.hidden = !rotationEnabled;
+      controllerPanel.inert = !rotationEnabled;
+    }
+    if (resetButton && resetButton.disabled === rotationEnabled) resetButton.disabled = !rotationEnabled;
+    if (rotationGizmo && rotationGizmo.disabled === rotationEnabled) {
       rotationGizmo.disabled = !rotationEnabled;
       rotationGizmo.title = rotationEnabled ? 'Drag to rotate' : 'Rotation is available at the top';
     }
@@ -2202,7 +2305,7 @@ async function startReferenceWorld(
       pointerEnergy = 0;
     }
     if (!coarsePointer && rotationEnabled) {
-      if (gizmoDragging) {
+      if (gizmoDragging || gizmoAutoFrame) {
         filteredPointerNdc.copy(pointerNdc);
         pointerVelocityNdc.set(0, 0);
         hoverEuler.set(0, 0, 0);
@@ -2256,7 +2359,7 @@ async function startReferenceWorld(
     if (!rotationEnabled) deltaQuaternion.setFromAxisAngle(scrollRotationAxis, -scrollRotation);
     // A captured drag owns the orientation until release. Returning toward rest here
     // erodes a stationary held pose even though no new pointer input was received.
-    if (!gizmoDragging) {
+    if (!gizmoDragging && !gizmoAutoFrame) {
       interactionQuaternion.slerp(
         rotationEnabled ? identityQuaternion : deltaQuaternion,
         rotationEnabled
@@ -2269,13 +2372,11 @@ async function startReferenceWorld(
     if (!appliedIdentityQuaternion.equals(composedIdentityQuaternion)) {
       identity.quaternion.copy(identityBaseQuaternion).multiply(composedIdentityQuaternion);
       appliedIdentityQuaternion.copy(composedIdentityQuaternion);
-      controllerUpdateElapsed += deltaSeconds;
-      if (controllerUpdateElapsed >= 1 / 30) {
-        updateQuaternionController(composedIdentityQuaternion);
-        controllerUpdateElapsed = 0;
-      }
       identityTransformChanged = true;
     }
+    // A snap/reset can finish between SVG updates. Flush its last pose even
+    // when the model no longer changes on subsequent animation frames.
+    if (rotationEnabled) syncQuaternionController(composedIdentityQuaternion);
     const identityScale = responsiveIdentityScale;
     if (appliedIdentityScale !== identityScale) {
       identity.scale.setScalar(identityScale);
@@ -2373,7 +2474,7 @@ async function startReferenceWorld(
             : 'REST';
       if (stateReadout.textContent !== nextState) stateReadout.textContent = nextState;
     }
-    if (!coarsePointer && quaternionReadout) {
+    if (!coarsePointer && rotationEnabled && quaternionReadout) {
       const quaternion = composedIdentityQuaternion;
       const nextQuaternion = `${quaternion.x.toFixed(2)} ${quaternion.y.toFixed(
         2,
@@ -2402,10 +2503,20 @@ async function startReferenceWorld(
     animationFrame = requestAnimationFrame(render);
   };
 
+  function updateWorldVisibility() {
+    worldInView = worldIntersects && (deterministicCaptureMode || scrollY < worldVisibleEnd);
+    if (worldInView) resumeRender();
+    else {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+    }
+  }
+  addEventListener('scroll', updateWorldVisibility, { passive: true });
+
   const worldObserver = new IntersectionObserver(
     ([entry]) => {
-      worldInView = entry?.isIntersecting ?? true;
-      if (worldInView) resumeRender();
+      worldIntersects = entry?.isIntersecting ?? true;
+      updateWorldVisibility();
     },
     { rootMargin: '120px 0px' },
   );
@@ -2541,7 +2652,9 @@ async function startReferenceWorld(
     disposed = true;
     cancelAnimationFrame(animationFrame);
     cancelAnimationFrame(resizeFrame);
+    cancelAnimationFrame(gizmoAutoFrame);
     worldObserver.disconnect();
+    removeEventListener('scroll', updateWorldVisibility);
     canvasResizeObserver?.disconnect();
     document.removeEventListener('visibilitychange', onVisibilityChange);
     removeEventListener('pointermove', onPointerMove);
@@ -2551,6 +2664,8 @@ async function startReferenceWorld(
     resetButton?.removeEventListener('click', resetOrientation);
     rotationGizmo?.removeEventListener('pointerdown', beginGizmoDrag);
     rotationGizmo?.removeEventListener('pointermove', moveGizmo);
+    rotationGizmo?.removeEventListener('pointerleave', leaveGizmo);
+    rotationGizmo?.removeEventListener('keydown', keyGizmo);
     rotationGizmo?.removeEventListener('pointerup', releaseGizmo);
     rotationGizmo?.removeEventListener('pointercancel', releaseGizmo);
     rotationGizmo?.removeEventListener('lostpointercapture', releaseGizmo);
