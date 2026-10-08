@@ -385,7 +385,7 @@ html[data-reference-surface='light'] .reference-contact-pill:focus-visible {
   line-height: 1.45;
   margin: 0;
 }
-.material-controls { border: 0; margin: 0; padding: 0; width: 250px; color: #b8b8ba; font: 10px/1.5 var(--mono); position: relative; }
+.material-controls { border: 0; margin: 0; padding: 0; width: 276px; color: #b8b8ba; font: 10px/1.5 var(--mono); position: relative; }
 .material-controls legend { text-align: center; margin-bottom: 8px; width: 100%; }
 .material-controls label { display: grid; grid-template-columns: 86px 1fr 48px; align-items: center; gap: 10px; margin-top: 6px; }
 .material-controls input { min-width: 0; width: 100%; pointer-events: auto; accent-color: #dedee0; cursor: pointer; }

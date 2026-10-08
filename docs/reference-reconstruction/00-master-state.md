@@ -127,10 +127,12 @@ hashes, all-frame comparison, and performance trace.
   [the storage and history record](2026-10-09-storage-history.md). The complete
   portfolio scratch evidence now lives on the D: SSD; original C: paths are
   junctions. All 50,499 relocated files passed SHA-256 verification and the
-  32,607-frame reference analysis passed revalidation. Historical messages are
-  being simplified with original dates preserved; recovered work uses requested
+  32,607-frame reference analysis passed revalidation. All 220 historical messages
+  were simplified and pushed with original dates preserved; recovered work uses requested
   September author dates with actual source timestamps documented separately.
-  Fresh build and eight scroll checks pass. Full parity remains open.
+  GitHub Pages deployment passed. Fresh build and eight scroll checks pass.
+  Continued with the clipped RGB readout: a 276px fieldset keeps it visible at
+  four screen widths, and picker/Escape checks pass. Full parity remains open.
 
 - **October 1 native scroll and performance:** read
   [the scroll/performance ledger](2026-10-01-native-scroll-performance.md).
