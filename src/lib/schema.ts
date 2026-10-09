@@ -1,6 +1,18 @@
-import { SITE } from '../config/site';
+import { SITE, SOCIAL_PROFILES } from '../config/site';
 
 export type SchemaNode = Record<string, unknown>;
+
+export function personSchema(): SchemaNode {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    '@id': `${SITE.origin}/#person`,
+    name: SITE.name,
+    url: `${SITE.origin}/`,
+    homeLocation: { '@type': 'Place', name: SITE.location },
+    sameAs: SOCIAL_PROFILES.map(profile => profile.href),
+  };
+}
 
 export interface BreadcrumbItem {
   label: string;
@@ -24,10 +36,12 @@ export function websiteSchema(): SchemaNode {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': `${SITE.origin}/#website`,
     name: SITE.name,
     url: SITE.origin,
     description: SITE.description,
     inLanguage: 'en',
+    publisher: { '@id': `${SITE.origin}/#person` },
   };
 }
 
@@ -39,6 +53,7 @@ export function profilePageSchema(): SchemaNode {
     url: `${SITE.origin}/about/`,
     mainEntity: {
       '@type': 'Person',
+      '@id': `${SITE.origin}/#person`,
       name: SITE.name,
       url: SITE.origin,
     },
@@ -64,6 +79,7 @@ export function serviceSchema(title: string, description: string, route: string)
     ],
     provider: {
       '@type': 'Person',
+      '@id': `${SITE.origin}/#person`,
       name: SITE.name,
       url: SITE.origin,
     },
@@ -88,6 +104,7 @@ export function articleSchema(input: {
     inLanguage: 'en',
     author: {
       '@type': 'Person',
+      '@id': `${SITE.origin}/#person`,
       name: SITE.name,
       url: SITE.origin,
     },
@@ -110,6 +127,7 @@ export function softwareApplicationSchema(input: {
     ...(input.operatingSystem ? { operatingSystem: input.operatingSystem } : {}),
     author: {
       '@type': 'Person',
+      '@id': `${SITE.origin}/#person`,
       name: SITE.name,
       url: SITE.origin,
     },

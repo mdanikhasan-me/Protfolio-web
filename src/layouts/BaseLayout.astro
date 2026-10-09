@@ -3,7 +3,7 @@ import SiteFooter from '../components/SiteFooter.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import StudioHeader from '../components/StudioHeader.astro';
 import { SITE } from '../config/site';
-import type { SchemaNode } from '../lib/schema';
+import { personSchema, type SchemaNode } from '../lib/schema';
 import '../styles/site.css';
 
 interface Props {
@@ -29,18 +29,7 @@ const {
 } = Astro.props;
 
 const canonical = new URL(canonicalPath, Astro.site);
-const personSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: SITE.name,
-  url: SITE.origin,
-  homeLocation: {
-    '@type': 'Place',
-    name: SITE.location,
-  },
-  sameAs: [SITE.github],
-};
-const schemaNodes = [personSchema, ...(Array.isArray(schema) ? schema : [schema])];
+const schemaNodes = [personSchema(), ...(Array.isArray(schema) ? schema : [schema])];
 const routeParts = canonicalPath.split('/').filter(Boolean);
 const section = routeParts[0] ?? 'home';
 const studioPage = ['work', 'writing', 'about', 'services', 'contact'].includes(section);
