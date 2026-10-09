@@ -1247,7 +1247,11 @@ async function loadIdentity(material: THREE.ShaderMaterial) {
     if (boundsMaximum instanceof THREE.Vector3) boundsMaximum.copy(geometry.boundingBox.max);
   }
   const root = new THREE.Group();
-  root.add(new THREE.Mesh(geometry, material));
+  const sculpture = new THREE.Mesh(geometry, material);
+  // Match the measured depth/height ratio without changing the protected GLB.
+  // Keep this on the mesh: responsive animation owns the parent's uniform scale.
+  sculpture.scale.z = 0.777983;
+  root.add(sculpture);
   const bounds = new THREE.Box3().setFromObject(root);
   const size = bounds.getSize(new THREE.Vector3());
   const center = bounds.getCenter(new THREE.Vector3());
@@ -1268,10 +1272,9 @@ async function loadIdentity(material: THREE.ShaderMaterial) {
       child.matrixAutoUpdate = false;
     }
   });
-  // Preserve the authored three-quarter pitch/yaw and counter the camera's projection
-  // slope with a slight positive roll. This makes the neutral left/right baseline level
-  // before pointer interaction is applied.
-  root.rotation.set(0.025, -0.085, 0.022);
+  // The reference rests at the identity orientation. Pointer rotation is composed
+  // separately; an extra base yaw exposed a side face even after the controller reset.
+  root.rotation.set(0, 0, 0);
   return root;
 }
 
