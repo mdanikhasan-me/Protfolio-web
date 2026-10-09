@@ -5,6 +5,7 @@ import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { ReferenceFluid } from './reference-fluid';
 import { noiseFragmentShader } from './reference-background-system';
+import { createWhiteChapterGrid } from './white-chapter-grid';
 
 const root = document.querySelector<HTMLElement>('[data-light-chapters]');
 const canvas = root?.querySelector<HTMLCanvasElement>('[data-light-canvas]');
@@ -28,19 +29,7 @@ async function startLightChapters(root: HTMLElement, canvas: HTMLCanvasElement, 
       varying vec2 vUv; uniform vec2 uSize; uniform sampler2D uFluid; uniform float uScroll;
       void main(){
         vec2 wake=texture2D(uFluid,vUv).xy;
-        vec2 uv=vUv+wake*.01;
-        vec2 pixel=uv*uSize;
-        float spacing=max(uSize.x,uSize.y)/64.0;
-        vec2 gridPixel=pixel-vec2(0.0,uScroll*1.5*spacing);
-        vec2 cell=abs(fract(gridPixel/spacing)-.5)*spacing;
-        float grid=1.0-smoothstep(.35,.95,min(cell.x,cell.y));
-        float crossSpacing=spacing*8.0;
-        vec2 crossPixel=pixel-vec2(0.0,uScroll*.1*max(uSize.x,uSize.y));
-        vec2 cross=abs(mod(crossPixel+crossSpacing*.5,crossSpacing)-crossSpacing*.5);
-        float marks=(1.0-smoothstep(.4,1.0,cross.x))*(1.0-step(8.0,cross.y));
-        marks=max(marks,(1.0-smoothstep(.4,1.0,cross.y))*(1.0-step(8.0,cross.x)));
         vec3 color=vec3(.875,.910,.918);
-        color-=grid*.023+marks*.19;
         color*=1.0-.13*smoothstep(.15,.78,length((vUv-.5)*vec2(1.15,1.0)));
         color+=min(length(wake)*.07,.06);
         gl_FragColor=vec4(color,1.0);
@@ -50,6 +39,36 @@ async function startLightChapters(root: HTMLElement, canvas: HTMLCanvasElement, 
   const background = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
   background.frustumCulled = false; background.renderOrder = -100;
   scene.add(background);
+  const chapterGrid = createWhiteChapterGrid(backgroundUniforms.uScroll);
+  scene.add(chapterGrid.group);
+  // The reference displaces the complete white scene, including the outline.
+  // Keep this target at drawing-buffer resolution with the canvas's sample count;
+  // a low-resolution copy would soften the grid and the thin white contour.
+  const sceneTarget = new THREE.WebGLRenderTarget(1, 1, {
+    samples: Math.min(renderer.getContext().getParameter(renderer.getContext().SAMPLES), renderer.capabilities.maxSamples),
+    depthBuffer: true,
+    stencilBuffer: false,
+  });
+  // Depth is used while drawing the sculpture, never sampled by the copy pass.
+  sceneTarget.resolveDepthBuffer = false;
+  sceneTarget.resolveStencilBuffer = false;
+  const compositeScene = new THREE.Scene();
+  const compositeMaterial = new THREE.ShaderMaterial({
+    depthTest: false, depthWrite: false, blending: THREE.NoBlending,
+    uniforms: { uScene: { value: sceneTarget.texture }, uFluid: { value: fluid.texture }, uResolution: { value: new THREE.Vector2() } },
+    vertexShader: 'varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}',
+    fragmentShader: `
+      uniform sampler2D uScene; uniform sampler2D uFluid; uniform vec2 uResolution;
+      void main(){
+        vec2 screenUv=gl_FragCoord.xy/uResolution;
+        vec2 uv=screenUv-texture2D(uFluid,screenUv).xy*.001;
+        uv-=texture2D(uFluid,uv).xy*.01;
+        gl_FragColor=texture2D(uScene,uv);
+      }`,
+  });
+  const compositeQuad = new THREE.Mesh(backgroundGeometry, compositeMaterial);
+  compositeQuad.frustumCulled = false;
+  compositeScene.add(compositeQuad);
   const noiseTarget=new THREE.WebGLRenderTarget(64,64,{type:THREE.FloatType,depthBuffer:false,stencilBuffer:false});
   noiseTarget.texture.wrapS=THREE.RepeatWrapping;noiseTarget.texture.wrapT=THREE.RepeatWrapping;
   const noiseUniforms={uTime:{value:0},uScreenAspectRatio:{value:innerWidth/innerHeight}};
@@ -135,11 +154,14 @@ async function startLightChapters(root: HTMLElement, canvas: HTMLCanvasElement, 
     visionTop=vision.getBoundingClientRect().top+scrollY;
     renderer.setSize(innerWidth,innerHeight,false);
     renderer.getDrawingBufferSize(uniforms.uResolution.value);
+    sceneTarget.setSize(uniforms.uResolution.value.x, uniforms.uResolution.value.y);
+    compositeMaterial.uniforms.uResolution!.value.copy(uniforms.uResolution.value);
     rimMaterial.resolution.set(innerWidth,innerHeight);
     const aspect=innerWidth/innerHeight;
     const halfHeight=Math.max(3.2,3.1/aspect);
     camera.top=halfHeight;camera.bottom=-halfHeight;
     camera.left=-halfHeight*aspect;camera.right=-camera.left;camera.updateProjectionMatrix();
+    chapterGrid.resize(camera, aspect);
     backgroundUniforms.uSize.value.set(innerWidth,innerHeight);fluid.resize(innerWidth,innerHeight);
     noiseUniforms.uScreenAspectRatio.value=innerWidth/innerHeight;
   }
@@ -163,19 +185,39 @@ async function startLightChapters(root: HTMLElement, canvas: HTMLCanvasElement, 
       fluid.update({x:filteredPointer.x,y:filteredPointer.y,space:'ndc',deltaX:velocity.x*(reduced?.35:1),deltaY:velocity.y*(reduced?.35:1)});
     }
     fluid.step(dt);
-    noiseUniforms.uTime.value=time/1000;
-    renderer.setRenderTarget(noiseTarget);renderer.render(noiseScene,camera);renderer.setRenderTarget(null);
-    renderer.render(scene,camera);
+    // Below the fragment shader's reveal threshold the colored mesh discards
+    // every fragment. Its depth mask and animated noise have no visible consumer;
+    // the grid and white rim both draw independently of depth.
+    const coloredSideVisible=tilt>=.001;
+    mask.visible=mesh.visible=coloredSideVisible;
+    if(coloredSideVisible){
+      noiseUniforms.uTime.value=time/1000;
+      renderer.setRenderTarget(noiseTarget);renderer.render(noiseScene,camera);renderer.setRenderTarget(null);
+    }
+    if (fluid.hasActivity) {
+      renderer.setRenderTarget(sceneTarget);renderer.render(scene,camera);
+      renderer.setRenderTarget(null);renderer.render(compositeScene,camera);
+    } else {
+      // Avoid the extra full-size pass before the first pointer disturbance.
+      renderer.render(scene,camera);
+    }
     frame=requestAnimationFrame(render);
   }
   function resume(){if(!frame && active && !stopped && !document.hidden){last=performance.now();frame=requestAnimationFrame(render);}}
-  const observer=new IntersectionObserver(([entry])=>{active=entry?.isIntersecting??false;if(!active){cancelAnimationFrame(frame);frame=0;}else resume();},{rootMargin:'100px'});
+  // Asset loading and shader compilation prewarm separately. Continuous drawing
+  // is only needed while the chapter itself is visible, not behind Contact.
+  const observer=new IntersectionObserver(([entry])=>{active=entry?.isIntersecting??false;if(!active){cancelAnimationFrame(frame);frame=0;}else resume();});
   measure();
   // Compile while approaching the chapter, including its initially invisible
   // colored side. Avoid compiling its first visible Vision frame on demand.
   uniforms.uReveal.value=1;
   await renderer.compileAsync(scene,camera);
   await renderer.compileAsync(noiseScene,camera);
+  renderer.initRenderTarget(sceneTarget);
+  renderer.setRenderTarget(sceneTarget);
+  await renderer.compileAsync(scene,camera);
+  renderer.setRenderTarget(null);
+  await renderer.compileAsync(compositeScene,camera);
   uniforms.uReveal.value=0;
   root.dataset.lightReady = 'true';
   observer.observe(root);
@@ -190,7 +232,7 @@ async function startLightChapters(root: HTMLElement, canvas: HTMLCanvasElement, 
   addEventListener('pageshow',()=>{stopped=false;resume();},{signal:events.signal});
   addEventListener('pagehide',event=>{
     stopped=true;cancelAnimationFrame(frame);frame=0;if(event.persisted)return;
-    events.abort();observer.disconnect();geometry.dispose();rimGeometry.dispose();rimMaterial.dispose();material.dispose();maskMaterial.dispose();backgroundGeometry.dispose();backgroundMaterial.dispose();noiseMaterial.dispose();noiseTarget.dispose();fluid.dispose();renderer.dispose();
+    events.abort();observer.disconnect();geometry.dispose();rimGeometry.dispose();rimMaterial.dispose();material.dispose();maskMaterial.dispose();backgroundGeometry.dispose();backgroundMaterial.dispose();chapterGrid.dispose();noiseMaterial.dispose();noiseTarget.dispose();compositeMaterial.dispose();sceneTarget.dispose();fluid.dispose();renderer.dispose();
   },{signal:events.signal});
 }
 
