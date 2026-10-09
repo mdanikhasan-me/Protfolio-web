@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { referenceMotionState } from '../lib/reference-motion-state';
+import { advancePointerRotation, pointerBlend } from '../lib/pointer-rotation';
 import { createReferenceBackgroundSystem } from './reference-background-system';
 
 const clamp = (value: number, minimum = 0, maximum = 1) =>
@@ -20,7 +21,9 @@ const rotationGizmo = world?.querySelector<HTMLButtonElement>('[data-reference-g
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarsePointer = matchMedia('(hover: none) and (pointer: coarse)').matches;
 const pointerEffectsEnabled = !coarsePointer;
-const pointerMotionIntensity = reducedMotion ? 0.35 : 1;
+// Direct manipulation keeps its full response in both motion preferences.
+// Reduced motion skips the automatic startup distortion, not the user's input.
+const pointerMotionIntensity = 1;
 const captureParameters = new URLSearchParams(window.location.search);
 const deterministicCaptureMode = captureParameters.get('__capture') === '1';
 const parseCaptureDimension = (name: string, fallback: number) => {
@@ -1700,6 +1703,7 @@ async function startReferenceWorld(
   const deltaQuaternion = new THREE.Quaternion();
   const scrollRotationAxis = new THREE.Vector3(0, 1, 0);
   const hoverEuler = new THREE.Euler();
+  const pointerStepEuler = new THREE.Euler();
   const fluidPointer = new THREE.Vector2();
   const fluidVelocity = new THREE.Vector2();
   const fluidResidual = new THREE.Vector2();
@@ -2202,26 +2206,13 @@ async function startReferenceWorld(
         hoverEuler.set(0, 0, 0);
         pointerEnergy = 0;
       } else {
-        pointerVelocityNdc.copy(pointerNdc).sub(filteredPointerNdc);
-        filteredPointerNdc.addScaledVector(
-          pointerVelocityNdc,
-          Math.min(1, deltaSeconds * 10),
+        const inputEnergy = advancePointerRotation(
+          pointerNdc, filteredPointerNdc, pointerVelocityNdc, hoverEuler,
+          pointerStepEuler, deltaQuaternion, interactionQuaternion,
+          deltaSeconds, pointerMotionIntensity,
         );
-        const hoverMultiplier = pointerMotionIntensity;
-        const pointerReach = Math.max(0, 1 - pointerNdc.length() * 1.5);
-        const velocityMultiplier = 0.01 * pointerReach * hoverMultiplier;
-        if (pointerEffectsEnabled && velocityMultiplier > 0) {
-          hoverEuler.x -=
-            pointerVelocityNdc.y * velocityMultiplier;
-          hoverEuler.y += pointerVelocityNdc.x * velocityMultiplier;
-        }
-        hoverEuler.x *= 1 - deltaSeconds;
-        hoverEuler.y *= 1 - deltaSeconds;
-        hoverEuler.z = 0;
-        deltaQuaternion.setFromEuler(hoverEuler);
-        interactionQuaternion.premultiply(deltaQuaternion).normalize();
         pointerEnergy = Math.max(
-          pointerVelocityNdc.length() * pointerReach,
+          inputEnergy,
           pointerEnergy * Math.pow(0.91, deltaSeconds * 60),
         );
         if (pointerEnergy < 0.0005) pointerEnergy = 0;
@@ -2266,7 +2257,9 @@ async function startReferenceWorld(
     if (!gizmoDragging) {
       interactionQuaternion.slerp(
         rotationEnabled ? identityQuaternion : deltaQuaternion,
-        THREE.MathUtils.clamp(deltaSeconds * returnForce, 0, 1),
+        rotationEnabled
+          ? pointerBlend(returnForce, deltaSeconds)
+          : THREE.MathUtils.clamp(deltaSeconds * returnForce, 0, 1),
       );
     }
     composedIdentityQuaternion.copy(interactionQuaternion).normalize();
