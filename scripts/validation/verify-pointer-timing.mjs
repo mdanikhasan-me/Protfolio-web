@@ -9,19 +9,23 @@ function sweep(hz) {
   const momentum = new Euler(), step = new Euler();
   const delta = new Quaternion(), orientation = new Quaternion(), rest = new Quaternion();
   let peak = 0, firstResponse = null;
-  for (let i = 0; i < hz * 8; i++) {
+  let angleAtQuarterSecond = 0;
+  for (let i = 0; i < hz * 10; i++) {
     const t = i / hz;
-    pointer.set(Math.min(t, 0.5) * 0.6, 0);
+    pointer.set(Math.min(t, 0.5) * 0.3, 0);
     advancePointerRotation(pointer, filtered, velocity, momentum, step, delta, orientation, 1 / hz, 1);
     orientation.slerp(rest, pointerBlend(2, 1 / hz));
     const angle = orientation.angleTo(rest);
     peak = Math.max(peak, angle);
+    if (t <= 0.25) angleAtQuarterSecond = angle;
     if (angle > 0.001 && firstResponse === null) firstResponse = t;
     assert.ok(Number.isFinite(angle));
   }
   assert.ok(orientation.angleTo(rest) < 0.003, `${hz} Hz fails to settle`);
   assert.ok(firstResponse < 0.1, `${hz} Hz input is delayed`);
-  return { hz, peakDegrees: peak * 180 / Math.PI, firstResponseSeconds: firstResponse };
+  assert.ok(angleAtQuarterSecond > 0.15, `${hz} Hz response is too weak during movement`);
+  return { hz, peakDegrees: peak * 180 / Math.PI, firstResponseSeconds: firstResponse,
+    quarterSecondDegrees: angleAtQuarterSecond * 180 / Math.PI };
 }
 const results = [30, 60, 120, 144, 240].map(sweep);
 const baseline = results.find(r => r.hz === 120).peakDegrees;

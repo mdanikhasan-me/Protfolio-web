@@ -429,8 +429,9 @@ export class ReferenceFluid {
   }
 
   /**
-   * Advance the field. At 60 Hz this applies 0.99 velocity retention and halves
-   * the queued pointer impulse every frame; other rates are time-corrected.
+   * Advance the field. Field advection and velocity retention use elapsed time.
+   * Pointer residual is queued once per render, so its accumulator must also
+   * decay once per render, as in the reference, rather than once per 1/60 second.
    */
   step(dt: number): void {
     if (this.disposed || !this.fieldActive || !Number.isFinite(dt) || dt <= 0) return;
@@ -465,7 +466,7 @@ export class ReferenceFluid {
 
     // Eight packed-data passes return the final field to fluidFront, keeping
     // the public texture object stable for materials that hold it as a uniform.
-    this.pointerImpulse.multiplyScalar(Math.pow(IMPULSE_RETENTION_PER_FRAME, frameScale));
+    this.pointerImpulse.multiplyScalar(IMPULSE_RETENTION_PER_FRAME);
   }
 
   resize(width: number, height: number): void;
