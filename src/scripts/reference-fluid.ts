@@ -213,10 +213,10 @@ const advectionFragmentShader = /* glsl */ `
   }
 `;
 
-const createRenderTarget = (width: number, height: number, name: string) => {
+const createRenderTarget = (width: number, height: number, name: string, type: THREE.TextureDataType) => {
   const target = new THREE.WebGLRenderTarget(width, height, {
     format: THREE.RGBAFormat,
-    type: THREE.HalfFloatType,
+    type,
     minFilter: THREE.LinearFilter,
     magFilter: THREE.LinearFilter,
     wrapS: THREE.ClampToEdgeWrapping,
@@ -354,11 +354,16 @@ export class ReferenceFluid {
     this.camera.matrixAutoUpdate = false;
     this.scene.add(this.quad);
 
-    this.fluidFront = createRenderTarget(1, 1, 'reference-fluid-velocity');
-    this.fluidBack = createRenderTarget(1, 1, 'reference-fluid-work');
+    // The desktop reference retains 32-bit velocity/pressure between passes.
+    // Half-float rounding accumulates through advection and changes the wake.
+    // Keep the compatible format on GPUs without renderable, filterable floats.
+    const fieldType = renderer.extensions.has('EXT_color_buffer_float') && renderer.extensions.has('OES_texture_float_linear')
+      ? THREE.FloatType : THREE.HalfFloatType;
+    this.fluidFront = createRenderTarget(1, 1, 'reference-fluid-velocity', fieldType);
+    this.fluidBack = createRenderTarget(1, 1, 'reference-fluid-work', fieldType);
     this.fluidRead = this.fluidFront;
     this.fluidWrite = this.fluidBack;
-    this.curlTarget = createRenderTarget(1, 1, 'reference-fluid-curl');
+    this.curlTarget = createRenderTarget(1, 1, 'reference-fluid-curl', fieldType);
 
     this.resize(width, height);
   }
@@ -369,6 +374,11 @@ export class ReferenceFluid {
    */
   get texture(): THREE.Texture {
     return this.fluidFront.texture;
+  }
+
+  /** Keep compositing the full decay once the field has been disturbed. */
+  get hasActivity(): boolean {
+    return this.fieldActive;
   }
 
   /**
@@ -429,14 +439,14 @@ export class ReferenceFluid {
   }
 
   /**
-   * Advance the field. Field advection and velocity retention use elapsed time.
-   * Pointer residual is queued once per render, so its accumulator must also
-   * decay once per render, as in the reference, rather than once per 1/60 second.
+   * Advance one reference solver iteration per rendered frame. The reference
+   * applies advection, curl and retention once per render, independently of dt.
+   * Scaling only those terms to 60 Hz makes high-refresh pointer wakes linger.
    */
   step(dt: number): void {
     if (this.disposed || !this.fieldActive || !Number.isFinite(dt) || dt <= 0) return;
 
-    const frameScale = clamp(dt * REFERENCE_FRAME_RATE, 0.25, 2);
+    const frameScale = 1;
     this.forceUniforms.uFrameScale.value = frameScale;
     this.advectionUniforms.uFrameScale.value = frameScale;
     this.advectionUniforms.uRetention.value = Math.pow(VELOCITY_RETENTION_PER_FRAME, frameScale);
