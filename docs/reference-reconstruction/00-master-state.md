@@ -123,6 +123,11 @@ hashes, all-frame comparison, and performance trace.
 
 ## Active work
 
+- **October 10 footer construction lines:** read
+  [the footer record](2026-10-10-footer-lines.md). Guides now extend around ANIK,
+  draw when the logo enters view, and replay after exit. Reduced motion retains
+  static guides. Build and five targeted browser checks pass; full parity is open.
+
 - **October 9 surface frequency:** the later controlled experiment in
   [the shape record](2026-10-09-shape.md) retains detail scale 1.0 provisionally.
   240 simulated frames passed integrity/controller audits; 6 were individually
