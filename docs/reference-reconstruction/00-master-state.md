@@ -1,5 +1,111 @@
 # Reference reconstruction: recovered state
 
+October 15: corrected the remaining opening return-to-rest interpolation against
+MainLogo.update. The independent combined hover/return check fails before and
+passes 20 trajectories / 23,760 simulated frames after. See
+`2026-10-15-pointer-return.md`. Fresh browser verification is pending: browser
+execution tools are no longer exposed in this session. The lightweight pacing
+control was prepared but has no captured result; do not infer its timing.
+
+October 14 hover follow-up: removed the 4x force and double frame scaling from
+the opening hover integrator after comparing MainLogo/Lerper reference behavior.
+20 numerical trajectories and 23,760 regression frames pass; live sweep, controller
+drag and Reset checked. Direct gizmo drag and caller return remain unchanged.
+See `2026-10-14-pointer-integration.md`. V05/P03 remain OPEN for native motion.
+
+October 14 follow-up: desktop fluid targets now use supported Float precision
+(HalfFloat fallback), reducing numerical reference error in 630 candidate plus
+630 production-constructor frames. This is a fidelity fix with a small measured
+GPU cost. White chapters skip three invisible draws below the colored-side shader
+threshold: 40/40 full-pixel local comparisons unchanged, about 0.295 ms isolated
+median GPU saving with noisy tails. Builds and live About/Vision sanity checks
+pass; native motion and whole-site acceptance remain OPEN. Details and evidence:
+[`2026-10-14-fluid-bloom.md`](2026-10-14-fluid-bloom.md).
+
+October 14 continuation: corrected per-render fluid cadence, the bloom blur
+cascade and bloom buffer rounding as three isolated factors. 1,890 simulated fluid
+frames compared (including desktop FloatType reference); 18/18 production-format
+bloom cascade outputs and 18/18 buffer-sizing outputs match. These are narrow
+shader diagnostics, not native frame or whole-site
+acceptance. See [`2026-10-14-fluid-bloom.md`](2026-10-14-fluid-bloom.md).
+Production builds pass; normal preview remains 4421. GPU before/after diagnostic
+previews 4441/4442 differ only in the bloom dependency. Broad work remains OPEN.
+
+Latest October 14: removed the Contact kicker "Have a project in mind?", its rule
+and reserved spacing at the user's request. Controller SVG now follows every
+changed rendered pose instead of a 30 Hz cap. Matched-coordinate browser drag:
+old 7 stale pose frames / 913 observed, new 0 / 990; this is scheduling evidence,
+not native-frame parity or a whole-site speed gain. See
+[`2026-10-14-controller-smoothness.md`](2026-10-14-controller-smoothness.md).
+
+Latest October 13 steering: preserve quality/motion while improving measured GPU
+and frame cost; pointer still feels heavy/over-bloomed. See
+[`2026-10-13-performance-audit.md`](2026-10-13-performance-audit.md).
+The two former candidate patches are now provisionally implemented with the
+October 14 evidence above. Local pass profiler uses port 4435 (normal preview 4421).
+October 14 live samples cover opening, controller drag, Works and white chapters.
+The full-size white scene target is a measured cost; optimization remains open.
+The Contact left-side redesign and kicker removal have a desktop rendered check;
+mobile/entrance review remains open; desktop keyboard reveal and activation pass.
+The right-side illustration source is
+preserved. See [`2026-10-13-contact-design.md`](2026-10-13-contact-design.md).
+Edge control reconnected October 14. Earlier live proof remains scoped to its
+recorded build; every source/build claim remains separate from rendered parity.
+
+October 13 controller follow-up: see
+[`2026-10-13-controller-visibility.md`](2026-10-13-controller-visibility.md).
+The user's top-only controller preference is implemented and verified in six live
+scroll observations, including returning to the top and Reset. Reference currently
+retains its quaternion panel in Works; this intentional user override is recorded.
+Whole-site parity and performance remain open.
+
+October 13 grid continuation: see [`2026-10-13-white-grid.md`](2026-10-13-white-grid.md).
+White grid/cross rendering matches 16 isolated reference states exactly; the
+rebuilt local scene passes four stationary transfer checks. Palette, pointer
+regimes, native motion and whole-site acceptance remain open.
+
+October 13 continuation: see [`2026-10-13-white-compositor.md`](2026-10-13-white-compositor.md).
+White scene displacement now includes the outline/colored edge with reference
+sampling direction. Four isolated stationary transfers match exactly; native
+reference trajectories and both response regimes remain open. The extra pass
+was measured and reduced from 4.244 to 2.863 ms in an isolated GPU comparison;
+this still costs more than direct rendering and does not close whole-page performance.
+
+Current follow-up: Edge extension browser `1` is available again. The user clarified
+that the entire homepage Writing section must be removed, not merely its lines.
+The section, rail anchor, scroll landmark and dead CSS are removed. Rebuilt and
+verified live in Edge: Vision leads directly to Contact with a measured 0px gap.
+Writing routes/articles and header/footer links remain. See the feedback log
+for screenshots and DOM proof; whole-site parity remains open.
+
+Latest feedback continuation (2026-10-12): read
+[`2026-10-12-user-feedback.md`](2026-10-12-user-feedback.md) first. Both detailed
+user prompts are preserved there. Project history dates, Bengali annotations,
+contact background, Writing separators, live flip exclusion, footer prewarming
+and controller changes are implemented provisionally. Controller final-pose
+scheduling has a numerical regression check. Live interaction and native-frame
+acceptance remain OPEN. Historical interruption: the browser connection disappeared
+(`listBrowsers` returned `[]`; selecting browser `1` or `edge` failed). Earlier
+The current follow-up above supersedes that browser blocker.
+
+Latest background continuation (2026-10-12): see
+[`2026-10-12-background.md`](2026-10-12-background.md). Browser access is restored.
+The interior CSS backdrop is replaced with the reference-derived animated field;
+controlled comparisons and local runtime evidence are recorded separately from
+native-frame acceptance. Homepage chamber sizing now matches nine isolated grid
+states exactly; panel transform correction substantially reduces measured error
+but its 120-phase sweep is not exact. Latest build and normal-browser opening /
+Works / second-project captures are recorded in that log. Homepage compositor,
+native-frame acceptance and whole-site parity remain OPEN.
+
+Earlier continuation (2026-10-12): see
+[`2026-10-12-interior-pages.md`](2026-10-12-interior-pages.md) for the page-specific
+reference analysis, rejected white compositor experiment, retained About layout
+and interior Contact fixes, final local evidence and remaining work. These changes
+are locally verified; full-site/native-frame parity and performance remain OPEN.
+The browser connection was unavailable during that earlier work; that blocker
+was resolved during the background continuation.
+
 Updated 2026-09-29. This is a continuation of thread `019fe377-48e0-7bc2-a899-8c82ad2d0717`, not a
 new design or a parity acceptance.
 
@@ -122,6 +228,27 @@ with unknown elapsed duration, not 120-fps coverage. They lack a build manifest,
 hashes, all-frame comparison, and performance trace.
 
 ## Active work
+
+- **October 12 full-scope reminder:** read the latest-corrections section in
+  [the whole-site audit](2026-10-11-whole-site-audit.md). The user explicitly says
+  not to forget any earlier requirements. In particular, the white chapters have
+  an earlier magnetic pointer response AND a softer wave response near their end;
+  both need separate reference comparison. Background seams/grid/dots, Contact
+  rolling hover and Works-to-About lag remain active concerns. Preserve wording.
+  The audit holds exact findings, evidence limits and remaining work; footer
+  evidence never closes the whole-site task.
+
+- **October 11 footer correction:** the latest user reprioritized the footer. Read
+  [the outro findings and evidence](2026-10-11-footer-outro.md). The reference uses
+  a separate pinned construction sequence before/behind the links; the previous
+  short reveal below navigation was structurally wrong. The local replacement
+  passes 50 functional browser checks; all 11 diagnostic pictures were reviewed.
+  Idle footer work reaches zero, but the color field and all-frame/native gates
+  remain open. This does not close V16 or the whole-site queue.
+
+- **October 11 whole-site scope:** read [the full audit and chunk queue](2026-10-11-whole-site-audit.md) first. User rejects treating footer work as the whole task. All visible elements, interactions, transitions and performance are in scope. Footer at `9be963e` was rejected; a shorter local revision is provisional, not accepted. Keep exact completion gates and remaining work in the audit ledger.
+  - Initial audit: 23 routes at two widths, 53 baseline pictures individually reviewed. Two narrow repairs retained locally: covered WebGL suspension (18 boundary + six resize cases and eight scroll regressions pass) and mobile detail breadcrumb clearance (18 layout cases; eight desktop pictures unchanged). Full native performance and all-frame parity remain open. See the ledger for rollback, build hashes and exact review coverage. Next desktop focus is opening/material/input and every card's wall response, not more isolated footer tuning.
+
 
 - **October 10 footer construction lines:** read
   [the footer record](2026-10-10-footer-lines.md). Guides now extend around ANIK,
@@ -285,3 +412,44 @@ a separately reviewed color-cut correction),
 then continue isolated background/surface/Works improvements with aligned input history. Native
 runtime recording/performance evidence and full desktop/mobile acceptance remain pending. No 100%
 parity claim is justified yet.
+
+
+## October 11: rejected footer and measured vertical correction
+
+The user rejected the footer's vertical animation and then explicitly objected
+that effects were being invented. The earlier footer candidate is not accepted.
+See [the vertical-track report](2026-10-11-footer-vertical-lines.md) for the narrow
+correction, rollback, build hash and evidence limits. Vertical tracks now use the
+reference's fixed x, downward trim, stroke and fade keys. A 119-state deterministic
+attribute comparison passes within 0.487 CSS px for the visible endpoint; this is
+not native all-frame pixel parity. Four image pairs received visual inspection;
+50 functional checks passed. Horizontal/diagonal motion, outline/fill, backdrop,
+A timing and native performance remain unaccepted. Continue by measuring those
+specific tracks, one factor at a time; no speculative wipes, stagger or glow.
+
+
+## October 11: full footer validation explicitly FAILS
+
+The user's proof request produced a saved 119-pair controlled sequence and an
+interactive comparison viewer. See [the validation report](2026-10-11-footer-validation.md).
+All 238 PNGs decode and hash; four pairs were individually reviewed. A trajectory
+error reaches 5.65157 CSS px, horizontal opacity differs, and local guides linger
+after reference disappearance. This is an explicit failed match, not a percentage
+or full native acceptance. No production edits in this validation pass. Preserve
+this baseline; continue isolated corrections against measured tracks.
+
+## October 12: measured footer corrections, acceptance still bounded
+
+Read [the correction report](2026-10-12-footer-corrections.md) before continuing.
+The A entry, guide tracks/fade, partial outlines, fill timing and noise backdrop have
+been corrected. Fast entry exposed an initialization-transition race; explicit A
+keyframes fix it and nine arrival/reentry cases pass. The current 119-state sequence
+has maximum A center error 0.031494 CSS px. All 119 background framebuffer pairs are
+pixel-identical at DPR 1 and separately at DPR 1.5. This is background-only acceptance.
+50 behavior checks and seven runtime lifecycle checks pass. Current evidence is
+`D:/Portfolio Evidence/current-20261011/footer-corrections/entry-fixed/`; the sibling
+`final/` is a preserved failed intermediate, not the final accepted sequence.
+Four image pairs were individually reviewed, all 238 full-viewport PNGs decode/hash.
+Native continuous capture, complete individual visual review, composited geometry,
+footer links/scroll parity and whole-site acceptance remain open. The GLB and four
+ANIK glyph paths are unchanged. Preview remains at 127.0.0.1:4321. No push/deploy.
