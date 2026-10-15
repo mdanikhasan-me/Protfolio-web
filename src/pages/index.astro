@@ -22,9 +22,9 @@ const mediaBase: Record<string, string> = {
 };
 const projectAnnotations: Record<string, string> = {
   boilabin: 'Ecommerce platform আমি বানিয়েছি, আমিই চালাই।',
-  'salty-potato-ai': 'নিজের কম্পিউটারে চলা এআই ও কাজের সরঞ্জাম।',
-  soctukit: 'উইন্ডোজের দৈনন্দিন কাজ সহজ করার সরঞ্জাম।',
-  'uiu-discord-bot': 'বিশ্ববিদ্যালয়ের নোটিশ সরাসরি ডিসকর্ডে।',
+  'salty-potato-ai': 'নিজের local machine-এর জন্য বানাচ্ছি AI harness।',
+  soctukit: 'Windows-এর জন্য বানানো social media automation system।',
+  'uiu-discord-bot': 'UIU-র নতুন notice, সরাসরি Discord-এ।',
 };
 ---
 
@@ -158,7 +158,7 @@ const projectAnnotations: Record<string, string> = {
             <span>Writing</span>
             {articles.map((article) => <a href={`/writing/${article.id}/`}>
               <time datetime={article.data.publishedAt.toISOString()}>{article.data.publishedAt.toISOString().slice(0, 10).replaceAll('-', '.')}</time>
-              <span lang="bn">{article.id.includes('university') ? 'UIU-র notice এখন Discord-এ' : 'নিজের Language Model নিজে বানাচ্ছি, কেন?'}</span>
+              <span lang="bn">{article.id.includes('university') ? 'UIU-র নতুন notice, সরাসরি Discord-এ।' : 'নিজের Language Model নিজে বানাচ্ছি, কেন?'}</span>
             </a>)}
           </div>
 
