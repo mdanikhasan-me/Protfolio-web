@@ -6,6 +6,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 const services = (await getCollection('services', ({ data }) => !data.draft)).sort(
   (a, b) => a.data.order - b.data.order,
 );
+const serviceLabels: Record<string, string> = {
+  'website-development': 'Web',
+  'custom-software-development': 'Software',
+  'native-windows-software': 'Windows',
+};
 ---
 
 <BaseLayout
@@ -19,21 +24,33 @@ const services = (await getCollection('services', ({ data }) => !data.draft)).so
     workshop="Websites and software"
   />
 
-  <section class="collection-list" aria-labelledby="service-list-title">
-    <p class="studio-bengali" lang="bn">আপনার কাজের জন্য ওয়েবসাইট বা সফটওয়্যার দরকার?</p>
-    <h2 id="service-list-title">What do you need to build?</h2>
-    <ol>
+  <section class="service-features" aria-labelledby="service-list-title">
+    <div class="service-features-heading">
+      <h2 id="service-list-title">What do you need to build?</h2>
+      <p class="studio-bengali" lang="bn">আপনার কাজের জন্য ওয়েবসাইট বা সফটওয়্যার দরকার?</p>
+    </div>
+    <ol class="service-feature-grid">
       {
         services.map((service) => (
-          <li>
-            <p class="list-index">{String(service.data.order).padStart(2, '0')}</p>
-            <div>
-              <p class="workshop-label">{service.data.workshop}</p>
-              <h3>
-                <a href={`/services/${service.id}/`}>{service.data.title}</a>
-              </h3>
-              <p>{service.data.intro}</p>
-            </div>
+          <li class="service-feature">
+            <a href={`/services/${service.id}/`} aria-labelledby={`service-${service.id}`}>
+              <div class="service-feature-meta" aria-hidden="true">
+                <span>{String(service.data.order).padStart(2, '0')}</span>
+                <span>{service.data.workshop}</span>
+                <span class="service-feature-arrow">↗</span>
+              </div>
+              <div class="service-feature-visual" aria-hidden="true">
+                <div class="service-feature-marquee">
+                  <span>{`${serviceLabels[service.id] || service.data.title} / `.repeat(3)}</span>
+                  <span>{`${serviceLabels[service.id] || service.data.title} / `.repeat(3)}</span>
+                </div>
+                <span class="service-feature-word">{serviceLabels[service.id] || service.data.title}</span>
+              </div>
+              <div class="service-feature-detail">
+                <h3 id={`service-${service.id}`}>{service.data.title}</h3>
+                <p>{service.data.intro}</p>
+              </div>
+            </a>
           </li>
         ))
       }

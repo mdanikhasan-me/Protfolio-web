@@ -73,6 +73,46 @@
 .studio-page[data-section='writing'] .page-hero { display: block; padding-bottom: 60px; }
 .studio-page[data-section='writing'] .page-intro { padding-top: 20px; }
 .studio-page[data-section='writing'] .collection-list li { grid-template-columns: 55px 1fr; }
+/* Three authored services share the reference feature-panel interaction. */
+.service-features { margin-inline: -5.555556%; padding-block: 12px 100px; }
+.service-features-heading { padding: 0 5% 42px; display: flex; align-items: baseline; flex-wrap: wrap; gap: 18px 32px; }
+.studio-page .service-features-heading h2 { font-size: clamp(28px, 3vw, 56px); font-weight: 400; line-height: 1.15; max-width: none; margin: 0; }
+.service-features-heading .studio-bengali { font-size: 15px; margin: 0; color: #cdd0d5; }
+.service-feature-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-block: 1px solid #ffffff66; }
+.service-feature { position: relative; min-width: 0; }
+.service-feature + .service-feature { border-left: 1px solid #ffffff66; }
+.service-feature > a { position: relative; isolation: isolate; display: flex; flex-direction: column; height: 100%; overflow: hidden; color: inherit; text-decoration: none; padding: 28px 32px 40px; }
+.service-feature > a::before { content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0; background: radial-gradient(ellipse at 6% 108%, #008b80 0%, transparent 62%), radial-gradient(ellipse at 65% 0%, #382535 0%, transparent 65%), #030523; transition: opacity 350ms ease; }
+.service-feature > a:is(:hover, :focus-visible)::before { opacity: 1; }
+.service-feature > a:focus-visible { outline: 2px solid #e7ffff; outline-offset: -5px; }
+.service-feature-meta { display: flex; align-items: center; gap: 18px; font: 10px/1.5 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: #afb2ba; }
+.service-feature-arrow { margin-left: auto; color: #fff; font-size: 20px; transition: transform 350ms ease; }
+.service-feature > a:is(:hover, :focus-visible) .service-feature-arrow { transform: translate(3px, -3px); }
+.service-feature-visual { display: grid; place-items: center; height: 210px; position: relative; }
+.service-feature-word { font: 600 clamp(36px, 3.6vw, 70px)/1 var(--display-alt); letter-spacing: -.035em; }
+.service-feature-marquee { position: absolute; display: flex; width: max-content; left: -32px; top: 20px; color: transparent; -webkit-text-stroke: 1px #ffffff33; font: 400 160px/1.05 Georgia, serif; text-transform: uppercase; opacity: 0; transition: opacity 350ms ease; pointer-events: none; animation: service-type-drift 18s linear infinite; animation-play-state: paused; z-index: -1; }
+.service-feature > a:is(:hover, :focus-visible) .service-feature-marquee { opacity: 1; animation-play-state: running; }
+.service-feature-marquee span { white-space: pre; }
+.service-feature-detail { text-align: center; }
+.studio-page .service-feature-detail h3 { font-size: 20px; font-weight: 600; line-height: 1.4; letter-spacing: .02em; margin: 0 0 20px; }
+.service-feature-detail p { color: #b5b8c0; font-size: 16px; line-height: 1.65; max-width: 43ch; margin: 0 auto; }
+@keyframes service-type-drift { to { transform: translateX(-50%); } }
+@media (max-width: 1050px) {
+  .service-feature > a { padding-inline: 22px; }
+  .service-feature-meta { gap: 10px; font-size: 9px; }
+  .service-feature-visual { height: 175px; }
+  .service-feature-detail p { font-size: 14px; }
+}
+@media (max-width: 760px) {
+  .service-features { padding-bottom: 54px; }
+  .service-features-heading { padding-bottom: 30px; }
+  .service-feature-grid { grid-template-columns: 1fr; }
+  .service-feature + .service-feature { border-left: 0; border-top: 1px solid #ffffff66; }
+  .service-feature > a { padding: 24px 8% 36px; }
+  .service-feature-visual { height: 160px; }
+  .service-feature-word { font-size: 52px; }
+  .service-feature-detail p { max-width: 46ch; }
+}
 /* About has its own title, editorial column and full-width details band. */
 .studio-page[data-section='about'] main { padding-inline: 0; }
 .about-composition { width: 90%; max-width: 1800px; margin-inline: auto; padding: 240px 0 180px; }

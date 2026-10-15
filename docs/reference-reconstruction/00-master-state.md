@@ -1,5 +1,11 @@
 # Reference reconstruction: recovered state
 
+October 15 Services follow-up: plain rows replaced with three bordered service
+panels and reference-inspired hover/focus treatment, preserving authored offerings.
+Desktop keyboard activation, phone stacking and tablet overflow checks pass.
+See `2026-10-15-services-panels.md`; this is an adapted composition, not six-cell
+reference parity. Whole-site/native motion acceptance remains OPEN.
+
 October 15 delivery follow-up: Edge access is restored and the public domain
 renders. Added per-release revision/file verification after Pages deployment;
 local checks cover all 155 public outputs. See `2026-10-15-live-release.md`.
