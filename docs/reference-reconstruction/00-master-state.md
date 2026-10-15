@@ -1,5 +1,11 @@
 # Reference reconstruction: recovered state
 
+October 15 copy follow-up: applied the user's page-by-page rewrite, preserving
+English words within Bengali and translating three romanized Bengali passages.
+Specified removals, metadata, desktop and mobile text-fit checks pass. See
+`2026-10-15-copy-rewrite.md`. Pages without supplied replacements and the broader
+visual/performance acceptance gates remain OPEN.
+
 October 15 Services follow-up: plain rows replaced with three bordered service
 panels and reference-inspired hover/focus treatment, preserving authored offerings.
 Desktop keyboard activation, phone stacking and tablet overflow checks pass.

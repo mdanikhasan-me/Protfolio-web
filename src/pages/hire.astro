@@ -3,75 +3,63 @@ import PageHero from '../components/PageHero.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../config/site';
 
-const requestedService = Astro.url.searchParams.get('service');
-const serviceLabel =
-  requestedService === 'website'
-    ? 'Website development'
-    : requestedService === 'software'
-      ? 'Custom software'
-      : 'Website or custom software';
 ---
 
 <BaseLayout
   title="Hire MD Anik Hasan for Website or Software Development"
-  description="Prepare a useful project enquiry for website development or custom software work with MD Anik Hasan in Bangladesh or remotely."
+  description="Want a website or custom software built? Here's what to send me. I work in Bangladesh and remotely."
 >
   <PageHero
-    eyebrow="Project intake"
-    title="Tell me what you’re building."
-    intro={`You’re asking about ${serviceLabel.toLowerCase()}. A useful first message can be short: explain the goal, what exists now, the rough scope, and any real deadline.`}
-    workshop="Project Intake"
+    eyebrow="Start a project"
+    title="What do you want to build?"
+    intro="Keep the first message short. Tell me what you want, what you have now, what it needs, and when you need it."
+    showGauge={false}
   />
 
   <section class="intake-guide" aria-labelledby="intake-title">
     <div>
-      <p class="eyebrow">A useful first message</p>
-      <h2 id="intake-title">Five things that help me understand the project</h2>
+      <p class="eyebrow">Your message</p>
+      <h2 id="intake-title">What to include</h2>
     </div>
     <ol>
       <li>
-        <h3>The goal</h3>
-        <p>What should the website or software help a person or business complete?</p>
+        <h3>What you want</h3>
+        <p>What should it do for you or your customers?</p>
       </li>
       <li>
-        <h3>The current situation</h3>
-        <p>Describe the existing site, repeated workflow, manual process, or missing tool.</p>
+        <h3>What you have now</h3>
+        <p>An old website, a spreadsheet, work you do by hand?</p>
       </li>
       <li>
-        <h3>The rough scope</h3>
-        <p>List important pages, features, inputs, outputs, integrations, and privacy needs.</p>
+        <h3>What it needs</h3>
+        <p>Main pages or features, other tools it should connect to, anything private.</p>
       </li>
       <li>
-        <h3>The timeline</h3>
+        <h3>When</h3>
         <p>
-          Share a real target or constraint. If the date is flexible, that is useful to know too.
+          Your deadline, or just say it's flexible.
         </p>
       </li>
       <li>
-        <h3>A contact route</h3>
+        <h3>How to reach you</h3>
         <p>
-          Include the best way to reply. A budget range is helpful when you have one, but optional.
+          A budget helps if you have one. Skip it if you don't.
         </p>
       </li>
     </ol>
   </section>
 
   <section class="plain-section">
-    <p class="eyebrow">Service boundary</p>
-    <h2>I focus on websites and custom software.</h2>
+    <h2>What I do</h2>
     <p>
-      My work is full-stack web development, desktop software, automation, and focused internal
-      tools. If the project sits outside those areas, I’ll say so instead of pretending it is a fit.
+      Websites, web apps, desktop software and automation. If your project is something else, I'll tell you.
     </p>
   </section>
 
   <section class="plain-section">
-    <p class="eyebrow">Contact handoff</p>
-    <h2>Send it directly.</h2>
+    <h2>Send it</h2>
     <p>
-      Email <a href={`mailto:${SITE.email}`}>{SITE.email}</a> with the goal, current situation, rough
-      scope, and timeline. You can also use the <a href={SITE.discord}>Discord profile</a> for a direct
-      conversation.
+      Use the <a href="/contact/">contact page</a>, or message me on <a href={SITE.discord}>Discord</a>.
     </p>
   </section>
 </BaseLayout>

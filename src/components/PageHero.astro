@@ -5,9 +5,10 @@ interface Props {
   intro: string;
   workshop?: string;
   meta?: string[];
+  showGauge?: boolean;
 }
 
-const { eyebrow, title, intro, workshop, meta = [] } = Astro.props;
+const { eyebrow, title, intro, workshop, meta = [], showGauge = true } = Astro.props;
 ---
 
 <header class="page-hero" data-workshop={workshop}>
@@ -28,9 +29,9 @@ const { eyebrow, title, intro, workshop, meta = [] } = Astro.props;
       )
     }
   </div>
-  <div class="hero-gauge" aria-hidden="true">
+  {showGauge && <div class="hero-gauge" aria-hidden="true">
     <span>ASSEMBLY / {workshop ?? 'PUBLIC PAGE'}</span>
     <span></span>
     <span>READY</span>
-  </div>
+  </div>}
 </header>

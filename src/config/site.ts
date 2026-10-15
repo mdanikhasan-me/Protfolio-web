@@ -3,7 +3,7 @@ export const SITE = {
   shortName: 'Anik',
   title: 'MD Anik Hasan | Website and Software Developer in Bangladesh',
   description:
-    'MD Anik Hasan builds full-stack web products and custom software, and currently runs Boilabin, a Bangladesh-focused ecommerce marketplace.',
+    'I make websites and software, and I run Boilabin, an online marketplace in Bangladesh.',
   origin: 'https://www.mdanikhasan.com',
   location: 'Dhaka, Bangladesh',
   email: 'hello@mdanikhasan.com',

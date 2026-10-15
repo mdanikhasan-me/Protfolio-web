@@ -3,19 +3,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../config/site';
 ---
 
-<BaseLayout title="Contact | MD Anik Hasan" description="An idea, a question, or just saying hello. Get in touch with Anik by email or Discord.">
+<BaseLayout title="Contact | MD Anik Hasan" description="An idea, a question, or just a hello. Message me by email or on Discord.">
   <section class="contact-composition" aria-labelledby="contact-title">
     <h1 id="contact-title">Say hello.</h1>
     <div class="contact-conversations">
       <div class="contact-note">
-        <p lang="bn">কোনো আইডিয়া নিয়ে কথা বলতে চান? মেসেজ দিতে পারেন।</p>
-        <p>An idea, a question, or something you're making. I'm up for a conversation.</p>
+        <p lang="bn">idea, প্রশ্ন, বা শুধু hi বলতে চাইলেও message দিন।</p>
+        <p>An idea, a question, or something you're working on. Send it over.</p>
         <a class="contact-destination" href={`mailto:${SITE.email}`}>
           <span>Email<small>{SITE.email}</small></span><i aria-hidden="true">&nearr;</i>
         </a>
       </div>
       <div class="contact-note">
-        <p>More comfortable on Discord? You can find me there too.</p>
+        <p>Prefer Discord? I'm there too.</p>
         <a class="contact-destination" href={SITE.discord} rel="me">
           <span>Discord<small>Open my profile</small></span><i aria-hidden="true">&nearr;</i>
         </a>

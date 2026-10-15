@@ -1,8 +1,6 @@
 ---
 title: UIU Discord Bot
-description:
-  Pulls new UIU notices into Discord automatically so students do not have to keep checking the
-  university notice board by hand.
+description: "Posts new UIU notices to Discord, so students don't have to keep checking the notice board."
 workshop: Automation Station
 route: /work/uiu-discord-bot/
 status: Built
@@ -22,25 +20,17 @@ updatedAt: 2026-08-02
 firstRecordedAt: 2025-11-09
 ---
 
-## University notices without the daily portal check
+## Notices come to you
 
-UIU publishes notices on its public notice board, and students should not have to keep checking it
-by hand. The UIU Discord Bot checks for new notices on a schedule and can post unseen ones into a
-chosen Discord channel automatically.
+UIU posts its notices on a public notice board, and you have to keep going back to check it. The bot does the checking. It looks for new notices on a schedule and posts them in a Discord channel you choose.
 
-It keeps a local history so the same notice is not posted twice, and it sends unseen notices in
-order. The bot also provides academic calendar information and a small set of useful server
-commands.
+It remembers what it already posted, so nothing appears twice, and new notices come in order. It also shows the academic calendar and has a few server commands.
 
-## Built for a real community
+## Made for UIU students
 
-The project is written in Python with `discord.py`. It combines notice retrieval, duplicate
-prevention, scheduled background checks, Discord commands, and local configuration in one practical
-tool.
+It's written in Python with discord.py.
 
-It is independent software, not an official UIU service. It does not sign in to UCAM or ask students
-for their university password. That boundary is important: the bot should reduce a repetitive task
-without pretending to replace the university's official systems.
+It's not an official UIU service. It never logs in to UCAM and never asks for your university password.
 
 [View the public repository](https://github.com/mdanikhasan-me/UIU-Discord_Bot)
 

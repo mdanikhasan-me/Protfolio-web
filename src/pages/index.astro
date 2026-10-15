@@ -21,7 +21,7 @@ const mediaBase: Record<string, string> = {
   'salty-potato-ai': '/media/projects/salty-steak',
 };
 const projectAnnotations: Record<string, string> = {
-  boilabin: 'নিজের উদ্যোগ, নিজের হাতে তৈরি অনলাইন দোকান।',
+  boilabin: 'Ecommerce platform আমি বানিয়েছি, আমিই চালাই।',
   'salty-potato-ai': 'নিজের কম্পিউটারে চলা এআই ও কাজের সরঞ্জাম।',
   soctukit: 'উইন্ডোজের দৈনন্দিন কাজ সহজ করার সরঞ্জাম।',
   'uiu-discord-bot': 'বিশ্ববিদ্যালয়ের নোটিশ সরাসরি ডিসকর্ডে।',
@@ -136,7 +136,7 @@ const projectAnnotations: Record<string, string> = {
         <div class="reference-opening-ui">
 
           <div class="reference-intro">
-            <p class="sr-only">I build web and software products, including Boilabin, the marketplace I run.</p>
+            <p class="sr-only">I make websites and software, and I run Boilabin, an online marketplace in Bangladesh.</p>
             <fieldset class="material-controls">
               <legend>Identity Material</legend>
               <label>roughness <input data-material-roughness type="range" min="0" max="0.4" step="0.01" value="0.1" /><output data-material-roughness-value>0.10</output></label>
@@ -158,7 +158,7 @@ const projectAnnotations: Record<string, string> = {
             <span>Writing</span>
             {articles.map((article) => <a href={`/writing/${article.id}/`}>
               <time datetime={article.data.publishedAt.toISOString()}>{article.data.publishedAt.toISOString().slice(0, 10).replaceAll('-', '.')}</time>
-              <span lang="bn">{article.id.includes('university') ? 'বিশ্ববিদ্যালয়ের নোটিশ থেকে ডিসকর্ড বট' : 'শুরু থেকে একটি ভাষা মডেল তৈরির গল্প'}</span>
+              <span lang="bn">{article.id.includes('university') ? 'UIU-র notice এখন Discord-এ' : 'নিজের Language Model নিজে বানাচ্ছি, কেন?'}</span>
             </a>)}
           </div>
 
@@ -171,8 +171,8 @@ const projectAnnotations: Record<string, string> = {
         </div>
 
         <div class="reference-opening-copy">
-          <p>Move the pointer to disturb the identity sculpture. It settles back to rest.</p>
-          <h1 id="home-title">MD Anik Hasan — full-stack web and software developer in Dhaka.</h1>
+          <p>Move your mouse over it. It settles back on its own.</p>
+          <h1 id="home-title">Web and software developer.</h1>
         </div>
       </div>
     </section>
@@ -187,7 +187,7 @@ const projectAnnotations: Record<string, string> = {
     >
       <div class="curve-work-sticky">
         <header class="curve-work-header">
-          <p id="selected-work-instructions">Works / wheel, swipe, or use arrow keys</p>
+          <p id="selected-work-instructions">Works / scroll, swipe or use the arrow keys</p>
           <h2 id="selected-work-title">Selected work</h2>
         </header>
 
@@ -273,11 +273,11 @@ const projectAnnotations: Record<string, string> = {
    <div class="vision-stage">
     <div class="evidence-index" aria-hidden="true">VISION</div>
     <div class="evidence-heading">
-      <h2 id="evidence-title" lang="bn"><span>ভালো লাগে বলেই</span><br /><span>এত সময় দিই।</span></h2>
+      <h2 id="evidence-title" lang="bn"><span>আমার একটা weird obsession আছে—randomly random project start করে ওখানে যে time দিই, সেটা আমি genuinely enjoy করি।</span></h2>
     </div>
     <div class="evidence-copy">
       <p>
-        I like seeing an idea turn into<br />something I can actually use.
+        My favorite part is when the thing I built finally works.
       </p>
       <a href="/work/">Things I’ve been making ↗</a>
     </div>
@@ -285,17 +285,17 @@ const projectAnnotations: Record<string, string> = {
   </section>
   </div>
 
-  <section class="home-contact" aria-labelledby="home-contact-title">
+  <section class="home-contact" aria-label="Send me a message ↗">
     <div class="home-contact-sticky">
       <div class="home-contact-stage">
         <div class="home-contact-copy">
-          <a class="home-contact-invitation" href="/contact/" aria-labelledby="home-contact-title">
+          <a class="home-contact-invitation" href="/contact/" aria-label="Send me a message ↗">
             <h2 class="home-contact-title" id="home-contact-title">
-              <span class="home-contact-line"><span>Send me</span></span>
-              <span class="home-contact-line home-contact-line-outline"><span>a message.</span></span>
+              <span class="home-contact-line"><span>Send me </span></span>
+              <span class="home-contact-line home-contact-line-outline"><span>a message</span></span>
             </h2>
             <span class="home-contact-action" aria-hidden="true">
-              <span>Let's talk</span><span class="home-contact-arrow">&nearr;</span>
+              <span class="home-contact-arrow">&nearr;</span>
             </span>
           </a>
         </div>

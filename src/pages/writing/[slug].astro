@@ -18,7 +18,7 @@ export async function getStaticPaths() {
 }
 
 const { article } = Astro.props;
-const { Content, headings } = await render(article);
+const { Content } = await render(article);
 const route = `/writing/${article.id}/`;
 const breadcrumbs = [
   { label: 'Home', href: '/' },
@@ -31,7 +31,6 @@ const formatter = new Intl.DateTimeFormat('en', {
   year: 'numeric',
   timeZone: 'UTC',
 });
-const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
 ---
 
 <BaseLayout
@@ -52,35 +51,18 @@ const toc = headings.filter((heading) => heading.depth === 2 || heading.depth ==
 >
   <Breadcrumbs items={breadcrumbs} />
   <PageHero
-    eyebrow="Field note"
+    eyebrow="Notes"
     title={article.data.title}
     intro={article.data.description}
-    workshop="Field Notes"
+    showGauge={false}
     meta={[
       `Published ${formatter.format(article.data.publishedAt)}`,
-      `By MD Anik Hasan`,
       ...article.data.topics,
     ]}
   />
 
   <div class="content-layout article-layout">
     <aside class="content-rail" aria-label="Article contents">
-      {
-        toc.length > 0 && (
-          <nav class="toc" aria-labelledby="toc-title">
-            <p class="rail-label" id="toc-title">
-              On this page
-            </p>
-            <ol>
-              {toc.map((heading) => (
-                <li class:list={['toc-item', `toc-depth-${heading.depth}`]}>
-                  <a href={`#${heading.slug}`}>{heading.text}</a>
-                </li>
-              ))}
-            </ol>
-          </nav>
-        )
-      }
       <a href="/about/">About the author</a>
     </aside>
     <article class="prose">
@@ -89,14 +71,13 @@ const toc = headings.filter((heading) => heading.depth === 2 || heading.depth ==
   </div>
 
   <section class="article-next" aria-labelledby="article-next-title">
-    <p class="eyebrow">Continue through the workshop</p>
-    <h2 id="article-next-title">See the work behind the note.</h2>
+    <h2 id="article-next-title">Want to see the project?</h2>
     <p>
       {
         article.data.relatedProject === 'salty-potato-ai' ? (
-          <a href="/lab/salty-potato-ai/">Open the Salty Steak build log</a>
+          <a href="/lab/salty-potato-ai/">See the project</a>
         ) : article.data.relatedProject === 'uiu-discord-bot' ? (
-          <a href="/work/uiu-discord-bot/">Open the UIU Discord Bot case study</a>
+          <a href="/work/uiu-discord-bot/">See the project</a>
         ) : (
           <a href="/work/">Browse verified work</a>
         )

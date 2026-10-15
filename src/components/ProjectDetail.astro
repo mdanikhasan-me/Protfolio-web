@@ -46,7 +46,8 @@ if (project.data.schemaType === 'SoftwareApplication') {
     eyebrow={project.data.kind}
     title={project.data.title}
     intro={project.data.description}
-    workshop={project.data.workshop}
+    {...(!['boilabin', 'uiu-discord-bot'].includes(project.id) ? { workshop: project.data.workshop } : {})}
+    showGauge={!['boilabin', 'uiu-discord-bot'].includes(project.id)}
     meta={[project.data.status, project.data.role]}
   />
 
@@ -63,7 +64,7 @@ if (project.data.schemaType === 'SoftwareApplication') {
       {
         project.data.technologies.length > 0 && (
           <div>
-            <p class="rail-label">Verified public details</p>
+            <p class="rail-label">{project.id === 'uiu-discord-bot' ? 'Built with' : 'Verified public details'}</p>
             <ul>
               {project.data.technologies.map((item) => (
                 <li>{item}</li>
