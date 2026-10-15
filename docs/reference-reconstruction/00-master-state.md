@@ -1,5 +1,12 @@
 # Reference reconstruction: recovered state
 
+October 15 delivery follow-up: Edge access is restored and the public domain
+renders. Added per-release revision/file verification after Pages deployment;
+local checks cover all 155 public outputs. See `2026-10-15-live-release.md`.
+The user now explicitly authorizes pushing each verified batch and checking its
+deployment. About column measurements match; Services/reference composition,
+native motion and whole-site acceptance remain OPEN.
+
 October 15: corrected the remaining opening return-to-rest interpolation against
 MainLogo.update. The independent combined hover/return check fails before and
 passes 20 trajectories / 23,760 simulated frames after. See
